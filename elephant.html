@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Elephant — Sales Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .header {
+            background: var(--navy);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--yellow-warm);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover { color: var(--yellow); }
+
+        .header-sep {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-content .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+        }
+
+        .header-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.25px;
+        }
+
+        .breadcrumb {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a { color: var(--sky); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { margin: 0 0.4rem; opacity: 0.5; }
+
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        .hero { margin-bottom: 2.5rem; }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy-light);
+            margin-bottom: 0.35rem;
+        }
+
+        .hero-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            border-left: 3px solid var(--yellow-warm);
+            padding-left: 1rem;
+            max-width: 600px;
+        }
+
+        .notice {
+            background: var(--cream);
+            border: 1px solid rgba(7,55,79,0.1);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notice-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notice-icon svg { width: 16px; height: 16px; }
+
+        .notice-text { font-size: 0.85rem; color: var(--text-muted); }
+        .notice-text strong { color: var(--navy); }
+
+        .resource-section { margin-bottom: 2rem; }
+
+        .resource-section-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .resource-empty {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 0.75rem 0;
+        }
+
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .header { padding: 1.25rem; }
+            .main { padding: 1.25rem 1.25rem 3rem; }
+            .hero-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header class="header">
+    <a href="index.html" class="back-btn">← Hub</a>
+    <div class="header-sep"></div>
+    <div class="header-content">
+        <div class="kicker">Sales Tools</div>
+        <h1>Ask Elephant</h1>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a href="index.html">Sales Hub</a>
+    <span class="sep">/</span>
+    <a href="index.html">Sales Tools</a>
+    <span class="sep">/</span>
+    Ask Elephant
+</div>
+
+<main class="main">
+
+    <div class="hero">
+        <div class="hero-eyebrow">AI Sales Intelligence</div>
+        <h2 class="hero-title">Ask Elephant</h2>
+        <p class="hero-desc">Your AI sales intelligence tool for conversation insights, real-time coaching, and data-driven deal analysis.</p>
+    </div>
+
+    <div class="notice">
+        <div class="notice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#07374F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+        <div class="notice-text"><strong>Resources coming soon.</strong> Training materials, templates, and quick links for Ask Elephant will be added here.</div>
+    </div>
+
+    <section class="resource-section">
+        <h3 class="resource-section-header">Quick Links</h3>
+        <p class="resource-empty">No quick links added yet.</p>
+    </section>
+
+    <section class="resource-section">
+        <h3 class="resource-section-header">Training &amp; Best Practices</h3>
+        <p class="resource-empty">No training resources added yet.</p>
+    </section>
+
+    <section class="resource-section">
+        <h3 class="resource-section-header">Templates &amp; Workflows</h3>
+        <p class="resource-empty">No templates added yet.</p>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-text">Rankings.io Sales Hub — Internal Use Only</div>
+</footer>
+
+</body>
+</html>

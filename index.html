@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Hub — Rankings.io</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ── Yellow Stripe ── */
+        .stripe {
+            height: 5px;
+            background: var(--yellow-warm);
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--navy);
+            padding: 2rem 2rem 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            background: var(--yellow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logo-mark svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .header-text h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .header-text .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--yellow-warm);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .header-meta {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.45);
+            text-align: right;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Main Content ── */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+        }
+
+        /* ── Section Header ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--navy);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .section-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--yellow);
+        }
+
+        .section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+        }
+
+        .section-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: rgba(7,55,79,0.08);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        /* ── Card Grid ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--cream);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border-top: 3px solid var(--navy);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(7,55,79,0.12);
+        }
+
+        .card-preview {
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 */
+            position: relative;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+        }
+
+        .card-preview-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px;
+            height: 52px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-preview-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--yellow);
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.6rem;
+            width: fit-content;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .card-link {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--sky);
+            margin-top: 1rem;
+        }
+
+        .card-link .arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover .card-link .arrow {
+            transform: translateX(4px);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            background: var(--cream);
+            border-radius: var(--radius);
+            border: 2px dashed rgba(7,55,79,0.15);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(7,55,79,0.06);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .empty-state-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-muted);
+        }
+
+        .empty-state-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+        }
+
+        .empty-state-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .header {
+                padding: 1.5rem 1.25rem;
+            }
+            .header-meta {
+                display: none;
+            }
+            .main {
+                padding: 1.5rem 1.25rem 3rem;
+            }
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<!-- ── Header ── -->
+<header class="header">
+    <div class="header-left">
+        <div class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#07374F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3h18v18H3z"/>
+                <path d="M8 12h8M12 8v8"/>
+            </svg>
+        </div>
+        <div class="header-text">
+            <div class="kicker">Rankings.io — Internal</div>
+            <h1>Sales Hub</h1>
+        </div>
+    </div>
+    <div class="header-meta">
+        Sales Team Resources<br>v1.0
+    </div>
+</header>
+
+<main class="main">
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Section 1: Sales Tools            -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="section-title">Sales Tools</span>
+            <span class="section-count">5 tools</span>
+        </div>
+
+        <div class="card-grid">
+
+            <!-- HubSpot -->
+            <a href="hubspot.html" class="card">
+                <div class="card-preview">
+                    <div class="card-preview-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-badge">CRM</span>
+                    <div class="card-title">HubSpot</div>
+                    <div class="card-desc">CRM platform — contacts, deals, workflows, and reporting resources.</div>
+                    <div class="card-link">
+                        View resources <span class="arrow">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Seamless.ai -->
+            <a href="seamless.html" class="card">
+                <div class="card-preview">
+                    <div class="card-preview-icon">
+                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-badge">Prospecting</span>
+                    <div class="card-title">Seamless.ai</div>
+                    <div class="card-desc">Prospecting platform — lead discovery, contact enrichment, and list building.</div>
+                    <div class="card-link">
+                        View resources <span class="arrow">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- PandaDoc -->
+            <a href="pandadoc.html" class="card">
+                <div class="card-preview">
+                    <div class="card-preview-icon">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-badge">Proposals</span>
+                    <div class="card-title">PandaDoc</div>
+                    <div class="card-desc">Document platform — proposals, contracts, e-signatures, and templates.</div>
+                    <div class="card-link">
+                        View resources <span class="arrow">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Qwilr -->
+            <a href="qwilr.html" class="card">
+                <div class="card-preview">
+                    <div class="card-preview-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-badge">Proposals</span>
+                    <div class="card-title">Qwilr</div>
+                    <div class="card-desc">Proposal platform — interactive proposals, web-based quotes, and analytics.</div>
+                    <div class="card-link">
+                        View resources <span class="arrow">→</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Ask Elephant -->
+            <a href="elephant.html" class="card">
+                <div class="card-preview">
+                    <div class="card-preview-icon">
+                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-badge">AI</span>
+                    <div class="card-title">Ask Elephant</div>
+                    <div class="card-desc">AI sales intelligence — conversation insights, coaching, and deal analysis.</div>
+                    <div class="card-link">
+                        View resources <span class="arrow">→</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Section 2: Sales Games            -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg viewBox="0 0 24 24"><path d="M2 12l5 5v-3h9v-4H7V7L2 12zm20 0l-5-5v3H8v4h9v3l5-5z"/></svg>
+            </div>
+            <span class="section-title">Sales Games</span>
+            <span class="section-count">0 games</span>
+        </div>
+
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1zM7 15H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2z"/></svg>
+            </div>
+            <div class="empty-state-title">Coming Soon</div>
+            <div class="empty-state-desc">Sales games and competitions will appear here.</div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Section 3: Sales Processes         -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
+            </div>
+            <span class="section-title">Sales Processes</span>
+            <span class="section-count">0 processes</span>
+        </div>
+
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+            </div>
+            <div class="empty-state-title">Coming Soon</div>
+            <div class="empty-state-desc">Sales process documentation and playbooks will appear here.</div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="footer-text">Rankings.io Sales Hub — Internal Use Only</div>
+</footer>
+
+</body>
+</html>
