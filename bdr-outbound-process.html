@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDR Outbound Process — Sales Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        /* ── Header ── */
+        .header {
+            background: var(--navy);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--yellow-warm);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover { color: var(--yellow); }
+
+        .header-sep {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-content .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+        }
+
+        .header-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.25px;
+        }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .breadcrumb a,
+        .breadcrumb span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .breadcrumb a {
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .breadcrumb .sep { color: var(--text-muted); margin: 0 0.4rem; }
+
+        .breadcrumb .current { color: var(--text-muted); }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.5rem 2rem 2rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 3px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 640px;
+        }
+
+        /* ── Main ── */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* ── Stepper ── */
+        .stepper {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        .step-wrapper {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+        }
+
+        .step-card {
+            background: var(--cream);
+            border-radius: var(--radius);
+            border-top: 3px solid var(--navy);
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+        }
+
+        .step-owner {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.85rem;
+            width: fit-content;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--text);
+            line-height: 1.55;
+            margin-bottom: 1rem;
+        }
+
+        .step-section-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .step-outcomes {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .step-outcomes li {
+            font-size: 0.8rem;
+            color: var(--text);
+            padding: 0.2rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .step-outcomes li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--sky);
+            font-weight: 600;
+        }
+
+        .step-why {
+            background: rgba(238,220,130,0.15);
+            border-left: 3px solid var(--yellow-warm);
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        .step-why strong {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── Connector ── */
+        .step-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            flex-shrink: 0;
+        }
+
+        .step-connector svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ── Detail Panels ── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+
+        .detail-panel {
+            background: var(--cream);
+            border-radius: var(--radius);
+            border-top: 3px solid var(--navy);
+            padding: 1.5rem;
+        }
+
+        .detail-panel-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-panel-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: baseline;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(7,55,79,0.06);
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+
+        .detail-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--navy);
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            font-size: 0.82rem;
+            color: var(--text);
+        }
+
+        /* ── After-Set Checklist ── */
+        .checklist-section {
+            margin-top: 3rem;
+        }
+
+        .checklist-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        .checklist-card {
+            background: var(--cream);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            border-left: 3px solid var(--navy);
+        }
+
+        .checklist-num {
+            width: 28px;
+            height: 28px;
+            background: var(--navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--yellow);
+            flex-shrink: 0;
+        }
+
+        .checklist-content h4 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.2rem;
+        }
+
+        .checklist-content p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ── Rules Callout ── */
+        .rules-callout {
+            margin-top: 3rem;
+            background: var(--cream);
+            border-radius: var(--radius);
+            border-top: 3px solid var(--yellow-warm);
+            padding: 1.5rem;
+        }
+
+        .rules-callout-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.75rem;
+        }
+
+        .rules-callout ul {
+            list-style: none;
+        }
+
+        .rules-callout li {
+            font-size: 0.85rem;
+            color: var(--text);
+            padding: 0.3rem 0;
+            padding-left: 1.25rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .rules-callout li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--yellow-warm);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* ── Simplified Flow ── */
+        .flow-section {
+            margin-top: 3rem;
+        }
+
+        .flow-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .flow-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            background: var(--cream);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            border-top: 3px solid var(--navy);
+        }
+
+        .flow-node {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--navy);
+            background: rgba(7,55,79,0.06);
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .flow-arrow {
+            color: var(--yellow-warm);
+            font-size: 1.1rem;
+            margin: 0 0.35rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .header { padding: 1.25rem; }
+
+            .hero h2 { font-size: 1.75rem; }
+
+            .stepper {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .step-wrapper {
+                flex-direction: column;
+            }
+
+            .step-connector {
+                width: 100%;
+                height: 40px;
+                transform: rotate(90deg);
+            }
+
+            .main { padding: 0 1.25rem 3rem; }
+            .hero { padding: 0.5rem 1.25rem 1.5rem; }
+            .breadcrumb { padding: 1rem 1.25rem; }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checklist-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 0.15rem 0 0.15rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<!-- ── Header ── -->
+<header class="header">
+    <a href="index.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+    </a>
+    <div class="header-sep"></div>
+    <div class="header-content">
+        <div class="kicker">Sales Hub</div>
+        <h1>BDR Outbound Process</h1>
+    </div>
+</header>
+
+<!-- ── Breadcrumb ── -->
+<nav class="breadcrumb">
+    <a href="index.html">Sales Hub</a>
+    <span class="sep">/</span>
+    <span class="current">BDR Outbound Process</span>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+    <span class="hero-eyebrow">Sales Process</span>
+    <h2>BDR Operating Standard</h2>
+    <p class="hero-desc">Ensure outbound leads are worked consistently, professionally, and with clean attribution, follow-up, and AE handoff. Outbound success is driven by discipline, repetition, and quality execution.</p>
+</section>
+
+<!-- ── Main ── -->
+<main class="main">
+
+    <!-- ── Horizontal Stepper ── -->
+    <div class="stepper">
+
+        <!-- Step 1 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-title">Lead Intake & Prep</div>
+                <span class="step-owner">BDR</span>
+                <p class="step-desc">Open the Company record in HubSpot. Review firm website, practice area, and locations. Identify the likely decision-maker (owner, managing partner, marketing lead). Log notes on the Company record.</p>
+                <div class="step-section-label">Checklist</div>
+                <ul class="step-outcomes">
+                    <li>Company record open in HubSpot</li>
+                    <li>Firm website & practice areas reviewed</li>
+                    <li>Decision-maker identified</li>
+                    <li>Notes logged on Company record</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Standard</strong>
+                    No outbound outreach should begin without basic firm context logged.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-title">Task Management & Outreach</div>
+                <span class="step-owner">BDR</span>
+                <p class="step-desc">Tasks are the system of record. Create a task for every follow-up, mark tasks completed immediately, and always create the next required task. Work leads from assigned sources.</p>
+                <div class="step-section-label">Lead Sources</div>
+                <ul class="step-outcomes">
+                    <li>Cold prospecting lists</li>
+                    <li>ABM target accounts</li>
+                    <li>Event lists</li>
+                    <li>Recycled MDR Exhausted leads</li>
+                    <li>Prior closed-lost or stalled opps</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Standard</strong>
+                    Priority is determined by leadership and campaign focus. Every touchpoint must have a task.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-title">Book the Meeting</div>
+                <span class="step-owner">BDR</span>
+                <p class="step-desc">When a prospect agrees to a meeting, set up the calendar event and create the deal in HubSpot immediately. Meeting goes on the AE's calendar with all required attendees.</p>
+                <div class="step-section-label">Requirements</div>
+                <ul class="step-outcomes">
+                    <li>Meeting type: Discovery — BDR</li>
+                    <li>Title: "Law Firm x Rankings: Intro"</li>
+                    <li>Duration: 30 minutes</li>
+                    <li>Attendees: AE + BDR + Client</li>
+                    <li>Deal created, stage: FTA Booked</li>
+                    <li>Pipeline direction: Outbound</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Standard</strong>
+                    Every set requires a deal created immediately with Company + Contact associations and deal owner set to the AE.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-title">After Meeting Set</div>
+                <span class="step-owner">BDR</span>
+                <p class="step-desc">Execute the 6-step post-set checklist: follow-up email with Loom, thank you postcard, update tracker, attend the meeting, send post-meeting email, and maintain pipeline hygiene.</p>
+                <div class="step-section-label">Checklist</div>
+                <ul class="step-outcomes">
+                    <li>Follow-up email with approved Loom</li>
+                    <li>Thank you postcard logged via HubSpot</li>
+                    <li>2026 Tracker updated</li>
+                    <li>Attend meeting & hand off to AE</li>
+                    <li>Post-meeting thank you email sent</li>
+                    <li>Weekly pipeline & tracker cleanup</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Standard</strong>
+                    Every step builds trust and keeps the pipeline clean. Block Friday time for weekly hygiene.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Detail Panels: Meeting Setup & Deal Creation ── -->
+    <div class="detail-grid">
+
+        <div class="detail-panel">
+            <div class="detail-panel-title">Calendar Event Setup</div>
+            <div class="detail-panel-subtitle">Outbound Meeting Standard</div>
+            <div class="detail-row">
+                <span class="detail-label">Meeting Type</span>
+                <span class="detail-value">Discovery — BDR</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Title</span>
+                <span class="detail-value">"Law Firm x Rankings: Intro"</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Duration</span>
+                <span class="detail-value">30 minutes</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Attendees</span>
+                <span class="detail-value">AE + BDR + Client</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Calendar</span>
+                <span class="detail-value">Placed on the AE's calendar</span>
+            </div>
+        </div>
+
+        <div class="detail-panel">
+            <div class="detail-panel-title">Deal Creation in HubSpot</div>
+            <div class="detail-panel-subtitle">Required for Every Set</div>
+            <div class="detail-row">
+                <span class="detail-label">Deal Notes</span>
+                <span class="detail-value">Pertinent info from the call with POC</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Deal Owner</span>
+                <span class="detail-value">AE</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Lead Owner</span>
+                <span class="detail-value">BDR (you)</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Deal Stage</span>
+                <span class="detail-value">FTA Booked</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Close Date</span>
+                <span class="detail-value">Last day of the month meeting is booked</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Pipeline</span>
+                <span class="detail-value">Outbound</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">How Heard</span>
+                <span class="detail-value">Outbound — BDR Name</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Associations</span>
+                <span class="detail-value">Company + Contact must be associated</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── After Meeting Set Checklist ── -->
+    <div class="checklist-section">
+        <div class="checklist-section-title">After Meeting Set — 6 Steps</div>
+        <div class="checklist-grid">
+            <div class="checklist-card">
+                <div class="checklist-num">1</div>
+                <div class="checklist-content">
+                    <h4>Follow-Up Email</h4>
+                    <p>Send follow-up email with an approved Loom video using the standard template.</p>
+                </div>
+            </div>
+            <div class="checklist-card">
+                <div class="checklist-num">2</div>
+                <div class="checklist-content">
+                    <h4>Thank You Postcard</h4>
+                    <p>Log Postal Mail activity on the Company record. Use HubSpot Mobile: Search Company → Log Activity → Postal Mail → Camera → Take Photo.</p>
+                </div>
+            </div>
+            <div class="checklist-card">
+                <div class="checklist-num">3</div>
+                <div class="checklist-content">
+                    <h4>Update Tracker</h4>
+                    <p>Update your 2026 Tracker with all meeting details. Ensure lead source and AE are noted.</p>
+                </div>
+            </div>
+            <div class="checklist-card">
+                <div class="checklist-num">4</div>
+                <div class="checklist-content">
+                    <h4>Attend the Meeting</h4>
+                    <p>Join the meeting you booked. Introduce the client to the AE, then drop after handoff is complete. If meetings overlap, attend one.</p>
+                </div>
+            </div>
+            <div class="checklist-card">
+                <div class="checklist-num">5</div>
+                <div class="checklist-content">
+                    <h4>Post-Meeting Thank You</h4>
+                    <p>If the meeting is held, send the "After Meeting with AE" email template.</p>
+                </div>
+            </div>
+            <div class="checklist-card">
+                <div class="checklist-num">6</div>
+                <div class="checklist-content">
+                    <h4>Pipeline Hygiene</h4>
+                    <p>Keep tracker and deal stages updated. Block weekly time (Friday recommended) to clean pipeline and trackers.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Reconnect Rules ── -->
+    <div class="rules-callout">
+        <div class="rules-callout-title">Reconnect & Reschedule Rules</div>
+        <ul>
+            <li>Reschedules within the same month do <strong>not</strong> count as new sets</li>
+            <li>A meeting becomes a <strong>Reconnect (new set)</strong> only if a full calendar month has passed since the original meeting date</li>
+            <li>Update tracker accordingly when a reconnect qualifies as a new set</li>
+        </ul>
+    </div>
+
+    <!-- ── Simplified Flow Summary ── -->
+    <div class="flow-section">
+        <div class="flow-section-title">Simplified Flow</div>
+        <div class="flow-bar">
+            <span class="flow-node">Research & Prep</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Outreach</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Meeting Set</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Follow-Up Sequence</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">AE Hand-Off</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Pipeline Hygiene</span>
+        </div>
+    </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="footer-text">Rankings.io Sales Hub — Internal Use Only</div>
+</footer>
+
+</body>
+</html>
