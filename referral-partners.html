@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Partners — Sales Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --red: #c0392b;
+            --red-bg: #fdf2f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        /* ── Header ── */
+        .header {
+            background: var(--navy);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--yellow-warm);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover { color: var(--yellow); }
+
+        .header-sep {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-content .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+        }
+
+        .header-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.25px;
+        }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .breadcrumb a,
+        .breadcrumb span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .breadcrumb a {
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .breadcrumb .sep { color: var(--text-muted); margin: 0 0.4rem; }
+
+        .breadcrumb .current { color: var(--text-muted); }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.5rem 2rem 2rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 3px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 640px;
+        }
+
+        /* ── Main ── */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* ── Section ── */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--navy);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .section-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--yellow);
+        }
+
+        .section-icon--red {
+            background: var(--red);
+        }
+
+        .section-icon--red svg {
+            fill: #fff;
+        }
+
+        .section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+        }
+
+        .section-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: rgba(7,55,79,0.08);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        /* ── Table ── */
+        .partner-table {
+            background: var(--cream);
+            border-radius: var(--radius);
+            border-top: 3px solid var(--navy);
+            overflow: hidden;
+        }
+
+        .partner-table--blackball {
+            border-top-color: var(--red);
+        }
+
+        .partner-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .partner-table th {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 1rem 1.25rem 0.6rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+        }
+
+        .partner-table td {
+            font-size: 0.85rem;
+            color: var(--text);
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid rgba(7,55,79,0.05);
+            vertical-align: top;
+        }
+
+        .partner-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .partner-table .name {
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .partner-table .email a {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .partner-table .email a:hover {
+            text-decoration: underline;
+        }
+
+        .service-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--navy);
+            background: rgba(7,55,79,0.07);
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .blackball-note {
+            font-size: 0.8rem;
+            color: var(--red);
+            font-style: italic;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .header { padding: 1.25rem; }
+            .hero h2 { font-size: 1.75rem; }
+            .main { padding: 0 1.25rem 3rem; }
+            .hero { padding: 0.5rem 1.25rem 1.5rem; }
+            .breadcrumb { padding: 1rem 1.25rem; }
+
+            .partner-table {
+                overflow-x: auto;
+            }
+
+            .partner-table table {
+                min-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<!-- ── Header ── -->
+<header class="header">
+    <a href="index.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+    </a>
+    <div class="header-sep"></div>
+    <div class="header-content">
+        <div class="kicker">Sales Hub</div>
+        <h1>Referral Partners</h1>
+    </div>
+</header>
+
+<!-- ── Breadcrumb ── -->
+<nav class="breadcrumb">
+    <a href="index.html">Sales Hub</a>
+    <span class="sep">/</span>
+    <span class="current">Referral Partners</span>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+    <span class="hero-eyebrow">Directory</span>
+    <h2>Referral Partners</h2>
+    <p class="hero-desc">Active referral partners, service categories, and contacts. Check the blackball list before engaging any new referral relationship.</p>
+</section>
+
+<!-- ── Main ── -->
+<main class="main">
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SEO Referral Partners              -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </div>
+            <span class="section-title">SEO Referral Partners</span>
+            <span class="section-count">2 partners</span>
+        </div>
+
+        <div class="partner-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="name">AttorneySync</td>
+                        <td>Gyi Tsakalakis</td>
+                        <td class="email"><a href="mailto:gt@attorneysync.com">gt@attorneysync.com</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">LawRank</td>
+                        <td>Maria Monroy</td>
+                        <td class="email"><a href="mailto:maria@lawrank.com">maria@lawrank.com</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Other Referral Partners            -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </div>
+            <span class="section-title">Other Referral Partners</span>
+            <span class="section-count">6 partners</span>
+        </div>
+
+        <div class="partner-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Service</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="name">SLS Consulting</td>
+                        <td><span class="service-badge">SEO</span></td>
+                        <td>Susan Ziegler</td>
+                        <td class="email"><a href="mailto:susan@slsconsulting.com">susan@slsconsulting.com</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">ConsultWebs</td>
+                        <td><span class="service-badge">SEO</span></td>
+                        <td>Tanner Jones</td>
+                        <td class="email"><a href="mailto:tjones@consultwebs-email.com">tjones@consultwebs-email.com</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">Intaker.com</td>
+                        <td><span class="service-badge">Live Chat</span></td>
+                        <td>Joe Ruotolo</td>
+                        <td class="email"><a href="mailto:joe@intaker.me">joe@intaker.me</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">Crisp</td>
+                        <td><span class="service-badge">Coaching & Video</span></td>
+                        <td>Michael Mogill</td>
+                        <td class="email"><a href="mailto:michael@crispvideo.com">michael@crispvideo.com</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">ROI360+</td>
+                        <td><span class="service-badge">Radio</span></td>
+                        <td>Gary Sarner</td>
+                        <td class="email"><a href="mailto:gary@roi360plus.com">gary@roi360plus.com</a></td>
+                    </tr>
+                    <tr>
+                        <td class="name">McQueen</td>
+                        <td><span class="service-badge">Media Buying</span></td>
+                        <td>Sarah Parisi</td>
+                        <td class="email"><a href="mailto:sarah@mcqueencollective.com">sarah@mcqueencollective.com</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Blackballed                        -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-icon section-icon--red">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            </div>
+            <span class="section-title">Blackballed</span>
+            <span class="section-count">Do not engage</span>
+        </div>
+
+        <div class="partner-table partner-table--blackball">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Service</th>
+                        <th>Contact</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="name">Clixsy</td>
+                        <td><span class="service-badge">SEO</span></td>
+                        <td>Corey Vandenberg</td>
+                        <td class="blackball-note">Do not engage</td>
+                    </tr>
+                    <tr>
+                        <td class="name">Hennessey Digital</td>
+                        <td><span class="service-badge">SEO</span></td>
+                        <td>Jason Hennessey</td>
+                        <td class="blackball-note">#1 Competitor</td>
+                    </tr>
+                    <tr>
+                        <td class="name">LowerStreet</td>
+                        <td><span class="service-badge">Podcast</span></td>
+                        <td>Harry Morton</td>
+                        <td class="blackball-note">Service quality decline</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="footer-text">Rankings.io Sales Hub — Internal Use Only</div>
+</footer>
+
+</body>
+</html>
