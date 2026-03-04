@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbound Lead Journey — Sales Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        /* ── Header ── */
+        .header {
+            background: var(--navy);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--yellow-warm);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover { color: var(--yellow); }
+
+        .header-sep {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-content .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+        }
+
+        .header-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.25px;
+        }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .breadcrumb a,
+        .breadcrumb span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .breadcrumb a {
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .breadcrumb .sep { color: var(--text-muted); margin: 0 0.4rem; }
+
+        .breadcrumb .current { color: var(--text-muted); }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.5rem 2rem 2rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 3px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 640px;
+        }
+
+        /* ── Main ── */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* ── Stepper ── */
+        .stepper {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        .step-wrapper {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+        }
+
+        .step-card {
+            background: var(--cream);
+            border-radius: var(--radius);
+            border-top: 3px solid var(--navy);
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+        }
+
+        .step-owner {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            background: var(--yellow);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.85rem;
+            width: fit-content;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--text);
+            line-height: 1.55;
+            margin-bottom: 1rem;
+        }
+
+        .step-section-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .step-outcomes {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .step-outcomes li {
+            font-size: 0.8rem;
+            color: var(--text);
+            padding: 0.2rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .step-outcomes li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--sky);
+            font-weight: 600;
+        }
+
+        .step-why {
+            background: rgba(238,220,130,0.15);
+            border-left: 3px solid var(--yellow-warm);
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text);
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        .step-why strong {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── Connector ── */
+        .step-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            flex-shrink: 0;
+        }
+
+        .step-connector svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ── Simplified Flow ── */
+        .flow-section {
+            margin-top: 3rem;
+        }
+
+        .flow-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .flow-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            background: var(--cream);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            border-top: 3px solid var(--navy);
+        }
+
+        .flow-node {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--navy);
+            background: rgba(7,55,79,0.06);
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .flow-arrow {
+            color: var(--yellow-warm);
+            font-size: 1.1rem;
+            margin: 0 0.35rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .header { padding: 1.25rem; }
+
+            .hero h2 { font-size: 1.75rem; }
+
+            .stepper {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .step-wrapper {
+                flex-direction: column;
+            }
+
+            .step-connector {
+                width: 100%;
+                height: 40px;
+                transform: rotate(90deg);
+            }
+
+            .main { padding: 0 1.25rem 3rem; }
+            .hero { padding: 0.5rem 1.25rem 1.5rem; }
+            .breadcrumb { padding: 1rem 1.25rem; }
+
+            .flow-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 0.15rem 0 0.15rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<!-- ── Header ── -->
+<header class="header">
+    <a href="index.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+    </a>
+    <div class="header-sep"></div>
+    <div class="header-content">
+        <div class="kicker">Sales Hub</div>
+        <h1>Inbound Lead Journey</h1>
+    </div>
+</header>
+
+<!-- ── Breadcrumb ── -->
+<nav class="breadcrumb">
+    <a href="index.html">Sales Hub</a>
+    <span class="sep">/</span>
+    <span class="current">Inbound Lead Journey</span>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+    <span class="hero-eyebrow">Sales Process</span>
+    <h2>Inbound Lead Journey</h2>
+    <p class="hero-desc">The end-to-end process from the moment a lead submits a form to a closed deal and account manager hand-off.</p>
+</section>
+
+<!-- ── Main ── -->
+<main class="main">
+
+    <!-- ── Horizontal Stepper ── -->
+    <div class="stepper">
+
+        <!-- Step 1 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-title">Lead Comes In</div>
+                <span class="step-owner">System / CRM</span>
+                <p class="step-desc">A prospect fills out a form on the website. The lead is automatically captured in HubSpot, the team is notified, and the lead is categorized by source and intent.</p>
+                <div class="step-section-label">Possible Outcomes</div>
+                <ul class="step-outcomes">
+                    <li>Lead routed to MDR for qualification</li>
+                    <li>Auto-disqualified (spam, competitor, etc.)</li>
+                    <li>Flagged as high-priority for immediate outreach</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Why It Matters</strong>
+                    Speed-to-lead is everything. The faster we capture, categorize, and route, the higher the connect rate and conversion.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-title">Initial Qualification</div>
+                <span class="step-owner">MDR</span>
+                <p class="step-desc">The MDR reaches out via call or email, has an initial conversation to understand the prospect's needs, budget, and timeline, then qualifies or disqualifies the lead.</p>
+                <div class="step-section-label">Possible Outcomes</div>
+                <ul class="step-outcomes">
+                    <li>Qualified — passed to AE for strategy call</li>
+                    <li>Disqualified — not a fit, logged in CRM</li>
+                    <li>Nurture — not ready now, added to drip sequence</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Why It Matters</strong>
+                    Proper qualification protects AE time and ensures only real opportunities move forward, keeping the pipeline healthy.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-title">Strategy / Discovery Call</div>
+                <span class="step-owner">AE</span>
+                <p class="step-desc">The AE runs a deep discovery call to understand the prospect's goals, current marketing efforts, competitive landscape, and pain points. Evaluates fit and scopes the engagement.</p>
+                <div class="step-section-label">Possible Outcomes</div>
+                <ul class="step-outcomes">
+                    <li>Strong fit — schedule audit / proposal presentation</li>
+                    <li>Needs more info — follow-up call or materials sent</li>
+                    <li>Not a fit — closed lost, feedback logged</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Why It Matters</strong>
+                    Discovery is where we earn trust and differentiate. A thorough discovery call sets the stage for a compelling, tailored proposal.
+                </div>
+            </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="step-connector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-wrapper">
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-title">Proposal</div>
+                <span class="step-owner">AE</span>
+                <p class="step-desc">The AE presents audit findings and delivers a tailored proposal. Addresses objections, negotiates terms, and works toward a signed agreement.</p>
+                <div class="step-section-label">Possible Outcomes</div>
+                <ul class="step-outcomes">
+                    <li>Closed Won — signed, handed off to AM</li>
+                    <li>Closed Lost — declined, reason documented</li>
+                    <li>Stalled — follow-up cadence initiated</li>
+                </ul>
+                <div class="step-why">
+                    <strong>Why It Matters</strong>
+                    The proposal is the culmination of every prior step. A clear, confident presentation backed by real data closes deals.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Simplified Flow Summary ── -->
+    <div class="flow-section">
+        <div class="flow-section-title">Simplified Flow</div>
+        <div class="flow-bar">
+            <span class="flow-node">Lead Captured</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Qualified</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">AE Strategy Call</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Proposal</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">Closed Won / Lost</span>
+            <span class="flow-arrow">&#9654;</span>
+            <span class="flow-node">AM Hand-Off</span>
+        </div>
+    </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="footer-text">Rankings.io Sales Hub — Internal Use Only</div>
+</footer>
+
+</body>
+</html>
