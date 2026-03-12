@@ -432,130 +432,30 @@
 <!-- ── Tab Navigation ── -->
 <div class="tab-header">
     <div class="tab-header-inner">
-        <span class="tab-label">Sales Resources</span>
         <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="vision">Vision</button>
-            <button class="tab-btn" data-tab="processes">Processes</button>
-            <button class="tab-btn" data-tab="tools">Tools</button>
-            <button class="tab-btn" data-tab="onboarding">Onboarding</button>
+            <button class="tab-btn active" data-tab="sales-resources">Sales Resources</button>
+            <button class="tab-btn" data-tab="dashboards">Dashboards</button>
+            <button class="tab-btn" data-tab="assets-tools">Assets & Tools</button>
+            <button class="tab-btn" data-tab="lab">Lab</button>
+            <button class="tab-btn" data-tab="play">Play</button>
         </nav>
     </div>
 </div>
 
 <main class="main">
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- TAB: Vision — Dashboards, Reports, Enablement  -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="tab-panel active" id="tab-vision">
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TAB: Sales Resources — Vision, Tools, Processes, Onboarding -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-sales-resources">
 
-        <!-- Dashboards & Reports -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <span class="section-title">Dashboards &amp; Reports</span>
-                <span class="section-count">5 reports</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- Sales Dashboard -->
-                <a href="https://scottbot6767-ux.github.io/sales-dashboard/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">BDR</span>
-                        <div class="card-title">Sales Dashboard</div>
-                        <div class="card-desc">Real-time BDR performance metrics, call volumes, and conversion tracking.</div>
-                        <div class="card-link">
-                            View dashboard <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Weekly Tracker -->
-                <a href="https://scottbot6767-ux.github.io/weekly-tracker/?v=2" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">BDR</span>
-                        <div class="card-title">Weekly Tracker</div>
-                        <div class="card-desc">Week-over-week activity tracking, goal progress, and team leaderboards.</div>
-                        <div class="card-link">
-                            View tracker <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- President's Club -->
-                <a href="https://presidents-club-pied.vercel.app/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Leaderboard</span>
-                        <div class="card-title">President's Club</div>
-                        <div class="card-desc">F1-style racing championship leaderboard tracking BDR performance.</div>
-                        <div class="card-link">
-                            View leaderboard <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- AE Lookback Report -->
-                <a href="https://scottbot6767-ux.github.io/ar-services-hub/ae-lookback.html" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">AE</span>
-                        <div class="card-title">AE Lookback Report</div>
-                        <div class="card-desc">Revenue lookback for all AEs — 2025 totals, monthly averages, Q4 YoY comparison, and last month performance.</div>
-                        <div class="card-link">
-                            View report <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- February 2026 Progress -->
-                <a href="https://scottbot6767-ux.github.io/feb-progress-2026/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Monthly</span>
-                        <div class="card-title">February 2026 Progress</div>
-                        <div class="card-desc">Outbound team performance deck — sets, shows, and closed won through Feb 23.</div>
-                        <div class="card-link">
-                            View progress <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-        <!-- Revenue Operations & Enablement -->
+        <!-- Vision -->
         <section class="section">
             <div class="section-header">
                 <div class="section-icon">
                     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                 </div>
-                <span class="section-title">Revenue Operations &amp; Enablement</span>
+                <span class="section-title">Vision</span>
             </div>
 
             <div class="card-grid">
@@ -579,159 +479,13 @@
             </div>
         </section>
 
-        <!-- Enablement Resources -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
-                </div>
-                <span class="section-title">Enablement Resources</span>
-                <span class="section-count">3 resources</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- RevOps Request Dashboard -->
-                <a href="revops-request-dashboard.html" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Dashboard</span>
-                        <div class="card-title">RevOps Request Dashboard</div>
-                        <div class="card-desc">Visual dashboard tracking 156 RevOps requests across departments, types, and priorities.</div>
-                        <div class="card-link">
-                            View dashboard <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- AR Services Hub -->
-                <a href="https://scottbot6767-ux.github.io/ar-services-hub/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Hub</span>
-                        <div class="card-title">AR Services Hub</div>
-                        <div class="card-desc">Central hub for AR service offerings, packages, and client-facing resources.</div>
-                        <div class="card-link">
-                            View hub <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Law Firm Audits -->
-                <a href="https://www.lawfirmaudits.com" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 2h1.5v3l2-3h1.7l-2 3 2 3h-1.7l-2-3v3H12V5zM7 7.25h2.5V6.5H7V5h4v3.75H8.5v.75H11V11H7V7.25zM19 19H5L19 5v14z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Audit</span>
-                        <div class="card-title">Law Firm Audits</div>
-                        <div class="card-desc">Comprehensive law firm audit suite — awareness, perception, client acquisition, and AI readiness.</div>
-                        <div class="card-link">
-                            Launch audits <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-    </div><!-- /tab-vision -->
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- TAB: Processes — Sales Processes                -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="tab-panel" id="tab-processes">
-
-        <!-- Sales Processes -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
-                </div>
-                <span class="section-title">Sales Processes</span>
-                <span class="section-count">3 processes</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- Inbound Lead Journey -->
-                <a href="inbound-lead-journey.html" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Process</span>
-                        <div class="card-title">Inbound Lead Journey</div>
-                        <div class="card-desc">End-to-end process from form submission to closed deal — Lead → MDR → AE → Proposal.</div>
-                        <div class="card-link">
-                            View process <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- BDR Outbound Process -->
-                <a href="bdr-outbound-process.html" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Process</span>
-                        <div class="card-title">BDR Outbound Process</div>
-                        <div class="card-desc">BDR operating standard — lead prep, task management, meeting setup, and post-set checklist.</div>
-                        <div class="card-link">
-                            View process <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Referral Partners -->
-                <a href="referral-partners.html" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Directory</span>
-                        <div class="card-title">Referral Partners</div>
-                        <div class="card-desc">SEO partners, service referrals, contacts, and blackball list.</div>
-                        <div class="card-link">
-                            View directory <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-    </div><!-- /tab-processes -->
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- TAB: Tools — Sales Tools, Games, Enablement Lab -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="tab-panel" id="tab-tools">
-
-        <!-- Sales Tools -->
+        <!-- Tools -->
         <section class="section">
             <div class="section-header">
                 <div class="section-icon">
                     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                 </div>
-                <span class="section-title">Sales Tools</span>
+                <span class="section-title">Tools</span>
                 <span class="section-count">5 tools</span>
             </div>
 
@@ -825,6 +579,449 @@
             </div>
         </section>
 
+        <!-- Processes -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg>
+                </div>
+                <span class="section-title">Processes</span>
+                <span class="section-count">3 processes</span>
+            </div>
+
+            <div class="card-grid">
+
+                <!-- Inbound Lead Journey -->
+                <a href="inbound-lead-journey.html" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Process</span>
+                        <div class="card-title">Inbound Lead Journey</div>
+                        <div class="card-desc">End-to-end process from form submission to closed deal — Lead → MDR → AE → Proposal.</div>
+                        <div class="card-link">
+                            View process <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- BDR Outbound Process -->
+                <a href="bdr-outbound-process.html" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Process</span>
+                        <div class="card-title">BDR Outbound Process</div>
+                        <div class="card-desc">BDR operating standard — lead prep, task management, meeting setup, and post-set checklist.</div>
+                        <div class="card-link">
+                            View process <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Referral Partners -->
+                <a href="referral-partners.html" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Directory</span>
+                        <div class="card-title">Referral Partners</div>
+                        <div class="card-desc">SEO partners, service referrals, contacts, and blackball list.</div>
+                        <div class="card-link">
+                            View directory <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Onboarding -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <span class="section-title">Onboarding</span>
+                <span class="section-count">5 resources</span>
+            </div>
+
+            <div class="card-grid">
+
+                <!-- Onboarding Deck -->
+                <a href="#" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Deck</span>
+                        <div class="card-title">Onboarding Deck</div>
+                        <div class="card-desc">New hire sales onboarding presentation — role overview, expectations, and getting started.</div>
+                        <div class="card-link">
+                            View deck <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Onboarding Resources -->
+                <a href="#" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Resources</span>
+                        <div class="card-title">Onboarding Resources</div>
+                        <div class="card-desc">Supplemental materials — playbooks, cheat sheets, and reference guides for new reps.</div>
+                        <div class="card-link">
+                            View resources <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- What's Important Right Now in SEO -->
+                <a href="https://app.askelephant.ai/share/clips/mclp_01KK0M8WW2NCRPFKV7JXWRCNZ6" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Recording</span>
+                        <div class="card-title">What's Important Right Now in SEO</div>
+                        <div class="card-desc">Megan Grothman on current SEO priorities — what matters most for sales conversations right now.</div>
+                        <div class="card-link">
+                            Watch recording <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Training Recording 2 -->
+                <a href="#" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Recording</span>
+                        <div class="card-title">Training Recording 2</div>
+                        <div class="card-desc">Recorded training session — update title and link when available.</div>
+                        <div class="card-link">
+                            Watch recording <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Training Recording 3 -->
+                <a href="#" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Recording</span>
+                        <div class="card-title">Training Recording 3</div>
+                        <div class="card-desc">Recorded training session — update title and link when available.</div>
+                        <div class="card-link">
+                            Watch recording <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </div><!-- /tab-sales-resources -->
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TAB: Dashboards — Reports & RevOps Dashboard   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-dashboards">
+
+        <!-- Dashboards & Reports -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                </div>
+                <span class="section-title">Dashboards &amp; Reports</span>
+                <span class="section-count">6 dashboards</span>
+            </div>
+
+            <div class="card-grid">
+
+                <!-- Sales Dashboard -->
+                <a href="https://scottbot6767-ux.github.io/sales-dashboard/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">BDR</span>
+                        <div class="card-title">Sales Dashboard</div>
+                        <div class="card-desc">Real-time BDR performance metrics, call volumes, and conversion tracking.</div>
+                        <div class="card-link">
+                            View dashboard <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Weekly Tracker -->
+                <a href="https://scottbot6767-ux.github.io/weekly-tracker/?v=2" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">BDR</span>
+                        <div class="card-title">Weekly Tracker</div>
+                        <div class="card-desc">Week-over-week activity tracking, goal progress, and team leaderboards.</div>
+                        <div class="card-link">
+                            View tracker <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- President's Club -->
+                <a href="https://presidents-club-pied.vercel.app/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Leaderboard</span>
+                        <div class="card-title">President's Club</div>
+                        <div class="card-desc">F1-style racing championship leaderboard tracking BDR performance.</div>
+                        <div class="card-link">
+                            View leaderboard <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- AE Lookback Report -->
+                <a href="https://scottbot6767-ux.github.io/ar-services-hub/ae-lookback.html" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">AE</span>
+                        <div class="card-title">AE Lookback Report</div>
+                        <div class="card-desc">Revenue lookback for all AEs — 2025 totals, monthly averages, Q4 YoY comparison, and last month performance.</div>
+                        <div class="card-link">
+                            View report <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- February 2026 Progress -->
+                <a href="https://scottbot6767-ux.github.io/feb-progress-2026/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Monthly</span>
+                        <div class="card-title">February 2026 Progress</div>
+                        <div class="card-desc">Outbound team performance deck — sets, shows, and closed won through Feb 23.</div>
+                        <div class="card-link">
+                            View progress <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- RevOps Request Dashboard -->
+                <a href="revops-request-dashboard.html" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Dashboard</span>
+                        <div class="card-title">RevOps Request Dashboard</div>
+                        <div class="card-desc">Visual dashboard tracking 156 RevOps requests across departments, types, and priorities.</div>
+                        <div class="card-link">
+                            View dashboard <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </div><!-- /tab-dashboards -->
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TAB: Assets & Tools                             -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-assets-tools">
+
+        <!-- Assets & Tools -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                </div>
+                <span class="section-title">Assets &amp; Tools</span>
+                <span class="section-count">3 tools</span>
+            </div>
+
+            <div class="card-grid">
+
+                <!-- AR Services Hub -->
+                <a href="https://scottbot6767-ux.github.io/ar-services-hub/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Hub</span>
+                        <div class="card-title">AR Services Hub</div>
+                        <div class="card-desc">Central hub for AR service offerings, packages, and client-facing resources.</div>
+                        <div class="card-link">
+                            View hub <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Law Firm Audits -->
+                <a href="https://www.lawfirmaudits.com" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 2h1.5v3l2-3h1.7l-2 3 2 3h-1.7l-2-3v3H12V5zM7 7.25h2.5V6.5H7V5h4v3.75H8.5v.75H11V11H7V7.25zM19 19H5L19 5v14z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Audit</span>
+                        <div class="card-title">Law Firm Audits</div>
+                        <div class="card-desc">Comprehensive law firm audit suite — awareness, perception, client acquisition, and AI readiness.</div>
+                        <div class="card-link">
+                            Launch audits <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Audit Tools -->
+                <a href="https://rankings-audit-tools.vercel.app/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Audit</span>
+                        <div class="card-title">Assets &amp; Audits</div>
+                        <div class="card-desc">Internal toolkit — site audits, asset generation, and sales enablement utilities.</div>
+                        <div class="card-link">
+                            Launch tools <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </div><!-- /tab-assets-tools -->
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TAB: Lab — Deal Rooms, Censy, Rankings Falcon   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-lab">
+
+        <!-- Lab -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg viewBox="0 0 24 24"><path d="M7 2v2h1v14c0 2.21 1.79 4 4 4s4-1.79 4-4V4h1V2H7zm4 16c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2-4.54c-.3-.17-.64-.27-1-.31V4h1v9.46z"/></svg>
+                </div>
+                <span class="section-title">Lab</span>
+                <span class="section-count">3 tools</span>
+            </div>
+
+            <div class="card-grid">
+
+                <!-- Deal Rooms -->
+                <a href="https://deal-rooms.vercel.app/admin" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7v-7zm4-3h2v10h-2V7zm4 6h2v4h-2v-4z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Deal Rooms</span>
+                        <div class="card-title">Deal Rooms</div>
+                        <div class="card-desc">Create and manage personalized deal rooms for prospects — proposals, resources, and engagement tracking.</div>
+                        <div class="card-link">
+                            Open admin <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Censy -->
+                <a href="https://censy-mu.vercel.app/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Census Data</span>
+                        <div class="card-title">Censy</div>
+                        <div class="card-desc">Census data intelligence tool — demographic insights, market analysis, and territory planning.</div>
+                        <div class="card-link">
+                            Launch app <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Rankings Falcon -->
+                <a href="https://scottbot6767-ux.github.io/localfalcon-tool/" class="card" target="_blank">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Local SEO</span>
+                        <div class="card-title">Rankings Falcon</div>
+                        <div class="card-desc">Local Falcon grid tracking tool — visualize local search rankings across map grid points.</div>
+                        <div class="card-link">
+                            Launch tool <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </div><!-- /tab-lab -->
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TAB: Play — Sales Games                         -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-play">
+
         <!-- Sales Games -->
         <section class="section">
             <div class="section-header">
@@ -908,212 +1105,7 @@
             </div>
         </section>
 
-        <!-- Enablement Lab -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M7 2v2h1v14c0 2.21 1.79 4 4 4s4-1.79 4-4V4h1V2H7zm4 16c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2-4.54c-.3-.17-.64-.27-1-.31V4h1v9.46z"/></svg>
-                </div>
-                <span class="section-title">Enablement Lab</span>
-                <span class="section-count">4 tools</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- Audit Tools -->
-                <a href="https://rankings-audit-tools.vercel.app/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Audit</span>
-                        <div class="card-title">Assets & Audits</div>
-                        <div class="card-desc">Internal toolkit — site audits, asset generation, and sales enablement utilities.</div>
-                        <div class="card-link">
-                            Launch tools <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Deal Rooms -->
-                <a href="https://deal-rooms.vercel.app/admin" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7v-7zm4-3h2v10h-2V7zm4 6h2v4h-2v-4z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Deal Rooms</span>
-                        <div class="card-title">Deal Rooms</div>
-                        <div class="card-desc">Create and manage personalized deal rooms for prospects — proposals, resources, and engagement tracking.</div>
-                        <div class="card-link">
-                            Open admin <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Censy -->
-                <a href="https://censy-mu.vercel.app/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Census Data</span>
-                        <div class="card-title">Censy</div>
-                        <div class="card-desc">Census data intelligence tool — demographic insights, market analysis, and territory planning.</div>
-                        <div class="card-link">
-                            Launch app <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Rankings Falcon -->
-                <a href="https://scottbot6767-ux.github.io/localfalcon-tool/" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Local SEO</span>
-                        <div class="card-title">Rankings Falcon</div>
-                        <div class="card-desc">Local Falcon grid tracking tool — visualize local search rankings across map grid points.</div>
-                        <div class="card-link">
-                            Launch tool <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-    </div><!-- /tab-tools -->
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- TAB: Onboarding — Onboarding + Ongoing Training -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div class="tab-panel" id="tab-onboarding">
-
-        <!-- Onboarding -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <span class="section-title">Onboarding</span>
-                <span class="section-count">2 resources</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- Onboarding Deck -->
-                <a href="#" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Deck</span>
-                        <div class="card-title">Onboarding Deck</div>
-                        <div class="card-desc">New hire sales onboarding presentation — role overview, expectations, and getting started.</div>
-                        <div class="card-link">
-                            View deck <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Onboarding Resources -->
-                <a href="#" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Resources</span>
-                        <div class="card-title">Onboarding Resources</div>
-                        <div class="card-desc">Supplemental materials — playbooks, cheat sheets, and reference guides for new reps.</div>
-                        <div class="card-link">
-                            View resources <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-        <!-- Ongoing Training -->
-        <section class="section">
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>
-                </div>
-                <span class="section-title">Ongoing Training</span>
-                <span class="section-count">3 recordings</span>
-            </div>
-
-            <div class="card-grid">
-
-                <!-- What's Important Right Now in SEO -->
-                <a href="https://app.askelephant.ai/share/clips/mclp_01KK0M8WW2NCRPFKV7JXWRCNZ6" class="card" target="_blank">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Recording</span>
-                        <div class="card-title">What's Important Right Now in SEO</div>
-                        <div class="card-desc">Megan Grothman on current SEO priorities — what matters most for sales conversations right now.</div>
-                        <div class="card-link">
-                            Watch recording <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Training Recording 2 -->
-                <a href="#" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Recording</span>
-                        <div class="card-title">Training Recording 2</div>
-                        <div class="card-desc">Recorded training session — update title and link when available.</div>
-                        <div class="card-link">
-                            Watch recording <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Training Recording 3 -->
-                <a href="#" class="card">
-                    <div class="card-preview">
-                        <div class="card-preview-icon">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-badge">Recording</span>
-                        <div class="card-title">Training Recording 3</div>
-                        <div class="card-desc">Recorded training session — update title and link when available.</div>
-                        <div class="card-link">
-                            Watch recording <span class="arrow">→</span>
-                        </div>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-    </div><!-- /tab-onboarding -->
+    </div><!-- /tab-play -->
 
 </main>
 
