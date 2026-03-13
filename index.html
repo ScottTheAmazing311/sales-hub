@@ -438,6 +438,7 @@
             <button class="tab-btn" data-tab="assets-tools">Assets & Tools</button>
             <button class="tab-btn" data-tab="lab">Lab</button>
             <button class="tab-btn" data-tab="play">Play</button>
+            <button class="tab-btn" data-tab="leadership">Leadership</button>
         </nav>
     </div>
 </div>
@@ -820,7 +821,7 @@
 
             <div class="card-grid">
 
-                <!-- AR Services Hub -->
+                <!-- Service Menu -->
                 <a href="https://scottbot6767-ux.github.io/ar-services-hub/" class="card" target="_blank">
                     <div class="card-preview">
                         <div class="card-preview-icon">
@@ -829,7 +830,7 @@
                     </div>
                     <div class="card-body">
                         <span class="card-badge">Hub</span>
-                        <div class="card-title">AR Services Hub</div>
+                        <div class="card-title">Service Menu</div>
                         <div class="card-desc">Central hub for AR service offerings, packages, and client-facing resources.</div>
                         <div class="card-link">
                             View hub <span class="arrow">→</span>
@@ -1056,6 +1057,334 @@
 
     </div><!-- /tab-play -->
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TAB: Leadership — Password Protected           -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-leadership">
+
+        <style>
+            .report-header {
+                background: var(--navy);
+                border-radius: var(--radius) var(--radius) 0 0;
+                padding: 2rem 2.5rem;
+                color: #fff;
+                margin-bottom: 0;
+            }
+            .report-header h2 {
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--yellow);
+                margin-bottom: 4px;
+            }
+            .report-header p {
+                font-size: 0.9rem;
+                color: rgba(255,255,255,0.6);
+            }
+            .report-body {
+                background: var(--cream);
+                border-radius: 0 0 var(--radius) var(--radius);
+                padding: 2rem 2.5rem 2.5rem;
+                margin-bottom: 2rem;
+            }
+            .report-section-title {
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: var(--navy);
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid var(--yellow);
+            }
+            .kpi-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .kpi-card {
+                background: #fff;
+                border-radius: 8px;
+                padding: 1.25rem 1rem;
+                text-align: center;
+                border: 1px solid rgba(7,55,79,0.08);
+            }
+            .kpi-label {
+                font-size: 0.7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-muted);
+                margin-bottom: 6px;
+            }
+            .kpi-value {
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: var(--navy);
+            }
+            .kpi-sub {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-top: 4px;
+            }
+            .kpi-change-up { color: #27ae60; font-weight: 600; }
+            .kpi-change-down { color: #c0392b; font-weight: 600; }
+            .report-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 2rem;
+                font-size: 0.9rem;
+            }
+            .report-table thead th {
+                background: var(--navy);
+                color: var(--yellow);
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 0.7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 0.75rem 1rem;
+                text-align: left;
+            }
+            .report-table thead th:first-child {
+                border-radius: 6px 0 0 0;
+            }
+            .report-table thead th:last-child {
+                border-radius: 0 6px 0 0;
+            }
+            .report-table tbody td {
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid rgba(7,55,79,0.08);
+                color: var(--text);
+            }
+            .report-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+            .report-table tbody tr:nth-child(even) {
+                background: rgba(7,55,79,0.03);
+            }
+            .report-table .col-money {
+                font-family: 'IBM Plex Mono', monospace;
+                font-weight: 600;
+                color: var(--navy);
+            }
+            .report-table .col-num {
+                font-family: 'IBM Plex Mono', monospace;
+                text-align: center;
+            }
+            .report-table .row-total td {
+                font-weight: 700;
+                border-top: 2px solid var(--navy);
+                background: rgba(234,255,106,0.15);
+            }
+            @media (max-width: 600px) {
+                .report-header, .report-body { padding: 1.25rem 1rem; }
+                .kpi-grid { grid-template-columns: 1fr 1fr; }
+                .report-table { font-size: 0.8rem; }
+                .report-table thead th, .report-table tbody td { padding: 0.6rem 0.6rem; }
+            }
+        </style>
+
+        <!-- ── Report: Sales Performance ── -->
+        <div class="report-header">
+            <h2>Sales Performance Report</h2>
+            <p>January – February 2025 &nbsp;|&nbsp; Rankings.io Revenue Kitchen</p>
+        </div>
+        <div class="report-body">
+
+            <!-- KPI Overview -->
+            <div class="report-section-title">Key Metrics</div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total ARR</div>
+                    <div class="kpi-value">$839K</div>
+                    <div class="kpi-sub"><span class="kpi-change-down">↓ 19.3%</span> from Jan ($1.04M)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total MRR</div>
+                    <div class="kpi-value">$69.9K</div>
+                    <div class="kpi-sub"><span class="kpi-change-down">↓ 14.9%</span> from Jan ($82.1K)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Deals Closed</div>
+                    <div class="kpi-value">9</div>
+                    <div class="kpi-sub"><span class="kpi-change-down">↓ 25%</span> from Jan (12)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg MRR / Deal</div>
+                    <div class="kpi-value">$11.6K</div>
+                    <div class="kpi-sub"><span class="kpi-change-up">↑ 60.7%</span> from Jan ($7.2K)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg ARR / Deal</div>
+                    <div class="kpi-value">$138.9K</div>
+                    <div class="kpi-sub"><span class="kpi-change-up">↑ 60.7%</span> from Jan ($86.4K)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Sales Cycle</div>
+                    <div class="kpi-value">46.9d</div>
+                    <div class="kpi-sub"><span class="kpi-change-down">↑ 41.3%</span> from Jan (33.2d)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Deals Lost to Price</div>
+                    <div class="kpi-value">11</div>
+                    <div class="kpi-sub"><span class="kpi-change-up">↓ 35.3%</span> from Jan (17)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pipeline Carryover</div>
+                    <div class="kpi-value">34</div>
+                    <div class="kpi-sub"><span class="kpi-change-up">↑ 36%</span> from Jan (25)</div>
+                </div>
+            </div>
+
+            <!-- Rep Performance -->
+            <div class="report-section-title">Rep Performance — Closed Won ARR</div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Sales Rep</th>
+                        <th>January</th>
+                        <th>February</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mike Budny</td>
+                        <td class="col-money">$450,000</td>
+                        <td class="col-money">$450,000</td>
+                        <td class="col-num">—</td>
+                    </tr>
+                    <tr>
+                        <td>Megan Grothman</td>
+                        <td class="col-money">$409,500</td>
+                        <td class="col-money">$389,000</td>
+                        <td class="col-num"><span class="kpi-change-down">↓ 5.0%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Simon Golding</td>
+                        <td class="col-money">$120,000</td>
+                        <td class="col-money">$0</td>
+                        <td class="col-num"><span class="kpi-change-down">↓ 100%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Jake Wangler</td>
+                        <td class="col-money">$60,000</td>
+                        <td class="col-money">$0</td>
+                        <td class="col-num"><span class="kpi-change-down">↓ 100%</span></td>
+                    </tr>
+                    <tr class="row-total">
+                        <td>Total</td>
+                        <td class="col-money">$1,039,500</td>
+                        <td class="col-money">$839,000</td>
+                        <td class="col-num"><span class="kpi-change-down">↓ 19.3%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Outbound Metrics -->
+            <div class="report-section-title">Outbound Performance</div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>January</th>
+                        <th>February</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Sets</td>
+                        <td class="col-num">99</td>
+                        <td class="col-num">110</td>
+                        <td class="col-num"><span class="kpi-change-up">↑ 11.1%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Holds</td>
+                        <td class="col-num">56</td>
+                        <td class="col-num">76</td>
+                        <td class="col-num"><span class="kpi-change-up">↑ 35.7%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Closed Won ARR</td>
+                        <td class="col-money">$195,000</td>
+                        <td class="col-money">$364,500</td>
+                        <td class="col-num"><span class="kpi-change-up">↑ 86.9%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Avg Daily Dials</td>
+                        <td class="col-num">62.16</td>
+                        <td class="col-num">62.50</td>
+                        <td class="col-num"><span class="kpi-change-up">↑ 0.5%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pipeline -->
+            <div class="report-section-title">Current Pipeline by Rep</div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Sales Rep</th>
+                        <th>MRR</th>
+                        <th>ARR</th>
+                        <th>Deals</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Megan Grothman</td>
+                        <td class="col-money">$94.67K</td>
+                        <td class="col-money">$1.136M</td>
+                        <td class="col-num">6</td>
+                    </tr>
+                    <tr>
+                        <td>Simon Golding</td>
+                        <td class="col-money">$123.5K</td>
+                        <td class="col-money">$1.4M</td>
+                        <td class="col-num">12</td>
+                    </tr>
+                    <tr>
+                        <td>Jake Wangler</td>
+                        <td class="col-money">$32.5K</td>
+                        <td class="col-money">$390K</td>
+                        <td class="col-num">3</td>
+                    </tr>
+                    <tr>
+                        <td>Brandon Steed</td>
+                        <td class="col-money">$39K</td>
+                        <td class="col-money">$468K</td>
+                        <td class="col-num">4</td>
+                    </tr>
+                    <tr>
+                        <td>Jacob Man</td>
+                        <td class="col-money">$27.5K</td>
+                        <td class="col-money">$330K</td>
+                        <td class="col-num">3</td>
+                    </tr>
+                    <tr>
+                        <td>Chris</td>
+                        <td class="col-money">$35K</td>
+                        <td class="col-money">$420K</td>
+                        <td class="col-num">1</td>
+                    </tr>
+                    <tr class="row-total">
+                        <td>Total Pipeline</td>
+                        <td class="col-money">$352.2K</td>
+                        <td class="col-money">$4.14M</td>
+                        <td class="col-num">29</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div><!-- /tab-leadership -->
+
 </main>
 
 <!-- ── Footer ── -->
@@ -1063,19 +1392,75 @@
     <div class="footer-text">Rankings.io Revenue Kitchen — Internal Use Only</div>
 </footer>
 
+<!-- ── Leadership Password Modal ── -->
+<div id="leadership-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,55,79,0.85); z-index:99998; align-items:center; justify-content:center; font-family:'IBM Plex Sans',sans-serif;">
+    <div style="background:#fefaed; border-radius:12px; padding:48px 40px; text-align:center; width:360px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+        <div style="width:56px; height:56px; background:#07374F; color:#eaff6a; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:20px; margin:0 auto 16px;">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="#eaff6a"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
+        </div>
+        <h2 style="color:#07374F; font-size:22px; margin-bottom:6px;">Leadership Access</h2>
+        <p style="color:#6b6b6b; font-size:14px; margin-bottom:24px;">Enter the leadership password to continue</p>
+        <form id="leadership-form">
+            <input type="password" id="leadership-password" placeholder="Password" autofocus style="width:100%; padding:12px 16px; border:2px solid #ddd; border-radius:8px; font-size:16px; font-family:inherit; outline:none; margin-bottom:12px;">
+            <button type="submit" style="width:100%; padding:12px; background:#07374F; color:#eaff6a; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit;">Enter</button>
+            <div id="leadership-error" style="color:#c0392b; font-size:13px; margin-top:10px; min-height:18px;"></div>
+        </form>
+        <button id="leadership-cancel" style="margin-top:8px; background:none; border:none; color:#6b6b6b; font-size:13px; cursor:pointer; font-family:inherit;">Cancel</button>
+    </div>
+</div>
+
 <!-- ── Tab Switching ── -->
 <script>
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Deactivate all tabs and panels
+    (function() {
+        var LEADERSHIP_PASSWORD = 'leadership456';
+        var LEADERSHIP_KEY = 'rk_leadership_auth';
+
+        function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
 
-            // Activate clicked tab and its panel
-            btn.classList.add('active');
-            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        var overlay = document.getElementById('leadership-overlay');
+        var form = document.getElementById('leadership-form');
+        var input = document.getElementById('leadership-password');
+        var error = document.getElementById('leadership-error');
+        var cancel = document.getElementById('leadership-cancel');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value === LEADERSHIP_PASSWORD) {
+                sessionStorage.setItem(LEADERSHIP_KEY, 'true');
+                overlay.style.display = 'none';
+                switchTab('leadership');
+            } else {
+                error.textContent = 'Incorrect password';
+                input.value = '';
+                input.focus();
+            }
         });
-    });
+
+        cancel.addEventListener('click', function() {
+            overlay.style.display = 'none';
+            input.value = '';
+            error.textContent = '';
+        });
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                var tab = btn.dataset.tab;
+                if (tab === 'leadership' && sessionStorage.getItem(LEADERSHIP_KEY) !== 'true') {
+                    overlay.style.display = 'flex';
+                    input.value = '';
+                    error.textContent = '';
+                    input.focus();
+                    return;
+                }
+                switchTab(tab);
+            });
+        });
+    })();
 </script>
 
 </body>
