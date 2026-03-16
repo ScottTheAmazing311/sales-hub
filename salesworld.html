@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales World Overview — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .report-wrapper {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 2rem 3rem;
+        }
+
+        .report-header {
+            background: var(--navy);
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 2rem 2.5rem;
+            color: #fff;
+        }
+        .report-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 4px;
+        }
+        .report-header p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .report-body {
+            background: var(--cream);
+            border-radius: 0 0 var(--radius) var(--radius);
+            padding: 2rem 2.5rem 2.5rem;
+        }
+
+        .report-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+
+        .section-block {
+            margin-bottom: 2rem;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .report-table thead th {
+            background: var(--navy);
+            color: var(--yellow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        .report-table thead th:first-child { border-radius: 6px 0 0 0; }
+        .report-table thead th:last-child { border-radius: 0 6px 0 0; }
+        .report-table tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+            color: var(--text);
+        }
+        .report-table tbody tr:last-child td { border-bottom: none; }
+        .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .tech-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            border: 1px solid rgba(7,55,79,0.08);
+        }
+        .tech-card img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        .tech-card .tech-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .offer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .offer-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            border: 1px solid rgba(7,55,79,0.08);
+        }
+        .offer-card .offer-tier {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .offer-card .offer-price {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .offer-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .plays-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        .plays-list li {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(7,55,79,0.08);
+            font-size: 0.9rem;
+        }
+        .plays-list li strong {
+            color: var(--navy);
+        }
+
+        .culture-callout {
+            background: var(--navy);
+            color: #fff;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        .culture-callout a {
+            color: var(--yellow);
+            font-weight: 600;
+        }
+
+        .support-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        .support-list li {
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+        .support-list li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 600px) {
+            .report-wrapper { padding: 0 1rem 2rem; }
+            .report-header, .report-body { padding: 1.25rem 1rem; }
+            .tech-grid { grid-template-columns: 1fr 1fr; }
+            .offer-grid { grid-template-columns: 1fr 1fr; }
+            .report-table { font-size: 0.8rem; }
+            .report-table thead th, .report-table tbody td { padding: 0.6rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+<div class="back-bar">
+    <a href="index.html" class="back-link">&larr; Back to Revenue Kitchen</a>
+</div>
+
+<div class="report-wrapper">
+    <div class="report-header">
+        <h1>Sales World Overview</h1>
+        <p>The single source of truth for how we sell at Rankings.io</p>
+    </div>
+    <div class="report-body">
+
+        <!-- 1. The Team -->
+        <div class="section-block">
+            <div class="report-section-title">1. The Team</div>
+
+            <p class="offer-label">Core Closing Unit &mdash; Closing Inbound &amp; Outbound Deals</p>
+            <table class="report-table">
+                <thead>
+                    <tr><th>Role</th><th>Who</th><th>What They Receive</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Key AEs</strong></td><td>Mike &amp; Megan</td><td>100% PI + Filler non-PI</td></tr>
+                    <tr><td><strong>AE1s</strong></td><td>&mdash;</td><td>Non-PI + Self-Sourced</td></tr>
+                </tbody>
+            </table>
+
+            <p class="offer-label">Core Channel Unit &mdash; Closing Referrals, Events, Channel &amp; Strategic Partnerships</p>
+            <table class="report-table">
+                <thead>
+                    <tr><th>Role</th><th>Who</th><th>What They Receive</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Channel Lead</strong></td><td>Simon</td><td>Self-sourced event deals + Strategic Partner deal compensation</td></tr>
+                </tbody>
+            </table>
+
+            <p class="offer-label">Core Pipeline Unit &mdash; Business Development</p>
+            <table class="report-table">
+                <thead>
+                    <tr><th>Role</th><th>Who</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>BDR/MDR Leadership</strong></td><td>Jacque &amp; Carson</td></tr>
+                    <tr><td><strong>BDR/MDR Teams</strong></td><td>The engine that feeds the pipeline</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. The Culture -->
+        <div class="section-block">
+            <div class="report-section-title">2. The Culture</div>
+            <div class="culture-callout">
+                All assets, processes, and resources live at <a href="https://revenuekitchen.io">revenuekitchen.io</a>
+            </div>
+        </div>
+
+        <!-- 3. The Tech -->
+        <div class="section-block">
+            <div class="report-section-title">3. The Tech</div>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <img src="https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png" alt="HubSpot">
+                    <div class="tech-name">HubSpot</div>
+                </div>
+                <div class="tech-card">
+                    <img src="https://seamless.ai/favicon.ico" alt="Seamless.ai">
+                    <div class="tech-name">Seamless.ai</div>
+                </div>
+                <div class="tech-card">
+                    <img src="https://www.pandadoc.com/wp-content/themes/jesuspended/favicon.ico" alt="PandaDoc">
+                    <div class="tech-name">PandaDoc</div>
+                </div>
+                <div class="tech-card">
+                    <img src="https://askelephant.com/favicon.ico" alt="AskElephant">
+                    <div class="tech-name">AskElephant</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. The Offer -->
+        <div class="section-block">
+            <div class="report-section-title">4. The Offer</div>
+
+            <p class="offer-label">PI Flagship Offers</p>
+            <div class="offer-grid">
+                <div class="offer-card"><div class="offer-tier">Tier 1</div><div class="offer-price">$10k</div></div>
+                <div class="offer-card"><div class="offer-tier">Tier 2</div><div class="offer-price">$15k</div></div>
+                <div class="offer-card"><div class="offer-tier">Tier 3</div><div class="offer-price">$25k</div></div>
+                <div class="offer-card"><div class="offer-tier">Tier 4</div><div class="offer-price">$40k</div></div>
+            </div>
+
+            <p class="offer-label">LawFirm Flagship Offers</p>
+            <div class="offer-grid">
+                <div class="offer-card"><div class="offer-tier">Tier 1</div><div class="offer-price">$3k</div></div>
+                <div class="offer-card"><div class="offer-tier">Tier 2</div><div class="offer-price">$5k</div></div>
+                <div class="offer-card"><div class="offer-tier">Tier 3</div><div class="offer-price">$7.5k</div></div>
+            </div>
+
+            <p class="offer-label">Core Offer (Sprints + A La Carte)</p>
+            <div class="offer-grid">
+                <div class="offer-card"><div class="offer-tier">Core</div><div class="offer-price">$5k</div></div>
+            </div>
+
+            <p class="offer-label">A La Carte</p>
+            <table class="report-table">
+                <thead>
+                    <tr><th>Product</th><th>Price</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>A La Carte Rider</strong> &mdash; Website Hours + AM</td><td>$2k Maintenance</td></tr>
+                    <tr><td><strong>Sprints</strong></td><td>TBD</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 5. The Support -->
+        <div class="section-block">
+            <div class="report-section-title">5. The Support</div>
+            <p class="offer-label">RevOps Team &amp; Deliverables</p>
+            <ul class="support-list">
+                <li>Reporting</li>
+                <li>Assets</li>
+                <li>Knowledge Base Curation</li>
+            </ul>
+        </div>
+
+        <!-- 2026 Proposed Plays -->
+        <div class="section-block">
+            <div class="report-section-title">2026 New Proposed Plays</div>
+            <ul class="plays-list">
+                <li><strong>Simon in a dual-focused role</strong> &mdash; Strategic Partnerships for channel referrals &amp; Sales Strategy support</li>
+                <li><strong>TBD &mdash; Referral Partner Channel Breakdown</strong> &mdash; Structure and ownership still being defined</li>
+                <li><strong>Simon at events and the Roadshow</strong> &mdash; In-market presence driving deal flow back to the team</li>
+                <li><strong>AE1s &mdash; 1 week per quarter onsite</strong> &mdash; Boots on the ground, face-to-face relationship building in local markets</li>
+                <li><strong>Mastermind Retreats + PIMCON</strong> &mdash; High-value touchpoints with prospects and partners</li>
+                <li><strong>Visibility Offer w/o POD</strong> &mdash; A new entry point into the Rankings.io ecosystem</li>
+                <li><strong>One New Dashboard to rule them all</strong> &mdash; A single pane of glass across pipeline, performance, and forecasting</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<footer class="footer">
+    Rankings.io Revenue Kitchen &mdash; Internal Use Only
+</footer>
+
+</body>
+</html>
