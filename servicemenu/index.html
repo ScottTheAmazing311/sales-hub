@@ -5,25 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attorney Rankings — Services Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 /* ==============================================
    TOKENS
    ============================================== */
 :root {
-  --dark:    #282828;
-  --cream:   #fcfaec;
+  --dark:    #2c2c2c;
+  --cream:   #fefaed;
   --white:   #ffffff;
-  --blue:    #3a93cf;
-  --navy:    #14364d;
-  --yellow:  #eedc82;
-  --lime:    #c6e005;
-  --navy-2:  #1e4a67;
-  --bg:      #f0ece0;
+  --blue:    #3c94d1;
+  --navy:    #07374F;
+  --yellow:  #eaff6a;
+  --yellow-warm: #eedc82;
+  --lime:    #eaff6a;
+  --navy-2:  #0e5f87;
+  --bg:      #f4f0e6;
+  --text-muted: #6b6b6b;
 
-  --font-head: 'Barlow Condensed', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-head: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'DM Mono', 'SF Mono', monospace;
 }
 
 /* ==============================================
@@ -67,19 +70,19 @@ button { cursor: pointer; font-family: inherit; }
 .pw-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
-  height: 4px; background: var(--yellow);
+  height: 4px; background: linear-gradient(90deg, var(--navy-2), var(--yellow));
   border-radius: 4px 4px 0 0;
 }
 .pw-eyebrow {
-  font-family: var(--font-head);
-  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--blue); margin-bottom: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+  font-weight: 600; color: var(--blue); margin-bottom: 0.75rem;
 }
 .pw-title {
   font-family: var(--font-head);
-  font-size: clamp(1.6rem,5vw,2.4rem); font-weight: 900;
-  line-height: 1; letter-spacing: -0.01em;
-  color: var(--navy); text-transform: uppercase; margin-bottom: 0.5rem;
+  font-size: clamp(1.8rem,5vw,2.6rem); font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.01em;
+  color: var(--navy); margin-bottom: 0.5rem;
 }
 .pw-sub {
   font-size: 0.8rem; font-weight: 300;
@@ -87,15 +90,15 @@ button { cursor: pointer; font-family: inherit; }
 }
 .pw-divider { height: 1px; background: rgba(20,54,77,0.12); margin-bottom: 2rem; }
 .pw-label {
-  font-family: var(--font-head);
-  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-  color: rgba(20,54,77,0.45); display: block; margin-bottom: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  font-weight: 600; color: rgba(7,55,79,0.45); display: block; margin-bottom: 0.5rem;
 }
 .pw-input {
   width: 100%; padding: 0.85rem 1rem;
-  background: var(--white); border: 1px solid rgba(20,54,77,0.15);
-  border-radius: 3px; font-family: var(--font-head);
-  font-size: 1.4rem; font-weight: 700; letter-spacing: 0.3em;
+  background: var(--white); border: 1px solid rgba(7,55,79,0.15);
+  border-radius: 3px; font-family: var(--font-mono);
+  font-size: 1.2rem; font-weight: 500; letter-spacing: 0.3em;
   color: var(--navy); outline: none; transition: border-color 0.2s;
   margin-bottom: 1.25rem;
 }
@@ -103,12 +106,12 @@ button { cursor: pointer; font-family: inherit; }
 .pw-input.error { border-color: #c0392b; animation: shake 0.3s ease; }
 .pw-btn {
   width: 100%; padding: 0.85rem;
-  background: var(--navy); color: var(--yellow); border: none;
-  border-radius: 3px; font-family: var(--font-head);
-  font-size: 0.9rem; font-weight: 700; letter-spacing: 0.2em;
-  text-transform: uppercase; transition: background 0.2s;
+  background: var(--yellow); color: var(--navy); border: none;
+  border-radius: 3px; font-family: var(--font-body);
+  font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; transition: filter 0.2s;
 }
-.pw-btn:hover { background: var(--navy-2); }
+.pw-btn:hover { filter: brightness(1.1); }
 .pw-error { font-size: 0.75rem; color: #c0392b; margin-top: 0.5rem; display: none; font-weight: 500; }
 .pw-error.show { display: block; }
 @keyframes shake {
@@ -120,7 +123,7 @@ button { cursor: pointer; font-family: inherit; }
 /* ==============================================
    SHARED HEADER (hub + offering page share it)
    ============================================== */
-.site-stripe { height: 5px; background: var(--yellow); }
+.site-stripe { height: 4px; background: linear-gradient(90deg, var(--navy-2), var(--yellow)); }
 .site-header {
   background: var(--navy);
   padding: clamp(1.25rem,3vw,2rem) clamp(1.5rem,5vw,4rem);
@@ -132,23 +135,23 @@ button { cursor: pointer; font-family: inherit; }
   display: flex; align-items: center; gap: 0.4rem;
   background: rgba(255,255,255,0.07); border: none;
   border-radius: 3px; padding: 0.45rem 0.75rem;
-  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
   color: rgba(252,250,236,0.6); transition: background 0.2s, color 0.2s;
 }
 .back-btn:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
 .back-btn svg { width: 10px; height: 10px; }
 .header-title-block {}
 .header-kicker {
-  font-family: var(--font-head); font-size: 0.65rem;
-  letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--yellow); opacity: 0.7; margin-bottom: 0.2rem;
+  font-family: var(--font-body); font-size: 0.65rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 600; color: var(--yellow); opacity: 0.7; margin-bottom: 0.2rem;
 }
 .header-title {
   font-family: var(--font-head);
-  font-size: clamp(1.4rem,3.5vw,2.2rem); font-weight: 900;
+  font-size: clamp(1.6rem,3.5vw,2.4rem); font-weight: 400;
   letter-spacing: -0.01em; color: var(--cream);
-  text-transform: uppercase; line-height: 1;
+  line-height: 1.1;
 }
 .header-title span { color: var(--yellow); }
 .header-meta {
@@ -203,8 +206,8 @@ button { cursor: pointer; font-family: inherit; }
 }
 .card-logo-wrap.preserve img { filter: none; }
 .card-name {
-  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.22em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
   color: rgba(252,250,236,0.45);
 }
 
@@ -216,14 +219,14 @@ button { cursor: pointer; font-family: inherit; }
 }
 .card-tab {
   flex: 1; padding: 0.65rem 1rem;
-  background: linear-gradient(180deg, rgba(20,54,77,0.06) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(7,55,79,0.06) 0%, transparent 100%);
   border: none; border-bottom: 3px solid transparent;
-  font-family: var(--font-head); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(20,54,77,0.4); transition: color 0.2s, border-color 0.2s, background 0.2s;
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(7,55,79,0.4); transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
-.card-tab:hover { color: var(--navy); background: linear-gradient(180deg, rgba(20,54,77,0.1) 0%, transparent 100%); }
-.card-tab.active { color: var(--navy); border-bottom-color: var(--yellow); background: linear-gradient(180deg, rgba(238,220,130,0.15) 0%, transparent 100%); }
+.card-tab:hover { color: var(--navy); background: linear-gradient(180deg, rgba(7,55,79,0.1) 0%, transparent 100%); }
+.card-tab.active { color: var(--navy); border-bottom-color: var(--yellow); background: linear-gradient(180deg, rgba(234,255,106,0.15) 0%, transparent 100%); }
 
 /* Card body (offering tile list) */
 .card-body { flex: 1; padding: 1rem 1.25rem 1.25rem; }
@@ -248,13 +251,13 @@ button { cursor: pointer; font-family: inherit; }
 .offering-tile:hover .tile-arrow { opacity: 1; transform: translateX(2px); }
 .tile-info { display: flex; flex-direction: column; gap: 0.2rem; }
 .tile-category {
-  font-family: var(--font-head); font-size: 0.55rem; font-weight: 700;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(20,54,77,0.35);
+  font-family: var(--font-body); font-size: 0.55rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(7,55,79,0.35);
 }
 .tile-name {
-  font-family: var(--font-head); font-size: 0.95rem; font-weight: 700;
-  letter-spacing: 0.03em; color: var(--navy);
+  font-family: var(--font-head); font-size: 1rem; font-weight: 400;
+  letter-spacing: 0; color: var(--navy);
 }
 .tile-arrow {
   flex-shrink: 0; color: var(--blue); opacity: 0.4;
@@ -286,12 +289,12 @@ button { cursor: pointer; font-family: inherit; }
 
 /* Breadcrumb bar below main header */
 .offering-breadcrumb {
-  background: rgba(20,54,77,0.06);
-  border-bottom: 1px solid rgba(20,54,77,0.1);
+  background: rgba(7,55,79,0.06);
+  border-bottom: 1px solid rgba(7,55,79,0.1);
   padding: 0.6rem clamp(1.5rem,5vw,4rem);
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.7rem; font-weight: 400; color: rgba(20,54,77,0.4);
-  font-family: var(--font-head); letter-spacing: 0.08em;
+  font-size: 0.7rem; font-weight: 500; color: rgba(7,55,79,0.4);
+  font-family: var(--font-body); letter-spacing: 0.05em;
 }
 .breadcrumb-sep { opacity: 0.3; }
 .breadcrumb-entity { color: rgba(20,54,77,0.55); }
@@ -317,14 +320,14 @@ button { cursor: pointer; font-family: inherit; }
 .offering-hero-logo.preserve img { filter: none; }
 .offering-hero-text {}
 .offering-hero-kicker {
-  font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
-  letter-spacing: 0.22em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--yellow); opacity: 0.7; margin-bottom: 0.3rem;
 }
 .offering-hero-title {
   font-family: var(--font-head); font-size: clamp(1.8rem,4vw,3rem);
-  font-weight: 900; letter-spacing: -0.01em;
-  color: var(--cream); text-transform: uppercase; line-height: 1;
+  font-weight: 400; letter-spacing: -0.01em;
+  color: var(--cream); line-height: 1.1;
 }
 
 /* Content area */
@@ -338,11 +341,11 @@ button { cursor: pointer; font-family: inherit; }
 .sow-section { margin-bottom: 2.5rem; }
 .sow-section:last-child { margin-bottom: 0; }
 .sow-section-title {
-  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.22em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--blue); margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(58,147,207,0.2);
+  border-bottom: 1px solid rgba(60,148,209,0.2);
 }
 
 .service-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -360,11 +363,11 @@ button { cursor: pointer; font-family: inherit; }
 /* Tier table */
 .tier-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
 .tier-table th {
-  font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
-  letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(20,54,77,0.4); text-align: left;
+  font-family: var(--font-body); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(7,55,79,0.4); text-align: left;
   padding: 0 0 0.5rem;
-  border-bottom: 1px solid rgba(20,54,77,0.12);
+  border-bottom: 1px solid rgba(7,55,79,0.12);
 }
 .tier-table th:last-child { text-align: right; }
 .tier-table td {
@@ -373,14 +376,14 @@ button { cursor: pointer; font-family: inherit; }
 }
 .tier-table td:last-child {
   text-align: right; font-weight: 600; color: var(--navy);
-  font-family: var(--font-head); font-size: 0.9rem; letter-spacing: 0.03em;
+  font-family: var(--font-mono); font-size: 0.9rem; letter-spacing: 0;
 }
 .tier-table tr:last-child td { border-bottom: none; }
 .tier-badge {
   display: inline-block;
-  background: rgba(198,224,5,0.15); color: #5a7200;
-  font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  background: rgba(234,255,106,0.2); color: #07374F;
+  font-family: var(--font-body); font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
   padding: 2px 6px; border-radius: 2px; vertical-align: middle; margin-left: 0.4rem;
 }
 
@@ -414,9 +417,9 @@ button { cursor: pointer; font-family: inherit; }
   font-weight: 300; letter-spacing: 0.04em;
 }
 .site-footer-right {
-  font-family: var(--font-head); font-size: 0.65rem;
-  letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(20,54,77,0.25);
+  font-family: var(--font-body); font-size: 0.65rem;
+  letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+  color: rgba(7,55,79,0.25);
 }
 
 /* ==============================================
@@ -427,9 +430,9 @@ button { cursor: pointer; font-family: inherit; }
 .expand-toggle {
   display: flex; align-items: center; justify-content: center; gap: 0.4rem;
   width: 100%; padding: 0.55rem 0; margin-top: 0.15rem;
-  background: none; border: 1px dashed rgba(20,54,77,0.15); border-radius: 3px;
-  font-family: var(--font-head); font-size: 0.7rem; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  background: none; border: 1px dashed rgba(7,55,79,0.15); border-radius: 3px;
+  font-family: var(--font-body); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--blue); cursor: pointer; transition: background 0.15s, color 0.15s;
 }
 .expand-toggle:hover { background: rgba(58,147,207,0.06); }
@@ -464,11 +467,11 @@ button { cursor: pointer; font-family: inherit; }
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
 }
 .investment-callout .inv-label {
-  font-family: var(--font-head); font-size: 0.63rem; font-weight: 700;
-  letter-spacing: 0.18em; text-transform: uppercase; color: rgba(252,250,236,0.45);
+  font-family: var(--font-body); font-size: 0.63rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: rgba(252,250,236,0.45);
 }
 .investment-callout .inv-amount {
-  font-family: var(--font-head); font-size: 1.5rem; font-weight: 900;
+  font-family: var(--font-mono); font-size: 1.5rem; font-weight: 500;
   color: var(--yellow); letter-spacing: -0.01em;
 }
 
@@ -477,12 +480,12 @@ button { cursor: pointer; font-family: inherit; }
   padding: 0.5rem 0.75rem; border-radius: 0 3px 3px 0; margin-bottom: 1rem;
 }
 .tier-label-banner .tier-num {
-  font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.1rem;
+  font-family: var(--font-body); font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.1rem;
 }
 .tier-label-banner .tier-name {
-  font-family: var(--font-head); font-size: 1rem; font-weight: 900;
-  color: var(--navy); letter-spacing: 0.02em;
+  font-family: var(--font-head); font-size: 1.1rem; font-weight: 400;
+  color: var(--navy);
 }
 
 .sprint-hero {
@@ -490,7 +493,7 @@ button { cursor: pointer; font-family: inherit; }
   padding: 1rem 1.25rem; margin-bottom: 1.5rem;
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
 }
-.sprint-price { font-family: var(--font-head); font-size: 1.3rem; font-weight: 900; color: var(--navy); }
+.sprint-price { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 500; color: var(--navy); }
 .sprint-timeline { font-size: 0.75rem; font-weight: 500; color: rgba(20,54,77,0.5); }
 .sprint-deliverables { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
 .sprint-deliverables li { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.85rem; color: var(--dark); line-height: 1.4; }
@@ -501,8 +504,8 @@ button { cursor: pointer; font-family: inherit; }
   display: flex; align-items: center; gap: 0.4rem;
   background: rgba(255,255,255,0.07); border: none; cursor: pointer;
   border-radius: 3px; padding: 0.4rem 0.75rem;
-  font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
-  letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
   color: rgba(252,250,236,0.55); transition: background 0.2s, color 0.2s;
 }
 .refresh-btn:hover { background: rgba(255,255,255,0.13); color: var(--cream); }
@@ -512,7 +515,7 @@ button { cursor: pointer; font-family: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .refresh-status {
   font-size: 0.68rem; color: rgba(252,250,236,0.38);
-  font-family: var(--font-head); letter-spacing: 0.07em; white-space: nowrap;
+  font-family: var(--font-body); letter-spacing: 0.05em; white-space: nowrap;
 }
 
 /* ── Add-from-Drive button & modal ── */
@@ -537,17 +540,16 @@ button { cursor: pointer; font-family: inherit; }
   width: min(440px, 92vw); box-shadow: 0 24px 60px rgba(0,0,0,0.4);
 }
 .add-modal-title {
-  font-family: var(--font-head); font-size: 1rem; font-weight: 900;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream);
-  margin-bottom: 0.35rem;
+  font-family: var(--font-head); font-size: 1.2rem; font-weight: 400;
+  color: var(--cream); margin-bottom: 0.35rem;
 }
 .add-modal-sub {
   font-size: 0.78rem; color: rgba(252,250,236,0.45); margin-bottom: 1.25rem;
   line-height: 1.5;
 }
 .add-modal-label {
-  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.15em; text-transform: uppercase;
+  font-family: var(--font-body); font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
   color: rgba(252,250,236,0.5); margin-bottom: 0.4rem; display: block;
 }
 .add-modal-input {
@@ -569,17 +571,17 @@ button { cursor: pointer; font-family: inherit; }
 }
 .add-modal-btns { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
 .add-modal-submit {
-  flex: 1; background: var(--blue); border: none; border-radius: 4px;
-  padding: 0.65rem; font-family: var(--font-head); font-size: 0.72rem;
-  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #fff; cursor: pointer; transition: opacity 0.2s;
+  flex: 1; background: var(--yellow); border: none; border-radius: 4px;
+  padding: 0.65rem; font-family: var(--font-body); font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--navy); cursor: pointer; transition: filter 0.2s;
 }
-.add-modal-submit:hover { opacity: 0.85; }
+.add-modal-submit:hover { filter: brightness(1.1); }
 .add-modal-submit:disabled { opacity: 0.45; pointer-events: none; }
 .add-modal-cancel {
   background: rgba(255,255,255,0.07); border: none; border-radius: 4px;
-  padding: 0.65rem 1rem; font-family: var(--font-head); font-size: 0.72rem;
-  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.65rem 1rem; font-family: var(--font-body); font-size: 0.72rem;
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
   color: rgba(252,250,236,0.55); cursor: pointer; transition: background 0.2s;
 }
 .add-modal-cancel:hover { background: rgba(255,255,255,0.12); }
@@ -607,8 +609,8 @@ button { cursor: pointer; font-family: inherit; }
 .add-doc-input::placeholder { color: rgba(20,54,77,0.3); font-size: 0.75rem; }
 .add-doc-go {
   background: var(--navy); border: none; border-radius: 3px;
-  padding: 0.4rem 0.75rem; font-family: var(--font-head); font-size: 0.62rem;
-  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.4rem 0.75rem; font-family: var(--font-body); font-size: 0.62rem;
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--cream); cursor: pointer; white-space: nowrap;
   transition: opacity 0.2s; flex-shrink: 0;
 }
@@ -661,7 +663,7 @@ button { cursor: pointer; font-family: inherit; }
       <div class="card">
         <div class="card-head">
           <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:#fcfaec;letter-spacing:0.04em;text-transform:uppercase">Personal Injury</span>
+            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Personal Injury</span>
           </div>
           <div class="card-name">Personal Injury</div>
         </div>
@@ -746,7 +748,7 @@ button { cursor: pointer; font-family: inherit; }
       <div class="card">
         <div class="card-head">
           <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:#fcfaec;letter-spacing:0.04em;text-transform:uppercase">Law Firm</span>
+            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Law Firm</span>
           </div>
           <div class="card-name">Law Firm</div>
         </div>
@@ -1696,7 +1698,7 @@ let currentOfferingId = null;
     logoWrap.classList.remove('preserve');
     // Replace with text label
     let textEl = logoWrap.querySelector('.logo-text-label');
-    if (!textEl) { textEl = document.createElement('span'); textEl.className = 'logo-text-label'; textEl.style.cssText = 'font-family:var(--font-head);font-size:1.2rem;font-weight:900;color:#fcfaec;letter-spacing:0.04em;text-transform:uppercase'; logoWrap.appendChild(textEl); }
+    if (!textEl) { textEl = document.createElement('span'); textEl.className = 'logo-text-label'; textEl.style.cssText = 'font-family:var(--font-head);font-size:1.3rem;font-weight:400;color:#fcfaec;letter-spacing:0'; logoWrap.appendChild(textEl); }
     textEl.textContent = logo.text;
   } else if (logo && logo.src) {
     logoImg.style.display = '';
