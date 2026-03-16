@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attorney Rankings — Services Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* ==============================================
+   TOKENS
+   ============================================== */
+:root {
+  --dark:    #282828;
+  --cream:   #fcfaec;
+  --white:   #ffffff;
+  --blue:    #3a93cf;
+  --navy:    #14364d;
+  --yellow:  #eedc82;
+  --lime:    #c6e005;
+  --navy-2:  #1e4a67;
+  --bg:      #f0ece0;
+
+  --font-head: 'Barlow Condensed', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/* ==============================================
+   RESET
+   ============================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; }
+body { font-family: var(--font-body); background: var(--navy); color: var(--dark); }
+img { display: block; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ==============================================
+   PASSWORD SCREEN
+   ============================================== */
+#pw-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+#pw-screen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(238,220,130,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238,220,130,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.pw-card {
+  background: var(--cream);
+  border-radius: 4px;
+  padding: clamp(2.5rem,5vw,4rem) clamp(2rem,5vw,4rem);
+  width: 100%; max-width: 420px;
+  position: relative; z-index: 1;
+}
+.pw-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 4px; background: var(--yellow);
+  border-radius: 4px 4px 0 0;
+}
+.pw-eyebrow {
+  font-family: var(--font-head);
+  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 0.75rem;
+}
+.pw-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem,5vw,2.4rem); font-weight: 900;
+  line-height: 1; letter-spacing: -0.01em;
+  color: var(--navy); text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.pw-sub {
+  font-size: 0.8rem; font-weight: 300;
+  color: rgba(20,54,77,0.55); margin-bottom: 2rem; line-height: 1.5;
+}
+.pw-divider { height: 1px; background: rgba(20,54,77,0.12); margin-bottom: 2rem; }
+.pw-label {
+  font-family: var(--font-head);
+  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(20,54,77,0.45); display: block; margin-bottom: 0.5rem;
+}
+.pw-input {
+  width: 100%; padding: 0.85rem 1rem;
+  background: var(--white); border: 1px solid rgba(20,54,77,0.15);
+  border-radius: 3px; font-family: var(--font-head);
+  font-size: 1.4rem; font-weight: 700; letter-spacing: 0.3em;
+  color: var(--navy); outline: none; transition: border-color 0.2s;
+  margin-bottom: 1.25rem;
+}
+.pw-input:focus { border-color: var(--blue); }
+.pw-input.error { border-color: #c0392b; animation: shake 0.3s ease; }
+.pw-btn {
+  width: 100%; padding: 0.85rem;
+  background: var(--navy); color: var(--yellow); border: none;
+  border-radius: 3px; font-family: var(--font-head);
+  font-size: 0.9rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; transition: background 0.2s;
+}
+.pw-btn:hover { background: var(--navy-2); }
+.pw-error { font-size: 0.75rem; color: #c0392b; margin-top: 0.5rem; display: none; font-weight: 500; }
+.pw-error.show { display: block; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ==============================================
+   SHARED HEADER (hub + offering page share it)
+   ============================================== */
+.site-stripe { height: 5px; background: var(--yellow); }
+.site-header {
+  background: var(--navy);
+  padding: clamp(1.25rem,3vw,2rem) clamp(1.5rem,5vw,4rem);
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.site-header-left { display: flex; align-items: center; gap: 1.5rem; }
+.back-btn {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(255,255,255,0.07); border: none;
+  border-radius: 3px; padding: 0.45rem 0.75rem;
+  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(252,250,236,0.6); transition: background 0.2s, color 0.2s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
+.back-btn svg { width: 10px; height: 10px; }
+.header-title-block {}
+.header-kicker {
+  font-family: var(--font-head); font-size: 0.65rem;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--yellow); opacity: 0.7; margin-bottom: 0.2rem;
+}
+.header-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.4rem,3.5vw,2.2rem); font-weight: 900;
+  letter-spacing: -0.01em; color: var(--cream);
+  text-transform: uppercase; line-height: 1;
+}
+.header-title span { color: var(--yellow); }
+.header-meta {
+  font-size: 0.72rem; font-weight: 300;
+  color: rgba(252,250,236,0.4); letter-spacing: 0.05em;
+  text-align: right; line-height: 1.6;
+}
+
+/* ==============================================
+   HUB (main card grid)
+   ============================================== */
+#hub { display: none; min-height: 100vh; background: var(--bg); }
+#hub.visible { opacity: 1; }
+#hub { opacity: 0; transition: opacity 0.4s ease; }
+.hub-body { padding: clamp(1.5rem,4vw,3rem) clamp(1.5rem,5vw,4rem); }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ==============================================
+   CARDS
+   ============================================== */
+.card {
+  background: var(--cream); border-radius: 4px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 2px 12px rgba(20,54,77,0.1);
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.card.in { opacity: 1; transform: translateY(0); }
+
+.card-head {
+  background: var(--dark);
+  padding: 1.75rem 1.5rem 1.25rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  position: relative;
+}
+.card-head::after {
+  content: ''; position: absolute; top: 12px; right: 12px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--lime);
+}
+.card-logo-wrap {
+  background: rgba(255,255,255,0.08); border-radius: 3px;
+  padding: 0.75rem 1.25rem; width: 100%; max-width: 200px;
+  display: flex; align-items: center; justify-content: center; min-height: 60px;
+}
+.card-logo-wrap img {
+  max-height: 44px; max-width: 160px; width: auto;
+  object-fit: contain; filter: brightness(0) invert(1);
+}
+.card-logo-wrap.preserve img { filter: none; }
+.card-name {
+  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(252,250,236,0.45);
+}
+
+/* Tab bar */
+.card-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(20,54,77,0.12);
+  background: var(--cream);
+}
+.card-tab {
+  flex: 1; padding: 0.65rem 1rem;
+  background: none; border: none; border-bottom: 3px solid transparent;
+  font-family: var(--font-head); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(20,54,77,0.4); transition: color 0.2s, border-color 0.2s;
+}
+.card-tab:hover { color: var(--navy); }
+.card-tab.active { color: var(--navy); border-bottom-color: var(--yellow); }
+
+/* Card body (offering tile list) */
+.card-body { flex: 1; padding: 1rem 1.25rem 1.25rem; }
+.card-panel { display: none; }
+.card-panel.active { display: block; }
+
+/* Offering tile — the clickable link inside each tab */
+.offering-tile {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 0.85rem 1rem;
+  background: var(--white); border: 1px solid rgba(20,54,77,0.1);
+  border-radius: 3px; text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+.offering-tile:last-child { margin-bottom: 0; }
+.offering-tile:hover {
+  border-color: var(--blue);
+  background: rgba(58,147,207,0.04);
+}
+.offering-tile:hover .tile-arrow { opacity: 1; transform: translateX(2px); }
+.tile-info { display: flex; flex-direction: column; gap: 0.2rem; }
+.tile-category {
+  font-family: var(--font-head); font-size: 0.55rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(20,54,77,0.35);
+}
+.tile-name {
+  font-family: var(--font-head); font-size: 0.95rem; font-weight: 700;
+  letter-spacing: 0.03em; color: var(--navy);
+}
+.tile-arrow {
+  flex-shrink: 0; color: var(--blue); opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.tile-arrow svg { width: 14px; height: 14px; }
+
+/* Coming soon placeholder */
+.coming-soon {
+  padding: 1.75rem 0; text-align: center;
+}
+.coming-soon-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(20,54,77,0.15); margin: 0 auto 0.75rem;
+}
+.coming-soon p {
+  font-size: 0.75rem; font-weight: 300;
+  color: rgba(20,54,77,0.35); letter-spacing: 0.04em;
+}
+
+/* ==============================================
+   OFFERING DETAIL PAGE
+   ============================================== */
+#offering-page {
+  display: none; min-height: 100vh; background: var(--bg);
+  flex-direction: column;
+}
+#offering-page.visible { display: flex; }
+
+/* Breadcrumb bar below main header */
+.offering-breadcrumb {
+  background: rgba(20,54,77,0.06);
+  border-bottom: 1px solid rgba(20,54,77,0.1);
+  padding: 0.6rem clamp(1.5rem,5vw,4rem);
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.7rem; font-weight: 400; color: rgba(20,54,77,0.4);
+  font-family: var(--font-head); letter-spacing: 0.08em;
+}
+.breadcrumb-sep { opacity: 0.3; }
+.breadcrumb-entity { color: rgba(20,54,77,0.55); }
+.breadcrumb-cat { color: rgba(20,54,77,0.55); }
+.breadcrumb-active { color: var(--navy); font-weight: 700; }
+
+/* Hero band */
+.offering-hero {
+  background: var(--dark);
+  padding: clamp(1.5rem,4vw,2.5rem) clamp(1.5rem,5vw,4rem);
+  display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+}
+.offering-hero-logo {
+  background: rgba(255,255,255,0.08); border-radius: 3px;
+  padding: 0.6rem 1rem;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 120px; max-width: 180px; min-height: 50px;
+}
+.offering-hero-logo img {
+  max-height: 38px; max-width: 140px; width: auto;
+  object-fit: contain; filter: brightness(0) invert(1);
+}
+.offering-hero-logo.preserve img { filter: none; }
+.offering-hero-text {}
+.offering-hero-kicker {
+  font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--yellow); opacity: 0.7; margin-bottom: 0.3rem;
+}
+.offering-hero-title {
+  font-family: var(--font-head); font-size: clamp(1.8rem,4vw,3rem);
+  font-weight: 900; letter-spacing: -0.01em;
+  color: var(--cream); text-transform: uppercase; line-height: 1;
+}
+
+/* Content area */
+.offering-content {
+  flex: 1;
+  padding: clamp(2rem,5vw,3.5rem) clamp(1.5rem,5vw,4rem);
+  max-width: 860px;
+}
+
+/* SOW styles */
+.sow-section { margin-bottom: 2.5rem; }
+.sow-section:last-child { margin-bottom: 0; }
+.sow-section-title {
+  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(58,147,207,0.2);
+}
+
+.service-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.service-list li {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  font-size: 0.88rem; font-weight: 400; color: var(--dark); line-height: 1.45;
+}
+.check-icon {
+  flex-shrink: 0; width: 17px; height: 17px; margin-top: 1px;
+  background: var(--lime); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.check-icon svg { width: 9px; height: 9px; }
+
+/* Tier table */
+.tier-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.tier-table th {
+  font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(20,54,77,0.4); text-align: left;
+  padding: 0 0 0.5rem;
+  border-bottom: 1px solid rgba(20,54,77,0.12);
+}
+.tier-table th:last-child { text-align: right; }
+.tier-table td {
+  padding: 0.65rem 0; font-size: 0.85rem; color: var(--dark);
+  border-bottom: 1px solid rgba(20,54,77,0.06);
+}
+.tier-table td:last-child {
+  text-align: right; font-weight: 600; color: var(--navy);
+  font-family: var(--font-head); font-size: 0.9rem; letter-spacing: 0.03em;
+}
+.tier-table tr:last-child td { border-bottom: none; }
+.tier-badge {
+  display: inline-block;
+  background: rgba(198,224,5,0.15); color: #5a7200;
+  font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 2px; vertical-align: middle; margin-left: 0.4rem;
+}
+
+/* Test placeholder in offering page */
+.offering-placeholder {
+  background: rgba(238,220,130,0.12);
+  border: 1px solid rgba(238,220,130,0.3);
+  border-left: 3px solid var(--yellow);
+  border-radius: 3px; padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.offering-placeholder p {
+  font-size: 0.8rem; font-weight: 400;
+  color: rgba(20,54,77,0.6); line-height: 1.6;
+}
+.offering-placeholder strong {
+  font-weight: 600; color: var(--navy);
+}
+
+/* ==============================================
+   FOOTER
+   ============================================== */
+.site-footer {
+  padding: 1.25rem clamp(1.5rem,5vw,4rem);
+  border-top: 1px solid rgba(20,54,77,0.1);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.5rem; background: var(--cream);
+}
+.site-footer-left {
+  font-size: 0.72rem; color: rgba(20,54,77,0.35);
+  font-weight: 300; letter-spacing: 0.04em;
+}
+.site-footer-right {
+  font-family: var(--font-head); font-size: 0.65rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(20,54,77,0.25);
+}
+
+/* ==============================================
+   EXPANDABLE PANEL
+   ============================================== */
+.card-panel .offering-tile.collapsed-tile { display: none; }
+.card-panel.expanded .offering-tile.collapsed-tile { display: flex; }
+.expand-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  width: 100%; padding: 0.55rem 0; margin-top: 0.15rem;
+  background: none; border: 1px dashed rgba(20,54,77,0.15); border-radius: 3px;
+  font-family: var(--font-head); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--blue); cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.expand-toggle:hover { background: rgba(58,147,207,0.06); }
+.expand-toggle svg { width: 12px; height: 12px; transition: transform 0.2s; }
+.card-panel.expanded .expand-toggle svg { transform: rotate(180deg); }
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+@media (max-width: 600px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .header-meta { display: none; }
+  .offering-hero { gap: 1rem; }
+}
+
+/* ==============================================
+   OFFERING DETAIL — SPEC & SPRINT STYLES
+   ============================================== */
+.spec-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.spec-table tr { border-bottom: 1px solid rgba(20,54,77,0.06); }
+.spec-table tr:last-child { border-bottom: none; }
+.spec-table td { padding: 0.55rem 0; font-size: 0.82rem; vertical-align: middle; }
+.spec-table td:first-child { color: var(--dark); }
+.spec-table td:last-child { text-align: right; min-width: 110px; }
+.val-check { color: #5a7200; font-weight: 700; font-size: 0.8rem; }
+.val-text  { color: var(--navy); font-weight: 600; font-size: 0.78rem; }
+.val-none  { color: rgba(20,54,77,0.22); font-size: 0.9rem; }
+
+.investment-callout {
+  margin-top: 1.5rem; padding: 1rem 1.25rem;
+  background: var(--navy); border-radius: 3px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+}
+.investment-callout .inv-label {
+  font-family: var(--font-head); font-size: 0.63rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase; color: rgba(252,250,236,0.45);
+}
+.investment-callout .inv-amount {
+  font-family: var(--font-head); font-size: 1.5rem; font-weight: 900;
+  color: var(--yellow); letter-spacing: -0.01em;
+}
+
+.tier-label-banner {
+  background: rgba(20,54,77,0.07); border-left: 3px solid var(--blue);
+  padding: 0.5rem 0.75rem; border-radius: 0 3px 3px 0; margin-bottom: 1rem;
+}
+.tier-label-banner .tier-num {
+  font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.1rem;
+}
+.tier-label-banner .tier-name {
+  font-family: var(--font-head); font-size: 1rem; font-weight: 900;
+  color: var(--navy); letter-spacing: 0.02em;
+}
+
+.sprint-hero {
+  background: rgba(20,54,77,0.06); border-radius: 3px;
+  padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.sprint-price { font-family: var(--font-head); font-size: 1.3rem; font-weight: 900; color: var(--navy); }
+.sprint-timeline { font-size: 0.75rem; font-weight: 500; color: rgba(20,54,77,0.5); }
+.sprint-deliverables { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+.sprint-deliverables li { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.85rem; color: var(--dark); line-height: 1.4; }
+.sprint-bullet { flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--blue); margin-top: 0.5rem; }
+
+/* ── Refresh button ── */
+.refresh-btn {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(255,255,255,0.07); border: none; cursor: pointer;
+  border-radius: 3px; padding: 0.4rem 0.75rem;
+  font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(252,250,236,0.55); transition: background 0.2s, color 0.2s;
+}
+.refresh-btn:hover { background: rgba(255,255,255,0.13); color: var(--cream); }
+.refresh-btn.loading { opacity: 0.5; pointer-events: none; }
+.refresh-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+.refresh-btn.loading svg { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.refresh-status {
+  font-size: 0.68rem; color: rgba(252,250,236,0.38);
+  font-family: var(--font-head); letter-spacing: 0.07em; white-space: nowrap;
+}
+
+/* ── Add-from-Drive button & modal ── */
+.card-tabs { position: relative; }
+.add-drive-btn {
+  margin-left: auto; background: none; border: none; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 3px; display: flex;
+  align-items: center; justify-content: center;
+  color: rgba(20,54,77,0.28); transition: background 0.15s, color 0.15s;
+  flex-shrink: 0; margin-right: 0.35rem;
+}
+.add-drive-btn:hover { background: rgba(20,54,77,0.08); color: var(--navy); }
+.add-drive-btn svg { width: 13px; height: 13px; }
+
+#add-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(20,54,77,0.72); align-items: center; justify-content: center;
+}
+#add-modal.open { display: flex; }
+.add-modal-box {
+  background: #1e3d52; border-radius: 6px; padding: 1.75rem 2rem;
+  width: min(440px, 92vw); box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+.add-modal-title {
+  font-family: var(--font-head); font-size: 1rem; font-weight: 900;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream);
+  margin-bottom: 0.35rem;
+}
+.add-modal-sub {
+  font-size: 0.78rem; color: rgba(252,250,236,0.45); margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+.add-modal-label {
+  font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(252,250,236,0.5); margin-bottom: 0.4rem; display: block;
+}
+.add-modal-input {
+  width: 100%; box-sizing: border-box;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(252,250,236,0.15);
+  border-radius: 4px; padding: 0.65rem 0.75rem;
+  font-family: var(--font-body); font-size: 0.82rem; color: var(--cream);
+  outline: none; margin-bottom: 0.5rem;
+  transition: border-color 0.2s;
+}
+.add-modal-input:focus { border-color: var(--blue); }
+.add-modal-input::placeholder { color: rgba(252,250,236,0.25); }
+.add-modal-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+.add-modal-row select {
+  flex: 1; background: rgba(0,0,0,0.25); border: 1px solid rgba(252,250,236,0.15);
+  border-radius: 4px; padding: 0.55rem 0.65rem;
+  font-family: var(--font-body); font-size: 0.82rem; color: var(--cream);
+  outline: none;
+}
+.add-modal-btns { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+.add-modal-submit {
+  flex: 1; background: var(--blue); border: none; border-radius: 4px;
+  padding: 0.65rem; font-family: var(--font-head); font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #fff; cursor: pointer; transition: opacity 0.2s;
+}
+.add-modal-submit:hover { opacity: 0.85; }
+.add-modal-submit:disabled { opacity: 0.45; pointer-events: none; }
+.add-modal-cancel {
+  background: rgba(255,255,255,0.07); border: none; border-radius: 4px;
+  padding: 0.65rem 1rem; font-family: var(--font-head); font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(252,250,236,0.55); cursor: pointer; transition: background 0.2s;
+}
+.add-modal-cancel:hover { background: rgba(255,255,255,0.12); }
+.add-modal-error { font-size: 0.75rem; color: #f87171; margin-top: 0.5rem; display: none; }
+.custom-tile-del {
+  background: none; border: none; cursor: pointer; padding: 0 0.25rem;
+  color: rgba(20,54,77,0.3); font-size: 0.85rem; line-height: 1;
+  transition: color 0.15s; flex-shrink: 0;
+}
+.custom-tile-del:hover { color: #c0392b; }
+
+/* ── Inline add-doc panel (shown on refresh for cards with no folder) ── */
+.add-doc-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 0.75rem; border-top: 1px solid rgba(20,54,77,0.08);
+  background: var(--cream);
+}
+.add-doc-input {
+  flex: 1; background: rgba(20,54,77,0.06); border: 1px solid rgba(20,54,77,0.15);
+  border-radius: 3px; padding: 0.4rem 0.6rem;
+  font-family: var(--font-body); font-size: 0.78rem; color: var(--dark);
+  outline: none; transition: border-color 0.2s;
+}
+.add-doc-input:focus { border-color: var(--blue); }
+.add-doc-input::placeholder { color: rgba(20,54,77,0.3); font-size: 0.75rem; }
+.add-doc-go {
+  background: var(--navy); border: none; border-radius: 3px;
+  padding: 0.4rem 0.75rem; font-family: var(--font-head); font-size: 0.62rem;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cream); cursor: pointer; white-space: nowrap;
+  transition: opacity 0.2s; flex-shrink: 0;
+}
+.add-doc-go:hover { opacity: 0.8; }
+.add-doc-go:disabled { opacity: 0.4; pointer-events: none; }
+.add-doc-bar.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     1. PASSWORD SCREEN
+     ============================================================ -->
+<div id="pw-screen">
+  <div class="pw-card">
+    <div class="pw-eyebrow">Internal Access Only</div>
+    <h1 class="pw-title">Attorney Rankings<br>Services Hub</h1>
+    <p class="pw-sub">Centralized service offerings for all entities under the Attorney Rankings umbrella.</p>
+    <div class="pw-divider"></div>
+    <label class="pw-label" for="pw-input">Access Code</label>
+    <input type="password" id="pw-input" class="pw-input" placeholder="——" maxlength="8" autocomplete="off">
+    <button class="pw-btn" onclick="checkPassword()">Enter Hub</button>
+    <p class="pw-error" id="pw-error">Incorrect access code. Try again.</p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     2. MAIN HUB
+     ============================================================ -->
+<div id="hub">
+  <div class="site-stripe"></div>
+  <header class="site-header">
+    <div class="site-header-left">
+      <div class="header-title-block">
+        <div class="header-kicker">Attorney Rankings — Internal</div>
+        <h1 class="header-title">Services <span>Hub</span></h1>
+      </div>
+    </div>
+    <div class="header-meta">
+      5 entities &nbsp;·&nbsp; Services menu<br>
+      Confidential — internal use only
+    </div>
+  </header>
+
+  <main class="hub-body">
+    <div class="cards-grid">
+
+      <!-- RANKINGS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap">
+            <img src="https://rankings.io/wp-content/uploads/logo-11-20-25.png" alt="Rankings.io"
+              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:#fcfaec\'>Rankings.io</span>'">
+          </div>
+          <div class="card-name">Rankings</div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'rankings-core')">Core</button>
+          <button class="card-tab" onclick="switchTab(this,'rankings-alacart')">A-La-Cart</button>
+          <button class="card-tab" onclick="switchTab(this,'rankings-sprints')">Module Sprints</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('rankings', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+          <div class="card-panel active" id="rankings-core">
+            <button class="offering-tile" onclick="openOffering('rankings-core-10k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">Authority — $10K</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-core-15k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">Ascend — $15K</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-core-25k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">Prestige — $25K</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-core-40k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">Apex — $40K</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+          <div class="card-panel" id="rankings-alacart">
+            <button class="offering-tile" onclick="openOffering('rankings-alacart-ppc')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">PPC / Google Ads</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-alacart-aic')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">AI Citation Magnet</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-alacart-web')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Ignite Website Design</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-alacart-media')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">On-Site Media Capture</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-alacart-ott')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">OTT Advertising</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+          <div class="card-panel" id="rankings-sprints">
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-paid-media')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">90-Day Paid Media</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-website')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Brand &amp; Website Design</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-links')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">High DR Link Package</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-intake')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Intake Optimization Sprint</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-social')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Legal Foundry Social</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('rankings-sprints-cwv')">
+              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Technical &amp; Core Web Vitals</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+        
+        <div class="add-doc-bar hidden" id="rankings-add-bar"><input class="add-doc-input" id="rankings-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('rankings')" /><button class="add-doc-go" id="rankings-add-go" onclick="addDocFromBar('rankings')">Add</button></div>
+      </div>
+      </div>
+
+      <!-- GLADIATOR -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap">
+            <img src="https://cdn-ilapehp.nitrocdn.com/JzcuNEOunVkUEngShcLekRVajrmSTreT/assets/images/optimized/rev-5a5341b/gladiatorlawmarketing.com/wp-content/uploads/2024/06/gladiator-law-marketing_logo.png" alt="Gladiator Law Marketing"
+              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:var(--font-head);font-size:1rem;font-weight:900;color:#fcfaec\'>Gladiator Law</span>'">
+          </div>
+          <div class="card-name">Gladiator</div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'gladiator-core')">Core</button>
+          <button class="card-tab" onclick="switchTab(this,'gladiator-alacart')">A-La-Cart</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('gladiator', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+                    <div class="card-panel active" id="gladiator-core">
+            <button class="offering-tile" onclick="openOffering('gladiator-core-3k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">3K — Authority</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-core-5k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">5K — Authority</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-core-7k5')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">7.5K — Authority</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-core-10k')">
+              <div class="tile-info"><span class="tile-category">Core</span><span class="tile-name">10K — Authority</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+
+                    <div class="card-panel" id="gladiator-alacart">
+            <button class="offering-tile" onclick="openOffering('gladiator-alacart-ppc')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">PPC / Google Ads</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-alacart-aic')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">AI Citation Magnet</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-alacart-web')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Ignite Website Design</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-alacart-media')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">On-Site Media Capture</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-alacart-ott')">
+              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">OTT Advertising</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+
+        
+        <div class="add-doc-bar hidden" id="gladiator-add-bar"><input class="add-doc-input" id="gladiator-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('gladiator')" /><button class="add-doc-go" id="gladiator-add-go" onclick="addDocFromBar('gladiator')">Add</button></div>
+      </div>
+      </div>
+
+      <!-- PIMCON -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap preserve">
+            <img src="https://www.pimcon.org/wp-content/uploads/2025/11/logo-2026.png" alt="PIMCon"
+              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:var(--font-head);font-size:1.6rem;font-weight:900;color:#fcfaec\'>PIMCon</span>'">
+          </div>
+          <div class="card-name">PIMCon</div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'pimcon-services')">Services</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('pimcon', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+          <div class="card-panel active" id="pimcon-services">
+            <button class="offering-tile" onclick="openOffering('pimcon-title-sponsor')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Title Sponsor — $250,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('pimcon-closing-party')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Closing Party Sponsor — $50,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('pimcon-comedy-show')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Comedy Show Sponsor — $50,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('pimcon-vip-dinner')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">VIP Dinner Sponsor — $50,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('pimcon-welcome-party')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Welcome Party Sponsor — $50,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-lunch')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Lunch Sponsor — $25,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-premium-exhibitor')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Premium Exhibitor — $25,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-vip-tables')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">VIP Tables Sponsor — $20,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-recharge-station')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Work/Recharge Station — $20,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-morning-wellness')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Morning Wellness Sponsor — $17,500</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-event-app')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Event App Sponsor — $15,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-spa')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Spa Sponsor — $15,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-standard-exhibitor')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Standard Exhibitor — $15,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-commercial')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Commercial Sponsorship — $10,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-room-key')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Room Key Sponsor — $10,000</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-badge')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Badge Sponsor — $7,500</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-lanyard')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Lanyard Sponsor — $7,500</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-snack-break')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Snack/Break Sponsor — $7,500</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-wifi')">
+              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Wi-Fi Sponsor — $7,500</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="expand-toggle" onclick="toggleExpand(this)">
+              <span class="expand-label">Show 14 more</span>
+              <svg viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        
+        <div class="add-doc-bar hidden" id="pimcon-add-bar"><input class="add-doc-input" id="pimcon-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('pimcon')" /><button class="add-doc-go" id="pimcon-add-go" onclick="addDocFromBar('pimcon')">Add</button></div>
+      </div>
+      </div>
+
+      <!-- PIM MEDIA -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap preserve" style="padding:0;overflow:hidden;border-radius:6px">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/10/87/68/10876893-0fdd-8b1d-e285-db97942cb549/mza_4260014981542632776.jpeg/600x600bb.jpg"
+              alt="PIM Media" style="width:72px;height:72px;object-fit:cover;border-radius:6px;filter:none"
+              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:var(--font-head);font-size:1.2rem;font-weight:900;color:#fcfaec\'>PIM Media</span>'">
+          </div>
+          <div class="card-name">PIM Media</div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'pimmedia-services')">Services</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('pimmedia', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+          <div class="card-panel active" id="pimmedia-services">
+            <button class="offering-tile" onclick="openOffering('pimmedia-entry-4k')">
+              <div class="tile-info"><span class="tile-category">Package</span>
+              <span class="tile-name">4K/Mo — Entry</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+            <button class="offering-tile" onclick="openOffering('pimmedia-growth-6k')">
+              <div class="tile-info"><span class="tile-category">Package</span>
+              <span class="tile-name">6K/Mo — Growth</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+            <button class="offering-tile" onclick="openOffering('pimmedia-dominance-12k')">
+              <div class="tile-info"><span class="tile-category">Package</span>
+              <span class="tile-name">12K/Mo — Dominance</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          </div>
+        
+        <div class="add-doc-bar hidden" id="pimmedia-add-bar"><input class="add-doc-input" id="pimmedia-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('pimmedia')" /><button class="add-doc-go" id="pimmedia-add-go" onclick="addDocFromBar('pimmedia')">Add</button></div>
+      </div>
+      </div>
+
+      <!-- OTHER -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap">
+            <span style="font-family:var(--font-head);font-size:1rem;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;color:rgba(252,250,236,0.4)">Other</span>
+          </div>
+          <div class="card-name">Other Services</div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'other-core')">Core</button>
+          <button class="card-tab" onclick="switchTab(this,'other-alacart')">A-La-Cart</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('other', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+          <div class="card-panel active" id="other-core">
+            <div class="coming-soon"><div class="coming-soon-dot"></div><p>Core offerings coming soon</p></div>
+          </div>
+          <div class="card-panel" id="other-alacart">
+            <div class="coming-soon"><div class="coming-soon-dot"></div><p>A-la-cart offerings coming soon</p></div>
+          </div>
+        
+        <div class="add-doc-bar hidden" id="other-add-bar"><input class="add-doc-input" id="other-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('other')" /><button class="add-doc-go" id="other-add-go" onclick="addDocFromBar('other')">Add</button></div>
+      </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <span class="site-footer-left">Attorney Rankings Services Hub &nbsp;·&nbsp; Internal Use Only &nbsp;·&nbsp; Confidential</span>
+    <span class="site-footer-right">© 2026 Attorney Rankings</span>
+  </footer>
+</div>
+
+
+<!-- ============================================================
+     3. OFFERING DETAIL PAGE
+     ============================================================ -->
+<div id="offering-page">
+  <div class="site-stripe"></div>
+  <header class="site-header">
+    <div class="site-header-left">
+      <button class="back-btn" onclick="closeOffering()">
+        <svg viewBox="0 0 10 10" fill="none"><path d="M7 5H3M5 3L3 5l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="header-title-block">
+        <div class="header-kicker" id="op-kicker"><!-- filled by JS --></div>
+        <h1 class="header-title" id="op-title"><!-- filled by JS --></h1>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshOffering()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M13.5 8a5.5 5.5 0 1 1-1.1-3.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12.5,2 12.5,5 9.5,5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </button>
+      <span class="refresh-status" id="refresh-status"></span>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="offering-breadcrumb">
+    <span>Hub</span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-entity" id="op-breadcrumb-entity"></span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-cat" id="op-breadcrumb-cat"></span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-active" id="op-breadcrumb-name"></span>
+  </div>
+
+  <!-- Hero -->
+  <div class="offering-hero">
+    <div class="offering-hero-logo" id="op-logo-wrap">
+      <img id="op-logo" src="" alt="">
+    </div>
+    <div class="offering-hero-text">
+      <div class="offering-hero-kicker" id="op-hero-kicker"></div>
+      <div class="offering-hero-title" id="op-hero-title"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="offering-content" id="op-content">
+    <!-- injected by JS -->
+  </div>
+
+  <footer class="site-footer">
+    <span class="site-footer-left">Attorney Rankings Services Hub &nbsp;·&nbsp; Internal Use Only &nbsp;·&nbsp; Confidential</span>
+    <span class="site-footer-right">© 2026 Attorney Rankings</span>
+  </footer>
+</div>
+
+
+<script>
+/* ==============================================
+   OFFERING DATA
+   ============================================== */
+const LOGOS = {
+  rankings: {
+    src: 'https://rankings.io/wp-content/uploads/logo-11-20-25.png',
+    alt: 'Rankings.io',
+    preserve: false
+  },
+  gladiator: {
+    src: 'https://cdn-ilapehp.nitrocdn.com/JzcuNEOunVkUEngShcLekRVajrmSTreT/assets/images/optimized/rev-5a5341b/gladiatorlawmarketing.com/wp-content/uploads/2024/06/gladiator-law-marketing_logo.png',
+    alt: 'Gladiator Law Marketing',
+    preserve: false
+  },
+  pimcon: {
+    src: 'https://www.pimcon.org/wp-content/uploads/2025/11/logo-2026.png',
+    alt: 'PIMCon',
+    preserve: true
+  }
+};
+
+
+const check = `<span class="check-icon"><svg viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#14364d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+
+// ─── SHARED A-LA-CART CONTENT ────────────────────────────────
+const ALC_PPC = `
+  <div class="sow-section">
+    <div class="sow-section-title">Google Ads Management</div>
+    <ul class="service-list">
+      <li>${check} Google Ads Setup &amp; Optimization</li>
+      <li>${check} Dedicated Google Ads Specialist</li>
+      <li>${check} PPC Campaign Management</li>
+      <li>${check} Keyword Research &amp; Selection</li>
+      <li>${check} Landing Page Creation</li>
+      <li>${check} Ongoing Keyword Analysis &amp; Revision</li>
+      <li>${check} Ad Campaign Copywriting Enhancements</li>
+      <li>${check} Comprehensive Bid Strategy &amp; Budget Management</li>
+      <li>${check} Reporting, Analytics &amp; Lead Tracking</li>
+    </ul>
+  </div>
+  <div class="sow-section">
+    <div class="sow-section-title">Ad Spend Tiers</div>
+    <table class="tier-table">
+      <thead><tr><th>Monthly Ad Spend</th><th>Management Fee</th></tr></thead>
+      <tbody>
+        <tr><td>$5,000 – $15,000</td><td>$1,500 / mo</td></tr>
+        <tr><td>$15,001 – $50,000</td><td>$3,000 / mo</td></tr>
+        <tr><td>$50,001 – $100,000</td><td>$5,000 / mo</td></tr>
+        <tr><td>$100,001+</td><td>Custom <span class="tier-badge">Contact Us</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+`;
+
+const ALC_AIC = `
+  <div class="sow-section">
+    <div class="sow-section-title">Executive Summary</div>
+    <p style="font-size:0.85rem;line-height:1.65;color:var(--dark);margin-bottom:1rem">
+      AI Citation Magnet creates proprietary data research that positions your firm as the definitive source cited by both traditional search engines and AI platforms. This strategic linkable asset generates <strong>7–10 high-authority backlinks</strong> and <strong>20–30 media citations</strong> through original research that journalists, publishers, and AI systems cannot ignore.
+    </p>
+    <p style="font-size:0.85rem;line-height:1.65;color:var(--dark)">
+      By developing data-driven insights specific to your practice areas and geographic markets, we create permanent digital assets that compound in value — earning links today while training AI models to reference your firm tomorrow.
+    </p>
+  </div>
+  <div class="sow-section">
+    <div class="sow-section-title">Deliverables</div>
+    <ul class="service-list">
+      <li>${check} Proprietary data research asset (practice-area specific)</li>
+      <li>${check} 7–10 high-authority backlink placements (DR 50+)</li>
+      <li>${check} 20–30 media citations via outreach campaign</li>
+      <li>${check} AI platform indexing &amp; citation targeting</li>
+      <li>${check} Geographic market research &amp; positioning</li>
+      <li>${check} Performance report &amp; attribution tracking</li>
+    </ul>
+  </div>
+`;
+
+const ALC_WEB = `
+  <div class="sow-section">
+    <div class="sow-section-title">Ignite Website Design — Deliverables</div>
+    <ul class="service-list">
+      <li>${check} WordPress Gutenberg Development</li>
+      <li>${check} Conversion-Optimization Design</li>
+      <li>${check} Responsive Mobile Design</li>
+      <li>${check} SEO Technical Foundation</li>
+      <li>${check} Core Web Vitals Optimization</li>
+      <li>${check} Silo Architecture</li>
+      <li>${check} Content Migration</li>
+      <li>${check} Landing Page Design</li>
+      <li>${check} Premium Plugin Integration</li>
+      <li>${check} Lead Capture Optimization</li>
+      <li>${check} 2 Rounds of Revisions</li>
+      <li>${check} Post-Launch Support (14 Days)</li>
+      <li>${check} Premium Hosting &amp; Security</li>
+    </ul>
+  </div>
+  <div class="investment-callout">
+    <span class="inv-label">Investment</span>
+    <span class="inv-amount">$18,000</span>
+  </div>
+`;
+
+const ALC_MEDIA = `
+  <div class="sow-section">
+    <div class="sow-section-title">Scope of Services</div>
+    <ul class="service-list">
+      <li>${check} Professional Photography — 50+ high-res images (attorneys, staff, office)</li>
+      <li>${check} B-Roll Footage — 10+ clips, 15–30 seconds each</li>
+      <li>${check} Client Testimonial Videos — 2–3 testimonials, 60–90 seconds each</li>
+      <li>${check} Web-optimized &amp; high-resolution format delivery</li>
+      <li>${check} Full usage rights for all marketing &amp; advertising</li>
+    </ul>
+  </div>
+  <div class="sow-section">
+    <div class="sow-section-title">Timeline</div>
+    <ul class="service-list">
+      <li>${check} Production scheduled within 30 days of contract execution</li>
+      <li>${check} Edited content delivered within 10 business days post-production</li>
+      <li>${check} One round of minor revisions included</li>
+    </ul>
+  </div>
+  <div class="investment-callout">
+    <span class="inv-label">Investment</span>
+    <span class="inv-amount">$7,500 <span style="font-size:0.85rem;font-weight:500;color:rgba(252,250,236,0.55)">one-time</span></span>
+  </div>
+`;
+
+const ALC_OTT = `
+  <div class="sow-section">
+    <div class="sow-section-title">Programmatic Advertising Services</div>
+    <ul class="service-list">
+      <li>${check} Over-the-Top (OTT) Advertising</li>
+      <li>${check} Connected TV (CTV) Advertising</li>
+      <li>${check} Geofencing Campaigns</li>
+      <li>${check} Streaming Audio Advertising</li>
+      <li>${check} Dedicated Programmatic Advertising Specialist</li>
+      <li>${check} Campaign Management &amp; Optimization</li>
+      <li>${check} Audience Research &amp; Targeting</li>
+      <li>${check} Creative Development Consultation</li>
+      <li>${check} Ongoing Performance Analysis &amp; Revision</li>
+      <li>${check} Comprehensive Budget Management</li>
+      <li>${check} Incrementality Testing</li>
+      <li>${check} Reporting, Analytics &amp; Lead Tracking</li>
+    </ul>
+  </div>
+`;
+
+// ─── TIER/SPRINT BUILDERS ─────────────────────────────────────
+function specRow(name, val) {
+  let td;
+  if (val === true)  td = `<td class="val-check">Included</td>`;
+  else if (val === false) td = `<td class="val-none">—</td>`;
+  else               td = `<td class="val-text">${val}</td>`;
+  return `<tr><td>${name}</td>${td}</tr>`;
+}
+
+function gladTierHTML(services, investment) {
+  return `
+    <div class="sow-section">
+      <div class="sow-section-title">Included Services</div>
+      <table class="spec-table">${services.map(s=>specRow(s[0],s[1])).join('')}</table>
+    </div>
+    <div class="investment-callout">
+      <span class="inv-label">Monthly Investment</span>
+      <span class="inv-amount">${investment}</span>
+    </div>`;
+}
+
+function rankTierHTML(tierNum, tierName, services, investment) {
+  return `
+    <div class="tier-label-banner">
+      <div class="tier-num">Tier ${tierNum}</div>
+      <div class="tier-name">${tierName}</div>
+    </div>
+    <div class="sow-section">
+      <div class="sow-section-title">Included Services</div>
+      <table class="spec-table">${services.map(s=>specRow(s[0],s[1])).join('')}</table>
+    </div>
+    <div class="investment-callout">
+      <span class="inv-label">Monthly Investment</span>
+      <span class="inv-amount">${investment}</span>
+    </div>`;
+}
+
+function sprintHTML(price, timeline, deliverables) {
+  const items = deliverables.map(d=>`<li><span class="sprint-bullet"></span>${d}</li>`).join('');
+  return `
+    <div class="sprint-hero">
+      <span class="sprint-price">${price}</span>
+      <span class="sprint-timeline">${timeline}</span>
+    </div>
+    <div class="sow-section">
+      <div class="sow-section-title">Deliverables</div>
+      <ul class="sprint-deliverables">${items}</ul>
+    </div>`;
+}
+
+const offerings = {
+
+  // ── GLADIATOR CORE ───────────────────────────────────────────
+  'gladiator-core-3k': {
+    entity: 'Gladiator', entityKey: 'gladiator', category: 'Core', title: '3K — Authority',
+    docId: '1_ct6v99VZTYOL-148UFFfb0DheorBEpGVfEWHV05iO8',
+    html: gladTierHTML([
+      ['SEO: Search Engine Optimization', true],
+      ['Content Marketing (English &amp; Spanish)', '3,000 words/mo'],
+      ['Local SEO + GBP Optimization &amp; Publishing', '1 GBP'],
+      ['Yelp Premium', true],
+      ['Link Building', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$3,000 / month')
+  },
+  'gladiator-core-5k': {
+    entity: 'Gladiator', entityKey: 'gladiator', category: 'Core', title: '5K — Authority',
+    docId: '1V1zAT1ZCSgt8b_7bEdZFsJy_QL10sheCO7d_1rsxAt0',
+    html: gladTierHTML([
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
+      ['Content Marketing (English &amp; Spanish)', '6,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 2 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$5,000 / month')
+  },
+  'gladiator-core-7k5': {
+    entity: 'Gladiator', entityKey: 'gladiator', category: 'Core', title: '7.5K — Authority',
+    docId: '13yhLaMsCwcsmpT9mzMnS4oqQuzpuxovjMiUe3BXYdUI',
+    html: gladTierHTML([
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
+      ['Content Marketing (English &amp; Spanish)', '9,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 3 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$7,500 / month')
+  },
+  'gladiator-core-10k': {
+    entity: 'Gladiator', entityKey: 'gladiator', category: 'Core', title: '10K — Authority',
+    docId: '1-NozDVOhZt7n2zhndk17ZemT91-M9zMienqrfVkSIdA',
+    html: gladTierHTML([
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
+      ['Content Marketing (English &amp; Spanish)', '12,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 5 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', true],
+      ['Digital PR Link Acquisition', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$10,000 / month')
+  },
+
+  // ── GLADIATOR A-LA-CART ──────────────────────────────────────
+  'gladiator-alacart-ppc':   { entity:'Gladiator', entityKey:'gladiator', category:'A-La-Cart', title:'PPC / Google Ads',
+    docId: '1tiURUyxBmR_Ofe1Qw8mLRS6TMmU0JQgzPruxfyih7JQ',       html: ALC_PPC   },
+  'gladiator-alacart-aic':   { entity:'Gladiator', entityKey:'gladiator', category:'A-La-Cart', title:'AI Citation Magnet',
+    docId: '1d6VxRnly_kJzgfh4sAMs54rxZ7T6Qivdkxtcel9bXFM',      html: ALC_AIC   },
+  'gladiator-alacart-web':   { entity:'Gladiator', entityKey:'gladiator', category:'A-La-Cart', title:'Ignite Website Design',
+    docId: '1_ZuDDyccczo-Igg4qWl1ZofcEFBxpJU-5MGLm4Wsnrc',   html: ALC_WEB   },
+  'gladiator-alacart-media': { entity:'Gladiator', entityKey:'gladiator', category:'A-La-Cart', title:'On-Site Media Capture',
+    docId: '1CVRWww8uc3K3jfw_qjM2MxfagO-VIUVff2h0Jb3iInc',   html: ALC_MEDIA },
+  'gladiator-alacart-ott':   { entity:'Gladiator', entityKey:'gladiator', category:'A-La-Cart', title:'OTT Advertising',
+    docId: '1HgYwBcTRMPQna2dQrRLuhhDBLCc3FF9VigxTIYAKY0c',         html: ALC_OTT   },
+
+  // ── RANKINGS CORE ────────────────────────────────────────────
+  'rankings-core-10k': {
+    entity: 'Rankings', entityKey: 'rankings', category: 'Core', title: 'Authority — $10K',
+    docId: '1Jfmpe5B_QiSYznhfuNKt18ZhzzECXeVT_3XWvOhZslM',
+    html: rankTierHTML(1, 'Authority', [
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
+      ['Content Marketing (English &amp; Spanish)', '12,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 3 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', 'Core'],
+      ['Digital PR Link Acquisition', false],
+      ['Local Services Ads (LSA)', true],
+    ], '$10,000 / month')
+  },
+  'rankings-core-15k': {
+    entity: 'Rankings', entityKey: 'rankings', category: 'Core', title: 'Ascend — $15K',
+    docId: '1B-kb75WI8KR2_-YN6UeFYgNjsdS9hqYG7tkPI7T1Rq8',
+    html: rankTierHTML(2, 'Ascend', [
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Authority Stack'],
+      ['Content Marketing (English &amp; Spanish)', '18,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 5 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', 'Premium'],
+      ['Digital PR Link Acquisition', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$15,000 / month')
+  },
+  'rankings-core-25k': {
+    entity: 'Rankings', entityKey: 'rankings', category: 'Core', title: 'Prestige — $25K',
+    docId: '1NUVu_JycVjVMpuQVu1TMNhTrQwBEl-nWW6dykr4VRHM',
+    html: rankTierHTML(3, 'Prestige', [
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Directory Optimizer + AI Authority Stack'],
+      ['Content Marketing (English &amp; Spanish)', '32,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 10 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', 'Elite'],
+      ['Digital PR Link Acquisition', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$25,000 / month')
+  },
+  'rankings-core-40k': {
+    entity: 'Rankings', entityKey: 'rankings', category: 'Core', title: 'Apex — $40K',
+    docId: '1B26ZUXzcuSdsPs8pP9JjMYqRsMJ7qW_bYGlYqIxgI0Q',
+    html: rankTierHTML(4, 'Apex', [
+      ['SEO: Search Engine Optimization', true],
+      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Citation Magnet + AI Directory Optimizer + AI Authority Stack'],
+      ['Content Marketing (English &amp; Spanish)', '50,000 words/mo'],
+      ['Web Maintenance', true],
+      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 20 GBPs'],
+      ['Yelp Premium', true],
+      ['Link Building', 'Pinnacle'],
+      ['Digital PR Link Acquisition', true],
+      ['Local Services Ads (LSA)', true],
+    ], '$40,000 / month')
+  },
+
+  // ── RANKINGS A-LA-CART (same SOW content as Gladiator) ───────
+  'rankings-alacart-ppc':   { entity:'Rankings', entityKey:'rankings', category:'A-La-Cart', title:'PPC / Google Ads',       html: ALC_PPC   },
+  'rankings-alacart-aic':   { entity:'Rankings', entityKey:'rankings', category:'A-La-Cart', title:'AI Citation Magnet',      html: ALC_AIC   },
+  'rankings-alacart-web':   { entity:'Rankings', entityKey:'rankings', category:'A-La-Cart', title:'Ignite Website Design',   html: ALC_WEB   },
+  'rankings-alacart-media': { entity:'Rankings', entityKey:'rankings', category:'A-La-Cart', title:'On-Site Media Capture',
+    docId: '1YIcPGM4Ky62_bEQeAwgalsXFuQN6NVs2JlqMsombgwE',   html: ALC_MEDIA },
+  'rankings-alacart-ott':   { entity:'Rankings', entityKey:'rankings', category:'A-La-Cart', title:'OTT Advertising',         html: ALC_OTT   },
+
+  // ── RANKINGS SPRINTS ─────────────────────────────────────────
+  'rankings-sprints-paid-media': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'90-Day Paid Media',
+    docId: '15m_mr1jnCin-Ikr2rhF58MuHO3opGe40d1WCwBsBwl4',
+    html: sprintHTML('$12,500', '90-Day Sprint', [
+      'Campaign build + restructure',
+      'Offer alignment',
+      'Landing page coordination',
+      'Aggressive optimization cadence',
+      'Weekly performance reporting',
+    ])
+  },
+  'rankings-sprints-website': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'Brand &amp; Website Design',
+    docId: '13k6YP84jfR655U-pLVusW4i0u0xbqzKaXwUPexFBd1Q',
+    html: sprintHTML('$35,000 – $75,000', 'Project-Based', [
+      'PI-specific conversion architecture',
+      'Messaging strategy',
+      'UX optimization',
+      'Mobile-first execution',
+      'Intake pathway engineering',
+    ])
+  },
+  'rankings-sprints-links': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'High DR Link Package',
+    docId: '1G1xp2Q9i3hIcERc-K9eroB8ms5ZTbzhYYFz15bRmOqk',
+    html: sprintHTML('$15,000', '60-Day Sprint', [
+      'Targeted DR 70+ placements',
+      'Authority-building link acquisition',
+      'Anchor strategy alignment',
+      'Competitive authority push',
+    ])
+  },
+  'rankings-sprints-intake': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'Intake Optimization Sprint',
+    docId: '1SvHd1eLsQc2KTAXx0el2uWRYwQJ6kEKqxxm396Wsz_8',
+    html: sprintHTML('$10,000', '60-Day Sprint', [
+      'Intake script overhaul',
+      'Call scoring + QA process',
+      'Objection handling optimization',
+      'Chase/follow-up cadence structure',
+      'Conversion KPI dashboard',
+    ])
+  },
+  'rankings-sprints-social': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'Legal Foundry Social',
+    docId: '1Opk11WLWrgRkOAxlqQNAlBGhOejREimodmKkh4uU2x0',
+    html: sprintHTML('$8,000', '60-Day Sprint', [
+      'Brand authority content system',
+      'Founder positioning strategy',
+      'Platform alignment',
+      'Editorial calendar',
+      'Distribution structure',
+    ])
+  },
+  'rankings-sprints-cwv': {
+    entity:'Rankings', entityKey:'rankings', category:'Sprints', title:'Technical &amp; Core Web Vitals',
+    docId: '18dQydQFH8CgsevN_-ysxYLwBivEEuR1TV60hrLyk',
+    html: sprintHTML('$12,000', '45–60 Day Sprint', [
+      'Site speed overhaul',
+      'Core Web Vitals correction',
+      'Schema expansion',
+      'Technical debt cleanup',
+    ])
+  },
+
+  // ── PIMCON SPONSORSHIPS ─────────────────────────────────────
+  'pimcon-title-sponsor': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Title Sponsor — $250,000',
+    docId: '15o8xEOhmYI9BnYpENj3BrEIn2opiIrCX17XZLJ02o5k',
+    html: `<div class="sprint-hero"><span class="sprint-price">$250,000</span><span class="sprint-timeline">1 available</span></div>
+      <div class="sow-section"><div class="sow-section-title">Inclusions</div>
+      <div class="sow-section-title" style="margin-top:1.25rem;margin-bottom:0.6rem">Premium Signage and Logo placement</div>
+      <ul class="service-list">
+        <li>${check} Main stage screens and walk-in loops</li>
+        <li>${check} DJ Booth</li>
+        <li>${check} Event Website &amp; Registration</li>
+        <li>${check} On-Site Signage and Printed Agenda Cover</li>
+      </ul></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} Branded Activation Alley</li>
+        <li>${check} Premium Booth in [Title Sponsor] Alley as a dedicated experience zone</li>
+        <li>${check} Largest, most prominent booth within the branded alley</li>
+        <li>${check} 4x In-Event Commercials</li>
+        <li>${check} Limited Category Exclusions</li>
+        <li>${check} Standard Conference Passes (# to be set later)</li>
+      </ul></div>`
+  },
+  'pimcon-closing-party': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Closing Party Sponsor — $50,000',
+    docId: '1iCVYDk9MxsYNxzCsBGjB7ZkHTjEQRze52Hr6BuX7yfQ',
+    html: `<div class="sprint-hero"><span class="sprint-price">$50,000</span><span class="sprint-timeline">1 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard Booth in the expo</li>
+        <li>${check} 1x In-Event Commercial</li>
+      </ul></div>
+      <div class="sow-section"><div class="sow-section-title">Experience Benefits</div><ul class="service-list">
+        <li>${check} "[Experience] sponsored by [brand]" naming</li>
+        <li>${check} Logo on experience-specific signage and slides</li>
+        <li>${check} Verbal recognition from the main stage</li>
+      </ul></div>
+      <div class="sow-section"><ul class="service-list"><li>${check} 5x Standard conference passes</li></ul></div>`
+  },
+  'pimcon-comedy-show': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Comedy Show Sponsor — $50,000',
+    docId: '1N64iFsSOq4IPeutFMIa0HdQ6x3rQRjRmyjeGpI2q2a4',
+    html: `<div class="sprint-hero"><span class="sprint-price">$50,000</span><span class="sprint-timeline">1 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard Booth in the expo</li>
+        <li>${check} 1x In-Event Commercial</li>
+      </ul></div>
+      <div class="sow-section"><div class="sow-section-title">Experience Benefits</div><ul class="service-list">
+        <li>${check} "[Experience] sponsored by [brand]" naming</li>
+        <li>${check} Logo on experience-specific signage and slides</li>
+        <li>${check} Verbal recognition from the main stage</li>
+      </ul></div>
+      <div class="sow-section"><ul class="service-list"><li>${check} 5x Standard conference passes</li></ul></div>`
+  },
+  'pimcon-vip-dinner': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'VIP Dinner Sponsor — $50,000',
+    docId: '1Iip5VWTwaev3lVplFMTQHUxgOLWEsPKD4BVtCrEFEM0',
+    html: `<div class="sprint-hero"><span class="sprint-price">$50,000</span><span class="sprint-timeline">1 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard Booth in the expo</li>
+        <li>${check} 1x In-Event Commercial</li>
+      </ul></div>
+      <div class="sow-section"><div class="sow-section-title">Experience Benefits</div><ul class="service-list">
+        <li>${check} "[Experience] sponsored by [brand]" naming</li>
+        <li>${check} Logo on experience-specific signage and slides</li>
+        <li>${check} Verbal recognition from the main stage</li>
+      </ul></div>
+      <div class="sow-section"><ul class="service-list"><li>${check} 5x Standard conference passes</li></ul></div>`
+  },
+  'pimcon-welcome-party': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Welcome Party Sponsor — $50,000',
+    docId: '1czohwv3p4huXoNKsKUtQswc_6C_dRvyvct6DSRcLk-4',
+    html: `<div class="sprint-hero"><span class="sprint-price">$50,000</span><span class="sprint-timeline">1 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard Booth in the expo</li>
+        <li>${check} 1x In-Event Commercial</li>
+      </ul></div>
+      <div class="sow-section"><div class="sow-section-title">Experience Benefits</div><ul class="service-list">
+        <li>${check} "[Experience] sponsored by [brand]" naming</li>
+        <li>${check} Logo on experience-specific signage and slides</li>
+        <li>${check} Verbal recognition from the main stage</li>
+      </ul></div>
+      <div class="sow-section"><ul class="service-list"><li>${check} 5x Standard conference passes</li></ul></div>`
+  },
+  'pimcon-lunch': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Lunch Sponsor — $25,000',
+    docId: '1zhsan9z_JbEfN7Rhd_tS90vVJfgBqeE9KStecMcV8r0',
+    html: `<div class="sprint-hero"><span class="sprint-price">$25,000</span><span class="sprint-timeline">1 available</span></div>`
+  },
+  'pimcon-premium-exhibitor': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Premium Exhibitor — $25,000',
+    docId: '1I9dIwklCkY7wxubl3snX84UGXYIgSLt-ML3iT-bYpTE',
+    html: `<div class="sprint-hero"><span class="sprint-price">$25,000</span><span class="sprint-timeline">8 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard booth in the expo</li>
+        <li>${check} 3x Conference Passes</li>
+        <li>${check} 1x Activation in "Title Sponsor Alley"</li>
+      </ul></div>`
+  },
+  'pimcon-vip-tables': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'VIP Tables Sponsor — $20,000',
+    docId: '1quT1QNBhJZEXImBKZDq_0wEfv8SOPy58wlzL9BohjwE',
+    html: `<div class="sprint-hero"><span class="sprint-price">$20,000</span></div>`
+  },
+  'pimcon-recharge-station': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Work/Recharge Station Sponsor — $20,000',
+    docId: '194IZxa1Yd923B13CkxBpW8i8YFMotOGMnsJW9Gc9AzM',
+    html: `<div class="sprint-hero"><span class="sprint-price">$20,000</span></div>`
+  },
+  'pimcon-morning-wellness': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Morning Wellness Sponsor — $17,500',
+    docId: '1gAMUk3MYYgSy51lvfMZ3VKYPNLbYepnMnQnyNH76-PE',
+    html: `<div class="sprint-hero"><span class="sprint-price">$17,500</span></div>`
+  },
+  'pimcon-event-app': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Event App Sponsor — $15,000',
+    docId: '1k4ZbpC8XeQ7HxIH8eu2qz5U-X6s5skzICQeyzNyLkzA',
+    html: `<div class="sprint-hero"><span class="sprint-price">$15,000</span></div>`
+  },
+  'pimcon-spa': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Spa Sponsor — $15,000',
+    docId: '1vymFo3N2ZvGpIBYbRu0kkpMmMQRGrd2Lfi5hx9WCK8E',
+    html: `<div class="sprint-hero"><span class="sprint-price">$15,000</span></div>`
+  },
+  'pimcon-standard-exhibitor': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Standard Exhibitor — $15,000',
+    docId: '1JtYPV_dJTBDJfNj2VBiJLFEuzLwkl-r6E5BBJoRURqs',
+    html: `<div class="sprint-hero"><span class="sprint-price">$15,000</span><span class="sprint-timeline">14 available</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 1x 10'x10' Standard Booth in the expo</li>
+        <li>${check} 2x Conference passes</li>
+      </ul></div>`
+  },
+  'pimcon-commercial': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Commercial Sponsorship — $10,000',
+    docId: '16YfCW9Fmxfiy6p603CiUuUqmNn-QBciFm7M9x3oYLP4',
+    html: `<div class="sprint-hero"><span class="sprint-price">$10,000</span></div>
+      <div class="sow-section"><ul class="service-list">
+        <li>${check} 30-60 second commercial featured in the main ballroom</li>
+        <li>${check} Logo placement on the PIMCON website</li>
+      </ul></div>`
+  },
+  'pimcon-room-key': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Room Key Sponsor — $10,000',
+    docId: '1knp1tOzvqU1dkV8WBq0iFQ_X0jnDAwMwzl0rmvoOeNY',
+    html: `<div class="sprint-hero"><span class="sprint-price">$10,000</span></div>`
+  },
+  'pimcon-badge': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Badge Sponsor — $7,500',
+    docId: '196JPB11IqhlTO_AtOfodeXHyuiEHodrbldGtwM0CDE4',
+    html: `<div class="sprint-hero"><span class="sprint-price">$7,500</span></div>`
+  },
+  'pimcon-lanyard': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Lanyard Sponsor — $7,500',
+    docId: '17fUsegHs_AT2Mc-peLixAGo5mzsADgAeMKMfs7D7j2E',
+    html: `<div class="sprint-hero"><span class="sprint-price">$7,500</span></div>`
+  },
+  'pimcon-snack-break': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Snack/Break Sponsor — $7,500',
+    docId: '1I852NzlLyLzYGWTacVfuCRhphgnQLY5kcD_ZwiSxI2k',
+    html: `<div class="sprint-hero"><span class="sprint-price">$7,500</span><span class="sprint-timeline">2 available</span></div>`
+  },
+  'pimcon-wifi': {
+    entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Wi-Fi Sponsor — $7,500',
+    docId: '1xLT16oBXMi5smqCQ4u7477BZlW2T6RpewoNx8aiyUsw',
+    html: `<div class="sprint-hero"><span class="sprint-price">$7,500</span></div>`
+  },
+
+  // ── PIM MEDIA PACKAGES ──────────────────────────────────────
+  'pimmedia-entry-4k': {
+    entity: 'PIM Media', entityKey: 'pimmedia', category: 'Package', title: '4K/Mo — Entry',
+    docId: '1xygn9vA2MHVzmeT7OHpNIIzshcDW-gf1IjC8ypYTzpI',
+    html: '<p class="loading-doc">Loading from Google Docs…</p>'
+  },
+  'pimmedia-growth-6k': {
+    entity: 'PIM Media', entityKey: 'pimmedia', category: 'Package', title: '6K/Mo — Growth',
+    docId: '11P1rOX0xi_Wrr26qtCm3Cj-438j9xiVxd6MCgmciW3k',
+    html: '<p class="loading-doc">Loading from Google Docs…</p>'
+  },
+  'pimmedia-dominance-12k': {
+    entity: 'PIM Media', entityKey: 'pimmedia', category: 'Package', title: '12K/Mo — Dominance',
+    docId: '1qstuDgMXnCXjG3vkmvlMqhqF53aqYhUUXygqfbLpb7Y',
+    html: '<p class="loading-doc">Loading from Google Docs…</p>'
+  },
+
+};
+
+/* ==============================================
+   PASSWORD
+   ============================================== */
+const PASS = '1234';
+
+function checkPassword() {
+  const input = document.getElementById('pw-input');
+  const error = document.getElementById('pw-error');
+  if (input.value === PASS) {
+    document.getElementById('pw-screen').style.display = 'none';
+    const hub = document.getElementById('hub');
+    hub.style.display = 'block';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      hub.classList.add('visible');
+      document.querySelectorAll('.card').forEach((card, i) => {
+        setTimeout(() => card.classList.add('in'), 80 + i * 80);
+      });
+    }));
+  } else {
+    input.classList.add('error');
+    error.classList.add('show');
+    input.value = '';
+    setTimeout(() => { input.classList.remove('error'); error.classList.remove('show'); }, 2000);
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+/* ==============================================
+   HUB TABS
+   ============================================== */
+function toggleExpand(btn) {
+  const panel = btn.closest('.card-panel');
+  const isExpanded = panel.classList.toggle('expanded');
+  const label = btn.querySelector('.expand-label');
+  const hiddenCount = panel.querySelectorAll('.collapsed-tile').length;
+  label.textContent = isExpanded ? 'Show less' : 'Show ' + hiddenCount + ' more';
+}
+
+function switchTab(btn, panelId) {
+  const tabBar = btn.closest('.card-tabs');
+  tabBar.querySelectorAll('.card-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const card = btn.closest('.card');
+  card.querySelectorAll('.card-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+/* ==============================================
+   OFFERING NAVIGATION
+   ============================================== */
+let currentOfferingId = null;
+
+  function openOffering(id) {
+    currentOfferingId = id;
+  const o = offerings[id];
+  if (!o) return;
+
+  const logo = LOGOS[o.entityKey];
+
+  // Populate header
+  document.getElementById('op-kicker').textContent = o.entity + ' — ' + o.category;
+  document.getElementById('op-title').textContent = o.title;
+
+  // Breadcrumb
+  document.getElementById('op-breadcrumb-entity').textContent = o.entity;
+  document.getElementById('op-breadcrumb-cat').textContent = o.category;
+  document.getElementById('op-breadcrumb-name').textContent = o.title;
+
+  // Hero
+  document.getElementById('op-hero-kicker').textContent = o.entity + ' · ' + o.category;
+  document.getElementById('op-hero-title').textContent = o.title;
+
+  const logoWrap = document.getElementById('op-logo-wrap');
+  const logoImg = document.getElementById('op-logo');
+  if (logo) {
+    logoImg.src = logo.src;
+    logoImg.alt = logo.alt;
+    logoWrap.classList.toggle('preserve', logo.preserve);
+  } else {
+    logoWrap.style.display = 'none';
+  }
+
+  // Content
+  document.getElementById('op-content').innerHTML = o.html;
+
+  // Show offering page
+  document.getElementById('hub').style.display = 'none';
+  const op = document.getElementById('offering-page');
+  op.classList.add('visible');
+  window.scrollTo(0, 0);
+}
+
+
+  /* ═══════════════════════════════════════════════
+     ADD-FROM-DRIVE SYSTEM
+     ═══════════════════════════════════════════════ */
+
+  let _addModalEntity = null;
+
+  // Panels that exist per entity (auto-creates tabs if needed)
+  const ENTITY_PANELS = {
+    rankings:  ['rankings-core','rankings-alacart','rankings-sprints'],
+    gladiator: ['gladiator-core','gladiator-alacart'],
+    pimcon:    ['pimcon-services'],
+    pimmedia:  ['pimmedia-services'],
+    other:     ['other-core','other-alacart'],
+  };
+
+  function _openAddModal(entityKey) {
+    _addModalEntity = entityKey;
+    document.getElementById('add-doc-url').value = '';
+    document.getElementById('add-tile-name').value = '';
+    document.getElementById('add-tab-select').value = '';
+    document.getElementById('add-modal-error').style.display = 'none';
+    document.getElementById('add-modal-submit').disabled = false;
+    document.getElementById('add-modal-submit').textContent = 'Add Offering';
+    document.getElementById('add-modal').classList.add('open');
+    setTimeout(() => document.getElementById('add-doc-url').focus(), 80);
+  }
+
+  function _closeAddModal() {
+    document.getElementById('add-modal').classList.remove('open');
+    _addModalEntity = null;
+  }
+
+  function extractDocId(url) {
+    const m = url.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+
+  async function _submitAddModal() {
+    const url   = document.getElementById('add-doc-url').value.trim();
+    const name  = document.getElementById('add-tile-name').value.trim();
+    const tab   = document.getElementById('add-tab-select').value || 'core';
+    const errEl = document.getElementById('add-modal-error');
+    const btn   = document.getElementById('add-modal-submit');
+
+    errEl.style.display = 'none';
+    if (!url) { showAddError('Please enter a Google Doc URL.'); return; }
+
+    const docId = extractDocId(url);
+    if (!docId) { showAddError('Could not extract a document ID from that URL.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Fetching…';
+
+    let text = '';
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + docId + '/export?format=txt');
+      const resp = await fetch(proxyUrl);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      text = await resp.text();
+    } catch(e) {
+      showAddError('Could not fetch the document. Make sure it\'s set to "Anyone with the link."');
+      btn.disabled = false; btn.textContent = 'Add Offering';
+      return;
+    }
+
+    // Auto-detect title from first non-empty line
+    const firstLine = text.split('\n').map(l => l.trim()).find(l => l.length > 2) || 'Untitled Offering';
+    const tileName = name || firstLine.replace(/^\W+/,'').slice(0, 60);
+
+    const id = `custom-${_addModalEntity}-${tab}-${docId.slice(0,8)}`;
+
+    // Create the offering entry
+    const offering = {
+      entity: _addModalEntity,
+      entityKey: _addModalEntity,
+      category: tab.charAt(0).toUpperCase() + tab.slice(1).replace('-',' '),
+      title: tileName,
+      docId: docId,
+      html: renderDocText(text),
+      custom: true,
+    };
+
+    // Add to live offerings map
+    offerings[id] = offering;
+
+    // Inject tile into correct panel
+    const panelId = `${_addModalEntity}-${tab}`;
+    injectCustomTile(id, panelId, tileName);
+
+    // Persist to localStorage
+    saveCustomTile(_addModalEntity, { id, panelId, tileName, docId, category: offering.category });
+
+    closeAddModal();
+  }
+
+  function showAddError(msg) {
+    const el = document.getElementById('add-modal-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function injectCustomTile(offeringId, panelId, tileName) {
+    let panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // Remove coming-soon placeholder if present
+    const cs = panel.querySelector('.coming-soon');
+    if (cs) cs.remove();
+
+    const btn = document.createElement('button');
+    btn.className = 'offering-tile';
+    btn.setAttribute('onclick', `openOffering('${offeringId}')`);
+    btn.innerHTML = `
+      <div class="tile-info">
+        <span class="tile-category">Custom</span>
+        <span class="tile-name">${tileName}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem">
+        <button class="custom-tile-del" title="Remove" onclick="event.stopPropagation();removeCustomTile('${offeringId}','${panelId}',this.closest('.offering-tile'))">✕</button>
+        <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>`;
+    panel.appendChild(btn);
+  }
+
+  function removeCustomTile(offeringId, panelId, tileEl) {
+    if (!confirm('Remove this tile?')) return;
+    tileEl.remove();
+    delete offerings[offeringId];
+
+    // Remove from localStorage
+    const stored = JSON.parse(localStorage.getItem('custom_tiles') || '[]');
+    localStorage.setItem('custom_tiles', JSON.stringify(stored.filter(t => t.id !== offeringId)));
+
+    // Restore coming-soon if panel is now empty
+    const panel = document.getElementById(panelId);
+    if (panel && !panel.querySelector('.offering-tile')) {
+      panel.innerHTML = '<div class="coming-soon"><div class="coming-soon-dot"></div><p>No offerings yet — click + to add from Drive</p></div>';
+    }
+  }
+
+  function saveCustomTile(entityKey, tileData) {
+    const stored = JSON.parse(localStorage.getItem('custom_tiles') || '[]');
+    if (!stored.find(t => t.id === tileData.id)) {
+      stored.push(tileData);
+      localStorage.setItem('custom_tiles', JSON.stringify(stored));
+    }
+  }
+
+  async function loadCustomTiles() {
+    const stored = JSON.parse(localStorage.getItem('custom_tiles') || '[]');
+    for (const t of stored) {
+      if (offerings[t.id]) continue; // already built-in
+      try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + t.docId + '/export?format=txt');
+        const resp = await fetch(proxyUrl);
+        const text = resp.ok ? await resp.text() : '';
+        offerings[t.id] = {
+          entity: t.panelId.split('-')[0],
+          entityKey: t.panelId.split('-')[0],
+          category: t.category,
+          title: t.tileName,
+          docId: t.docId,
+          html: text ? renderDocText(text) : '<p style="color:rgba(20,54,77,0.4);font-size:0.85rem">Could not load content.</p>',
+          custom: true,
+        };
+      } catch(_) {}
+      injectCustomTile(t.id, t.panelId, t.tileName);
+    }
+  }
+
+  
+  
+  
+  /* ─── Per-card add/refresh system ─── */
+
+  function extractDocId(url) {
+    const m = url.match(/\/document\/d\/([a-zA-Z0-9_-]{20,})/);
+    return m ? m[1] : null;
+  }
+
+  async function refreshCard(entityKey, btnEl) {
+    btnEl.classList.add('loading');
+
+    // Toggle inline add bar
+    const bar = document.getElementById(entityKey + '-add-bar');
+    if (bar) {
+      bar.classList.toggle('hidden');
+      if (!bar.classList.contains('hidden')) {
+        const input = document.getElementById(entityKey + '-add-input');
+        if (input) setTimeout(() => input.focus(), 60);
+      }
+    }
+
+    // Re-fetch all existing custom tiles for this card from Drive
+    const stored = JSON.parse(localStorage.getItem('custom_tiles') || '[]');
+    const mine = stored.filter(t => t.id.startsWith('custom-' + entityKey));
+    let updated = 0;
+
+    await Promise.all(mine.map(async t => {
+      if (!t.docId || !offerings[t.id]) return;
+      try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + t.docId + '/export?format=txt');
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) return;
+        offerings[t.id].html = renderDocText(await resp.text());
+        updated++;
+      } catch(_) {}
+    }));
+
+    btnEl.classList.remove('loading');
+    if (updated > 0) {
+      btnEl.style.color = 'var(--lime)';
+      setTimeout(() => { btnEl.style.color = ''; }, 1200);
+    }
+  }
+
+  async function addDocFromBar(entityKey) {
+    const input  = document.getElementById(entityKey + '-add-input');
+    const goBtn  = document.getElementById(entityKey + '-add-go');
+    const url    = input ? input.value.trim() : '';
+    if (!url) return;
+
+    const docId = extractDocId(url);
+    if (!docId) { input.style.borderColor = '#f87171'; setTimeout(() => { input.style.borderColor = ''; }, 1500); return; }
+
+    if (goBtn) { goBtn.disabled = true; goBtn.textContent = '…'; }
+
+    // Determine active panel
+    const activePanelEl = [...document.querySelectorAll('[id^="' + entityKey + '-"].card-panel.active')][0];
+    const panelId = activePanelEl ? activePanelEl.id : (entityKey + '-core');
+
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + docId + '/export?format=txt');
+      const resp = await fetch(proxyUrl);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      const title = text.split('\n').map(l => l.trim()).find(l => l.length > 2) || 'Untitled';
+      const id = 'custom-' + entityKey + '-' + docId.slice(0, 12);
+
+      offerings[id] = {
+        entity: entityKey, entityKey,
+        category: panelId.replace(entityKey + '-', '').replace('-', ' '),
+        title, docId,
+        html: renderDocText(text),
+        custom: true,
+      };
+
+      injectCustomTile(id, panelId, title);
+      saveCustomTile(entityKey, { id, panelId, tileName: title, docId, category: offerings[id].category });
+
+      input.value = '';
+      // Close bar after successful add
+      const bar = document.getElementById(entityKey + '-add-bar');
+      if (bar) bar.classList.add('hidden');
+    } catch(e) {
+      input.style.borderColor = '#f87171';
+      setTimeout(() => { input.style.borderColor = ''; }, 1500);
+    }
+
+    if (goBtn) { goBtn.disabled = false; goBtn.textContent = 'Add'; }
+  }
+
+
+  async function refreshOffering() {
+  const o = offerings[currentOfferingId];
+  if (!o || !o.docId) { alert('No Drive doc linked to this offering.'); return; }
+  const btn = document.getElementById('refresh-btn');
+  const status = document.getElementById('refresh-status');
+  btn.classList.add('loading');
+  status.textContent = 'Fetching\u2026';
+  try {
+    const docUrl = encodeURIComponent('https://docs.google.com/document/d/' + o.docId + '/export?format=txt');
+    const resp = await fetch('https://api.allorigins.win/raw?url=' + docUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    document.getElementById('op-content').innerHTML = renderDocText(text);
+    const now = new Date();
+    status.textContent = 'Synced ' + now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    status.textContent = 'Sync failed — try again';
+  }
+  btn.classList.remove('loading');
+}
+
+function renderDocText(raw) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let out = '';
+  let tableRows = [];
+
+  function flushTable() {
+    if (!tableRows.length) return;
+    out += '<div class="sow-section"><table class="spec-table">';
+    tableRows.forEach(row => {
+      const cells = row.split('\t').map(c => c.trim()).filter(c => c);
+      if (cells.length >= 2) {
+        const val = cells[1];
+        let cls = 'val-text', display = val;
+        if (val === '✔' || val === '\u2714') { cls = 'val-check'; display = 'Included'; }
+        else if (['\u{11063}','-','\u2014','–'].includes(val)) { cls = 'val-none'; display = '—'; }
+        out += `<tr><td>${cells[0]}</td><td class="${cls}">${display}</td></tr>`;
+      }
+    });
+    out += '</table></div>';
+    tableRows = [];
+  }
+
+  lines.forEach(line => {
+    if (line.startsWith('* ') || line.startsWith('\u2022 ')) {
+      flushTable();
+      out += `<div style="display:flex;gap:0.6rem;align-items:flex-start;margin-bottom:0.4rem;font-size:0.85rem"><span class="sprint-bullet" style="margin-top:0.5rem"></span>${line.replace(/^[*\u2022]\s*/,'')}</div>`;
+    } else if (line.includes('\t')) {
+      tableRows.push(line);
+    } else if (line.match(/^\$[\d,]/) ) {
+      flushTable();
+      const dash = line.indexOf('\u2014') > -1 ? '\u2014' : (line.indexOf('\u2013') > -1 ? '\u2013' : '\u2014');
+      const parts = line.split(dash);
+      out += `<div class="sprint-hero"><span class="sprint-price">${parts[0].trim()}</span><span class="sprint-timeline">${(parts[1]||'').trim()}</span></div>`;
+    } else if (line === line.toUpperCase() && line.length > 3 && !line.match(/^\$/)) {
+      flushTable();
+      out += `<div class="sow-section-title" style="margin-top:1.25rem;margin-bottom:0.6rem">${line}</div>`;
+    } else {
+      flushTable();
+      out += `<p style="font-size:0.85rem;line-height:1.6;color:var(--dark);margin-bottom:0.6rem">${line}</p>`;
+    }
+  });
+  flushTable();
+  return out || '<p style="color:rgba(20,54,77,0.4);font-size:0.85rem">Nothing returned from Drive.</p>';
+}
+
+function closeOffering() {
+  document.getElementById('offering-page').classList.remove('visible');
+  const hub = document.getElementById('hub');
+  hub.style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+async function loadDocOfferings() {
+  const docOfferings = Object.entries(offerings).filter(([k, v]) => v.docId && v.html && v.html.includes('Loading from Google Docs'));
+  for (let i = 0; i < docOfferings.length; i++) {
+    const [key, o] = docOfferings[i];
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + o.docId + '/export?format=txt');
+      const resp = await fetch(proxyUrl);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      offerings[key].html = renderDocText(await resp.text());
+    } catch(e) {
+      // Retry once after a short delay
+      try {
+        await new Promise(r => setTimeout(r, 1000));
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/' + o.docId + '/export?format=txt');
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        offerings[key].html = renderDocText(await resp.text());
+      } catch(e2) {
+        offerings[key].html = '<p style="color:#f87171;padding:1rem;">Could not load document. Make sure it\'s shared as "Anyone with the link."</p>';
+      }
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadCustomTiles(); loadDocOfferings(); });
+</script>
+
+
+<!-- Add-from-Drive modal -->
+<div id="add-modal-disabled" style="display:none!important" onclick="if(event.target===this)closeAddModal()">
+  <div class="add-modal-box">
+    <div class="add-modal-title">Add from Google Drive</div>
+    <div class="add-modal-sub">Paste a Google Doc URL. The document must be set to "Anyone with the link" can view.</div>
+    <label class="add-modal-label">Google Doc URL</label>
+    <input class="add-modal-input" id="add-doc-url" type="text" placeholder="https://docs.google.com/document/d/..." />
+    <label class="add-modal-label" style="margin-top:0.75rem">Tile name (optional — auto-detected from doc)</label>
+    <input class="add-modal-input" id="add-tile-name" type="text" placeholder="e.g. Conference Sponsorship" />
+    <div class="add-modal-row">
+      <div style="flex:1">
+        <label class="add-modal-label">Tab</label>
+        <select id="add-tab-select">
+          <option value="">— auto —</option>
+          <option value="core">Core</option>
+          <option value="alacart">A-La-Cart</option>
+          <option value="sprints">Sprints</option>
+        </select>
+      </div>
+    </div>
+    <div class="add-modal-error" id="add-modal-error"></div>
+    <div class="add-modal-btns">
+      <button class="add-modal-submit" id="add-modal-submit" onclick="submitAddModal()">Add Offering</button>
+      <button class="add-modal-cancel" onclick="closeAddModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
