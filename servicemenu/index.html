@@ -759,19 +759,15 @@ button { cursor: pointer; font-family: inherit; }
         <div class="card-body">
                     <div class="card-panel active" id="gladiator-core">
             <button class="offering-tile" onclick="openOffering('gladiator-core-3k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K — Authority</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Maintenance</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('gladiator-core-5k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K — Authority</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Base</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('gladiator-core-7k5')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K — Authority</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-core-10k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K — Authority</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Accelerator</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
           </div>
@@ -1228,7 +1224,7 @@ const offerings = {
 
   // ── GLADIATOR CORE ───────────────────────────────────────────
   'gladiator-core-3k': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '3K — Authority',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '3K/Mo — Maintenance',
     docId: '1_ct6v99VZTYOL-148UFFfb0DheorBEpGVfEWHV05iO8',
     html: gladTierHTML([
       ['SEO: Search Engine Optimization', true],
@@ -1240,7 +1236,7 @@ const offerings = {
     ], '$3,000 / month')
   },
   'gladiator-core-5k': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '5K — Authority',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '5K/Mo — Base',
     docId: '1V1zAT1ZCSgt8b_7bEdZFsJy_QL10sheCO7d_1rsxAt0',
     html: gladTierHTML([
       ['SEO: Search Engine Optimization', true],
@@ -1254,7 +1250,7 @@ const offerings = {
     ], '$5,000 / month')
   },
   'gladiator-core-7k5': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '7.5K — Authority',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '7.5K/Mo — Accelerator',
     docId: '13yhLaMsCwcsmpT9mzMnS4oqQuzpuxovjMiUe3BXYdUI',
     html: gladTierHTML([
       ['SEO: Search Engine Optimization', true],
@@ -1267,22 +1263,6 @@ const offerings = {
       ['Local Services Ads (LSA)', true],
     ], '$7,500 / month')
   },
-  'gladiator-core-10k': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '10K — Authority',
-    docId: '1-NozDVOhZt7n2zhndk17ZemT91-M9zMienqrfVkSIdA',
-    html: gladTierHTML([
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
-      ['Content Marketing (English &amp; Spanish)', '12,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 5 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', true],
-      ['Digital PR Link Acquisition', true],
-      ['Local Services Ads (LSA)', true],
-    ], '$10,000 / month')
-  },
-
   // ── GLADIATOR A-LA-CART ──────────────────────────────────────
   'gladiator-alacart-ppc':   { entity:'Law Firm', entityKey:'gladiator', category:'A-La-Cart', title:'PPC / Google Ads',
     docId: '1tiURUyxBmR_Ofe1Qw8mLRS6TMmU0JQgzPruxfyih7JQ',       html: ALC_PPC   },
