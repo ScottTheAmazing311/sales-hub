@@ -99,8 +99,8 @@
         /* ── Chart grid ── */
         .chart-grid { display: grid; grid-template-columns: 4fr 3fr; gap: 1rem; margin-bottom: 1.5rem; }
         .chart-full { margin-bottom: 1.5rem; }
-        .chart-wrap { position: relative; width: 100%; }
-        .chart-wrap canvas { width: 100% !important; }
+        .chart-wrap { position: relative; width: 100%; height: 300px; }
+        .chart-wrap canvas { display: block; }
 
         /* ── Table inside card ── */
         .dtable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -318,77 +318,93 @@
 
         el.innerHTML = html;
 
-        // ── Build charts ──
-        // Rep ARR chart
-        var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
-        var repNames = [], repJan = [], repFeb = [];
-        repRows.forEach(function(r) {
-            repNames.push(gv(r, 0));
-            repJan.push(gv(r, 1) || 0);
-            repFeb.push(gv(r, 2) || 0);
-        });
-        new Chart(document.getElementById('chart-rep-arr'), {
-            type: 'bar',
-            data: {
-                labels: repNames,
-                datasets: [
-                    { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                    { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
-                    tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
-                },
-                scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
-            }
-        });
+        // ── Build charts after DOM update ──
+        setTimeout(function() {
+            try {
+                // Rep ARR chart
+                var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
+                var repNames = [], repJan = [], repFeb = [];
+                repRows.forEach(function(r) {
+                    repNames.push(gv(r, 0));
+                    repJan.push(gv(r, 1) || 0);
+                    repFeb.push(gv(r, 2) || 0);
+                });
+                console.log('Rep chart data:', repNames, repJan, repFeb);
+                var repCanvas = document.getElementById('chart-rep-arr');
+                console.log('Rep canvas found:', !!repCanvas, 'size:', repCanvas && repCanvas.parentElement.offsetWidth, repCanvas && repCanvas.parentElement.offsetHeight);
+                new Chart(repCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: repNames,
+                        datasets: [
+                            { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                            { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+                            tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
+                    }
+                });
+            } catch(e) { console.error('Rep ARR chart error:', e); }
 
-        // Outbound chart
-        var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
-        var outLabels = [], outJan = [], outFeb = [];
-        outRows.forEach(function(r) {
-            var name = gv(r, 0);
-            if (name.trim() === 'Closed Won ARR') return; // skip money metric, different scale
-            outLabels.push(name);
-            outJan.push(gv(r, 1) || 0);
-            outFeb.push(gv(r, 2) || 0);
-        });
-        new Chart(document.getElementById('chart-outbound'), {
-            type: 'bar',
-            data: {
-                labels: outLabels,
-                datasets: [
-                    { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                    { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
+            try {
+                // Outbound chart
+                var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+                var outLabels = [], outJan = [], outFeb = [];
+                outRows.forEach(function(r) {
+                    var name = gv(r, 0);
+                    if (name.trim() === 'Closed Won ARR') return;
+                    outLabels.push(name);
+                    outJan.push(gv(r, 1) || 0);
+                    outFeb.push(gv(r, 2) || 0);
+                });
+                console.log('Outbound chart data:', outLabels, outJan, outFeb);
+                var outCanvas = document.getElementById('chart-outbound');
+                console.log('Outbound canvas found:', !!outCanvas, 'size:', outCanvas && outCanvas.parentElement.offsetWidth, outCanvas && outCanvas.parentElement.offsetHeight);
+                new Chart(outCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: outLabels,
+                        datasets: [
+                            { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                            { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                        scales: { x: { beginAtZero: true } }
+                    }
+                });
+            } catch(e) { console.error('Outbound chart error:', e); }
 
-        // Pipeline doughnut
-        var pipeNames = [], pipeDeals = [];
-        pipeRows.forEach(function(r) {
-            var d = gv(r, 2) || 0;
-            if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
-        });
-        new Chart(document.getElementById('chart-pipeline'), {
-            type: 'doughnut',
-            data: {
-                labels: pipeNames,
-                datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
-            },
-            options: {
-                responsive: true, cutout: '60%',
-                plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
-            }
-        });
+            try {
+                // Pipeline doughnut
+                var pipeNames = [], pipeDeals = [];
+                pipeRows.forEach(function(r) {
+                    var d = gv(r, 2) || 0;
+                    if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
+                });
+                new Chart(document.getElementById('chart-pipeline'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: pipeNames,
+                        datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '60%',
+                        plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+                    }
+                });
+            } catch(e) { console.error('Pipeline chart error:', e); }
+        }, 50);
     }
 
     // ═══════════════════════════════════════════════

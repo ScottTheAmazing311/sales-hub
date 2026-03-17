@@ -4,12 +4,7 @@
 
     if (sessionStorage.getItem(SESSION_KEY) === 'true') return;
 
-    document.documentElement.style.visibility = 'hidden';
-
     document.addEventListener('DOMContentLoaded', function() {
-        document.body.style.visibility = 'visible';
-        document.documentElement.style.visibility = 'visible';
-
         var overlay = document.createElement('div');
         overlay.id = 'auth-overlay';
         overlay.innerHTML = '\
@@ -32,7 +27,6 @@
                 display: flex; align-items: center; justify-content: center;\
                 font-family: "IBM Plex Sans", sans-serif;\
             }\
-            #auth-overlay * { visibility: visible; }\
             #auth-box {\
                 background: #fefaed; border-radius: 12px; padding: 48px 40px;\
                 text-align: center; width: 360px; max-width: 90vw;\
@@ -67,9 +61,6 @@
         ';
 
         document.head.appendChild(style);
-
-        var originalContent = document.body.innerHTML;
-        document.body.innerHTML = '';
         document.body.appendChild(overlay);
 
         document.getElementById('auth-form').addEventListener('submit', function(e) {
@@ -77,7 +68,7 @@
             var input = document.getElementById('auth-password').value;
             if (input === PASSWORD) {
                 sessionStorage.setItem(SESSION_KEY, 'true');
-                document.body.innerHTML = originalContent;
+                overlay.remove();
                 style.remove();
             } else {
                 document.getElementById('auth-error').textContent = 'Incorrect password';
