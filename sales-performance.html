@@ -4,391 +4,565 @@
     <script src="auth.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Performance Report — Revenue Kitchen</title>
+    <title>Performance Dashboard — Revenue Kitchen</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --navy: #07374F;
-            --navy-light: #0e5f87;
-            --yellow: #eaff6a;
-            --yellow-warm: #eedc82;
-            --cream: #fefaed;
             --bg: #f4f0e6;
-            --text: #2c2c2c;
-            --text-muted: #6b6b6b;
+            --card: #ffffff;
+            --card-border: #e5e5e5;
+            --foreground: #0a0a0a;
+            --muted: #f5f5f5;
+            --muted-fg: #737373;
+            --primary: #07374F;
+            --primary-fg: #fafafa;
+            --accent: #eaff6a;
+            --accent-warm: #eedc82;
+            --destructive: #c0392b;
+            --success: #22c55e;
+            --blue: #3c94d1;
             --radius: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
         }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--foreground); line-height: 1.5; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
+        /* ── Top bar ── */
+        .topbar {
+            background: var(--primary);
+            padding: 0.75rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .stripe { height: 5px; background: var(--yellow-warm); }
-
-        .back-bar {
-            background: var(--navy);
-            padding: 1rem 2rem;
-        }
-        .back-link {
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .topbar a {
+            color: rgba(255,255,255,0.5); text-decoration: none;
+            font-size: 0.8rem; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 6px;
             transition: color 0.2s;
         }
-        .back-link:hover { color: #fff; }
+        .topbar a:hover { color: #fff; }
+        .live-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.35);
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .report-wrapper {
-            max-width: 960px;
-            margin: 2rem auto;
-            padding: 0 2rem 3rem;
-        }
+        /* ── Dashboard container ── */
+        .dash { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
 
-        .report-header {
-            background: var(--navy);
-            border-radius: var(--radius) var(--radius) 0 0;
-            padding: 2rem 2.5rem;
-            color: #fff;
-        }
-        .report-header h1 {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--yellow);
-            margin-bottom: 4px;
-        }
-        .report-header p {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.6);
-        }
+        .dash-header { margin-bottom: 1.5rem; }
+        .dash-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--foreground); }
+        .dash-header p { font-size: 0.85rem; color: var(--muted-fg); margin-top: 2px; }
 
-        .report-body {
-            background: var(--cream);
-            border-radius: 0 0 var(--radius) var(--radius);
-            padding: 2rem 2.5rem 2.5rem;
+        /* ── Tabs ── */
+        .tabs {
+            display: inline-flex; border: 1px solid var(--card-border);
+            border-radius: 8px; background: var(--muted); padding: 3px; margin-bottom: 1.5rem;
         }
+        .tab-btn {
+            padding: 0.45rem 1rem; border: none; background: none;
+            font-family: inherit; font-size: 0.8rem; font-weight: 500;
+            color: var(--muted-fg); border-radius: 6px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tab-btn:hover { color: var(--foreground); }
+        .tab-btn.active { background: var(--card); color: var(--foreground); box-shadow: var(--shadow); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
 
-        .report-section-title {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--navy);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--yellow);
+        /* ── Card ── */
+        .card {
+            background: var(--card); border: 1px solid var(--card-border);
+            border-radius: var(--radius); box-shadow: var(--shadow);
         }
+        .card-header { padding: 1.25rem 1.5rem 0; }
+        .card-header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+        .card-title { font-size: 0.85rem; font-weight: 600; color: var(--foreground); }
+        .card-desc { font-size: 0.78rem; color: var(--muted-fg); margin-top: 2px; }
+        .card-icon { color: var(--muted-fg); }
+        .card-icon svg { width: 16px; height: 16px; }
+        .card-content { padding: 1rem 1.5rem 1.5rem; }
 
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .kpi-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 1.25rem 1rem;
-            text-align: center;
-            border: 1px solid rgba(7,55,79,0.08);
-        }
-        .kpi-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-        .kpi-value {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--navy);
-        }
-        .kpi-sub {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        .kpi-change-up { color: #27ae60; font-weight: 600; }
-        .kpi-change-down { color: #c0392b; font-weight: 600; }
+        /* ── Stat cards ── */
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--foreground); line-height: 1.2; margin-top: 0.25rem; }
+        .stat-change { font-size: 0.75rem; color: var(--muted-fg); margin-top: 2px; }
+        .stat-change .up { color: var(--success); font-weight: 600; }
+        .stat-change .down { color: var(--destructive); font-weight: 600; }
 
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        .report-table thead th {
-            background: var(--navy);
-            color: var(--yellow);
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.75rem 1rem;
-            text-align: left;
-        }
-        .report-table thead th:first-child { border-radius: 6px 0 0 0; }
-        .report-table thead th:last-child { border-radius: 0 6px 0 0; }
-        .report-table tbody td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid rgba(7,55,79,0.08);
-            color: var(--text);
-        }
-        .report-table tbody tr:last-child td { border-bottom: none; }
-        .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
-        .report-table .col-money {
-            font-family: 'IBM Plex Mono', monospace;
-            font-weight: 600;
-            color: var(--navy);
-        }
-        .report-table .col-num {
-            font-family: 'IBM Plex Mono', monospace;
-            text-align: center;
-        }
-        .report-table .row-total td {
-            font-weight: 700;
-            border-top: 2px solid var(--navy);
-            background: rgba(234,255,106,0.15);
-        }
+        /* ── Chart grid ── */
+        .chart-grid { display: grid; grid-template-columns: 4fr 3fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .chart-full { margin-bottom: 1.5rem; }
+        .chart-wrap { position: relative; width: 100%; }
+        .chart-wrap canvas { width: 100% !important; }
 
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
+        /* ── Table inside card ── */
+        .dtable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .dtable thead th {
+            text-align: left; font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--muted-fg); padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--card-border);
         }
+        .dtable tbody td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f0f0f0; }
+        .dtable tbody tr:last-child td { border-bottom: none; }
+        .dtable .mono { font-variant-numeric: tabular-nums; font-weight: 600; }
+        .dtable .muted { color: var(--muted-fg); }
+        .dtable .total-row td { font-weight: 700; border-top: 2px solid var(--primary); background: rgba(234,255,106,0.08); }
 
+        /* ── Loading ── */
+        .loading { text-align: center; padding: 4rem; color: var(--muted-fg); font-size: 0.85rem; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 600px) {
-            .report-wrapper { padding: 0 1rem 2rem; }
-            .report-header, .report-body { padding: 1.25rem 1rem; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; }
-            .report-table { font-size: 0.8rem; }
-            .report-table thead th, .report-table tbody td { padding: 0.6rem 0.6rem; }
+            .dash { padding: 1rem; }
+            .stat-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+            .stat-value { font-size: 1.3rem; }
+            .card-content { padding: 0.75rem 1rem 1rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="stripe"></div>
-<div class="back-bar">
-    <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+<div class="topbar">
+    <a href="index.html">&larr; Revenue Kitchen</a>
+    <span class="live-badge"><span class="live-dot"></span> Live from Google Sheets</span>
 </div>
 
-<div class="report-wrapper">
-    <div class="report-header">
-        <h1>Sales Performance Report</h1>
-        <p>January – February 2025 &nbsp;|&nbsp; Rankings.io Revenue Kitchen</p>
+<div class="dash">
+    <div class="dash-header">
+        <h1>Performance Dashboard</h1>
+        <p>January &ndash; February 2025 &nbsp;&middot;&nbsp; Rankings.io</p>
     </div>
-    <div class="report-body">
 
-        <!-- KPI Overview -->
-        <div class="report-section-title">Key Metrics</div>
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-label">Total ARR</div>
-                <div class="kpi-value">$839K</div>
-                <div class="kpi-sub"><span class="kpi-change-down">↓ 19.3%</span> from Jan ($1.04M)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Total MRR</div>
-                <div class="kpi-value">$69.9K</div>
-                <div class="kpi-sub"><span class="kpi-change-down">↓ 14.9%</span> from Jan ($82.1K)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Deals Closed</div>
-                <div class="kpi-value">9</div>
-                <div class="kpi-sub"><span class="kpi-change-down">↓ 25%</span> from Jan (12)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Avg MRR / Deal</div>
-                <div class="kpi-value">$11.6K</div>
-                <div class="kpi-sub"><span class="kpi-change-up">↑ 60.7%</span> from Jan ($7.2K)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Avg ARR / Deal</div>
-                <div class="kpi-value">$138.9K</div>
-                <div class="kpi-sub"><span class="kpi-change-up">↑ 60.7%</span> from Jan ($86.4K)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Avg Sales Cycle</div>
-                <div class="kpi-value">46.9d</div>
-                <div class="kpi-sub"><span class="kpi-change-down">↑ 41.3%</span> from Jan (33.2d)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Deals Lost to Price</div>
-                <div class="kpi-value">11</div>
-                <div class="kpi-sub"><span class="kpi-change-up">↓ 35.3%</span> from Jan (17)</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Pipeline Carryover</div>
-                <div class="kpi-value">34</div>
-                <div class="kpi-sub"><span class="kpi-change-up">↑ 36%</span> from Jan (25)</div>
-            </div>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="sales">Sales</button>
+        <button class="tab-btn" data-tab="marketing">Marketing</button>
+    </div>
 
-        <!-- Rep Performance -->
-        <div class="report-section-title">Rep Performance — Closed Won ARR</div>
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>Sales Rep</th>
-                    <th>January</th>
-                    <th>February</th>
-                    <th>Change</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Mike Budny</td>
-                    <td class="col-money">$450,000</td>
-                    <td class="col-money">$450,000</td>
-                    <td class="col-num">—</td>
-                </tr>
-                <tr>
-                    <td>Megan Grothman</td>
-                    <td class="col-money">$409,500</td>
-                    <td class="col-money">$389,000</td>
-                    <td class="col-num"><span class="kpi-change-down">↓ 5.0%</span></td>
-                </tr>
-                <tr>
-                    <td>Simon Golding</td>
-                    <td class="col-money">$120,000</td>
-                    <td class="col-money">$0</td>
-                    <td class="col-num"><span class="kpi-change-down">↓ 100%</span></td>
-                </tr>
-                <tr>
-                    <td>Jake Wangler</td>
-                    <td class="col-money">$60,000</td>
-                    <td class="col-money">$0</td>
-                    <td class="col-num"><span class="kpi-change-down">↓ 100%</span></td>
-                </tr>
-                <tr class="row-total">
-                    <td>Total</td>
-                    <td class="col-money">$1,039,500</td>
-                    <td class="col-money">$839,000</td>
-                    <td class="col-num"><span class="kpi-change-down">↓ 19.3%</span></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Outbound Metrics -->
-        <div class="report-section-title">Outbound Performance</div>
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>January</th>
-                    <th>February</th>
-                    <th>Change</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Sets</td>
-                    <td class="col-num">99</td>
-                    <td class="col-num">110</td>
-                    <td class="col-num"><span class="kpi-change-up">↑ 11.1%</span></td>
-                </tr>
-                <tr>
-                    <td>Holds</td>
-                    <td class="col-num">56</td>
-                    <td class="col-num">76</td>
-                    <td class="col-num"><span class="kpi-change-up">↑ 35.7%</span></td>
-                </tr>
-                <tr>
-                    <td>Closed Won ARR</td>
-                    <td class="col-money">$195,000</td>
-                    <td class="col-money">$364,500</td>
-                    <td class="col-num"><span class="kpi-change-up">↑ 86.9%</span></td>
-                </tr>
-                <tr>
-                    <td>Avg Daily Dials</td>
-                    <td class="col-num">62.16</td>
-                    <td class="col-num">62.50</td>
-                    <td class="col-num"><span class="kpi-change-up">↑ 0.5%</span></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Pipeline -->
-        <div class="report-section-title">Current Pipeline by Rep</div>
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>Sales Rep</th>
-                    <th>MRR</th>
-                    <th>ARR</th>
-                    <th>Deals</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Megan Grothman</td>
-                    <td class="col-money">$94.67K</td>
-                    <td class="col-money">$1.136M</td>
-                    <td class="col-num">6</td>
-                </tr>
-                <tr>
-                    <td>Simon Golding</td>
-                    <td class="col-money">$123.5K</td>
-                    <td class="col-money">$1.4M</td>
-                    <td class="col-num">12</td>
-                </tr>
-                <tr>
-                    <td>Jake Wangler</td>
-                    <td class="col-money">$32.5K</td>
-                    <td class="col-money">$390K</td>
-                    <td class="col-num">3</td>
-                </tr>
-                <tr>
-                    <td>Brandon Steed</td>
-                    <td class="col-money">$39K</td>
-                    <td class="col-money">$468K</td>
-                    <td class="col-num">4</td>
-                </tr>
-                <tr>
-                    <td>Jacob Man</td>
-                    <td class="col-money">$27.5K</td>
-                    <td class="col-money">$330K</td>
-                    <td class="col-num">3</td>
-                </tr>
-                <tr>
-                    <td>Chris</td>
-                    <td class="col-money">$35K</td>
-                    <td class="col-money">$420K</td>
-                    <td class="col-num">1</td>
-                </tr>
-                <tr class="row-total">
-                    <td>Total Pipeline</td>
-                    <td class="col-money">$352.2K</td>
-                    <td class="col-money">$4.14M</td>
-                    <td class="col-num">29</td>
-                </tr>
-            </tbody>
-        </table>
-
+    <div class="tab-panel active" id="tab-sales">
+        <div class="loading">Loading sales data&hellip;</div>
+    </div>
+    <div class="tab-panel" id="tab-marketing">
+        <div class="loading">Loading marketing data&hellip;</div>
     </div>
 </div>
 
-<footer class="footer">
-    Rankings.io Revenue Kitchen — Internal Use Only
-</footer>
+<script>
+(function() {
+    // ── Tab switching ──
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-panel').forEach(function(c) { c.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    var SHEET_ID = '18WMXkoKVY-JiWvPMt6e06fljsufO4YziLropqidkYek';
+    var chartDefaults = {
+        borderRadius: 4,
+        barPercentage: 0.65,
+        categoryPercentage: 0.8
+    };
+    var COLORS = {
+        primary: '#07374F',
+        primaryLight: 'rgba(7,55,79,0.7)',
+        blue: '#3c94d1',
+        blueLight: 'rgba(60,148,209,0.15)',
+        accent: '#eaff6a',
+        success: '#22c55e',
+        destructive: '#c0392b',
+        muted: '#e5e5e5',
+        warmYellow: '#eedc82'
+    };
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.display = false;
+    Chart.defaults.plugins.tooltip.backgroundColor = '#0a0a0a';
+    Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.titleFont = { weight: '600' };
+    Chart.defaults.scale.grid = { color: 'rgba(0,0,0,0.05)', drawBorder: false };
+    Chart.defaults.scale.ticks = { color: '#737373' };
+
+    function sheetURL(gid) {
+        return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + gid;
+    }
+    function fetchSheet(gid) {
+        return fetch(sheetURL(gid)).then(function(r) { return r.text(); }).then(function(text) {
+            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table.rows;
+        });
+    }
+    function gv(row, col) { return (row && row.c && row.c[col]) ? row.c[col].v : null; }
+    function gf(row, col) { return (row && row.c && row.c[col]) ? (row.c[col].f || String(row.c[col].v || '')) : ''; }
+    function fmtMoney(n) {
+        if (n == null || isNaN(n)) return '$0';
+        if (Math.abs(n) >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+        if (Math.abs(n) >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+        return '$' + n.toLocaleString();
+    }
+    function fmtNum(n) { return (n == null || isNaN(n)) ? '0' : n.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+    function pctStr(jan, feb, invert) {
+        if (!jan) return { text: '\u2014', cls: '' };
+        var pct = ((feb - jan) / Math.abs(jan)) * 100;
+        var arrow = pct >= 0 ? '\u2191' : '\u2193';
+        var cls = invert ? (pct >= 0 ? 'down' : 'up') : (pct >= 0 ? 'up' : 'down');
+        return { text: arrow + ' ' + Math.abs(pct).toFixed(1) + '% from Jan', cls: cls };
+    }
+    function findRow(rows, label, col) {
+        col = col || 0;
+        for (var i = 0; i < rows.length; i++) { var c = gv(rows[i], col); if (c && c.trim() === label.trim()) return rows[i]; }
+        return null;
+    }
+    function sectionRows(rows, start, ends, colA) {
+        colA = colA || 0;
+        var results = [], inSec = false;
+        for (var i = 0; i < rows.length; i++) {
+            var label = gv(rows[i], colA);
+            if (label && label.trim() === start.trim()) { inSec = true; continue; }
+            if (inSec && label && ends.indexOf(label.trim()) !== -1) break;
+            if (inSec) results.push(rows[i]);
+        }
+        return results;
+    }
+
+    function statCard(title, value, changeObj, iconSvg) {
+        return '<div class="card"><div class="card-header"><div class="card-header-row"><span class="card-title">' + title + '</span><span class="card-icon">' + iconSvg + '</span></div></div><div class="card-content"><div class="stat-value">' + value + '</div><div class="stat-change"><span class="' + changeObj.cls + '">' + changeObj.text + '</span></div></div></div>';
+    }
+
+    var ICONS = {
+        dollar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+        clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        trending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+        bar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>',
+        mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>',
+        mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+        globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+        heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
+    };
+
+    // ═══════════════════════════════════════════════
+    //  SALES TAB
+    // ═══════════════════════════════════════════════
+    fetchSheet('1217173270').then(renderSales).catch(function(err) {
+        document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';
+    });
+
+    function renderSales(rows) {
+        var el = document.getElementById('tab-sales');
+        var html = '';
+
+        // Get values
+        function rv(key, col) { var r = findRow(rows, key); return gv(r, col || 0); }
+        function rvn(key) { var r = findRow(rows, key); return { jan: gv(r, 1) || 0, feb: gv(r, 2) || 0 }; }
+
+        var arr = rvn('Total ARR'), mrr = rvn('Total MRR'), deals = rvn('Deals Closed'), winRate = rvn('Win Rate (From Qualifed)');
+
+        // Stat cards
+        html += '<div class="stat-grid">';
+        html += statCard('Total ARR', fmtMoney(arr.feb), pctStr(arr.jan, arr.feb), ICONS.dollar);
+        html += statCard('Total MRR', fmtMoney(mrr.feb), pctStr(mrr.jan, mrr.feb), ICONS.dollar);
+        html += statCard('Deals Closed', fmtNum(deals.feb), pctStr(deals.jan, deals.feb), ICONS.target);
+        html += statCard('Win Rate', (winRate.feb * 100).toFixed(0) + '%', pctStr(winRate.jan, winRate.feb), ICONS.trending);
+        html += '</div>';
+
+        // Chart row: Rep performance bar chart + Outbound bar chart
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
+        html += '</div>';
+
+        // KPI detail row
+        html += '<div class="chart-grid">';
+
+        // More KPIs as table
+        html += '<div class="card"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>Jan</th><th>Feb</th><th>Change</th></tr></thead><tbody>';
+        var kpiRows = [
+            ['Total ARR', 'money'], ['Total MRR', 'money'], ['Deals Closed', 'num'],
+            ['Average MRR Per Deal', 'money'], ['Average ARR Per Deal', 'money'],
+            ['Average Sales Cycle (Days)', 'days', true], ['Deals Lost to Price', 'num', true],
+            ['Win Rate (From Qualifed)', 'pct']
+        ];
+        kpiRows.forEach(function(k) {
+            var r = findRow(rows, k[0]);
+            var jan = gv(r, 1) || 0, feb = gv(r, 2) || 0;
+            var jStr, fStr;
+            if (k[1] === 'money') { jStr = fmtMoney(jan); fStr = fmtMoney(feb); }
+            else if (k[1] === 'days') { jStr = fmtNum(jan) + 'd'; fStr = fmtNum(feb) + 'd'; }
+            else if (k[1] === 'pct') { jStr = (jan * 100).toFixed(0) + '%'; fStr = (feb * 100).toFixed(0) + '%'; }
+            else { jStr = fmtNum(jan); fStr = fmtNum(feb); }
+            var ch = pctStr(jan, feb, !!k[2]);
+            html += '<tr><td>' + k[0] + '</td><td class="mono">' + jStr + '</td><td class="mono">' + fStr + '</td><td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td></tr>';
+        });
+        html += '</tbody></table></div></div>';
+
+        // Pipeline table
+        var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
+        html += '<div class="card"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+        html += '</div>';
+
+        el.innerHTML = html;
+
+        // ── Build charts ──
+        // Rep ARR chart
+        var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
+        var repNames = [], repJan = [], repFeb = [];
+        repRows.forEach(function(r) {
+            repNames.push(gv(r, 0));
+            repJan.push(gv(r, 1) || 0);
+            repFeb.push(gv(r, 2) || 0);
+        });
+        new Chart(document.getElementById('chart-rep-arr'), {
+            type: 'bar',
+            data: {
+                labels: repNames,
+                datasets: [
+                    { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                    { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
+            }
+        });
+
+        // Outbound chart
+        var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+        var outLabels = [], outJan = [], outFeb = [];
+        outRows.forEach(function(r) {
+            var name = gv(r, 0);
+            if (name.trim() === 'Closed Won ARR') return; // skip money metric, different scale
+            outLabels.push(name);
+            outJan.push(gv(r, 1) || 0);
+            outFeb.push(gv(r, 2) || 0);
+        });
+        new Chart(document.getElementById('chart-outbound'), {
+            type: 'bar',
+            data: {
+                labels: outLabels,
+                datasets: [
+                    { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                    { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+
+        // Pipeline doughnut
+        var pipeNames = [], pipeDeals = [];
+        pipeRows.forEach(function(r) {
+            var d = gv(r, 2) || 0;
+            if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
+        });
+        new Chart(document.getElementById('chart-pipeline'), {
+            type: 'doughnut',
+            data: {
+                labels: pipeNames,
+                datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
+            },
+            options: {
+                responsive: true, cutout: '60%',
+                plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    //  MARKETING TAB
+    // ═══════════════════════════════════════════════
+    fetchSheet('2097807044').then(renderMarketing).catch(function(err) {
+        document.getElementById('tab-marketing').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load marketing data: ' + err.message + '</div>';
+    });
+
+    function renderMarketing(rows) {
+        var el = document.getElementById('tab-marketing');
+        var html = '';
+
+        function mktRow(label) { return findRow(rows, label, 1); }
+        function mktVal(label) { var r = mktRow(label); return { jan: gv(r, 2), feb: gv(r, 3) }; }
+
+        var followers = mktVal('Chris Personal Followers (All Platforms)');
+        var newsletter = mktVal('Total Newsletter Subscribers');
+        var podcast = mktVal('Podcast Downlads + Streams');
+        var sponsorship = mktVal('Total sponnsorship sold');
+
+        // Stat cards
+        html += '<div class="stat-grid">';
+        html += statCard('Chris Followers', followers.feb != null ? fmtNum(followers.feb) : '\u2014', followers.jan ? pctStr(followers.jan, followers.feb) : { text: '\u2014', cls: '' }, ICONS.heart);
+        html += statCard('Newsletter Subs', fmtNum(newsletter.feb), pctStr(newsletter.jan, newsletter.feb), ICONS.mail);
+        html += statCard('Podcast Downloads', fmtNum(podcast.feb), pctStr(podcast.jan, podcast.feb), ICONS.mic);
+        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.feb), pctStr(sponsorship.jan, sponsorship.feb), ICONS.dollar);
+        html += '</div>';
+
+        // Charts row: Social followers bar + Podcast metrics
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (Feb)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Performance</div><div class="card-desc">January vs February</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        html += '</div>';
+
+        // Second row: Newsletter + YouTube + Website
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Newsletter & YouTube</div><div class="card-desc">Audience growth metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-newsletter"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">PIMCON</div><div class="card-desc">Event metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pimcon"></canvas></div></div></div>';
+        html += '</div>';
+
+        // Full-width detail tables
+        var sections = [
+            { title: 'Social Media', start: 'SOCIAL MEDIA', end: ['PERSONAL SOCIAL (CHRIS)'] },
+            { title: 'Personal Social (Chris)', start: 'PERSONAL SOCIAL (CHRIS)', end: ['PODCAST'] },
+            { title: 'Podcast', start: 'PODCAST', end: ['NEWSLETTER'] },
+            { title: 'Newsletter', start: 'NEWSLETTER', end: ['YouTube'] },
+            { title: 'YouTube', start: 'YouTube', end: ['WEBSITE & SEO'] },
+            { title: 'Website & SEO', start: 'WEBSITE & SEO', end: ['PIMCON'] },
+            { title: 'PIMCON', start: 'PIMCON', end: ['__END__'] }
+        ];
+
+        sections.forEach(function(sec) {
+            var secRows = mktSectionRows(rows, sec.start, sec.end);
+            if (secRows.length === 0) return;
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">' + sec.title + '</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>Jan</th><th>Feb</th><th>Change</th><th>Notes</th></tr></thead><tbody>';
+            secRows.forEach(function(r) {
+                var metric = gv(r, 1); if (!metric || !metric.trim()) return;
+                var jan = gv(r, 2), feb = gv(r, 3), note = gv(r, 5) || '';
+                var isPct = (metric.toLowerCase().indexOf('rate') !== -1 || metric.toLowerCase().indexOf('consumption') !== -1);
+                var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1);
+                var jStr, fStr;
+                if (isPct) { jStr = jan != null ? gf(r, 2) : '\u2014'; fStr = feb != null ? gf(r, 3) : '\u2014'; }
+                else if (isMoney) { jStr = jan != null ? fmtMoney(jan) : '\u2014'; fStr = feb != null ? fmtMoney(feb) : '\u2014'; }
+                else { jStr = jan != null ? fmtNum(jan) : '\u2014'; fStr = feb != null ? fmtNum(feb) : '\u2014'; }
+                var ch = (jan != null && feb != null) ? pctStr(jan, feb) : { text: '\u2014', cls: '' };
+                html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + jStr + '</td><td class="mono">' + fStr + '</td><td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td><td class="muted" style="font-size:0.78rem;font-style:italic">' + note + '</td></tr>';
+            });
+            html += '</tbody></table></div></div>';
+        });
+
+        el.innerHTML = html;
+
+        // ── Build marketing charts ──
+
+        // Social followers horizontal bar
+        var socialData = [
+            { label: 'LinkedIn', val: gv(mktRow('Rankings LinkedIn New Followers'), 6) || gv(findRow(rows, 'Rankings LinkedIn New Followers', 1), 6) || 18962 },
+            { label: 'X / Twitter', val: gv(mktRow('Rankings X Followers'), 3) || 78786 },
+            { label: 'Instagram', val: 17177 },
+            { label: 'Facebook', val: gv(mktRow('Rankings Facebook New Followers'), 6) || 4000 },
+            { label: 'YouTube', val: gv(mktRow('YouTube Total Subscribers'), 3) || 775 },
+            { label: 'TikTok', val: gv(mktRow('Rankings TikTok Followers'), 3) || 514 }
+        ];
+        socialData.sort(function(a, b) { return b.val - a.val; });
+        new Chart(document.getElementById('chart-social'), {
+            type: 'bar',
+            data: {
+                labels: socialData.map(function(d) { return d.label; }),
+                datasets: [{ data: socialData.map(function(d) { return d.val; }), backgroundColor: [COLORS.primary, COLORS.blue, '#e4405f', '#1877f2', '#ff0000', '#000000'], borderRadius: 4, borderWidth: 0 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true,
+                scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000) + 'K' : v; } } } }
+            }
+        });
+
+        // Podcast grouped bar
+        var podMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed'];
+        var podJan = [], podFeb = [];
+        podMetrics.forEach(function(m) { var d = mktVal(m); podJan.push(d.jan || 0); podFeb.push(d.feb || 0); });
+        new Chart(document.getElementById('chart-podcast'), {
+            type: 'bar',
+            data: {
+                labels: podMetrics,
+                datasets: [
+                    { label: 'January', data: podJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                    { label: 'February', data: podFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Newsletter + YouTube grouped bar
+        var nlMetrics = ['Total Subscribers', 'New Subscribers', 'Total Views', 'Newsletter Issues Published'];
+        var ytMetrics = ['YouTube New Subscribers', 'YouTube Total Subscribers', 'YouTube Long Form Published', 'YouTube Shorts Published'];
+        var allMetrics = nlMetrics.concat(ytMetrics);
+        var nlLabels = ['NL Subs', 'New NL Subs', 'NL Views', 'NL Issues', 'YT New Subs', 'YT Total Subs', 'YT Long Form', 'YT Shorts'];
+        var nlJan = [], nlFeb = [];
+        allMetrics.forEach(function(m) { var d = mktVal(m); nlJan.push(d.jan || 0); nlFeb.push(d.feb || 0); });
+        new Chart(document.getElementById('chart-newsletter'), {
+            type: 'bar',
+            data: {
+                labels: nlLabels,
+                datasets: [
+                    { label: 'January', data: nlJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                    { label: 'February', data: nlFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } }
+            }
+        });
+
+        // PIMCON metrics
+        var pimconMetrics = ['Projected attendance', 'Registered attendees'];
+        var pcJan = [], pcFeb = [];
+        pimconMetrics.forEach(function(m) { var d = mktVal(m); pcJan.push(d.jan || 0); pcFeb.push(d.feb || 0); });
+        var pcSponsor = mktVal('Total sponnsorship sold');
+        new Chart(document.getElementById('chart-pimcon'), {
+            type: 'bar',
+            data: {
+                labels: ['Projected Attendance', 'Registered', 'Sponsorship ($K)'],
+                datasets: [
+                    { label: 'January', data: [pcJan[0], pcJan[1], (pcSponsor.jan || 0) / 1000], backgroundColor: COLORS.primary, borderRadius: 4 },
+                    { label: 'February', data: [pcFeb[0], pcFeb[1], (pcSponsor.feb || 0) / 1000], backgroundColor: COLORS.blue, borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    function mktSectionRows(rows, startLabel, endLabels) {
+        var results = [], inSection = false;
+        for (var i = 0; i < rows.length; i++) {
+            var labelA = gv(rows[i], 0);
+            if (labelA && labelA.trim() === startLabel.trim()) { inSection = true; continue; }
+            if (inSection && labelA && endLabels.indexOf(labelA.trim()) !== -1) break;
+            if (inSection) results.push(rows[i]);
+        }
+        return results;
+    }
+})();
+</script>
 
 </body>
 </html>
