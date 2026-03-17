@@ -203,7 +203,7 @@
     }
     function fetchSheet(gid) {
         return fetch(sheetURL(gid)).then(function(r) { return r.text(); }).then(function(text) {
-            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table.rows;
+            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table;
         });
     }
     function gv(row, col) { return (row && row.c && row.c[col]) ? row.c[col].v : null; }
@@ -239,8 +239,9 @@
         return results;
     }
 
-    function statCard(title, value, changeObj, iconSvg) {
-        return '<div class="card"><div class="card-header"><div class="card-header-row"><span class="card-title">' + title + '</span><span class="card-icon">' + iconSvg + '</span></div></div><div class="card-content"><div class="stat-value">' + value + '</div><div class="stat-change"><span class="' + changeObj.cls + '">' + changeObj.text + '</span></div></div></div>';
+    function statCard(title, value, changeObj, iconSvg, prevValue) {
+        var prevHtml = prevValue ? '<div style="font-size:0.75rem;color:var(--muted-fg);margin-top:2px;">prev: ' + prevValue + '</div>' : '';
+        return '<div class="card"><div class="card-header"><div class="card-header-row"><span class="card-title">' + title + '</span><span class="card-icon">' + iconSvg + '</span></div></div><div class="card-content"><div class="stat-value">' + value + '</div>' + prevHtml + '<div class="stat-change"><span class="' + changeObj.cls + '">' + changeObj.text + '</span></div></div></div>';
     }
 
     var ICONS = {
@@ -263,27 +264,58 @@
         document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';
     });
 
-    function renderSales(rows) {
+    function renderSales(table) {
+        var rows = table.rows;
         var el = document.getElementById('tab-sales');
         var html = '';
 
-        // Get values
-        function rv(key, col) { var r = findRow(rows, key); return gv(r, col || 0); }
-        function rvn(key) { var r = findRow(rows, key); return { jan: gv(r, 1) || 0, feb: gv(r, 2) || 0 }; }
+        // Extract month labels dynamically from column headers (skip col 0 = labels)
+        var monthCols = [];
+        for (var ci = 1; ci < table.cols.length; ci++) {
+            var lbl = (table.cols[ci].label || '').trim();
+            if (lbl && table.cols[ci].type === 'number') {
+                monthCols.push({ idx: ci, label: lbl.replace(/[\s-]+$/, '') });
+            }
+        }
+        var monthLabels = monthCols.map(function(m) { return m.label; });
+        var lastCol = monthCols.length ? monthCols[monthCols.length - 1].idx : 1;
+        var prevCol = monthCols.length > 1 ? monthCols[monthCols.length - 2].idx : null;
 
-        var arr = rvn('Total ARR'), mrr = rvn('Total MRR'), deals = rvn('Deals Closed'), winRate = rvn('Win Rate (From Qualifed)');
+        // Helper: get all month values for a metric
+        function monthVals(key) {
+            var r = findRow(rows, key);
+            return monthCols.map(function(m) { return gv(r, m.idx) || 0; });
+        }
+        function lastVal(key) { var r = findRow(rows, key); return gv(r, lastCol) || 0; }
+        function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return gv(r, prevCol) || 0; }
+
+        var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
+        var mrrLast = lastVal('Total MRR'), mrrPrev = prevVal('Total MRR');
+        var dealsLast = lastVal('Deals Closed'), dealsPrev = prevVal('Deals Closed');
+        var wrLast = lastVal('Win Rate (From Qualifed)'), wrPrev = prevVal('Win Rate (From Qualifed)');
 
         // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Total ARR', fmtMoney(arr.feb), pctStr(arr.jan, arr.feb), ICONS.dollar);
-        html += statCard('Total MRR', fmtMoney(mrr.feb), pctStr(mrr.jan, mrr.feb), ICONS.dollar);
-        html += statCard('Deals Closed', fmtNum(deals.feb), pctStr(deals.jan, deals.feb), ICONS.target);
-        html += statCard('Win Rate', (winRate.feb * 100).toFixed(0) + '%', pctStr(winRate.jan, winRate.feb), ICONS.trending);
+        html += statCard('Total ARR', fmtMoney(arrLast), pctStr(arrPrev, arrLast), ICONS.dollar, fmtMoney(arrPrev));
+        html += statCard('Total MRR', fmtMoney(mrrLast), pctStr(mrrPrev, mrrLast), ICONS.dollar, fmtMoney(mrrPrev));
+        html += statCard('Deals Closed', fmtNum(dealsLast), pctStr(dealsPrev, dealsLast), ICONS.target, fmtNum(dealsPrev));
+        html += statCard('Win Rate', (wrLast * 100).toFixed(0) + '%', pctStr(wrPrev, wrLast), ICONS.trending, (wrPrev * 100).toFixed(0) + '%');
+        html += '</div>';
+
+        // ── MoM Trend Line Charts ──
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">ARR &amp; MRR Trend</div><div class="card-desc">Month-over-month revenue growth</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-revenue"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Deals &amp; Win Rate Trend</div><div class="card-desc">Month-over-month deal velocity</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-deals"></canvas></div></div></div>';
+        html += '</div>';
+
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Trend</div><div class="card-desc">Sets, holds &amp; closed won ARR over time</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-outbound"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Deal Economics Trend</div><div class="card-desc">Avg deal size &amp; sales cycle over time</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-economics"></canvas></div></div></div>';
         html += '</div>';
 
         // Chart row: Rep performance bar chart + Outbound bar chart
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + ' comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
         html += '</div>';
 
@@ -291,7 +323,9 @@
         html += '<div class="chart-grid">';
 
         // More KPIs as table
-        html += '<div class="card"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>Jan</th><th>Feb</th><th>Change</th></tr></thead><tbody>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
+        monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+        html += '<th>Change</th></tr></thead><tbody>';
         var kpiRows = [
             ['Total ARR', 'money'], ['Total MRR', 'money'], ['Deals Closed', 'num'],
             ['Average MRR Per Deal', 'money'], ['Average ARR Per Deal', 'money'],
@@ -300,14 +334,18 @@
         ];
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
-            var jan = gv(r, 1) || 0, feb = gv(r, 2) || 0;
-            var jStr, fStr;
-            if (k[1] === 'money') { jStr = fmtMoney(jan); fStr = fmtMoney(feb); }
-            else if (k[1] === 'days') { jStr = fmtNum(jan) + 'd'; fStr = fmtNum(feb) + 'd'; }
-            else if (k[1] === 'pct') { jStr = (jan * 100).toFixed(0) + '%'; fStr = (feb * 100).toFixed(0) + '%'; }
-            else { jStr = fmtNum(jan); fStr = fmtNum(feb); }
-            var ch = pctStr(jan, feb, !!k[2]);
-            html += '<tr><td>' + k[0] + '</td><td class="mono">' + jStr + '</td><td class="mono">' + fStr + '</td><td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td></tr>';
+            html += '<tr><td>' + k[0] + '</td>';
+            var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
+            vals.forEach(function(v) {
+                var str;
+                if (k[1] === 'money') str = fmtMoney(v);
+                else if (k[1] === 'days') str = fmtNum(v) + 'd';
+                else if (k[1] === 'pct') str = (v * 100).toFixed(0) + '%';
+                else str = fmtNum(v);
+                html += '<td class="mono">' + str + '</td>';
+            });
+            var ch = vals.length > 1 ? pctStr(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
+            html += '<td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td></tr>';
         });
         html += '</tbody></table></div></div>';
 
@@ -318,28 +356,128 @@
 
         el.innerHTML = html;
 
+        // ── Shared line chart options ──
+        var lineOpts = function(yCallback) {
+            return {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: yCallback || function(v) { return v; } } },
+                    x: { grid: { display: false } }
+                },
+                elements: {
+                    line: { tension: 0.3, borderWidth: 2.5 },
+                    point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' }
+                }
+            };
+        };
+
         // ── Build charts ──
         setTimeout(function() {
-            // Rep ARR chart
-            var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
-            var repNames = [], repJan = [], repFeb = [];
-            repRows.forEach(function(r) {
-                repNames.push(gv(r, 0));
-                repJan.push(gv(r, 1) || 0);
-                repFeb.push(gv(r, 2) || 0);
-            });
-            new Chart(document.getElementById('chart-rep-arr'), {
-                type: 'bar',
+            // ── Trend: ARR & MRR ──
+            new Chart(document.getElementById('chart-trend-revenue'), {
+                type: 'line',
                 data: {
-                    labels: repNames,
+                    labels: monthLabels,
                     datasets: [
-                        { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                        { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                        { label: 'Total ARR', data: monthVals('Total ARR'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff' },
+                        { label: 'Total MRR', data: monthVals('Total MRR'), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointBackgroundColor: '#fff' }
+                    ]
+                },
+                options: lineOpts(function(v) { return fmtMoney(v); })
+            });
+
+            // ── Trend: Deals & Win Rate ──
+            new Chart(document.getElementById('chart-trend-deals'), {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        { label: 'Deals Closed', data: monthVals('Deals Closed'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff', yAxisID: 'y' },
+                        { label: 'Win Rate %', data: monthVals('Win Rate (From Qualifed)').map(function(v) { return v * 100; }), borderColor: COLORS.success, backgroundColor: COLORS.success, pointBackgroundColor: '#fff', yAxisID: 'y1' }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Deals', font: { size: 11 } } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return v + '%'; } }, title: { display: true, text: 'Win Rate', font: { size: 11 } } },
+                        x: { grid: { display: false } }
+                    },
+                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
+                }
+            });
+
+            // ── Trend: Outbound ──
+            new Chart(document.getElementById('chart-trend-outbound'), {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        { label: 'Sets', data: monthVals('Sets'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff' },
+                        { label: 'Holds', data: monthVals('Holds'), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointBackgroundColor: '#fff' },
+                        { label: 'Closed Won ARR', data: monthVals('Closed Won ARR'), borderColor: COLORS.success, backgroundColor: COLORS.success, pointBackgroundColor: '#fff', yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Count', font: { size: 11 } } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return fmtMoney(v); } }, title: { display: true, text: 'ARR', font: { size: 11 } } },
+                        x: { grid: { display: false } }
+                    },
+                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
+                }
+            });
+
+            // ── Trend: Deal Economics ──
+            new Chart(document.getElementById('chart-trend-economics'), {
+                type: 'line',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        { label: 'Avg ARR/Deal', data: monthVals('Average ARR Per Deal'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff', yAxisID: 'y' },
+                        { label: 'Avg Sales Cycle', data: monthVals('Average Sales Cycle (Days)'), borderColor: '#f97316', backgroundColor: '#f97316', pointBackgroundColor: '#fff', yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', ticks: { callback: function(v) { return fmtMoney(v); } }, title: { display: true, text: 'Avg Deal', font: { size: 11 } } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return v + 'd'; } }, title: { display: true, text: 'Days', font: { size: 11 } } },
+                        x: { grid: { display: false } }
+                    },
+                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
+                }
+            });
+
+            // ── Rep ARR bar chart ──
+            var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
+            var repNames = [];
+            var repDatasets = [];
+            var repBarColors = [COLORS.primary, COLORS.blue, '#22c55e', '#f97316', '#8b5cf6', '#ec4899'];
+            monthCols.forEach(function(m, mi) {
+                var data = [];
+                repRows.forEach(function(r, ri) {
+                    if (mi === 0) repNames.push(gv(r, 0));
+                    data.push(gv(r, m.idx) || 0);
+                });
+                repDatasets.push({ label: m.label, data: data, backgroundColor: repBarColors[mi % repBarColors.length], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-rep-arr'), {
+                type: 'bar',
+                data: { labels: repNames, datasets: repDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
                         tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
                     },
@@ -347,38 +485,34 @@
                 }
             });
 
-            // Outbound chart
+            // ── Outbound bar chart ──
             var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
-            var outLabels = [], outJan = [], outFeb = [];
-            outRows.forEach(function(r) {
-                var name = gv(r, 0);
-                if (name.trim() === 'Closed Won ARR') return;
-                outLabels.push(name);
-                outJan.push(gv(r, 1) || 0);
-                outFeb.push(gv(r, 2) || 0);
+            var outLabels = [];
+            var outDatasets = [];
+            monthCols.forEach(function(m, mi) {
+                var data = [];
+                outRows.forEach(function(r, ri) {
+                    var name = gv(r, 0);
+                    if (name.trim() === 'Closed Won ARR') return;
+                    if (mi === 0) outLabels.push(name);
+                    data.push(gv(r, m.idx) || 0);
+                });
+                outDatasets.push({ label: m.label, data: data, backgroundColor: repBarColors[mi % repBarColors.length], borderRadius: 4 });
             });
             new Chart(document.getElementById('chart-outbound'), {
                 type: 'bar',
-                data: {
-                    labels: outLabels,
-                    datasets: [
-                        { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                        { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                    ]
-                },
+                data: { labels: outLabels, datasets: outDatasets },
                 options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
                     scales: { x: { beginAtZero: true } }
                 }
             });
 
-            // Pipeline doughnut
+            // ── Pipeline doughnut ──
             var pipeNames = [], pipeDeals = [];
             pipeRows.forEach(function(r) {
-                var d = gv(r, 2) || 0;
+                var d = gv(r, lastCol) || 0;
                 if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
             });
             new Chart(document.getElementById('chart-pipeline'), {
@@ -402,7 +536,8 @@
         document.getElementById('tab-marketing').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load marketing data: ' + err.message + '</div>';
     });
 
-    function renderMarketing(rows) {
+    function renderMarketing(table) {
+        var rows = table.rows;
         var el = document.getElementById('tab-marketing');
         var html = '';
 
@@ -416,10 +551,10 @@
 
         // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Chris Followers', followers.feb != null ? fmtNum(followers.feb) : '\u2014', followers.jan ? pctStr(followers.jan, followers.feb) : { text: '\u2014', cls: '' }, ICONS.heart);
-        html += statCard('Newsletter Subs', fmtNum(newsletter.feb), pctStr(newsletter.jan, newsletter.feb), ICONS.mail);
-        html += statCard('Podcast Downloads', fmtNum(podcast.feb), pctStr(podcast.jan, podcast.feb), ICONS.mic);
-        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.feb), pctStr(sponsorship.jan, sponsorship.feb), ICONS.dollar);
+        html += statCard('Chris Followers', followers.feb != null ? fmtNum(followers.feb) : '\u2014', followers.jan ? pctStr(followers.jan, followers.feb) : { text: '\u2014', cls: '' }, ICONS.heart, followers.jan ? fmtNum(followers.jan) : null);
+        html += statCard('Newsletter Subs', fmtNum(newsletter.feb), pctStr(newsletter.jan, newsletter.feb), ICONS.mail, fmtNum(newsletter.jan));
+        html += statCard('Podcast Downloads', fmtNum(podcast.feb), pctStr(podcast.jan, podcast.feb), ICONS.mic, fmtNum(podcast.jan));
+        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.feb), pctStr(sponsorship.jan, sponsorship.feb), ICONS.dollar, fmtMoney(sponsorship.jan));
         html += '</div>';
 
         // Charts row: Social followers bar + Podcast metrics
