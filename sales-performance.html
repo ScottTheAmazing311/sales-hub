@@ -195,8 +195,8 @@
     Chart.defaults.plugins.tooltip.cornerRadius = 6;
     Chart.defaults.plugins.tooltip.padding = 10;
     Chart.defaults.plugins.tooltip.titleFont = { weight: '600' };
-    Chart.defaults.scale.grid = { color: 'rgba(0,0,0,0.05)', drawBorder: false };
-    Chart.defaults.scale.ticks = { color: '#737373' };
+    Chart.defaults.scale.grid.color = 'rgba(0,0,0,0.05)';
+    Chart.defaults.scale.ticks.color = '#737373';
 
     function sheetURL(gid) {
         return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + gid;
@@ -281,13 +281,10 @@
         html += statCard('Win Rate', (winRate.feb * 100).toFixed(0) + '%', pctStr(winRate.jan, winRate.feb), ICONS.trending);
         html += '</div>';
 
-        // TEST chart - hardcoded data
-        html += '<div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">TEST CHART (hardcoded data - delete me)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-test" width="590" height="300"></canvas></div></div></div>';
-
         // Chart row: Rep performance bar chart + Outbound bar chart
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr" width="590" height="300"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound" width="400" height="300"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
         html += '</div>';
 
         // KPI detail row
@@ -321,122 +318,80 @@
 
         el.innerHTML = html;
 
-        // DEBUG: dump all row labels so we can see exact sheet structure
-        var debugInfo = '<div id="debug-output" style="background:#fff3cd;border:2px solid #ffc107;padding:12px;margin:12px 0;border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;">';
-        debugInfo += 'DEBUG — Total rows from sheet: ' + rows.length + '\n';
-        rows.forEach(function(r, i) {
-            debugInfo += 'Row ' + i + ': [' + JSON.stringify(gv(r, 0)) + '] col1=' + gv(r, 1) + ' col2=' + gv(r, 2) + '\n';
-        });
-        debugInfo += '</div>';
-        el.insertAdjacentHTML('afterbegin', debugInfo);
-
-        // ── Build charts after DOM update ──
+        // ── Build charts ──
         setTimeout(function() {
-            // TEST CHART with hardcoded data
-            try {
-                new Chart(document.getElementById('chart-test'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['Alice', 'Bob', 'Carol'],
-                        datasets: [{ label: 'Test', data: [100, 200, 150], backgroundColor: ['red', 'green', 'blue'] }]
+            // Rep ARR chart
+            var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
+            var repNames = [], repJan = [], repFeb = [];
+            repRows.forEach(function(r) {
+                repNames.push(gv(r, 0));
+                repJan.push(gv(r, 1) || 0);
+                repFeb.push(gv(r, 2) || 0);
+            });
+            new Chart(document.getElementById('chart-rep-arr'), {
+                type: 'bar',
+                data: {
+                    labels: repNames,
+                    datasets: [
+                        { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                        { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
                     },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-                document.getElementById('debug-output').textContent += 'TEST chart created OK\n';
-            } catch(e) {
-                document.getElementById('debug-output').textContent += 'TEST chart ERROR: ' + e.message + '\n';
-            }
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
+                }
+            });
 
-            try {
-                // Rep ARR chart
-                var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
-                var repNames = [], repJan = [], repFeb = [];
-                repRows.forEach(function(r) {
-                    repNames.push(gv(r, 0));
-                    repJan.push(gv(r, 1) || 0);
-                    repFeb.push(gv(r, 2) || 0);
-                });
+            // Outbound chart
+            var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+            var outLabels = [], outJan = [], outFeb = [];
+            outRows.forEach(function(r) {
+                var name = gv(r, 0);
+                if (name.trim() === 'Closed Won ARR') return;
+                outLabels.push(name);
+                outJan.push(gv(r, 1) || 0);
+                outFeb.push(gv(r, 2) || 0);
+            });
+            new Chart(document.getElementById('chart-outbound'), {
+                type: 'bar',
+                data: {
+                    labels: outLabels,
+                    datasets: [
+                        { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
+                        { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
 
-                var repDebug = document.getElementById('debug-output');
-                repDebug.textContent += '\n--- CHART DEBUG ---\n';
-                repDebug.textContent += 'repRows count: ' + repRows.length + '\n';
-                repDebug.textContent += 'repNames: ' + JSON.stringify(repNames) + '\n';
-                repDebug.textContent += 'repJan: ' + JSON.stringify(repJan) + '\n';
-                repDebug.textContent += 'repFeb: ' + JSON.stringify(repFeb) + '\n';
-                var repCanvas = document.getElementById('chart-rep-arr');
-                repDebug.textContent += 'canvas: ' + !!repCanvas + ' parentW=' + (repCanvas && repCanvas.parentElement.offsetWidth) + ' parentH=' + (repCanvas && repCanvas.parentElement.offsetHeight) + '\n';
-                new Chart(repCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: repNames,
-                        datasets: [
-                            { label: 'January', data: repJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                            { label: 'February', data: repFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
-                            tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
-                        },
-                        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
-                    }
-                });
-            } catch(e) { console.error('Rep ARR chart error:', e); }
-
-            try {
-                // Outbound chart
-                var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
-                var outLabels = [], outJan = [], outFeb = [];
-                outRows.forEach(function(r) {
-                    var name = gv(r, 0);
-                    if (name.trim() === 'Closed Won ARR') return;
-                    outLabels.push(name);
-                    outJan.push(gv(r, 1) || 0);
-                    outFeb.push(gv(r, 2) || 0);
-                });
-                console.log('Outbound chart data:', outLabels, outJan, outFeb);
-                var outCanvas = document.getElementById('chart-outbound');
-                console.log('Outbound canvas found:', !!outCanvas, 'size:', outCanvas && outCanvas.parentElement.offsetWidth, outCanvas && outCanvas.parentElement.offsetHeight);
-                new Chart(outCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: outLabels,
-                        datasets: [
-                            { label: 'January', data: outJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                            { label: 'February', data: outFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                        ]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
-                        scales: { x: { beginAtZero: true } }
-                    }
-                });
-            } catch(e) { console.error('Outbound chart error:', e); }
-
-            try {
-                // Pipeline doughnut
-                var pipeNames = [], pipeDeals = [];
-                pipeRows.forEach(function(r) {
-                    var d = gv(r, 2) || 0;
-                    if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
-                });
-                new Chart(document.getElementById('chart-pipeline'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: pipeNames,
-                        datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, cutout: '60%',
-                        plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
-                    }
-                });
-            } catch(e) { console.error('Pipeline chart error:', e); }
+            // Pipeline doughnut
+            var pipeNames = [], pipeDeals = [];
+            pipeRows.forEach(function(r) {
+                var d = gv(r, 2) || 0;
+                if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
+            });
+            new Chart(document.getElementById('chart-pipeline'), {
+                type: 'doughnut',
+                data: {
+                    labels: pipeNames,
+                    datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '60%',
+                    plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+                }
+            });
         }, 50);
     }
 
