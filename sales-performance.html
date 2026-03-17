@@ -318,6 +318,15 @@
 
         el.innerHTML = html;
 
+        // DEBUG: dump all row labels so we can see exact sheet structure
+        var debugInfo = '<div id="debug-output" style="background:#fff3cd;border:2px solid #ffc107;padding:12px;margin:12px 0;border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;">';
+        debugInfo += 'DEBUG — Total rows from sheet: ' + rows.length + '\n';
+        rows.forEach(function(r, i) {
+            debugInfo += 'Row ' + i + ': [' + JSON.stringify(gv(r, 0)) + '] col1=' + gv(r, 1) + ' col2=' + gv(r, 2) + '\n';
+        });
+        debugInfo += '</div>';
+        el.insertAdjacentHTML('afterbegin', debugInfo);
+
         // ── Build charts after DOM update ──
         setTimeout(function() {
             try {
@@ -329,9 +338,15 @@
                     repJan.push(gv(r, 1) || 0);
                     repFeb.push(gv(r, 2) || 0);
                 });
-                console.log('Rep chart data:', repNames, repJan, repFeb);
+
+                var repDebug = document.getElementById('debug-output');
+                repDebug.textContent += '\n--- CHART DEBUG ---\n';
+                repDebug.textContent += 'repRows count: ' + repRows.length + '\n';
+                repDebug.textContent += 'repNames: ' + JSON.stringify(repNames) + '\n';
+                repDebug.textContent += 'repJan: ' + JSON.stringify(repJan) + '\n';
+                repDebug.textContent += 'repFeb: ' + JSON.stringify(repFeb) + '\n';
                 var repCanvas = document.getElementById('chart-rep-arr');
-                console.log('Rep canvas found:', !!repCanvas, 'size:', repCanvas && repCanvas.parentElement.offsetWidth, repCanvas && repCanvas.parentElement.offsetHeight);
+                repDebug.textContent += 'canvas: ' + !!repCanvas + ' parentW=' + (repCanvas && repCanvas.parentElement.offsetWidth) + ' parentH=' + (repCanvas && repCanvas.parentElement.offsetHeight) + '\n';
                 new Chart(repCanvas, {
                     type: 'bar',
                     data: {
