@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --bg: #f4f0e6;
@@ -281,10 +281,13 @@
         html += statCard('Win Rate', (winRate.feb * 100).toFixed(0) + '%', pctStr(winRate.jan, winRate.feb), ICONS.trending);
         html += '</div>';
 
+        // TEST chart - hardcoded data
+        html += '<div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">TEST CHART (hardcoded data - delete me)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-test" width="590" height="300"></canvas></div></div></div>';
+
         // Chart row: Rep performance bar chart + Outbound bar chart
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">January vs February comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr" width="590" height="300"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound" width="400" height="300"></canvas></div></div></div>';
         html += '</div>';
 
         // KPI detail row
@@ -329,6 +332,21 @@
 
         // ── Build charts after DOM update ──
         setTimeout(function() {
+            // TEST CHART with hardcoded data
+            try {
+                new Chart(document.getElementById('chart-test'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Alice', 'Bob', 'Carol'],
+                        datasets: [{ label: 'Test', data: [100, 200, 150], backgroundColor: ['red', 'green', 'blue'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+                document.getElementById('debug-output').textContent += 'TEST chart created OK\n';
+            } catch(e) {
+                document.getElementById('debug-output').textContent += 'TEST chart ERROR: ' + e.message + '\n';
+            }
+
             try {
                 // Rep ARR chart
                 var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
