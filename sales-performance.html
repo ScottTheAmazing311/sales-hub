@@ -115,6 +115,11 @@
         .dtable .mono { font-variant-numeric: tabular-nums; font-weight: 600; }
         .dtable .muted { color: var(--muted-fg); }
         .dtable .total-row td { font-weight: 700; border-top: 2px solid var(--primary); background: rgba(234,255,106,0.08); }
+        .dtable-lg { font-size: 0.95rem; }
+        .dtable-lg thead th { font-size: 0.78rem; padding: 0.65rem 1rem; }
+        .dtable-lg tbody td { padding: 0.75rem 1rem; }
+        .dtable .up { color: var(--success); font-weight: 600; }
+        .dtable .down { color: var(--destructive); font-weight: 600; }
 
         /* ── Loading ── */
         .loading { text-align: center; padding: 4rem; color: var(--muted-fg); font-size: 0.85rem; }
@@ -302,28 +307,8 @@
         html += statCard('Win Rate', (wrLast * 100).toFixed(0) + '%', pctStr(wrPrev, wrLast), ICONS.trending, (wrPrev * 100).toFixed(0) + '%');
         html += '</div>';
 
-        // ── MoM Trend Line Charts ──
-        html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">ARR &amp; MRR Trend</div><div class="card-desc">Month-over-month revenue growth</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-revenue"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Deals &amp; Win Rate Trend</div><div class="card-desc">Month-over-month deal velocity</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-deals"></canvas></div></div></div>';
-        html += '</div>';
-
-        html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Trend</div><div class="card-desc">Sets, holds &amp; closed won ARR over time</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-outbound"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Deal Economics Trend</div><div class="card-desc">Avg deal size &amp; sales cycle over time</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-trend-economics"></canvas></div></div></div>';
-        html += '</div>';
-
-        // Chart row: Rep performance bar chart + Outbound bar chart
-        html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + ' comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
-        html += '</div>';
-
-        // KPI detail row
-        html += '<div class="chart-grid">';
-
-        // More KPIs as table
-        html += '<div class="card"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
+        // Key Metrics Detail — full width, right after stat cards
+        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th>';
         monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
         html += '<th>Change</th></tr></thead><tbody>';
         var kpiRows = [
@@ -334,132 +319,40 @@
         ];
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
-            html += '<tr><td>' + k[0] + '</td>';
             var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
-            vals.forEach(function(v) {
+            var ch = vals.length > 1 ? pctStr(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
+            html += '<tr><td>' + k[0] + '</td>';
+            vals.forEach(function(v, vi) {
                 var str;
                 if (k[1] === 'money') str = fmtMoney(v);
                 else if (k[1] === 'days') str = fmtNum(v) + 'd';
                 else if (k[1] === 'pct') str = (v * 100).toFixed(0) + '%';
                 else str = fmtNum(v);
-                html += '<td class="mono">' + str + '</td>';
+                // Color the latest month value red/green based on direction
+                if (vi === vals.length - 1 && vals.length > 1) {
+                    html += '<td class="mono ' + ch.cls + '">' + str + '</td>';
+                } else {
+                    html += '<td class="mono">' + str + '</td>';
+                }
             });
-            var ch = vals.length > 1 ? pctStr(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
             html += '<td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td></tr>';
         });
         html += '</tbody></table></div></div>';
 
-        // Pipeline table
-        var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
-        html += '<div class="card"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+        // Chart row: Rep performance bar chart + Outbound bar chart
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + ' comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
         html += '</div>';
+
+        // Pipeline
+        var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
+        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
 
         el.innerHTML = html;
 
-        // ── Shared line chart options ──
-        var lineOpts = function(yCallback) {
-            return {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { callback: yCallback || function(v) { return v; } } },
-                    x: { grid: { display: false } }
-                },
-                elements: {
-                    line: { tension: 0.3, borderWidth: 2.5 },
-                    point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' }
-                }
-            };
-        };
-
         // ── Build charts ──
         setTimeout(function() {
-            // ── Trend: ARR & MRR ──
-            new Chart(document.getElementById('chart-trend-revenue'), {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [
-                        { label: 'Total ARR', data: monthVals('Total ARR'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff' },
-                        { label: 'Total MRR', data: monthVals('Total MRR'), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointBackgroundColor: '#fff' }
-                    ]
-                },
-                options: lineOpts(function(v) { return fmtMoney(v); })
-            });
-
-            // ── Trend: Deals & Win Rate ──
-            new Chart(document.getElementById('chart-trend-deals'), {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [
-                        { label: 'Deals Closed', data: monthVals('Deals Closed'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff', yAxisID: 'y' },
-                        { label: 'Win Rate %', data: monthVals('Win Rate (From Qualifed)').map(function(v) { return v * 100; }), borderColor: COLORS.success, backgroundColor: COLORS.success, pointBackgroundColor: '#fff', yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
-                    scales: {
-                        y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Deals', font: { size: 11 } } },
-                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return v + '%'; } }, title: { display: true, text: 'Win Rate', font: { size: 11 } } },
-                        x: { grid: { display: false } }
-                    },
-                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
-                }
-            });
-
-            // ── Trend: Outbound ──
-            new Chart(document.getElementById('chart-trend-outbound'), {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [
-                        { label: 'Sets', data: monthVals('Sets'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff' },
-                        { label: 'Holds', data: monthVals('Holds'), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointBackgroundColor: '#fff' },
-                        { label: 'Closed Won ARR', data: monthVals('Closed Won ARR'), borderColor: COLORS.success, backgroundColor: COLORS.success, pointBackgroundColor: '#fff', yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
-                    scales: {
-                        y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Count', font: { size: 11 } } },
-                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return fmtMoney(v); } }, title: { display: true, text: 'ARR', font: { size: 11 } } },
-                        x: { grid: { display: false } }
-                    },
-                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
-                }
-            });
-
-            // ── Trend: Deal Economics ──
-            new Chart(document.getElementById('chart-trend-economics'), {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [
-                        { label: 'Avg ARR/Deal', data: monthVals('Average ARR Per Deal'), borderColor: COLORS.primary, backgroundColor: COLORS.primary, pointBackgroundColor: '#fff', yAxisID: 'y' },
-                        { label: 'Avg Sales Cycle', data: monthVals('Average Sales Cycle (Days)'), borderColor: '#f97316', backgroundColor: '#f97316', pointBackgroundColor: '#fff', yAxisID: 'y1' }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 }, usePointStyle: true } } },
-                    scales: {
-                        y: { beginAtZero: true, position: 'left', ticks: { callback: function(v) { return fmtMoney(v); } }, title: { display: true, text: 'Avg Deal', font: { size: 11 } } },
-                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(v) { return v + 'd'; } }, title: { display: true, text: 'Days', font: { size: 11 } } },
-                        x: { grid: { display: false } }
-                    },
-                    elements: { line: { tension: 0.3, borderWidth: 2.5 }, point: { radius: 5, hoverRadius: 7, borderWidth: 2, backgroundColor: '#fff' } }
-                }
-            });
-
             // ── Rep ARR bar chart ──
             var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
             var repNames = [];
