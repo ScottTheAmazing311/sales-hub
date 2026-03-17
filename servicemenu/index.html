@@ -169,9 +169,11 @@ button { cursor: pointer; font-family: inherit; }
 .hub-body { padding: clamp(1.5rem,4vw,3rem) clamp(1.5rem,5vw,4rem); }
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
+@media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .cards-grid { grid-template-columns: 1fr; } }
 
 /* ==============================================
    CARDS
@@ -804,7 +806,7 @@ button { cursor: pointer; font-family: inherit; }
       <div class="card">
         <div class="card-head">
           <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1rem;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;color:rgba(252,250,236,0.4)">Brand</span>
+            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Brand</span>
           </div>
           <div class="card-name">Brand</div>
         </div>
@@ -858,9 +860,8 @@ button { cursor: pointer; font-family: inherit; }
       <!-- PIMCON -->
       <div class="card">
         <div class="card-head">
-          <div class="card-logo-wrap preserve">
-            <img src="https://www.pimcon.org/wp-content/uploads/2025/11/logo-2026.png" alt="PIMCon"
-              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:var(--font-head);font-size:1.6rem;font-weight:900;color:#fcfaec\'>PIMCon</span>'">
+          <div class="card-logo-wrap">
+            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">PIMCon</span>
           </div>
           <div class="card-name">PIMCon</div>
         </div>
