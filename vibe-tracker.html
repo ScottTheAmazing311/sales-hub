@@ -1539,8 +1539,39 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { closeModal(); closeDetailModal(); closeDetail(); }
 });
 
+// ── Migrate localStorage → Supabase (one-time) ──────────────
+async function migrateLocalStorage() {
+    const STORAGE_KEY = 'vibetracker_projects';
+    const MIGRATED_KEY = 'vibetracker_migrated';
+    if (localStorage.getItem(MIGRATED_KEY)) return;
+    try {
+        const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (local.length === 0) return;
+        // Check which IDs already exist in Supabase
+        const { data: existing } = await sb.from(TABLE).select('id');
+        const existingIds = new Set((existing || []).map(r => r.id));
+        const toMigrate = local.filter(p => !existingIds.has(p.id));
+        if (toMigrate.length > 0) {
+            const rows = toMigrate.map(p => ({
+                id: p.id, name: p.name, description: p.description || '',
+                type: p.type || 'miscellaneous', priority: p.priority || 'medium',
+                status: p.status || 'request', requester: p.requester || '',
+                target_date: p.targetDate || '', tasks: p.tasks || [],
+                notes: p.notes || [],
+                created_at: p.createdAt || new Date().toISOString(),
+                updated_at: p.updatedAt || new Date().toISOString(),
+            }));
+            const { error } = await sb.from(TABLE).insert(rows);
+            if (error) { console.error('Migration error:', error); return; }
+            console.log(`Migrated ${toMigrate.length} projects to Supabase`);
+        }
+        localStorage.setItem(MIGRATED_KEY, 'true');
+    } catch (e) { console.error('Migration failed:', e); }
+}
+
 // ── Init ─────────────────────────────────────────────────────
 (async function init() {
+    await migrateLocalStorage();
     projects = await loadProjects();
     renderCurrentView();
 })();
