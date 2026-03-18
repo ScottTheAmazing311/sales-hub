@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Tracker — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --destructive: #c0392b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Top stripe */
+        .stripe {
+            height: 5px;
+            background: linear-gradient(90deg, var(--navy-light), var(--yellow-warm));
+        }
+
+        /* Header */
+        .header {
+            background: var(--navy);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--navy);
+            border: 2px solid var(--yellow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--yellow);
+        }
+        .header-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700;
+            font-size: 1.35rem;
+            letter-spacing: -0.5px;
+        }
+        .header-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+            opacity: 0.8;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--yellow);
+            color: var(--navy);
+        }
+        .btn-primary:hover { background: var(--yellow-warm); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--cream);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--navy);
+            border: 1px solid rgba(7,55,79,0.2);
+        }
+        .btn-ghost:hover { background: var(--navy); color: var(--cream); }
+        .btn-danger {
+            background: transparent;
+            color: var(--destructive);
+            border: 1px solid rgba(192,57,43,0.2);
+        }
+        .btn-danger:hover { background: var(--destructive); color: white; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.65rem; }
+
+        /* Stats bar */
+        .stats-bar {
+            max-width: 1200px;
+            margin: 1.5rem auto 0;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.sky { color: var(--sky); }
+
+        /* Tabs */
+        .tabs-container {
+            max-width: 1200px;
+            margin: 1.5rem auto 0;
+            padding: 0 2rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid rgba(0,0,0,0.08);
+        }
+        .tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+        }
+        .tab:hover { color: var(--navy); }
+        .tab.active {
+            color: var(--navy);
+            border-bottom-color: var(--yellow);
+        }
+        .tab .count {
+            background: var(--navy);
+            color: var(--cream);
+            font-size: 0.55rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 99px;
+            margin-left: 0.4rem;
+        }
+
+        /* Main content */
+        .main {
+            max-width: 1200px;
+            margin: 1.25rem auto;
+            padding: 0 2rem 3rem;
+        }
+
+        /* Project cards */
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .project-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            padding: 1.25rem 1.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            border-color: var(--sky);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .project-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .project-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--navy);
+        }
+        .project-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Status badges */
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.25rem 0.65rem;
+            border-radius: 99px;
+        }
+        .badge-request {
+            background: rgba(60,148,209,0.12);
+            color: var(--sky);
+        }
+        .badge-planning {
+            background: rgba(234,255,106,0.3);
+            color: #7a8a00;
+        }
+        .badge-building {
+            background: rgba(245,158,11,0.12);
+            color: var(--warning);
+        }
+        .badge-review {
+            background: rgba(14,95,135,0.12);
+            color: var(--navy-light);
+        }
+        .badge-complete {
+            background: rgba(34,197,94,0.12);
+            color: var(--success);
+        }
+        .badge-archived {
+            background: rgba(0,0,0,0.06);
+            color: var(--text-muted);
+        }
+
+        /* Priority */
+        .priority {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .priority-high { color: var(--destructive); }
+        .priority-medium { color: var(--warning); }
+        .priority-low { color: var(--text-muted); }
+
+        .meta-item {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 120px;
+            height: 4px;
+            background: rgba(0,0,0,0.06);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: var(--sky);
+            transition: width 0.3s ease;
+        }
+        .progress-fill.complete { background: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(7,55,79,0.55);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 620px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--navy);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+        }
+        .modal-close:hover { color: var(--text); }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.65rem 0.9rem;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: var(--radius);
+            background: var(--cream);
+            color: var(--text);
+            transition: border-color 0.2s ease;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--sky);
+        }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Detail panel */
+        .detail-panel {
+            display: none;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 1rem;
+        }
+        .detail-panel.active { display: block; }
+        .detail-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .detail-body { padding: 1.5rem; }
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+        .detail-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        .detail-field {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .detail-field-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            min-width: 80px;
+        }
+        .detail-field-value {
+            font-size: 0.85rem;
+        }
+
+        /* Checklist */
+        .checklist { list-style: none; }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        .checklist-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        .checklist-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .checklist-text {
+            font-size: 0.85rem;
+            flex: 1;
+        }
+        .checklist-text.done {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        .checklist-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .checklist-item:hover .checklist-remove { opacity: 1; }
+        .checklist-remove:hover { color: var(--destructive); }
+
+        .add-task-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .add-task-row .form-input { font-size: 0.8rem; padding: 0.45rem 0.75rem; }
+
+        /* Notes */
+        .note-item {
+            padding: 0.75rem;
+            background: var(--cream);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        .note-text {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 0.35rem;
+        }
+        .note-date {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        .empty-state-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+        .empty-state-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem 2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Search */
+        .search-bar {
+            position: relative;
+        }
+        .search-bar .form-input {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: var(--cream);
+            font-size: 0.8rem;
+            padding-left: 2rem;
+            width: 220px;
+        }
+        .search-bar .form-input::placeholder { color: rgba(255,255,255,0.4); }
+        .search-bar .form-input:focus { border-color: var(--yellow); background: rgba(255,255,255,0.15); }
+        .search-icon {
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .header-inner { flex-direction: column; align-items: flex-start; }
+            .form-row { grid-template-columns: 1fr; }
+            .project-card-header { flex-direction: column; }
+            .search-bar .form-input { width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .stats-bar { grid-template-columns: 1fr; }
+            .tabs { overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="header-left">
+            <div class="logo">RK</div>
+            <div>
+                <div class="header-title">Vibe Tracker</div>
+                <div class="header-subtitle">Revenue Kitchen — Project Manager</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="search-bar">
+                <span class="search-icon">⌕</span>
+                <input type="text" class="form-input" placeholder="Search projects..." id="searchInput" oninput="renderProjects()">
+            </div>
+            <button class="btn btn-primary" onclick="openNewProjectModal()">+ New Request</button>
+        </div>
+    </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+    <!-- Populated by JS -->
+</div>
+
+<div class="tabs-container">
+    <div class="tabs" id="tabs">
+        <button class="tab active" data-filter="all" onclick="setFilter('all', this)">All <span class="count" id="count-all">0</span></button>
+        <button class="tab" data-filter="request" onclick="setFilter('request', this)">Requests <span class="count" id="count-request">0</span></button>
+        <button class="tab" data-filter="planning" onclick="setFilter('planning', this)">Planning <span class="count" id="count-planning">0</span></button>
+        <button class="tab" data-filter="building" onclick="setFilter('building', this)">Building <span class="count" id="count-building">0</span></button>
+        <button class="tab" data-filter="review" onclick="setFilter('review', this)">Review <span class="count" id="count-review">0</span></button>
+        <button class="tab" data-filter="complete" onclick="setFilter('complete', this)">Complete <span class="count" id="count-complete">0</span></button>
+    </div>
+</div>
+
+<main class="main">
+    <div class="detail-panel" id="detailPanel">
+        <!-- Populated by JS -->
+    </div>
+    <div class="project-list" id="projectList">
+        <!-- Populated by JS -->
+    </div>
+</main>
+
+<footer class="footer">
+    Revenue Kitchen — Vibe Tracker &copy; 2026
+</footer>
+
+<!-- New Project Modal -->
+<div class="modal-overlay" id="newProjectModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">New Vibe Code Request</div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Project Name</label>
+                <input type="text" class="form-input" id="formName" placeholder="e.g. Client Dashboard Redesign">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="formDesc" placeholder="Describe the vibe code request — what do you want built and why?"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="formPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="formStatus">
+                        <option value="request">Request</option>
+                        <option value="planning">Planning</option>
+                        <option value="building">Building</option>
+                        <option value="review">Review</option>
+                        <option value="complete">Complete</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Requested By</label>
+                <input type="text" class="form-input" id="formRequester" placeholder="Name or team">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Date (optional)</label>
+                <input type="date" class="form-input" id="formDate">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="formSubmitBtn" onclick="saveProject()">Submit Request</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Data Layer (localStorage) ────────────────────────────────
+const STORAGE_KEY = 'vibetracker_projects';
+
+function loadProjects() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch { return []; }
+}
+
+function saveProjects(projects) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+}
+
+function generateId() {
+    return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+// ── State ────────────────────────────────────────────────────
+let projects = loadProjects();
+let currentFilter = 'all';
+let editingId = null;
+let selectedProjectId = null;
+
+// ── Stats ────────────────────────────────────────────────────
+function renderStats() {
+    const total = projects.length;
+    const active = projects.filter(p => ['planning','building','review'].includes(p.status)).length;
+    const complete = projects.filter(p => p.status === 'complete').length;
+    const requests = projects.filter(p => p.status === 'request').length;
+
+    document.getElementById('statsBar').innerHTML = `
+        <div class="stat-card">
+            <div class="stat-label">Total Projects</div>
+            <div class="stat-value">${total}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active</div>
+            <div class="stat-value sky">${active}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value success">${complete}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Pending Requests</div>
+            <div class="stat-value warning">${requests}</div>
+        </div>
+    `;
+}
+
+// ── Tab counts ───────────────────────────────────────────────
+function updateCounts() {
+    document.getElementById('count-all').textContent = projects.length;
+    ['request','planning','building','review','complete'].forEach(s => {
+        document.getElementById('count-' + s).textContent = projects.filter(p => p.status === s).length;
+    });
+}
+
+function setFilter(filter, tabEl) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+    closeDetail();
+    renderProjects();
+}
+
+// ── Render project list ──────────────────────────────────────
+function renderProjects() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = projects;
+
+    if (currentFilter !== 'all') {
+        filtered = filtered.filter(p => p.status === currentFilter);
+    }
+    if (search) {
+        filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(search) ||
+            p.description.toLowerCase().includes(search) ||
+            (p.requester || '').toLowerCase().includes(search)
+        );
+    }
+
+    // Sort: requests first, then by date descending
+    const statusOrder = { request: 0, planning: 1, building: 2, review: 3, complete: 4 };
+    filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.createdAt) - new Date(a.createdAt));
+
+    const list = document.getElementById('projectList');
+
+    if (filtered.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">◇</div>
+                <div class="empty-state-title">No projects yet</div>
+                <div class="empty-state-desc">Click "+ New Request" to submit your first vibe code request.</div>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = filtered.map(p => {
+        const tasks = p.tasks || [];
+        const doneTasks = tasks.filter(t => t.done).length;
+        const progress = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
+        const isComplete = progress === 100 && tasks.length > 0;
+
+        return `
+        <div class="project-card" onclick="openDetail('${p.id}')">
+            <div class="project-card-header">
+                <div>
+                    <div class="project-name">${escapeHtml(p.name)}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span class="priority priority-${p.priority}">${p.priority}</span>
+                    <span class="badge badge-${p.status}">${p.status}</span>
+                </div>
+            </div>
+            <div class="project-desc">${escapeHtml(p.description || '—')}</div>
+            <div class="project-meta">
+                ${p.requester ? `<span class="meta-item">▪ ${escapeHtml(p.requester)}</span>` : ''}
+                ${p.targetDate ? `<span class="meta-item">▪ Due ${p.targetDate}</span>` : ''}
+                <span class="meta-item">▪ Created ${formatDate(p.createdAt)}</span>
+                ${tasks.length > 0 ? `
+                    <span class="meta-item">${doneTasks}/${tasks.length} tasks</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill${isComplete ? ' complete' : ''}" style="width:${progress}%"></div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+        `;
+    }).join('');
+
+    renderStats();
+    updateCounts();
+}
+
+// ── Detail panel ─────────────────────────────────────────────
+function openDetail(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    selectedProjectId = id;
+
+    const tasks = p.tasks || [];
+    const notes = p.notes || [];
+    const doneTasks = tasks.filter(t => t.done).length;
+    const progress = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
+
+    const panel = document.getElementById('detailPanel');
+    panel.innerHTML = `
+        <div class="detail-header">
+            <div>
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.25rem;">
+                    <span class="project-name" style="font-size:1.15rem;">${escapeHtml(p.name)}</span>
+                    <span class="badge badge-${p.status}">${p.status}</span>
+                    <span class="priority priority-${p.priority}">${p.priority} priority</span>
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">${escapeHtml(p.description || '')}</div>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-ghost btn-sm" onclick="openEditModal('${p.id}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">Delete</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeDetail()">✕</button>
+            </div>
+        </div>
+        <div class="detail-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+                <div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">Details</div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Requester</span>
+                            <span class="detail-field-value">${escapeHtml(p.requester || '—')}</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Target</span>
+                            <span class="detail-field-value">${p.targetDate || '—'}</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Created</span>
+                            <span class="detail-field-value">${formatDate(p.createdAt)}</span>
+                        </div>
+                        <div class="detail-field">
+                            <span class="detail-field-label">Progress</span>
+                            <span class="detail-field-value" style="display:flex; align-items:center; gap:0.5rem;">
+                                ${progress}%
+                                <div class="progress-bar" style="width:80px;">
+                                    <div class="progress-fill${progress === 100 && tasks.length > 0 ? ' complete' : ''}" style="width:${progress}%"></div>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-section-title">Status</div>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            ${['request','planning','building','review','complete'].map(s => `
+                                <button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}')">${s}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">Tasks (${doneTasks}/${tasks.length})</div>
+                        <ul class="checklist">
+                            ${tasks.map((t, i) => `
+                                <li class="checklist-item">
+                                    <div class="checklist-checkbox${t.done ? ' checked' : ''}" onclick="toggleTask('${p.id}', ${i})"></div>
+                                    <span class="checklist-text${t.done ? ' done' : ''}">${escapeHtml(t.text)}</span>
+                                    <button class="checklist-remove" onclick="removeTask('${p.id}', ${i})">✕</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="add-task-row">
+                            <input type="text" class="form-input" id="newTaskInput" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTask('${p.id}')">
+                            <button class="btn btn-ghost btn-sm" onclick="addTask('${p.id}')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section" style="margin-top:1rem;">
+                <div class="detail-section-title">Notes</div>
+                ${notes.map((n, i) => `
+                    <div class="note-item">
+                        <div class="note-text">${escapeHtml(n.text)}</div>
+                        <div class="note-date">${formatDate(n.date)} <button class="checklist-remove" style="opacity:1; font-size:0.65rem;" onclick="removeNote('${p.id}', ${i})">remove</button></div>
+                    </div>
+                `).join('')}
+                <div class="add-task-row" style="margin-top:0.5rem;">
+                    <input type="text" class="form-input" id="newNoteInput" placeholder="Add a note..." onkeydown="if(event.key==='Enter')addNote('${p.id}')">
+                    <button class="btn btn-ghost btn-sm" onclick="addNote('${p.id}')">Add</button>
+                </div>
+            </div>
+        </div>
+    `;
+    panel.classList.add('active');
+}
+
+function closeDetail() {
+    selectedProjectId = null;
+    document.getElementById('detailPanel').classList.remove('active');
+}
+
+// ── CRUD ─────────────────────────────────────────────────────
+function openNewProjectModal() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'New Vibe Code Request';
+    document.getElementById('formSubmitBtn').textContent = 'Submit Request';
+    document.getElementById('formName').value = '';
+    document.getElementById('formDesc').value = '';
+    document.getElementById('formPriority').value = 'medium';
+    document.getElementById('formStatus').value = 'request';
+    document.getElementById('formRequester').value = '';
+    document.getElementById('formDate').value = '';
+    document.getElementById('newProjectModal').classList.add('active');
+    document.getElementById('formName').focus();
+}
+
+function openEditModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('modalTitle').textContent = 'Edit Project';
+    document.getElementById('formSubmitBtn').textContent = 'Save Changes';
+    document.getElementById('formName').value = p.name;
+    document.getElementById('formDesc').value = p.description || '';
+    document.getElementById('formPriority').value = p.priority;
+    document.getElementById('formStatus').value = p.status;
+    document.getElementById('formRequester').value = p.requester || '';
+    document.getElementById('formDate').value = p.targetDate || '';
+    document.getElementById('newProjectModal').classList.add('active');
+    document.getElementById('formName').focus();
+}
+
+function closeModal() {
+    document.getElementById('newProjectModal').classList.remove('active');
+    editingId = null;
+}
+
+function saveProject() {
+    const name = document.getElementById('formName').value.trim();
+    if (!name) { document.getElementById('formName').style.borderColor = 'var(--destructive)'; return; }
+
+    const data = {
+        name,
+        description: document.getElementById('formDesc').value.trim(),
+        priority: document.getElementById('formPriority').value,
+        status: document.getElementById('formStatus').value,
+        requester: document.getElementById('formRequester').value.trim(),
+        targetDate: document.getElementById('formDate').value,
+    };
+
+    if (editingId) {
+        const idx = projects.findIndex(p => p.id === editingId);
+        if (idx !== -1) {
+            projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
+        }
+    } else {
+        projects.push({
+            id: generateId(),
+            ...data,
+            tasks: [],
+            notes: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
+    }
+
+    saveProjects(projects);
+    closeModal();
+    renderProjects();
+    if (editingId && selectedProjectId === editingId) openDetail(editingId);
+}
+
+function deleteProject(id) {
+    if (!confirm('Delete this project? This cannot be undone.')) return;
+    projects = projects.filter(p => p.id !== id);
+    saveProjects(projects);
+    closeDetail();
+    renderProjects();
+}
+
+function updateStatus(id, status) {
+    const p = projects.find(x => x.id === id);
+    if (p) {
+        p.status = status;
+        p.updatedAt = new Date().toISOString();
+        saveProjects(projects);
+        renderProjects();
+        openDetail(id);
+    }
+}
+
+// ── Tasks ────────────────────────────────────────────────────
+function addTask(id) {
+    const input = document.getElementById('newTaskInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    if (!p.tasks) p.tasks = [];
+    p.tasks.push({ text, done: false });
+    p.updatedAt = new Date().toISOString();
+    saveProjects(projects);
+    input.value = '';
+    renderProjects();
+    openDetail(id);
+}
+
+function toggleTask(id, idx) {
+    const p = projects.find(x => x.id === id);
+    if (p && p.tasks && p.tasks[idx] !== undefined) {
+        p.tasks[idx].done = !p.tasks[idx].done;
+        p.updatedAt = new Date().toISOString();
+        saveProjects(projects);
+        renderProjects();
+        openDetail(id);
+    }
+}
+
+function removeTask(id, idx) {
+    const p = projects.find(x => x.id === id);
+    if (p && p.tasks) {
+        p.tasks.splice(idx, 1);
+        p.updatedAt = new Date().toISOString();
+        saveProjects(projects);
+        renderProjects();
+        openDetail(id);
+    }
+}
+
+// ── Notes ────────────────────────────────────────────────────
+function addNote(id) {
+    const input = document.getElementById('newNoteInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    if (!p.notes) p.notes = [];
+    p.notes.unshift({ text, date: new Date().toISOString() });
+    p.updatedAt = new Date().toISOString();
+    saveProjects(projects);
+    input.value = '';
+    renderProjects();
+    openDetail(id);
+}
+
+function removeNote(id, idx) {
+    const p = projects.find(x => x.id === id);
+    if (p && p.notes) {
+        p.notes.splice(idx, 1);
+        p.updatedAt = new Date().toISOString();
+        saveProjects(projects);
+        renderProjects();
+        openDetail(id);
+    }
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+
+function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Close modal on overlay click
+document.getElementById('newProjectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// Keyboard shortcut: Escape to close
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+        closeDetail();
+    }
+});
+
+// ── Init ─────────────────────────────────────────────────────
+renderStats();
+updateCounts();
+renderProjects();
+</script>
+
+</body>
+</html>
