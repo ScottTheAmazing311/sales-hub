@@ -46,13 +46,14 @@
             padding: 1.5rem 2rem;
         }
         .header-inner {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 1rem;
+            padding: 0 0.5rem;
         }
         .header-left {
             display: flex;
@@ -134,11 +135,36 @@
         .btn-danger:hover { background: var(--destructive); color: white; }
         .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.65rem; }
 
+        /* View toggle */
+        .view-toggle {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .view-toggle-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 0.9rem;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .view-toggle-btn.active {
+            background: var(--yellow);
+            color: var(--navy);
+        }
+        .view-toggle-btn:hover:not(.active) { color: var(--cream); }
+
         /* Stats bar */
         .stats-bar {
-            max-width: 1200px;
-            margin: 1.5rem auto 0;
-            padding: 0 2rem;
+            margin: 1.5rem 2rem 0;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
@@ -168,11 +194,160 @@
         .stat-value.warning { color: var(--warning); }
         .stat-value.sky { color: var(--sky); }
 
-        /* Tabs */
+        /* ═══════════════════════════════════════════ */
+        /* KANBAN BOARD                                */
+        /* ═══════════════════════════════════════════ */
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin: 1.25rem 2rem 3rem;
+            min-height: 60vh;
+        }
+        .kanban-column {
+            background: rgba(0,0,0,0.03);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+        }
+        .kanban-column.drag-over {
+            background: rgba(60,148,209,0.08);
+            outline: 2px dashed var(--sky);
+            outline-offset: -2px;
+        }
+        .kanban-column-header {
+            padding: 1rem 1rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .kanban-column-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+        .kanban-column-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55rem;
+            font-weight: 600;
+            background: var(--navy);
+            color: var(--cream);
+            padding: 0.1rem 0.45rem;
+            border-radius: 99px;
+        }
+        .kanban-column-accent {
+            height: 3px;
+            margin: 0 1rem;
+            border-radius: 99px;
+        }
+        .kanban-column[data-status="request"] .kanban-column-accent { background: var(--sky); }
+        .kanban-column[data-status="planning"] .kanban-column-accent { background: var(--yellow); }
+        .kanban-column[data-status="building"] .kanban-column-accent { background: var(--warning); }
+        .kanban-column[data-status="review"] .kanban-column-accent { background: var(--navy-light); }
+        .kanban-column[data-status="complete"] .kanban-column-accent { background: var(--success); }
+
+        .kanban-cards {
+            flex: 1;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 60px;
+        }
+
+        .kanban-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            cursor: grab;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .kanban-card:hover {
+            border-color: var(--sky);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .kanban-card.dragging {
+            opacity: 0.4;
+            transform: rotate(2deg);
+        }
+        .kanban-card-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--navy);
+            margin-bottom: 0.35rem;
+            line-height: 1.3;
+        }
+        .kanban-card-desc {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .kanban-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .kanban-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .kanban-card-meta .meta-item { font-size: 0.58rem; }
+        .kanban-card-priority {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+        .kanban-card-priority.high { background: rgba(192,57,43,0.1); color: var(--destructive); }
+        .kanban-card-priority.medium { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .kanban-card-priority.low { background: rgba(0,0,0,0.05); color: var(--text-muted); }
+
+        .kanban-card-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .kanban-card-progress .meta-item { font-size: 0.55rem; }
+        .kanban-card-progress .progress-bar { width: 50px; height: 3px; }
+
+        .kanban-empty {
+            text-align: center;
+            padding: 2rem 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* ═══════════════════════════════════════════ */
+        /* LIST VIEW                                   */
+        /* ═══════════════════════════════════════════ */
+        .list-view {
+            margin: 0 2rem 3rem;
+        }
         .tabs-container {
-            max-width: 1200px;
-            margin: 1.5rem auto 0;
-            padding: 0 2rem;
+            margin: 1.5rem 2rem 0;
         }
         .tabs {
             display: flex;
@@ -270,30 +445,11 @@
             padding: 0.25rem 0.65rem;
             border-radius: 99px;
         }
-        .badge-request {
-            background: rgba(60,148,209,0.12);
-            color: var(--sky);
-        }
-        .badge-planning {
-            background: rgba(234,255,106,0.3);
-            color: #7a8a00;
-        }
-        .badge-building {
-            background: rgba(245,158,11,0.12);
-            color: var(--warning);
-        }
-        .badge-review {
-            background: rgba(14,95,135,0.12);
-            color: var(--navy-light);
-        }
-        .badge-complete {
-            background: rgba(34,197,94,0.12);
-            color: var(--success);
-        }
-        .badge-archived {
-            background: rgba(0,0,0,0.06);
-            color: var(--text-muted);
-        }
+        .badge-request { background: rgba(60,148,209,0.12); color: var(--sky); }
+        .badge-planning { background: rgba(234,255,106,0.3); color: #7a8a00; }
+        .badge-building { background: rgba(245,158,11,0.12); color: var(--warning); }
+        .badge-review { background: rgba(14,95,135,0.12); color: var(--navy-light); }
+        .badge-complete { background: rgba(34,197,94,0.12); color: var(--success); }
 
         /* Priority */
         .priority {
@@ -385,9 +541,7 @@
         }
 
         /* Form */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
+        .form-group { margin-bottom: 1.25rem; }
         .form-label {
             display: block;
             font-family: 'IBM Plex Mono', monospace;
@@ -438,9 +592,7 @@
             align-items: flex-start;
         }
         .detail-body { padding: 1.5rem; }
-        .detail-section {
-            margin-bottom: 1.5rem;
-        }
+        .detail-section { margin-bottom: 1.5rem; }
         .detail-section-title {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.6rem;
@@ -461,9 +613,7 @@
             color: var(--text-muted);
             min-width: 80px;
         }
-        .detail-field-value {
-            font-size: 0.85rem;
-        }
+        .detail-field-value { font-size: 0.85rem; }
 
         /* Checklist */
         .checklist { list-style: none; }
@@ -497,10 +647,7 @@
             font-size: 0.7rem;
             font-weight: 700;
         }
-        .checklist-text {
-            font-size: 0.85rem;
-            flex: 1;
-        }
+        .checklist-text { font-size: 0.85rem; flex: 1; }
         .checklist-text.done {
             text-decoration: line-through;
             color: var(--text-muted);
@@ -575,9 +722,7 @@
         }
 
         /* Search */
-        .search-bar {
-            position: relative;
-        }
+        .search-bar { position: relative; }
         .search-bar .form-input {
             background: rgba(255,255,255,0.1);
             border-color: rgba(255,255,255,0.2);
@@ -597,13 +742,26 @@
             font-size: 0.8rem;
         }
 
+        /* Hide/show views */
+        .hidden { display: none !important; }
+
         /* Responsive */
+        @media (max-width: 1024px) {
+            .kanban {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
         @media (max-width: 768px) {
             .stats-bar { grid-template-columns: repeat(2, 1fr); }
             .header-inner { flex-direction: column; align-items: flex-start; }
             .form-row { grid-template-columns: 1fr; }
             .project-card-header { flex-direction: column; }
             .search-bar .form-input { width: 100%; }
+            .kanban {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+            }
+            .kanban-column { min-height: 100px; }
         }
         @media (max-width: 480px) {
             .stats-bar { grid-template-columns: 1fr; }
@@ -627,42 +785,58 @@
         <div class="header-right">
             <div class="search-bar">
                 <span class="search-icon">⌕</span>
-                <input type="text" class="form-input" placeholder="Search projects..." id="searchInput" oninput="renderProjects()">
+                <input type="text" class="form-input" placeholder="Search projects..." id="searchInput" oninput="renderCurrentView()">
+            </div>
+            <div class="view-toggle">
+                <button class="view-toggle-btn active" id="viewBoard" onclick="setView('board')">Board</button>
+                <button class="view-toggle-btn" id="viewList" onclick="setView('list')">List</button>
             </div>
             <button class="btn btn-primary" onclick="openNewProjectModal()">+ New Request</button>
         </div>
     </div>
 </header>
 
-<div class="stats-bar" id="statsBar">
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- KANBAN BOARD VIEW -->
+<div class="kanban" id="kanbanBoard">
     <!-- Populated by JS -->
 </div>
 
-<div class="tabs-container">
-    <div class="tabs" id="tabs">
-        <button class="tab active" data-filter="all" onclick="setFilter('all', this)">All <span class="count" id="count-all">0</span></button>
-        <button class="tab" data-filter="request" onclick="setFilter('request', this)">Requests <span class="count" id="count-request">0</span></button>
-        <button class="tab" data-filter="planning" onclick="setFilter('planning', this)">Planning <span class="count" id="count-planning">0</span></button>
-        <button class="tab" data-filter="building" onclick="setFilter('building', this)">Building <span class="count" id="count-building">0</span></button>
-        <button class="tab" data-filter="review" onclick="setFilter('review', this)">Review <span class="count" id="count-review">0</span></button>
-        <button class="tab" data-filter="complete" onclick="setFilter('complete', this)">Complete <span class="count" id="count-complete">0</span></button>
+<!-- LIST VIEW -->
+<div class="hidden" id="listViewWrapper">
+    <div class="tabs-container">
+        <div class="tabs" id="tabs">
+            <button class="tab active" data-filter="all" onclick="setFilter('all', this)">All <span class="count" id="count-all">0</span></button>
+            <button class="tab" data-filter="request" onclick="setFilter('request', this)">Requests <span class="count" id="count-request">0</span></button>
+            <button class="tab" data-filter="planning" onclick="setFilter('planning', this)">Planning <span class="count" id="count-planning">0</span></button>
+            <button class="tab" data-filter="building" onclick="setFilter('building', this)">Building <span class="count" id="count-building">0</span></button>
+            <button class="tab" data-filter="review" onclick="setFilter('review', this)">Review <span class="count" id="count-review">0</span></button>
+            <button class="tab" data-filter="complete" onclick="setFilter('complete', this)">Complete <span class="count" id="count-complete">0</span></button>
+        </div>
+    </div>
+    <div class="main">
+        <div class="detail-panel" id="detailPanel"></div>
+        <div class="project-list" id="projectList"></div>
     </div>
 </div>
-
-<main class="main">
-    <div class="detail-panel" id="detailPanel">
-        <!-- Populated by JS -->
-    </div>
-    <div class="project-list" id="projectList">
-        <!-- Populated by JS -->
-    </div>
-</main>
 
 <footer class="footer">
     Revenue Kitchen — Vibe Tracker &copy; 2026
 </footer>
 
-<!-- New Project Modal -->
+<!-- Detail Modal (used by kanban) -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal" style="max-width:720px;">
+        <div class="modal-header">
+            <div class="modal-title" id="detailModalTitle">Project Details</div>
+            <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="detailModalBody"></div>
+    </div>
+</div>
+
+<!-- New/Edit Project Modal -->
 <div class="modal-overlay" id="newProjectModal">
     <div class="modal">
         <div class="modal-header">
@@ -715,28 +889,42 @@
 </div>
 
 <script>
-// ── Data Layer (localStorage) ────────────────────────────────
+// ── Data Layer ───────────────────────────────────────────────
 const STORAGE_KEY = 'vibetracker_projects';
+const STATUSES = ['request','planning','building','review','complete'];
+const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', review: 'Review', complete: 'Complete' };
 
 function loadProjects() {
-    try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
 }
-
-function saveProjects(projects) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-}
-
-function generateId() {
-    return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-}
+function saveProjects(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+function generateId() { return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
 // ── State ────────────────────────────────────────────────────
 let projects = loadProjects();
 let currentFilter = 'all';
+let currentView = 'board';
 let editingId = null;
 let selectedProjectId = null;
+let draggedId = null;
+
+// ── View toggle ──────────────────────────────────────────────
+function setView(view) {
+    currentView = view;
+    document.getElementById('viewBoard').classList.toggle('active', view === 'board');
+    document.getElementById('viewList').classList.toggle('active', view === 'list');
+    document.getElementById('kanbanBoard').classList.toggle('hidden', view !== 'board');
+    document.getElementById('listViewWrapper').classList.toggle('hidden', view !== 'list');
+    renderCurrentView();
+}
+
+function renderCurrentView() {
+    renderStats();
+    updateCounts();
+    if (currentView === 'board') renderKanban();
+    else renderProjects();
+}
 
 // ── Stats ────────────────────────────────────────────────────
 function renderStats() {
@@ -744,35 +932,222 @@ function renderStats() {
     const active = projects.filter(p => ['planning','building','review'].includes(p.status)).length;
     const complete = projects.filter(p => p.status === 'complete').length;
     const requests = projects.filter(p => p.status === 'request').length;
-
     document.getElementById('statsBar').innerHTML = `
-        <div class="stat-card">
-            <div class="stat-label">Total Projects</div>
-            <div class="stat-value">${total}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Active</div>
-            <div class="stat-value sky">${active}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Completed</div>
-            <div class="stat-value success">${complete}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Pending Requests</div>
-            <div class="stat-value warning">${requests}</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Total Projects</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value sky">${active}</div></div>
+        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value success">${complete}</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Requests</div><div class="stat-value warning">${requests}</div></div>
     `;
 }
 
-// ── Tab counts ───────────────────────────────────────────────
 function updateCounts() {
-    document.getElementById('count-all').textContent = projects.length;
-    ['request','planning','building','review','complete'].forEach(s => {
-        document.getElementById('count-' + s).textContent = projects.filter(p => p.status === s).length;
+    const el = id => document.getElementById(id);
+    if (el('count-all')) el('count-all').textContent = projects.length;
+    STATUSES.forEach(s => { if (el('count-' + s)) el('count-' + s).textContent = projects.filter(p => p.status === s).length; });
+}
+
+// ═══════════════════════════════════════════════════════════
+// KANBAN BOARD
+// ═══════════════════════════════════════════════════════════
+function renderKanban() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const board = document.getElementById('kanbanBoard');
+
+    board.innerHTML = STATUSES.map(status => {
+        let cards = projects.filter(p => p.status === status);
+        if (search) {
+            cards = cards.filter(p =>
+                p.name.toLowerCase().includes(search) ||
+                (p.description || '').toLowerCase().includes(search) ||
+                (p.requester || '').toLowerCase().includes(search)
+            );
+        }
+        // Sort by priority (high first), then by date
+        const prioOrder = { high: 0, medium: 1, low: 2 };
+        cards.sort((a, b) => prioOrder[a.priority] - prioOrder[b.priority] || new Date(b.createdAt) - new Date(a.createdAt));
+
+        return `
+        <div class="kanban-column" data-status="${status}"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${status}')">
+            <div class="kanban-column-header">
+                <span class="kanban-column-title">${STATUS_LABELS[status]}</span>
+                <span class="kanban-column-count">${cards.length}</span>
+            </div>
+            <div class="kanban-column-accent"></div>
+            <div class="kanban-cards" data-status="${status}"
+                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${status}')">
+                ${cards.length === 0 ? '<div class="kanban-empty">Drop here</div>' : cards.map(p => renderKanbanCard(p)).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderKanbanCard(p) {
+    const tasks = p.tasks || [];
+    const done = tasks.filter(t => t.done).length;
+    const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
+    const isComplete = progress === 100 && tasks.length > 0;
+
+    return `
+    <div class="kanban-card" draggable="true" data-id="${p.id}"
+         ondragstart="onDragStart(event, '${p.id}')" ondragend="onDragEnd(event)"
+         onclick="openDetailModal('${p.id}')">
+        <div class="kanban-card-name">${escapeHtml(p.name)}</div>
+        ${p.description ? `<div class="kanban-card-desc">${escapeHtml(p.description)}</div>` : ''}
+        <div class="kanban-card-footer">
+            <div class="kanban-card-meta">
+                <span class="kanban-card-priority ${p.priority}">${p.priority}</span>
+                ${p.requester ? `<span class="meta-item">${escapeHtml(p.requester)}</span>` : ''}
+            </div>
+            ${tasks.length > 0 ? `
+                <div class="kanban-card-progress">
+                    <span class="meta-item">${done}/${tasks.length}</span>
+                    <div class="progress-bar" style="width:50px; height:3px;">
+                        <div class="progress-fill${isComplete ? ' complete' : ''}" style="width:${progress}%"></div>
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    </div>`;
+}
+
+// ── Drag & Drop ──────────────────────────────────────────────
+function onDragStart(e, id) {
+    draggedId = id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+    requestAnimationFrame(() => {
+        const el = document.querySelector(`.kanban-card[data-id="${id}"]`);
+        if (el) el.classList.add('dragging');
     });
 }
 
+function onDragEnd(e) {
+    document.querySelectorAll('.kanban-card.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.kanban-column.drag-over').forEach(el => el.classList.remove('drag-over'));
+    draggedId = null;
+}
+
+function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const col = e.target.closest('.kanban-column');
+    if (col) col.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+    const col = e.target.closest('.kanban-column');
+    if (col && !col.contains(e.relatedTarget)) {
+        col.classList.remove('drag-over');
+    }
+}
+
+function onDrop(e, newStatus) {
+    e.preventDefault();
+    const col = e.target.closest('.kanban-column');
+    if (col) col.classList.remove('drag-over');
+
+    const id = e.dataTransfer.getData('text/plain') || draggedId;
+    if (!id) return;
+
+    const p = projects.find(x => x.id === id);
+    if (p && p.status !== newStatus) {
+        p.status = newStatus;
+        p.updatedAt = new Date().toISOString();
+        saveProjects(projects);
+        renderCurrentView();
+    }
+}
+
+// ── Detail Modal (for kanban card click) ─────────────────────
+function openDetailModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    selectedProjectId = id;
+
+    const tasks = p.tasks || [];
+    const notes = p.notes || [];
+    const done = tasks.filter(t => t.done).length;
+    const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
+
+    document.getElementById('detailModalTitle').textContent = p.name;
+    document.getElementById('detailModalBody').innerHTML = `
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+            <span class="badge badge-${p.status}">${p.status}</span>
+            <span class="priority priority-${p.priority}">${p.priority} priority</span>
+            <div style="margin-left:auto; display:flex; gap:0.5rem;">
+                <button class="btn btn-ghost btn-sm" onclick="openEditModal('${p.id}'); closeDetailModal();">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}'); closeDetailModal();">Delete</button>
+            </div>
+        </div>
+        ${p.description ? `<div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.5;">${escapeHtml(p.description)}</div>` : ''}
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+            <div>
+                <div class="detail-section">
+                    <div class="detail-section-title">Details</div>
+                    <div class="detail-field"><span class="detail-field-label">Requester</span><span class="detail-field-value">${escapeHtml(p.requester || '—')}</span></div>
+                    <div class="detail-field"><span class="detail-field-label">Target</span><span class="detail-field-value">${p.targetDate || '—'}</span></div>
+                    <div class="detail-field"><span class="detail-field-label">Created</span><span class="detail-field-value">${formatDate(p.createdAt)}</span></div>
+                    <div class="detail-field"><span class="detail-field-label">Progress</span>
+                        <span class="detail-field-value" style="display:flex; align-items:center; gap:0.5rem;">
+                            ${progress}%
+                            <div class="progress-bar" style="width:80px;"><div class="progress-fill${progress === 100 && tasks.length ? ' complete' : ''}" style="width:${progress}%"></div></div>
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-section-title">Move to</div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        ${STATUSES.map(s => `<button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}'); openDetailModal('${p.id}');">${s}</button>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="detail-section">
+                    <div class="detail-section-title">Tasks (${done}/${tasks.length})</div>
+                    <ul class="checklist">
+                        ${tasks.map((t, i) => `
+                            <li class="checklist-item">
+                                <div class="checklist-checkbox${t.done ? ' checked' : ''}" onclick="toggleTask('${p.id}', ${i}); openDetailModal('${p.id}');"></div>
+                                <span class="checklist-text${t.done ? ' done' : ''}">${escapeHtml(t.text)}</span>
+                                <button class="checklist-remove" onclick="removeTask('${p.id}', ${i}); openDetailModal('${p.id}');">✕</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="add-task-row">
+                        <input type="text" class="form-input" id="newTaskInput" placeholder="Add a task..." onkeydown="if(event.key==='Enter'){addTask('${p.id}'); openDetailModal('${p.id}');}">
+                        <button class="btn btn-ghost btn-sm" onclick="addTask('${p.id}'); openDetailModal('${p.id}');">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section" style="margin-top:1rem;">
+            <div class="detail-section-title">Notes</div>
+            ${notes.map((n, i) => `
+                <div class="note-item">
+                    <div class="note-text">${escapeHtml(n.text)}</div>
+                    <div class="note-date">${formatDate(n.date)} <button class="checklist-remove" style="opacity:1; font-size:0.65rem;" onclick="removeNote('${p.id}', ${i}); openDetailModal('${p.id}');">remove</button></div>
+                </div>
+            `).join('')}
+            <div class="add-task-row" style="margin-top:0.5rem;">
+                <input type="text" class="form-input" id="newNoteInput" placeholder="Add a note..." onkeydown="if(event.key==='Enter'){addNote('${p.id}'); openDetailModal('${p.id}');}">
+                <button class="btn btn-ghost btn-sm" onclick="addNote('${p.id}'); openDetailModal('${p.id}');">Add</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('active');
+    selectedProjectId = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIST VIEW (existing)
+// ═══════════════════════════════════════════════════════════
 function setFilter(filter, tabEl) {
     currentFilter = filter;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -781,51 +1156,29 @@ function setFilter(filter, tabEl) {
     renderProjects();
 }
 
-// ── Render project list ──────────────────────────────────────
 function renderProjects() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     let filtered = projects;
+    if (currentFilter !== 'all') filtered = filtered.filter(p => p.status === currentFilter);
+    if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.requester || '').toLowerCase().includes(search));
 
-    if (currentFilter !== 'all') {
-        filtered = filtered.filter(p => p.status === currentFilter);
-    }
-    if (search) {
-        filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(search) ||
-            p.description.toLowerCase().includes(search) ||
-            (p.requester || '').toLowerCase().includes(search)
-        );
-    }
-
-    // Sort: requests first, then by date descending
     const statusOrder = { request: 0, planning: 1, building: 2, review: 3, complete: 4 };
     filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.createdAt) - new Date(a.createdAt));
 
     const list = document.getElementById('projectList');
-
     if (filtered.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">◇</div>
-                <div class="empty-state-title">No projects yet</div>
-                <div class="empty-state-desc">Click "+ New Request" to submit your first vibe code request.</div>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">◇</div><div class="empty-state-title">No projects yet</div><div class="empty-state-desc">Click "+ New Request" to submit your first vibe code request.</div></div>`;
         return;
     }
-
     list.innerHTML = filtered.map(p => {
         const tasks = p.tasks || [];
-        const doneTasks = tasks.filter(t => t.done).length;
-        const progress = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
+        const done = tasks.filter(t => t.done).length;
+        const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
         const isComplete = progress === 100 && tasks.length > 0;
-
         return `
         <div class="project-card" onclick="openDetail('${p.id}')">
             <div class="project-card-header">
-                <div>
-                    <div class="project-name">${escapeHtml(p.name)}</div>
-                </div>
+                <div><div class="project-name">${escapeHtml(p.name)}</div></div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
                     <span class="priority priority-${p.priority}">${p.priority}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
@@ -836,31 +1189,21 @@ function renderProjects() {
                 ${p.requester ? `<span class="meta-item">▪ ${escapeHtml(p.requester)}</span>` : ''}
                 ${p.targetDate ? `<span class="meta-item">▪ Due ${p.targetDate}</span>` : ''}
                 <span class="meta-item">▪ Created ${formatDate(p.createdAt)}</span>
-                ${tasks.length > 0 ? `
-                    <span class="meta-item">${doneTasks}/${tasks.length} tasks</span>
-                    <div class="progress-bar">
-                        <div class="progress-fill${isComplete ? ' complete' : ''}" style="width:${progress}%"></div>
-                    </div>
-                ` : ''}
+                ${tasks.length > 0 ? `<span class="meta-item">${done}/${tasks.length} tasks</span><div class="progress-bar"><div class="progress-fill${isComplete ? ' complete' : ''}" style="width:${progress}%"></div></div>` : ''}
             </div>
-        </div>
-        `;
+        </div>`;
     }).join('');
-
-    renderStats();
-    updateCounts();
 }
 
-// ── Detail panel ─────────────────────────────────────────────
+// ── Detail panel (list view) ─────────────────────────────────
 function openDetail(id) {
     const p = projects.find(x => x.id === id);
     if (!p) return;
     selectedProjectId = id;
-
     const tasks = p.tasks || [];
     const notes = p.notes || [];
-    const doneTasks = tasks.filter(t => t.done).length;
-    const progress = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0;
+    const done = tasks.filter(t => t.done).length;
+    const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
 
     const panel = document.getElementById('detailPanel');
     panel.innerHTML = `
@@ -884,42 +1227,25 @@ function openDetail(id) {
                 <div>
                     <div class="detail-section">
                         <div class="detail-section-title">Details</div>
-                        <div class="detail-field">
-                            <span class="detail-field-label">Requester</span>
-                            <span class="detail-field-value">${escapeHtml(p.requester || '—')}</span>
-                        </div>
-                        <div class="detail-field">
-                            <span class="detail-field-label">Target</span>
-                            <span class="detail-field-value">${p.targetDate || '—'}</span>
-                        </div>
-                        <div class="detail-field">
-                            <span class="detail-field-label">Created</span>
-                            <span class="detail-field-value">${formatDate(p.createdAt)}</span>
-                        </div>
-                        <div class="detail-field">
-                            <span class="detail-field-label">Progress</span>
-                            <span class="detail-field-value" style="display:flex; align-items:center; gap:0.5rem;">
-                                ${progress}%
-                                <div class="progress-bar" style="width:80px;">
-                                    <div class="progress-fill${progress === 100 && tasks.length > 0 ? ' complete' : ''}" style="width:${progress}%"></div>
-                                </div>
+                        <div class="detail-field"><span class="detail-field-label">Requester</span><span class="detail-field-value">${escapeHtml(p.requester || '—')}</span></div>
+                        <div class="detail-field"><span class="detail-field-label">Target</span><span class="detail-field-value">${p.targetDate || '—'}</span></div>
+                        <div class="detail-field"><span class="detail-field-label">Created</span><span class="detail-field-value">${formatDate(p.createdAt)}</span></div>
+                        <div class="detail-field"><span class="detail-field-label">Progress</span>
+                            <span class="detail-field-value" style="display:flex; align-items:center; gap:0.5rem;">${progress}%
+                                <div class="progress-bar" style="width:80px;"><div class="progress-fill${progress === 100 && tasks.length ? ' complete' : ''}" style="width:${progress}%"></div></div>
                             </span>
                         </div>
                     </div>
-
                     <div class="detail-section">
                         <div class="detail-section-title">Status</div>
                         <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                            ${['request','planning','building','review','complete'].map(s => `
-                                <button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}')">${s}</button>
-                            `).join('')}
+                            ${STATUSES.map(s => `<button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}')">${s}</button>`).join('')}
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <div class="detail-section">
-                        <div class="detail-section-title">Tasks (${doneTasks}/${tasks.length})</div>
+                        <div class="detail-section-title">Tasks (${done}/${tasks.length})</div>
                         <ul class="checklist">
                             ${tasks.map((t, i) => `
                                 <li class="checklist-item">
@@ -936,7 +1262,6 @@ function openDetail(id) {
                     </div>
                 </div>
             </div>
-
             <div class="detail-section" style="margin-top:1rem;">
                 <div class="detail-section-title">Notes</div>
                 ${notes.map((n, i) => `
@@ -999,7 +1324,6 @@ function closeModal() {
 function saveProject() {
     const name = document.getElementById('formName').value.trim();
     if (!name) { document.getElementById('formName').style.borderColor = 'var(--destructive)'; return; }
-
     const data = {
         name,
         description: document.getElementById('formDesc').value.trim(),
@@ -1008,27 +1332,15 @@ function saveProject() {
         requester: document.getElementById('formRequester').value.trim(),
         targetDate: document.getElementById('formDate').value,
     };
-
     if (editingId) {
         const idx = projects.findIndex(p => p.id === editingId);
-        if (idx !== -1) {
-            projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
-        }
+        if (idx !== -1) projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
     } else {
-        projects.push({
-            id: generateId(),
-            ...data,
-            tasks: [],
-            notes: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        });
+        projects.push({ id: generateId(), ...data, tasks: [], notes: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     }
-
     saveProjects(projects);
     closeModal();
-    renderProjects();
-    if (editingId && selectedProjectId === editingId) openDetail(editingId);
+    renderCurrentView();
 }
 
 function deleteProject(id) {
@@ -1036,7 +1348,7 @@ function deleteProject(id) {
     projects = projects.filter(p => p.id !== id);
     saveProjects(projects);
     closeDetail();
-    renderProjects();
+    renderCurrentView();
 }
 
 function updateStatus(id, status) {
@@ -1045,8 +1357,8 @@ function updateStatus(id, status) {
         p.status = status;
         p.updatedAt = new Date().toISOString();
         saveProjects(projects);
-        renderProjects();
-        openDetail(id);
+        renderCurrentView();
+        if (currentView === 'list') openDetail(id);
     }
 }
 
@@ -1062,8 +1374,8 @@ function addTask(id) {
     p.updatedAt = new Date().toISOString();
     saveProjects(projects);
     input.value = '';
-    renderProjects();
-    openDetail(id);
+    renderCurrentView();
+    if (currentView === 'list') openDetail(id);
 }
 
 function toggleTask(id, idx) {
@@ -1072,8 +1384,8 @@ function toggleTask(id, idx) {
         p.tasks[idx].done = !p.tasks[idx].done;
         p.updatedAt = new Date().toISOString();
         saveProjects(projects);
-        renderProjects();
-        openDetail(id);
+        renderCurrentView();
+        if (currentView === 'list') openDetail(id);
     }
 }
 
@@ -1083,8 +1395,8 @@ function removeTask(id, idx) {
         p.tasks.splice(idx, 1);
         p.updatedAt = new Date().toISOString();
         saveProjects(projects);
-        renderProjects();
-        openDetail(id);
+        renderCurrentView();
+        if (currentView === 'list') openDetail(id);
     }
 }
 
@@ -1100,8 +1412,8 @@ function addNote(id) {
     p.updatedAt = new Date().toISOString();
     saveProjects(projects);
     input.value = '';
-    renderProjects();
-    openDetail(id);
+    renderCurrentView();
+    if (currentView === 'list') openDetail(id);
 }
 
 function removeNote(id, idx) {
@@ -1110,8 +1422,8 @@ function removeNote(id, idx) {
         p.notes.splice(idx, 1);
         p.updatedAt = new Date().toISOString();
         saveProjects(projects);
-        renderProjects();
-        openDetail(id);
+        renderCurrentView();
+        if (currentView === 'list') openDetail(id);
     }
 }
 
@@ -1121,30 +1433,21 @@ function escapeHtml(str) {
     d.textContent = str;
     return d.innerHTML;
 }
-
 function formatDate(iso) {
     if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Close modal on overlay click
-document.getElementById('newProjectModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
+// Close modals on overlay click
+document.getElementById('newProjectModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
 
-// Keyboard shortcut: Escape to close
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-        closeDetail();
-    }
+    if (e.key === 'Escape') { closeModal(); closeDetailModal(); closeDetail(); }
 });
 
 // ── Init ─────────────────────────────────────────────────────
-renderStats();
-updateCounts();
-renderProjects();
+renderCurrentView();
 </script>
 
 </body>
