@@ -4,7 +4,7 @@
 
 ---
 
-## 1. The Team
+# 1. The Team
 
 ### Core Closing Unit — Closing Inbound & Outbound Deals
 
@@ -13,15 +13,15 @@ The front line. Every qualified opportunity lands here.
 | Role | Who | What They Receive |
 |------|-----|-------------------|
 | **Key AEs** | Mike & Megan | 100% PI + Filler non-PI |
-| **AE1s** | — | Non-PI + Self-Sourced |
+| **AE1s** | Jake W, Brandon S, Jacob M | Non-PI + Self-Sourced |
 
 ---
 
-### Core Channel Unit — Closing Referrals, Events, Channel & Strategic Partnerships
+### Core Channel Unit — Events, Channel & Strategic Partnerships
 
 | Role | Who | What They Receive |
 |------|-----|-------------------|
-| **Channel Lead** | Simon | Self-sourced event deals + Strategic Partner deal compensation |
+| **Strategic Partnerships** | Simon | Self-sourced event deals + Strategic Partner deal compensation |
 
 ---
 
@@ -29,27 +29,27 @@ The front line. Every qualified opportunity lands here.
 
 | Role | Who |
 |------|-----|
-| **BDR/MDR Leadership** | Jacque & Carson |
-| **BDR/MDR Teams** | The engine that feeds the pipeline |
+| **BDR/MDR Leadership** | Jacqui & Carson |
+| **BDR/MDR Teams** | 6 BDRs / 2 MDRs |
 
 ---
 
-## 2. The Culture
+# 2. The Culture
 
 All assets, processes, and resources live at **[revenuekitchen.io](https://revenuekitchen.io)**
 
 ---
 
-## 3. The Tech
+# 3. The Tech
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| ![HubSpot](https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png) | ![Seamless.ai](https://seamless.ai/favicon.ico) | ![PandaDoc](https://www.pandadoc.com/wp-content/themes/jesuspended/favicon.ico) | ![AskElephant](https://askelephant.com/favicon.ico) |
+| ![HubSpot](https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png) | ![Seamless.ai](https://logo.clearbit.com/seamless.ai) | ![PandaDoc](https://logo.clearbit.com/pandadoc.com) | ![AskElephant](https://askelephant.com/favicon.ico) |
 | **HubSpot** | **Seamless.ai** | **PandaDoc** | **AskElephant** |
 
 ---
 
-## 4. The Offer
+# 4. The Offer
 
 ### PI Flagship Offers
 
@@ -63,7 +63,7 @@ All assets, processes, and resources live at **[revenuekitchen.io](https://reven
 |:------:|:------:|:------:|
 | $3k | $5k | $7,500 |
 
-### Core Offer (Sprints + A La Carte)
+### Core Offer (Maintenance/Down Sells)
 
 **$5k**
 
@@ -75,7 +75,7 @@ All assets, processes, and resources live at **[revenuekitchen.io](https://reven
 
 ---
 
-## 5. The Support
+# 5. The Support
 
 **RevOps Team & Deliverables**
 
@@ -93,17 +93,8 @@ Strategic Partnerships for channel referrals & Sales Strategy support
 **TBD — Referral Partner Channel Breakdown**
 Structure and ownership still being defined
 
-**Simon at events and the Roadshow**
-In-market presence driving deal flow back to the team
-
 **AE1s — 1 week per quarter onsite in local markets**
 Boots on the ground, face-to-face relationship building
-
-**Mastermind Retreats + PIMCON**
-High-value touchpoints with prospects and partners
-
-**Visibility Offer w/o POD**
-A new entry point into the Rankings.io ecosystem
 
 **One New Dashboard to rule them all**
 A single pane of glass across pipeline, performance, and forecasting
