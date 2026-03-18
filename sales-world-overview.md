@@ -44,7 +44,7 @@ All assets, processes, and resources live at **[revenuekitchen.io](https://reven
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| ![HubSpot](https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png) | ![Seamless.ai](https://logo.clearbit.com/seamless.ai) | ![PandaDoc](https://logo.clearbit.com/pandadoc.com) | ![AskElephant](https://askelephant.com/favicon.ico) |
+| ![HubSpot](https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png) | ![Seamless.ai](https://www.google.com/s2/favicons?domain=seamless.ai&sz=64) | ![PandaDoc](https://www.google.com/s2/favicons?domain=pandadoc.com&sz=64) | ![AskElephant](https://askelephant.com/favicon.ico) |
 | **HubSpot** | **Seamless.ai** | **PandaDoc** | **AskElephant** |
 
 ---
