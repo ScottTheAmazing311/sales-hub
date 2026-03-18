@@ -915,27 +915,77 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ── Data Layer ───────────────────────────────────────────────
-const STORAGE_KEY = 'vibetracker_projects';
+// ── Supabase ─────────────────────────────────────────────────
+const SUPABASE_URL = 'https://ryxrgbvymudmqqpefmmf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eHJnYnZ5bXVkbXFxcGVmbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMDM5MTEsImV4cCI6MjA4Njc3OTkxMX0.o9TKcIBHO4whilqiqKoHrGmRR8BCuCzgzwI0quA75H0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const TABLE = 'vibe_projects';
+
 const STATUSES = ['request','planning','building','review','complete'];
 const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', review: 'Review', complete: 'Complete' };
 const TYPE_LABELS = { 'dashboard': 'Dashboard', 'internal-tool': 'Internal Tool', 'external-asset': 'External Asset', 'software-duplication': 'Software Duplication', 'miscellaneous': 'Miscellaneous' };
 
-function loadProjects() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
-}
-function saveProjects(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
 function generateId() { return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
+// ── Map DB row ↔ app object ──────────────────────────────────
+function fromRow(r) {
+    return {
+        id: r.id, name: r.name, description: r.description || '',
+        type: r.type || 'miscellaneous', priority: r.priority || 'medium',
+        status: r.status || 'request', requester: r.requester || '',
+        targetDate: r.target_date || '', tasks: r.tasks || [],
+        notes: r.notes || [], createdAt: r.created_at, updatedAt: r.updated_at,
+    };
+}
+function toRow(p) {
+    return {
+        id: p.id, name: p.name, description: p.description,
+        type: p.type, priority: p.priority, status: p.status,
+        requester: p.requester, target_date: p.targetDate,
+        tasks: p.tasks, notes: p.notes,
+        created_at: p.createdAt, updated_at: p.updatedAt,
+    };
+}
+
+// ── Data Layer (Supabase) ────────────────────────────────────
+async function loadProjects() {
+    const { data, error } = await sb.from(TABLE).select('*').order('created_at', { ascending: false });
+    if (error) { console.error('Load error:', error); return []; }
+    return (data || []).map(fromRow);
+}
+
+async function insertProject(p) {
+    const { error } = await sb.from(TABLE).insert(toRow(p));
+    if (error) console.error('Insert error:', error);
+}
+
+async function updateProject(p) {
+    const { error } = await sb.from(TABLE).update(toRow(p)).eq('id', p.id);
+    if (error) console.error('Update error:', error);
+}
+
+async function deleteProjectFromDb(id) {
+    const { error } = await sb.from(TABLE).delete().eq('id', id);
+    if (error) console.error('Delete error:', error);
+}
+
 // ── State ────────────────────────────────────────────────────
-let projects = loadProjects();
+let projects = [];
 let currentFilter = 'all';
 let currentView = 'board';
 let editingId = null;
 let selectedProjectId = null;
 let draggedId = null;
+
+// ── Realtime subscription ────────────────────────────────────
+sb.channel('vibe-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
+        projects = await loadProjects();
+        renderCurrentView();
+    })
+    .subscribe();
 
 // ── View toggle ──────────────────────────────────────────────
 function setView(view) {
@@ -1073,7 +1123,7 @@ function onDragLeave(e) {
     }
 }
 
-function onDrop(e, newStatus) {
+async function onDrop(e, newStatus) {
     e.preventDefault();
     const col = e.target.closest('.kanban-column');
     if (col) col.classList.remove('drag-over');
@@ -1085,7 +1135,7 @@ function onDrop(e, newStatus) {
     if (p && p.status !== newStatus) {
         p.status = newStatus;
         p.updatedAt = new Date().toISOString();
-        saveProjects(projects);
+        await updateProject(p);
         renderCurrentView();
     }
 }
@@ -1359,7 +1409,7 @@ function closeModal() {
     editingId = null;
 }
 
-function saveProject() {
+async function saveProject() {
     const name = document.getElementById('formName').value.trim();
     if (!name) { document.getElementById('formName').style.borderColor = 'var(--destructive)'; return; }
     const data = {
@@ -1373,36 +1423,40 @@ function saveProject() {
     };
     if (editingId) {
         const idx = projects.findIndex(p => p.id === editingId);
-        if (idx !== -1) projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
+        if (idx !== -1) {
+            projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
+            await updateProject(projects[idx]);
+        }
     } else {
-        projects.push({ id: generateId(), ...data, tasks: [], notes: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+        const newProj = { id: generateId(), ...data, tasks: [], notes: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        projects.push(newProj);
+        await insertProject(newProj);
     }
-    saveProjects(projects);
     closeModal();
     renderCurrentView();
 }
 
-function deleteProject(id) {
+async function deleteProject(id) {
     if (!confirm('Delete this project? This cannot be undone.')) return;
     projects = projects.filter(p => p.id !== id);
-    saveProjects(projects);
+    await deleteProjectFromDb(id);
     closeDetail();
     renderCurrentView();
 }
 
-function updateStatus(id, status) {
+async function updateStatus(id, status) {
     const p = projects.find(x => x.id === id);
     if (p) {
         p.status = status;
         p.updatedAt = new Date().toISOString();
-        saveProjects(projects);
+        await updateProject(p);
         renderCurrentView();
         if (currentView === 'list') openDetail(id);
     }
 }
 
 // ── Tasks ────────────────────────────────────────────────────
-function addTask(id) {
+async function addTask(id) {
     const input = document.getElementById('newTaskInput');
     const text = input.value.trim();
     if (!text) return;
@@ -1411,36 +1465,36 @@ function addTask(id) {
     if (!p.tasks) p.tasks = [];
     p.tasks.push({ text, done: false });
     p.updatedAt = new Date().toISOString();
-    saveProjects(projects);
+    await updateProject(p);
     input.value = '';
     renderCurrentView();
     if (currentView === 'list') openDetail(id);
 }
 
-function toggleTask(id, idx) {
+async function toggleTask(id, idx) {
     const p = projects.find(x => x.id === id);
     if (p && p.tasks && p.tasks[idx] !== undefined) {
         p.tasks[idx].done = !p.tasks[idx].done;
         p.updatedAt = new Date().toISOString();
-        saveProjects(projects);
+        await updateProject(p);
         renderCurrentView();
         if (currentView === 'list') openDetail(id);
     }
 }
 
-function removeTask(id, idx) {
+async function removeTask(id, idx) {
     const p = projects.find(x => x.id === id);
     if (p && p.tasks) {
         p.tasks.splice(idx, 1);
         p.updatedAt = new Date().toISOString();
-        saveProjects(projects);
+        await updateProject(p);
         renderCurrentView();
         if (currentView === 'list') openDetail(id);
     }
 }
 
 // ── Notes ────────────────────────────────────────────────────
-function addNote(id) {
+async function addNote(id) {
     const input = document.getElementById('newNoteInput');
     const text = input.value.trim();
     if (!text) return;
@@ -1449,18 +1503,18 @@ function addNote(id) {
     if (!p.notes) p.notes = [];
     p.notes.unshift({ text, date: new Date().toISOString() });
     p.updatedAt = new Date().toISOString();
-    saveProjects(projects);
+    await updateProject(p);
     input.value = '';
     renderCurrentView();
     if (currentView === 'list') openDetail(id);
 }
 
-function removeNote(id, idx) {
+async function removeNote(id, idx) {
     const p = projects.find(x => x.id === id);
     if (p && p.notes) {
         p.notes.splice(idx, 1);
         p.updatedAt = new Date().toISOString();
-        saveProjects(projects);
+        await updateProject(p);
         renderCurrentView();
         if (currentView === 'list') openDetail(id);
     }
@@ -1486,7 +1540,10 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── Init ─────────────────────────────────────────────────────
-renderCurrentView();
+(async function init() {
+    projects = await loadProjects();
+    renderCurrentView();
+})();
 </script>
 
 </body>
