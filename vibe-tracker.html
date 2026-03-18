@@ -451,6 +451,23 @@
         .badge-review { background: rgba(14,95,135,0.12); color: var(--navy-light); }
         .badge-complete { background: rgba(34,197,94,0.12); color: var(--success); }
 
+        /* Type badges */
+        .type-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid;
+        }
+        .type-dashboard { background: rgba(60,148,209,0.08); color: var(--sky); border-color: rgba(60,148,209,0.2); }
+        .type-internal-tool { background: rgba(7,55,79,0.08); color: var(--navy); border-color: rgba(7,55,79,0.2); }
+        .type-external-asset { background: rgba(34,197,94,0.08); color: var(--success); border-color: rgba(34,197,94,0.2); }
+        .type-software-duplication { background: rgba(245,158,11,0.08); color: var(--warning); border-color: rgba(245,158,11,0.2); }
+        .type-miscellaneous { background: rgba(0,0,0,0.04); color: var(--text-muted); border-color: rgba(0,0,0,0.1); }
+
         /* Priority */
         .priority {
             font-family: 'IBM Plex Mono', monospace;
@@ -852,6 +869,16 @@
                 <label class="form-label">Description</label>
                 <textarea class="form-textarea" id="formDesc" placeholder="Describe the vibe code request — what do you want built and why?"></textarea>
             </div>
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select class="form-select" id="formType">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="internal-tool">Internal Tool</option>
+                    <option value="external-asset">External Asset</option>
+                    <option value="software-duplication">Software Duplication</option>
+                    <option value="miscellaneous">Miscellaneous</option>
+                </select>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Priority</label>
@@ -893,6 +920,7 @@
 const STORAGE_KEY = 'vibetracker_projects';
 const STATUSES = ['request','planning','building','review','complete'];
 const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', review: 'Review', complete: 'Complete' };
+const TYPE_LABELS = { 'dashboard': 'Dashboard', 'internal-tool': 'Internal Tool', 'external-asset': 'External Asset', 'software-duplication': 'Software Duplication', 'miscellaneous': 'Miscellaneous' };
 
 function loadProjects() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -992,7 +1020,10 @@ function renderKanbanCard(p) {
     <div class="kanban-card" draggable="true" data-id="${p.id}"
          ondragstart="onDragStart(event, '${p.id}')" ondragend="onDragEnd(event)"
          onclick="openDetailModal('${p.id}')">
-        <div class="kanban-card-name">${escapeHtml(p.name)}</div>
+        <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.3rem;">
+            <div class="kanban-card-name" style="margin-bottom:0;">${escapeHtml(p.name)}</div>
+        </div>
+        ${p.type ? `<span class="type-badge type-${p.type}" style="margin-bottom:0.35rem; display:inline-block;">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
         ${p.description ? `<div class="kanban-card-desc">${escapeHtml(p.description)}</div>` : ''}
         <div class="kanban-card-footer">
             <div class="kanban-card-meta">
@@ -1072,8 +1103,9 @@ function openDetailModal(id) {
 
     document.getElementById('detailModalTitle').textContent = p.name;
     document.getElementById('detailModalBody').innerHTML = `
-        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap;">
             <span class="badge badge-${p.status}">${p.status}</span>
+            ${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
             <span class="priority priority-${p.priority}">${p.priority} priority</span>
             <div style="margin-left:auto; display:flex; gap:0.5rem;">
                 <button class="btn btn-ghost btn-sm" onclick="openEditModal('${p.id}'); closeDetailModal();">Edit</button>
@@ -1086,6 +1118,7 @@ function openDetailModal(id) {
             <div>
                 <div class="detail-section">
                     <div class="detail-section-title">Details</div>
+                    <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value">${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : '—'}</span></div>
                     <div class="detail-field"><span class="detail-field-label">Requester</span><span class="detail-field-value">${escapeHtml(p.requester || '—')}</span></div>
                     <div class="detail-field"><span class="detail-field-label">Target</span><span class="detail-field-value">${p.targetDate || '—'}</span></div>
                     <div class="detail-field"><span class="detail-field-label">Created</span><span class="detail-field-value">${formatDate(p.createdAt)}</span></div>
@@ -1180,6 +1213,7 @@ function renderProjects() {
             <div class="project-card-header">
                 <div><div class="project-name">${escapeHtml(p.name)}</div></div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
+                    ${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
                     <span class="priority priority-${p.priority}">${p.priority}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
                 </div>
@@ -1209,9 +1243,10 @@ function openDetail(id) {
     panel.innerHTML = `
         <div class="detail-header">
             <div>
-                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.25rem;">
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.25rem; flex-wrap:wrap;">
                     <span class="project-name" style="font-size:1.15rem;">${escapeHtml(p.name)}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
+                    ${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
                     <span class="priority priority-${p.priority}">${p.priority} priority</span>
                 </div>
                 <div style="font-size:0.85rem; color:var(--text-muted);">${escapeHtml(p.description || '')}</div>
@@ -1227,6 +1262,7 @@ function openDetail(id) {
                 <div>
                     <div class="detail-section">
                         <div class="detail-section-title">Details</div>
+                        <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value">${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : '—'}</span></div>
                         <div class="detail-field"><span class="detail-field-label">Requester</span><span class="detail-field-value">${escapeHtml(p.requester || '—')}</span></div>
                         <div class="detail-field"><span class="detail-field-label">Target</span><span class="detail-field-value">${p.targetDate || '—'}</span></div>
                         <div class="detail-field"><span class="detail-field-label">Created</span><span class="detail-field-value">${formatDate(p.createdAt)}</span></div>
@@ -1292,6 +1328,7 @@ function openNewProjectModal() {
     document.getElementById('formSubmitBtn').textContent = 'Submit Request';
     document.getElementById('formName').value = '';
     document.getElementById('formDesc').value = '';
+    document.getElementById('formType').value = 'miscellaneous';
     document.getElementById('formPriority').value = 'medium';
     document.getElementById('formStatus').value = 'request';
     document.getElementById('formRequester').value = '';
@@ -1308,6 +1345,7 @@ function openEditModal(id) {
     document.getElementById('formSubmitBtn').textContent = 'Save Changes';
     document.getElementById('formName').value = p.name;
     document.getElementById('formDesc').value = p.description || '';
+    document.getElementById('formType').value = p.type || 'miscellaneous';
     document.getElementById('formPriority').value = p.priority;
     document.getElementById('formStatus').value = p.status;
     document.getElementById('formRequester').value = p.requester || '';
@@ -1327,6 +1365,7 @@ function saveProject() {
     const data = {
         name,
         description: document.getElementById('formDesc').value.trim(),
+        type: document.getElementById('formType').value,
         priority: document.getElementById('formPriority').value,
         status: document.getElementById('formStatus').value,
         requester: document.getElementById('formRequester').value.trim(),
