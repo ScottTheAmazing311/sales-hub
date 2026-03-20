@@ -58,6 +58,7 @@
                 '<input type="password" id="rk-password" placeholder="Password" autofocus>' +
                 '<button type="submit" class="rk-btn" id="rk-submit-btn">Sign In</button>' +
                 '<div class="rk-error" id="rk-login-error"></div>' +
+                '<button type="button" class="rk-toggle" id="rk-to-signup">First time? Create an account</button>' +
                 '<button type="button" class="rk-toggle" id="rk-back-login">&larr; Use a different email</button>' +
             '</form>' +
 
@@ -71,6 +72,7 @@
                 '<input type="password" id="rk-signup-pw" placeholder="Create password (min 6 chars)">' +
                 '<button type="submit" class="rk-btn" id="rk-signup-btn">Create Account</button>' +
                 '<div class="rk-error" id="rk-signup-error"></div>' +
+                '<button type="button" class="rk-toggle" id="rk-to-login">Already have an account? Sign in</button>' +
                 '<button type="button" class="rk-toggle" id="rk-back-signup">&larr; Use a different email</button>' +
             '</form>' +
         '</div>';
@@ -171,28 +173,34 @@
                     return;
                 }
 
-                // Email is on the allowlist — check profiles table for existing account
-                sb.from('profiles').select('id').eq('email', email).maybeSingle().then(function (profileRes) {
-                    if (profileRes.data) {
-                        // Account exists — show login form
-                        emailForm.style.display = 'none';
-                        loginForm.style.display = '';
-                        document.getElementById('rk-login-email').value = email;
-                        document.getElementById('rk-password').focus();
-                        sub.textContent = 'Welcome back — enter your password';
-                    } else {
-                        // No account yet — show signup form
-                        emailForm.style.display = 'none';
-                        signupForm.style.display = '';
-                        document.getElementById('rk-signup-email').value = email;
-                        document.getElementById('rk-first').focus();
-                        sub.textContent = 'Set up your account';
-                    }
-                });
+                // Email is on the allowlist — show login with toggle to signup
+                emailForm.style.display = 'none';
+                loginForm.style.display = '';
+                document.getElementById('rk-login-email').value = email;
+                document.getElementById('rk-password').focus();
+                sub.textContent = 'Enter your password';
             });
         });
 
-        // Back buttons
+        // Toggle between login and signup
+        document.getElementById('rk-to-signup').addEventListener('click', function () {
+            var email = document.getElementById('rk-login-email').value;
+            loginForm.style.display = 'none';
+            signupForm.style.display = '';
+            document.getElementById('rk-signup-email').value = email;
+            document.getElementById('rk-first').focus();
+            sub.textContent = 'Set up your account';
+        });
+        document.getElementById('rk-to-login').addEventListener('click', function () {
+            var email = document.getElementById('rk-signup-email').value;
+            signupForm.style.display = 'none';
+            loginForm.style.display = '';
+            document.getElementById('rk-login-email').value = email;
+            document.getElementById('rk-password').focus();
+            sub.textContent = 'Enter your password';
+        });
+
+        // Back to email buttons
         document.getElementById('rk-back-login').addEventListener('click', function () {
             loginForm.style.display = 'none';
             emailForm.style.display = '';
