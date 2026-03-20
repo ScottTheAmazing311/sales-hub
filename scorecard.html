@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Scorecard — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --destructive: #c0392b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .dash {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .dash-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .dash-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .dash-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+
+        .section-block {
+            margin-bottom: 2rem;
+        }
+
+        /* ── Stat Cards ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .stat-card .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .stat-card .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+        .stat-card .stat-change {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .stat-card .stat-change .up {
+            color: var(--success);
+            font-weight: 600;
+        }
+        .stat-card .stat-change .down {
+            color: var(--destructive);
+            font-weight: 600;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem 0;
+        }
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .card-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .card-content {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        /* ── Tables ── */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .report-table thead th {
+            background: var(--navy);
+            color: var(--yellow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .report-table thead th:first-child { border-radius: 6px 0 0 0; }
+        .report-table thead th:last-child { border-radius: 0 6px 0 0; }
+        .report-table tbody td {
+            padding: 0.6rem 0.85rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .report-table tbody tr:last-child td { border-bottom: none; }
+        .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
+        .report-table td.highlight {
+            background: rgba(234,255,106,0.18);
+            font-weight: 600;
+        }
+        .report-table td.metric-name {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .report-table td.null-val {
+            color: #ccc;
+        }
+
+        /* ── Charts ── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem 1rem;
+            box-shadow: var(--shadow);
+        }
+        .chart-card .chart-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--yellow);
+            margin-bottom: 0.75rem;
+        }
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 250px;
+        }
+
+        /* ── Dept tables grid ── */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .dept-grid .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ── Loading ── */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .loading-state .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid rgba(7,55,79,0.15);
+            border-top-color: var(--navy);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+            .dept-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            .dash { padding: 1rem; }
+            .report-table { font-size: 0.78rem; }
+            .report-table thead th { font-size: 0.62rem; padding: 0.5rem; }
+            .report-table tbody td { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stripe"></div>
+    <div class="back-bar">
+        <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+    </div>
+
+    <div class="dash">
+        <div class="dash-header">
+            <div>
+                <h1>Leadership Scorecard</h1>
+                <p>Weekly performance metrics across all departments</p>
+            </div>
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                Live from Google Sheets
+            </div>
+        </div>
+
+        <div id="loading" class="loading-state">
+            <div class="spinner"></div>
+            Loading scorecard data...
+        </div>
+
+        <div id="dashboard" style="display:none;">
+            <!-- Key Metrics Cards -->
+            <div class="section-block">
+                <div class="section-title">Key Metrics</div>
+                <div class="stat-grid" id="stat-cards"></div>
+            </div>
+
+            <!-- 4-Week Rolling Table -->
+            <div class="section-block">
+                <div class="section-title">4-Week Rolling</div>
+                <div class="card">
+                    <div class="card-content" style="padding-top:0;">
+                        <div style="overflow-x:auto;" id="rolling-table-wrap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="section-block">
+                <div class="section-title">Trends</div>
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-label">Total Active MRR</div>
+                        <div class="chart-wrap"><canvas id="chart-mrr"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-label">Won MRR</div>
+                        <div class="chart-wrap"><canvas id="chart-won"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-label">Inbound vs Outbound Leads</div>
+                        <div class="chart-wrap"><canvas id="chart-leads"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-label">Cash on Hand</div>
+                        <div class="chart-wrap"><canvas id="chart-cash"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-grid" style="grid-template-columns:1fr;">
+                    <div class="chart-card">
+                        <div class="chart-label">Total Pipeline — AE Proposal Sent</div>
+                        <div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Breakdown -->
+            <div class="section-block">
+                <div class="section-title">Department Breakdown — Last 8 Weeks</div>
+                <div class="dept-grid">
+                    <div class="card" id="dept-sales">
+                        <div class="card-header"><div class="card-title">Sales (Cole)</div></div>
+                        <div class="card-content"><div style="overflow-x:auto;" id="dept-sales-table"></div></div>
+                    </div>
+                    <div class="card" id="dept-marketing">
+                        <div class="card-header"><div class="card-title">Marketing (Zach)</div></div>
+                        <div class="card-content"><div style="overflow-x:auto;" id="dept-marketing-table"></div></div>
+                    </div>
+                    <div class="card" id="dept-cs">
+                        <div class="card-header"><div class="card-title">Client Success (Britt)</div></div>
+                        <div class="card-content"><div style="overflow-x:auto;" id="dept-cs-table"></div></div>
+                    </div>
+                    <div class="card" id="dept-finance">
+                        <div class="card-header"><div class="card-title">Finance (Aaron)</div></div>
+                        <div class="card-content"><div style="overflow-x:auto;" id="dept-finance-table"></div></div>
+                    </div>
+                    <div class="card" id="dept-hr">
+                        <div class="card-header"><div class="card-title">HR (Gillian)</div></div>
+                        <div class="card-content"><div style="overflow-x:auto;" id="dept-hr-table"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ── CSV Parser (handles quoted fields with commas) ──
+function parseCSV(text) {
+    const rows = [];
+    let current = '';
+    let inQuotes = false;
+    const lines = [];
+
+    // Split into lines respecting quotes
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+            if (inQuotes && text[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === '\n' && !inQuotes) {
+            lines.push(current);
+            current = '';
+        } else if (ch === '\r' && !inQuotes) {
+            // skip CR
+        } else {
+            current += ch;
+        }
+    }
+    if (current.trim()) lines.push(current);
+
+    // Parse each line into fields
+    for (const line of lines) {
+        const fields = [];
+        let field = '';
+        let q = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                if (q && line[i + 1] === '"') {
+                    field += '"';
+                    i++;
+                } else {
+                    q = !q;
+                }
+            } else if (ch === ',' && !q) {
+                fields.push(field.trim());
+                field = '';
+            } else {
+                field += ch;
+            }
+        }
+        fields.push(field.trim());
+        rows.push(fields);
+    }
+    return rows;
+}
+
+// ── Value parsing ──
+function parseValue(raw) {
+    if (!raw || raw === '—' || raw === '-' || raw === '–' || raw.trim() === '') return null;
+    let s = raw.replace(/[$,%]/g, '').replace(/,/g, '').trim();
+    const n = parseFloat(s);
+    return isNaN(n) ? null : n;
+}
+
+function formatDisplay(raw) {
+    if (!raw || raw === '—' || raw === '-' || raw === '–' || raw.trim() === '') return '—';
+    return raw;
+}
+
+// ── Get latest N non-empty values for a row ──
+function getLatestValues(values, n) {
+    const result = [];
+    for (let i = values.length - 1; i >= 0 && result.length < n; i--) {
+        result.unshift({ index: i, raw: values[i], value: parseValue(values[i]) });
+    }
+    return result;
+}
+
+// ── Get the latest non-null value from a row ──
+function getLatestNonNull(values) {
+    for (let i = values.length - 1; i >= 0; i--) {
+        const v = parseValue(values[i]);
+        if (v !== null) return { index: i, raw: values[i], value: v };
+    }
+    return null;
+}
+
+// ── Get previous non-null value ──
+function getPrevNonNull(values, beforeIndex) {
+    for (let i = beforeIndex - 1; i >= 0; i--) {
+        const v = parseValue(values[i]);
+        if (v !== null) return { index: i, raw: values[i], value: v };
+    }
+    return null;
+}
+
+// ── Format number for display ──
+function formatNum(val, raw) {
+    if (val === null) return '—';
+    if (raw && raw.includes('$')) {
+        if (Math.abs(val) >= 1000000) return '$' + (val / 1000000).toFixed(1) + 'M';
+        if (Math.abs(val) >= 1000) return '$' + (val / 1000).toFixed(0) + 'K';
+        return '$' + val.toLocaleString();
+    }
+    if (raw && raw.includes('%')) return val + '%';
+    return val.toLocaleString();
+}
+
+// ── Build arrow HTML ──
+function buildChange(current, previous) {
+    if (!current || !previous || current.value === null || previous.value === null) return '';
+    const diff = current.value - previous.value;
+    if (diff === 0) return '<span style="color:var(--text-muted);">— No change</span>';
+    const cls = diff > 0 ? 'up' : 'down';
+    const arrow = diff > 0 ? '▲' : '▼';
+    let display;
+    if (current.raw && current.raw.includes('$')) {
+        display = '$' + Math.abs(diff).toLocaleString(undefined, {maximumFractionDigits: 0});
+    } else {
+        display = Math.abs(diff).toLocaleString(undefined, {maximumFractionDigits: 2});
+    }
+    return `<span class="${cls}">${arrow} ${display}</span> vs prev week`;
+}
+
+// ── Find a row by person + metric substring ──
+function findRow(data, person, metricFragment) {
+    return data.find(r =>
+        r.who.toLowerCase().includes(person.toLowerCase()) &&
+        r.metric.toLowerCase().includes(metricFragment.toLowerCase())
+    );
+}
+
+// ── Chart.js defaults ──
+function chartDefaults() {
+    Chart.defaults.color = 'rgba(255,255,255,0.5)';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+    Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+    Chart.defaults.font.size = 11;
+}
+
+// ── Create a line chart ──
+function createLineChart(canvasId, labels, datasets) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    return new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: {
+                    display: datasets.length > 1,
+                    labels: { color: 'rgba(255,255,255,0.7)', font: { size: 10 }, boxWidth: 12, padding: 12 }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(7,55,79,0.95)',
+                    titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+                    bodyFont: { family: "'IBM Plex Sans', sans-serif", size: 12 },
+                    padding: 10,
+                    cornerRadius: 6,
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxTicksLimit: 8, color: 'rgba(255,255,255,0.4)', font: { size: 10 } },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                y: {
+                    ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            }
+        }
+    });
+}
+
+// ── Create a bar chart ──
+function createBarChart(canvasId, labels, datasets) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    return new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(7,55,79,0.95)',
+                    titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+                    bodyFont: { family: "'IBM Plex Sans', sans-serif", size: 12 },
+                    padding: 10,
+                    cornerRadius: 6,
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxTicksLimit: 8, color: 'rgba(255,255,255,0.4)', font: { size: 10 } },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                y: {
+                    ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            }
+        }
+    });
+}
+
+// ── Build a department table ──
+function buildDeptTable(container, rows, weekHeaders, weekIndices) {
+    if (!rows || rows.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">No data available</p>';
+        return;
+    }
+    let html = '<table class="report-table"><thead><tr><th>Metric</th>';
+    for (const wi of weekIndices) {
+        const isLatest = wi === weekIndices[weekIndices.length - 1];
+        html += `<th${isLatest ? ' style="background:var(--navy-light);"' : ''}>${weekHeaders[wi]}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+    for (const row of rows) {
+        html += `<tr><td class="metric-name">${row.metric}</td>`;
+        for (const wi of weekIndices) {
+            const raw = row.values[wi];
+            const display = formatDisplay(raw);
+            const isLatest = wi === weekIndices[weekIndices.length - 1];
+            const isNull = display === '—';
+            let cls = '';
+            if (isLatest && !isNull) cls = 'highlight';
+            else if (isNull) cls = 'null-val';
+            html += `<td class="${cls}">${display}</td>`;
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+// ── Short date format ──
+function shortDate(dateStr) {
+    if (!dateStr) return '';
+    // Input might be "11/10/2025" or similar
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        return parts[0] + '/' + parts[1];
+    }
+    return dateStr;
+}
+
+// ── Main ──
+async function init() {
+    chartDefaults();
+
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1ORZnCGteWUSyadNNe4fklttr_KQXwnzdqcPYnFfK9w4/gviz/tq?tqx=out:csv';
+
+    let csvText;
+    try {
+        const res = await fetch(SHEET_URL);
+        if (!res.ok) throw new Error('Failed to fetch');
+        csvText = await res.text();
+    } catch (e) {
+        document.getElementById('loading').innerHTML =
+            '<p style="color:var(--destructive);">Failed to load data. Please refresh.</p>';
+        return;
+    }
+
+    const raw = parseCSV(csvText);
+    if (raw.length < 2) {
+        document.getElementById('loading').innerHTML =
+            '<p style="color:var(--destructive);">No data found in sheet.</p>';
+        return;
+    }
+
+    // Header row
+    const headers = raw[0];
+    const weekHeaders = headers.slice(2); // Columns C+ are week dates
+
+    // Parse all data rows
+    const data = [];
+    for (let i = 1; i < raw.length; i++) {
+        const row = raw[i];
+        if (!row[0] && !row[1]) continue; // skip empty rows
+        data.push({
+            who: (row[0] || '').trim(),
+            metric: (row[1] || '').trim(),
+            values: row.slice(2)
+        });
+    }
+
+    // Fill in "who" for rows where it's blank (grouped under prev person)
+    let lastWho = '';
+    for (const d of data) {
+        if (d.who) lastWho = d.who;
+        else d.who = lastWho;
+    }
+
+    // Find last 8 week indices that have at least some data
+    const weekCount = weekHeaders.length;
+    const last8Indices = [];
+    for (let i = Math.max(0, weekCount - 8); i < weekCount; i++) {
+        last8Indices.push(i);
+    }
+    const last4Indices = last8Indices.slice(-4);
+
+    // ── 1. Key Metrics Cards ──
+    const keyMetrics = [
+        { label: 'Total Active MRR', person: 'Aaron', fragment: 'total active mrr' },
+        { label: 'Cash on Hand', person: 'Aaron', fragment: 'cash on hand' },
+        { label: 'Won MRR', person: 'Cole', fragment: 'won mrr' },
+        { label: 'Inbound Leads (Direct)', person: 'Zach', fragment: 'inbound leads (direct)' },
+        { label: 'Total Pipeline', person: 'Cole', fragment: 'total pipeline' },
+        { label: 'Managed Clients', person: 'Britt', fragment: 'managed clients' },
+    ];
+
+    const statContainer = document.getElementById('stat-cards');
+    let statHTML = '';
+    for (const km of keyMetrics) {
+        const row = findRow(data, km.person, km.fragment);
+        let valDisplay = '—';
+        let changeHTML = '';
+        if (row) {
+            const latest = getLatestNonNull(row.values);
+            if (latest) {
+                valDisplay = formatNum(latest.value, latest.raw);
+                const prev = getPrevNonNull(row.values, latest.index);
+                changeHTML = buildChange(latest, prev);
+            }
+        }
+        statHTML += `
+            <div class="stat-card">
+                <div class="stat-label">${km.label}</div>
+                <div class="stat-value">${valDisplay}</div>
+                <div class="stat-change">${changeHTML}</div>
+            </div>`;
+    }
+    statContainer.innerHTML = statHTML;
+
+    // ── 2. 4-Week Rolling Table ──
+    const rollingMetrics = [
+        { label: 'Inbound Leads (Direct)', person: 'Zach', fragment: 'inbound leads (direct)' },
+        { label: 'Outbound Leads (Sets)', person: 'Cole', fragment: 'outbound leads' },
+        { label: 'Won MRR', person: 'Cole', fragment: 'won mrr' },
+        { label: 'New Clients', person: 'Cole', fragment: 'new clients' },
+        { label: 'Client — Notice Given', person: 'Britt', fragment: 'notice given' },
+        { label: 'Total Active MRR', person: 'Aaron', fragment: 'total active mrr' },
+    ];
+
+    const rollingWrap = document.getElementById('rolling-table-wrap');
+    let rhtml = '<table class="report-table"><thead><tr><th>Metric</th>';
+    for (const wi of last4Indices) {
+        const isLatest = wi === last4Indices[last4Indices.length - 1];
+        rhtml += `<th${isLatest ? ' style="background:var(--navy-light);"' : ''}>${shortDate(weekHeaders[wi])}</th>`;
+    }
+    rhtml += '</tr></thead><tbody>';
+    for (const rm of rollingMetrics) {
+        const row = findRow(data, rm.person, rm.fragment);
+        rhtml += `<tr><td class="metric-name">${rm.label}</td>`;
+        for (const wi of last4Indices) {
+            const raw = row ? row.values[wi] : undefined;
+            const display = formatDisplay(raw);
+            const isLatest = wi === last4Indices[last4Indices.length - 1];
+            const isNull = display === '—';
+            let cls = '';
+            if (isLatest && !isNull) cls = 'highlight';
+            else if (isNull) cls = 'null-val';
+            rhtml += `<td class="${cls}">${display}</td>`;
+        }
+        rhtml += '</tr>';
+    }
+    rhtml += '</tbody></table>';
+    rollingWrap.innerHTML = rhtml;
+
+    // ── 3. Charts ──
+    // Prepare chart labels (short dates) for all weeks
+    const chartLabels = weekHeaders.map(shortDate);
+
+    // Helper: get chart-ready array from a row
+    function chartData(row) {
+        if (!row) return weekHeaders.map(() => null);
+        return row.values.map(v => parseValue(v));
+    }
+
+    // Total Active MRR
+    const mrrRow = findRow(data, 'Aaron', 'total active mrr');
+    createLineChart('chart-mrr', chartLabels, [{
+        label: 'Total Active MRR',
+        data: chartData(mrrRow),
+        borderColor: '#eaff6a',
+        backgroundColor: 'rgba(234,255,106,0.1)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+        spanGaps: false,
+    }]);
+
+    // Won MRR (bar)
+    const wonRow = findRow(data, 'Cole', 'won mrr');
+    createBarChart('chart-won', chartLabels, [{
+        label: 'Won MRR',
+        data: chartData(wonRow),
+        backgroundColor: 'rgba(234,255,106,0.7)',
+        borderColor: '#eaff6a',
+        borderWidth: 1,
+        borderRadius: 3,
+    }]);
+
+    // Inbound vs Outbound
+    const inboundRow = findRow(data, 'Zach', 'inbound leads (direct)');
+    const outboundRow = findRow(data, 'Cole', 'outbound leads');
+    createLineChart('chart-leads', chartLabels, [
+        {
+            label: 'Inbound (Direct)',
+            data: chartData(inboundRow),
+            borderColor: '#eaff6a',
+            backgroundColor: 'rgba(234,255,106,0.1)',
+            borderWidth: 2,
+            pointRadius: 2,
+            tension: 0.3,
+            spanGaps: false,
+        },
+        {
+            label: 'Outbound (Sets)',
+            data: chartData(outboundRow),
+            borderColor: '#eedc82',
+            backgroundColor: 'rgba(238,220,130,0.1)',
+            borderWidth: 2,
+            pointRadius: 2,
+            tension: 0.3,
+            spanGaps: false,
+        }
+    ]);
+
+    // Cash on Hand
+    const cashRow = findRow(data, 'Aaron', 'cash on hand');
+    createLineChart('chart-cash', chartLabels, [{
+        label: 'Cash on Hand',
+        data: chartData(cashRow),
+        borderColor: '#eedc82',
+        backgroundColor: 'rgba(238,220,130,0.1)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+        spanGaps: false,
+    }]);
+
+    // Pipeline
+    const pipelineRow = findRow(data, 'Cole', 'total pipeline');
+    createLineChart('chart-pipeline', chartLabels, [{
+        label: 'Pipeline ($)',
+        data: chartData(pipelineRow),
+        borderColor: '#eaff6a',
+        backgroundColor: 'rgba(234,255,106,0.08)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+        spanGaps: false,
+    }]);
+
+    // ── 4. Department Breakdown Tables ──
+    const departments = [
+        { id: 'dept-sales-table', person: 'Cole' },
+        { id: 'dept-marketing-table', person: 'Zach' },
+        { id: 'dept-cs-table', person: 'Britt' },
+        { id: 'dept-finance-table', person: 'Aaron' },
+        { id: 'dept-hr-table', person: 'Gillian' },
+    ];
+
+    for (const dept of departments) {
+        const rows = data.filter(r => r.who.toLowerCase() === dept.person.toLowerCase());
+        const container = document.getElementById(dept.id);
+        buildDeptTable(container, rows, weekHeaders.map(shortDate), last8Indices);
+    }
+
+    // Show dashboard, hide loading
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>
