@@ -1068,7 +1068,7 @@
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
                 </div>
                 <span class="section-title">Leadership Reports</span>
-                <span class="section-count">3 reports</span>
+                <span class="section-count">4 reports</span>
             </div>
 
             <div class="card-grid">
@@ -1124,6 +1124,23 @@
                     </div>
                 </a>
 
+                <!-- User Management -->
+                <a href="user-management.html" class="card">
+                    <div class="card-preview">
+                        <div class="card-preview-icon">
+                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-badge">Admin</span>
+                        <div class="card-title">User Management</div>
+                        <div class="card-desc">View all users, manage access, and revoke accounts when team members leave.</div>
+                        <div class="card-link">
+                            Manage users <span class="arrow">→</span>
+                        </div>
+                    </div>
+                </a>
+
             </div>
         </section>
 
@@ -1136,28 +1153,33 @@
     <div class="footer-text">Rankings.io Revenue Kitchen — Internal Use Only</div>
 </footer>
 
-<!-- ── Leadership Password Modal ── -->
-<div id="leadership-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,55,79,0.85); z-index:99998; align-items:center; justify-content:center; font-family:'IBM Plex Sans',sans-serif;">
+<!-- ── Leadership Access Denied Modal ── -->
+<div id="leadership-denied" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,55,79,0.85); z-index:99998; align-items:center; justify-content:center; font-family:'IBM Plex Sans',sans-serif;">
     <div style="background:#fefaed; border-radius:12px; padding:48px 40px; text-align:center; width:360px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-        <div style="width:56px; height:56px; background:#07374F; color:#eaff6a; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:20px; margin:0 auto 16px;">
+        <div style="width:56px; height:56px; background:#07374F; color:#eaff6a; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
             <svg viewBox="0 0 24 24" width="28" height="28" fill="#eaff6a"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
         </div>
         <h2 style="color:#07374F; font-size:22px; margin-bottom:6px;">Leadership Access</h2>
-        <p style="color:#6b6b6b; font-size:14px; margin-bottom:24px;">Enter the leadership password to continue</p>
-        <form id="leadership-form">
-            <input type="password" id="leadership-password" placeholder="Password" autofocus style="width:100%; padding:12px 16px; border:2px solid #ddd; border-radius:8px; font-size:16px; font-family:inherit; outline:none; margin-bottom:12px;">
-            <button type="submit" style="width:100%; padding:12px; background:#07374F; color:#eaff6a; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit;">Enter</button>
-            <div id="leadership-error" style="color:#c0392b; font-size:13px; margin-top:10px; min-height:18px;"></div>
-        </form>
-        <button id="leadership-cancel" style="margin-top:8px; background:none; border:none; color:#6b6b6b; font-size:13px; cursor:pointer; font-family:inherit;">Cancel</button>
+        <p style="color:#6b6b6b; font-size:14px; margin-bottom:24px;">Your account doesn't have leadership access. Contact an admin if you need it.</p>
+        <button id="leadership-dismiss" style="width:100%; padding:12px; background:#07374F; color:#eaff6a; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit;">OK</button>
     </div>
+</div>
+
+<!-- ── Sign Out Button ── -->
+<div id="rk-signout-bar" style="display:none; position:fixed; top:16px; right:16px; z-index:99990;">
+    <button onclick="rkSignOut()" style="background:rgba(7,55,79,0.8); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer; font-family:'IBM Plex Mono',monospace;">Sign Out</button>
 </div>
 
 <!-- ── Tab Switching ── -->
 <script>
     (function() {
-        var LEADERSHIP_PASSWORD = 'leadership456';
-        var LEADERSHIP_KEY = 'rk_leadership_auth';
+        // Leadership email allowlist — these emails can access the Leadership tab
+        var LEADERSHIP_EMAILS = [
+            'scott@rankings.io',
+            'scottksimon@gmail.com'
+        ];
+
+        var leadershipAllowed = false;
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1166,39 +1188,24 @@
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
-        var overlay = document.getElementById('leadership-overlay');
-        var form = document.getElementById('leadership-form');
-        var input = document.getElementById('leadership-password');
-        var error = document.getElementById('leadership-error');
-        var cancel = document.getElementById('leadership-cancel');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value === LEADERSHIP_PASSWORD) {
-                sessionStorage.setItem(LEADERSHIP_KEY, 'true');
-                overlay.style.display = 'none';
-                switchTab('leadership');
-            } else {
-                error.textContent = 'Incorrect password';
-                input.value = '';
-                input.focus();
-            }
+        // When auth is ready, check if user has leadership access
+        window.addEventListener('rk-auth-ready', function(e) {
+            var email = e.detail.email.toLowerCase();
+            leadershipAllowed = LEADERSHIP_EMAILS.indexOf(email) !== -1;
+            // Show sign out button
+            document.getElementById('rk-signout-bar').style.display = 'block';
         });
 
-        cancel.addEventListener('click', function() {
-            overlay.style.display = 'none';
-            input.value = '';
-            error.textContent = '';
+        var denied = document.getElementById('leadership-denied');
+        document.getElementById('leadership-dismiss').addEventListener('click', function() {
+            denied.style.display = 'none';
         });
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 var tab = btn.dataset.tab;
-                if (tab === 'leadership' && sessionStorage.getItem(LEADERSHIP_KEY) !== 'true') {
-                    overlay.style.display = 'flex';
-                    input.value = '';
-                    error.textContent = '';
-                    input.focus();
+                if (tab === 'leadership' && !leadershipAllowed) {
+                    denied.style.display = 'flex';
                     return;
                 }
                 switchTab(tab);
