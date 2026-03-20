@@ -167,7 +167,7 @@
                 btn.textContent = 'Continue';
 
                 if (res.error || !res.data) {
-                    err.textContent = "You don't have access. Contact an admin to get added.";
+                    err.textContent = "You're not on the approved list. Slack Scott to be added.";
                     return;
                 }
 
