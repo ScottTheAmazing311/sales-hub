@@ -171,29 +171,23 @@
                     return;
                 }
 
-                // Email is on the allowlist — check if they already have an account
-                // Try signing in with a dummy password to see if account exists
-                // (Supabase returns different errors for "user not found" vs "wrong password")
-                sb.auth.signInWithPassword({ email: email, password: '___check___' }).then(function (signInRes) {
-                    if (signInRes.error) {
-                        var msg = signInRes.error.message.toLowerCase();
-                        if (msg.indexOf('invalid login credentials') !== -1) {
-                            // Account exists — show login form
-                            emailForm.style.display = 'none';
-                            loginForm.style.display = '';
-                            document.getElementById('rk-login-email').value = email;
-                            document.getElementById('rk-password').focus();
-                            sub.textContent = 'Welcome back — enter your password';
-                        } else {
-                            // No account yet — show signup form
-                            emailForm.style.display = 'none';
-                            signupForm.style.display = '';
-                            document.getElementById('rk-signup-email').value = email;
-                            document.getElementById('rk-first').focus();
-                            sub.textContent = 'Set up your account';
-                        }
+                // Email is on the allowlist — check profiles table for existing account
+                sb.from('profiles').select('id').eq('email', email).maybeSingle().then(function (profileRes) {
+                    if (profileRes.data) {
+                        // Account exists — show login form
+                        emailForm.style.display = 'none';
+                        loginForm.style.display = '';
+                        document.getElementById('rk-login-email').value = email;
+                        document.getElementById('rk-password').focus();
+                        sub.textContent = 'Welcome back — enter your password';
+                    } else {
+                        // No account yet — show signup form
+                        emailForm.style.display = 'none';
+                        signupForm.style.display = '';
+                        document.getElementById('rk-signup-email').value = email;
+                        document.getElementById('rk-first').focus();
+                        sub.textContent = 'Set up your account';
                     }
-                    // If somehow it succeeded with dummy password... shouldn't happen
                 });
             });
         });
