@@ -236,6 +236,19 @@
                 </div>
             </div>
 
+            <!-- Allowlist Section -->
+            <div style="margin-bottom:2rem;">
+                <h3 style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--navy);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--yellow);">Allowed Emails</h3>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Only these emails can create accounts. Add someone here before they can sign up.</p>
+                <form id="add-email-form" style="display:flex;gap:8px;margin-bottom:1rem;">
+                    <input type="email" id="new-email" placeholder="Add email address" style="flex:1;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;outline:none;">
+                    <button type="submit" style="padding:10px 20px;background:var(--navy);color:var(--yellow);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Add</button>
+                </form>
+                <div id="allowlist-container"></div>
+            </div>
+
+            <!-- Users Section -->
+            <h3 style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--navy);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--yellow);">Registered Users</h3>
             <table class="user-table">
                 <thead>
                     <tr>
@@ -278,6 +291,8 @@
 
         document.getElementById('content').style.display = '';
         loadUsers();
+        loadAllowlist();
+        wireAllowlistForm();
     });
 
     function loadUsers() {
@@ -346,6 +361,62 @@
                 return;
             }
             loadUsers();
+        });
+    }
+
+    function loadAllowlist() {
+        var sb = window.rkSupabase;
+        sb.from('allowed_emails').select('*').order('added_at', { ascending: true }).then(function(res) {
+            var container = document.getElementById('allowlist-container');
+            if (res.error) {
+                container.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error loading allowlist: ' + escapeHtml(res.error.message) + '</p>';
+                return;
+            }
+
+            if (!res.data.length) {
+                container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">No emails added yet.</p>';
+                return;
+            }
+
+            var html = '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+            res.data.forEach(function(row) {
+                html += '<div style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(7,55,79,0.08);border-radius:6px;padding:6px 10px;font-size:0.85rem;">' +
+                    escapeHtml(row.email) +
+                    ' <button class="remove-email" data-email="' + escapeHtml(row.email) + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" title="Remove">&times;</button>' +
+                '</div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            container.querySelectorAll('.remove-email').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    if (confirm('Remove ' + btn.dataset.email + ' from the allowlist?')) {
+                        sb.from('allowed_emails').delete().eq('email', btn.dataset.email).then(function() {
+                            loadAllowlist();
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    function wireAllowlistForm() {
+        var form = document.getElementById('add-email-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var input = document.getElementById('new-email');
+            var email = input.value.trim().toLowerCase();
+            if (!email) return;
+
+            var sb = window.rkSupabase;
+            sb.from('allowed_emails').insert({ email: email }).then(function(res) {
+                if (res.error) {
+                    alert('Error: ' + res.error.message);
+                    return;
+                }
+                input.value = '';
+                loadAllowlist();
+            });
         });
     }
 

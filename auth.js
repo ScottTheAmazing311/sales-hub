@@ -1,6 +1,6 @@
-/*  Revenue Kitchen — Supabase Auth Gate
+/*  Revenue Kitchen — Supabase Auth Gate (Allowlist-based)
     Included on every page via <script src="auth.js"></script>
-    Requires the Supabase JS SDK to be loaded first (loaded inline below).
+    Users must be on the allowlist to create an account. No email confirmation needed.
 */
 (function () {
     var SUPABASE_URL = 'https://ryxrgbvymudmqqpefmmf.supabase.co';
@@ -29,12 +29,11 @@
         '#rk-auth-box .rk-btn:hover{background:#0e5f87}' +
         '#rk-auth-box .rk-btn:disabled{opacity:.5;cursor:not-allowed}' +
         '#rk-auth-box .rk-error{color:#c0392b;font-size:13px;margin-top:10px;min-height:18px}' +
+        '#rk-auth-box .rk-success{color:#07374F;font-size:13px;margin-top:10px;min-height:18px}' +
         '#rk-auth-box .rk-toggle{color:#07374F;font-size:13px;margin-top:16px;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit}' +
         '#rk-auth-box .rk-toggle:hover{color:#0e5f87}' +
         '#rk-auth-box .rk-name-row{display:flex;gap:8px}' +
-        '#rk-auth-box .rk-name-row input{width:50%}' +
-        '#rk-auth-box .rk-signout{position:absolute;top:16px;right:16px;background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:"IBM Plex Mono",monospace}' +
-        '#rk-auth-box .rk-signout:hover{color:#fff;border-color:rgba(255,255,255,.5)}';
+        '#rk-auth-box .rk-name-row input{width:50%}';
     document.head.appendChild(style);
 
     // ── Build overlay immediately so page is blocked ──
@@ -45,28 +44,37 @@
             '<div class="rk-logo">RK</div>' +
             '<h2>Revenue Kitchen</h2>' +
             '<p class="rk-sub" id="rk-auth-sub">Sign in to continue</p>' +
-            '<!-- Login form -->' +
-            '<form id="rk-login-form">' +
-                '<input type="email" id="rk-email" placeholder="Email" autofocus>' +
-                '<input type="password" id="rk-password" placeholder="Password">' +
-                '<button type="submit" class="rk-btn" id="rk-submit-btn">Sign In</button>' +
-                '<div class="rk-error" id="rk-error"></div>' +
+
+            '<!-- Step 1: Email check -->' +
+            '<form id="rk-email-form">' +
+                '<input type="email" id="rk-email" placeholder="Enter your email" autofocus>' +
+                '<button type="submit" class="rk-btn" id="rk-email-btn">Continue</button>' +
+                '<div class="rk-error" id="rk-email-error"></div>' +
             '</form>' +
-            '<!-- Signup form (hidden) -->' +
+
+            '<!-- Step 2a: Returning user — password -->' +
+            '<form id="rk-login-form" style="display:none">' +
+                '<input type="email" id="rk-login-email" disabled>' +
+                '<input type="password" id="rk-password" placeholder="Password" autofocus>' +
+                '<button type="submit" class="rk-btn" id="rk-submit-btn">Sign In</button>' +
+                '<div class="rk-error" id="rk-login-error"></div>' +
+                '<button type="button" class="rk-toggle" id="rk-back-login">&larr; Use a different email</button>' +
+            '</form>' +
+
+            '<!-- Step 2b: New user — set up account -->' +
             '<form id="rk-signup-form" style="display:none">' +
                 '<div class="rk-name-row">' +
                     '<input type="text" id="rk-first" placeholder="First name">' +
                     '<input type="text" id="rk-last" placeholder="Last name">' +
                 '</div>' +
-                '<input type="email" id="rk-signup-email" placeholder="Email">' +
+                '<input type="email" id="rk-signup-email" disabled>' +
                 '<input type="password" id="rk-signup-pw" placeholder="Create password (min 6 chars)">' +
                 '<button type="submit" class="rk-btn" id="rk-signup-btn">Create Account</button>' +
                 '<div class="rk-error" id="rk-signup-error"></div>' +
+                '<button type="button" class="rk-toggle" id="rk-back-signup">&larr; Use a different email</button>' +
             '</form>' +
-            '<button class="rk-toggle" id="rk-toggle">First time? Create an account</button>' +
         '</div>';
 
-    // Append overlay as soon as possible
     if (document.body) {
         document.body.appendChild(overlay);
     } else {
@@ -78,19 +86,16 @@
     // ── Auth logic ──
     loadSupabase(function () {
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Expose for other scripts (leadership tab, user management)
         window.rkSupabase = sb;
 
         // Check existing session
         sb.auth.getSession().then(function (res) {
             var session = res.data.session;
             if (session) {
-                // Check if user is disabled
                 checkDisabled(sb, session.user, function (blocked) {
                     if (blocked) {
                         sb.auth.signOut();
-                        showDisabledMessage();
+                        showMessage('Account Disabled', 'Your access has been revoked. Contact an admin if this is a mistake.');
                         return;
                     }
                     overlay.remove();
@@ -99,17 +104,15 @@
                 });
                 return;
             }
-            // No session — show login
             wireUpForms(sb);
         });
 
-        // Listen for auth changes (handles tab focus returning etc.)
         sb.auth.onAuthStateChange(function (event, session) {
             if (event === 'SIGNED_IN' && session) {
                 checkDisabled(sb, session.user, function (blocked) {
                     if (blocked) {
                         sb.auth.signOut();
-                        showDisabledMessage();
+                        showMessage('Account Disabled', 'Your access has been revoked. Contact an admin if this is a mistake.');
                         return;
                     }
                     overlay.remove();
@@ -125,41 +128,96 @@
 
     function checkDisabled(sb, user, cb) {
         sb.from('profiles').select('disabled').eq('id', user.id).single().then(function (res) {
-            if (res.error || !res.data) return cb(false); // no profile yet = not disabled
+            if (res.error || !res.data) return cb(false);
             cb(res.data.disabled === true);
         });
     }
 
-    function showDisabledMessage() {
+    function showMessage(title, msg) {
         var box = document.getElementById('rk-auth-box');
         if (!box) return;
         box.innerHTML =
             '<div class="rk-logo">RK</div>' +
-            '<h2>Account Disabled</h2>' +
-            '<p class="rk-sub">Your access has been revoked. Contact an admin if this is a mistake.</p>';
+            '<h2>' + title + '</h2>' +
+            '<p class="rk-sub">' + msg + '</p>';
     }
 
     function wireUpForms(sb) {
+        var emailForm = document.getElementById('rk-email-form');
         var loginForm = document.getElementById('rk-login-form');
         var signupForm = document.getElementById('rk-signup-form');
-        var toggle = document.getElementById('rk-toggle');
         var sub = document.getElementById('rk-auth-sub');
-        var isSignup = false;
 
-        toggle.addEventListener('click', function () {
-            isSignup = !isSignup;
-            loginForm.style.display = isSignup ? 'none' : '';
-            signupForm.style.display = isSignup ? '' : 'none';
-            sub.textContent = isSignup ? 'Create your account' : 'Sign in to continue';
-            toggle.textContent = isSignup ? 'Already have an account? Sign in' : 'First time? Create an account';
+        // Step 1: Check email against allowlist
+        emailForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var email = document.getElementById('rk-email').value.trim().toLowerCase();
+            var err = document.getElementById('rk-email-error');
+            var btn = document.getElementById('rk-email-btn');
+            err.textContent = '';
+
+            if (!email) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Checking…';
+
+            // Check allowlist
+            sb.from('allowed_emails').select('email').eq('email', email).single().then(function (res) {
+                btn.disabled = false;
+                btn.textContent = 'Continue';
+
+                if (res.error || !res.data) {
+                    err.textContent = "You don't have access. Contact an admin to get added.";
+                    return;
+                }
+
+                // Email is on the allowlist — check if they already have an account
+                // Try signing in with a dummy password to see if account exists
+                // (Supabase returns different errors for "user not found" vs "wrong password")
+                sb.auth.signInWithPassword({ email: email, password: '___check___' }).then(function (signInRes) {
+                    if (signInRes.error) {
+                        var msg = signInRes.error.message.toLowerCase();
+                        if (msg.indexOf('invalid login credentials') !== -1) {
+                            // Account exists — show login form
+                            emailForm.style.display = 'none';
+                            loginForm.style.display = '';
+                            document.getElementById('rk-login-email').value = email;
+                            document.getElementById('rk-password').focus();
+                            sub.textContent = 'Welcome back — enter your password';
+                        } else {
+                            // No account yet — show signup form
+                            emailForm.style.display = 'none';
+                            signupForm.style.display = '';
+                            document.getElementById('rk-signup-email').value = email;
+                            document.getElementById('rk-first').focus();
+                            sub.textContent = 'Set up your account';
+                        }
+                    }
+                    // If somehow it succeeded with dummy password... shouldn't happen
+                });
+            });
         });
 
-        // Login
+        // Back buttons
+        document.getElementById('rk-back-login').addEventListener('click', function () {
+            loginForm.style.display = 'none';
+            emailForm.style.display = '';
+            sub.textContent = 'Sign in to continue';
+            document.getElementById('rk-email').focus();
+        });
+        document.getElementById('rk-back-signup').addEventListener('click', function () {
+            signupForm.style.display = 'none';
+            emailForm.style.display = '';
+            sub.textContent = 'Sign in to continue';
+            document.getElementById('rk-email').focus();
+        });
+
+        // Step 2a: Login
         loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            var email = document.getElementById('rk-email').value.trim();
+            var email = document.getElementById('rk-login-email').value;
             var pw = document.getElementById('rk-password').value;
-            var err = document.getElementById('rk-error');
+            var err = document.getElementById('rk-login-error');
             var btn = document.getElementById('rk-submit-btn');
             err.textContent = '';
             btn.disabled = true;
@@ -169,18 +227,17 @@
                 btn.disabled = false;
                 btn.textContent = 'Sign In';
                 if (res.error) {
-                    err.textContent = res.error.message;
+                    err.textContent = 'Incorrect password';
                 }
-                // success handled by onAuthStateChange
             });
         });
 
-        // Signup
+        // Step 2b: Signup — create account then auto sign in
         signupForm.addEventListener('submit', function (e) {
             e.preventDefault();
             var first = document.getElementById('rk-first').value.trim();
             var last = document.getElementById('rk-last').value.trim();
-            var email = document.getElementById('rk-signup-email').value.trim();
+            var email = document.getElementById('rk-signup-email').value;
             var pw = document.getElementById('rk-signup-pw').value;
             var err = document.getElementById('rk-signup-error');
             var btn = document.getElementById('rk-signup-btn');
@@ -199,16 +256,34 @@
                     data: { first_name: first, last_name: last }
                 }
             }).then(function (res) {
-                btn.disabled = false;
-                btn.textContent = 'Create Account';
                 if (res.error) {
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
                     err.textContent = res.error.message;
-                } else if (res.data.user && !res.data.session) {
-                    // Email confirmation required
-                    err.style.color = '#07374F';
-                    err.textContent = 'Check your email to confirm your account, then sign in.';
+                    return;
                 }
-                // If auto-confirmed, onAuthStateChange handles it
+
+                // If auto-confirmed (trigger set email_confirmed_at), session exists
+                if (res.data.session) {
+                    // onAuthStateChange will handle it
+                    return;
+                }
+
+                // If not auto-confirmed, try signing in immediately
+                // (the BEFORE INSERT trigger should have confirmed them)
+                sb.auth.signInWithPassword({ email: email, password: pw }).then(function (signInRes) {
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
+                    if (signInRes.error) {
+                        err.textContent = 'Account created but sign-in failed. Try signing in manually.';
+                        // Show login form
+                        signupForm.style.display = 'none';
+                        loginForm.style.display = '';
+                        document.getElementById('rk-login-email').value = email;
+                        document.getElementById('rk-password').focus();
+                        sub.textContent = 'Enter your password to sign in';
+                    }
+                });
             });
         });
     }
