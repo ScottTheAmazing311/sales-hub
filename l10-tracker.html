@@ -419,6 +419,93 @@
             outline: none; border-color: var(--navy);
         }
 
+        /* View Toggle */
+        .view-toggle {
+            display: flex; gap: 0;
+            background: #fff;
+            border: 2px solid rgba(7,55,79,0.1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            width: fit-content;
+            margin-bottom: 1.5rem;
+        }
+        .view-toggle-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem; font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .view-toggle-btn:not(:last-child) {
+            border-right: 2px solid rgba(7,55,79,0.1);
+        }
+        .view-toggle-btn.active {
+            background: var(--navy); color: var(--yellow);
+        }
+
+        /* Summary Table */
+        .summary-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.85rem; background: #fff;
+            border-radius: var(--radius); overflow: hidden;
+            border: 1px solid rgba(7,55,79,0.08);
+        }
+        .summary-table thead th {
+            background: var(--navy);
+            color: var(--yellow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 0.75rem 1rem; text-align: left;
+            white-space: nowrap;
+        }
+        .summary-table tbody td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(7,55,79,0.06);
+            vertical-align: top;
+        }
+        .summary-table tbody tr:last-child td { border-bottom: none; }
+        .summary-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.02); }
+        .summary-dept {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--navy); white-space: nowrap;
+        }
+        .summary-focus {
+            color: var(--text); line-height: 1.5;
+        }
+        .summary-list {
+            list-style: none; padding: 0; margin: 0;
+        }
+        .summary-list li {
+            padding: 2px 0; font-size: 0.82rem;
+            line-height: 1.4; color: var(--text);
+        }
+        .summary-list li::before {
+            content: '•'; color: var(--navy); margin-right: 6px;
+            font-weight: 700;
+        }
+        .summary-list li.done {
+            color: var(--text-muted); text-decoration: line-through;
+        }
+        .summary-status {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55rem; font-weight: 600;
+            text-transform: uppercase;
+            padding: 1px 5px; border-radius: 3px;
+            margin-left: 4px;
+        }
+        .summary-status.s-in-progress { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .summary-status.s-done { background: rgba(34,197,94,0.15); color: var(--success); }
+        .summary-status.s-blocked { background: rgba(192,57,43,0.15); color: var(--destructive); }
+        .summary-status.s-carried { background: rgba(60,148,209,0.15); color: var(--sky); }
+
+        @media (max-width: 768px) {
+            .summary-table { font-size: 0.78rem; display: block; overflow-x: auto; }
+        }
+
         /* Footer */
         .footer {
             background: var(--cream);
@@ -503,11 +590,25 @@
             </div>
         </div>
 
-        <!-- Department Tabs -->
-        <div class="dept-tabs" id="dept-tabs"></div>
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" onclick="setView('edit')">Edit</button>
+            <button class="view-toggle-btn" onclick="setView('summary')">Summary</button>
+        </div>
 
-        <!-- Department Panels -->
-        <div id="dept-panels"></div>
+        <!-- Edit View -->
+        <div id="edit-view">
+            <!-- Department Tabs -->
+            <div class="dept-tabs" id="dept-tabs"></div>
+
+            <!-- Department Panels -->
+            <div id="dept-panels"></div>
+        </div>
+
+        <!-- Summary View -->
+        <div id="summary-view" style="display:none;">
+            <div id="summary-content"></div>
+        </div>
 
     </div>
 </div>
@@ -773,6 +874,7 @@
         renderDeptTabs();
         renderDeptPanel();
         updateTranscript();
+        if (currentView === 'summary') renderSummary();
     }
 
     function showEmptyState() {
@@ -861,6 +963,76 @@
             renderDeptPanel();
         }
     };
+
+    // ── View switching ──
+    var currentView = 'edit';
+
+    window.setView = function(view) {
+        currentView = view;
+        document.querySelectorAll('.view-toggle-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        document.querySelector('.view-toggle-btn[onclick*="' + view + '"]').classList.add('active');
+
+        if (view === 'edit') {
+            document.getElementById('edit-view').style.display = '';
+            document.getElementById('summary-view').style.display = 'none';
+        } else {
+            document.getElementById('edit-view').style.display = 'none';
+            document.getElementById('summary-view').style.display = '';
+            renderSummary();
+        }
+    };
+
+    function renderSummary() {
+        var meeting = getCurrentMeeting();
+        if (!meeting) return;
+
+        var depts = getDepartments();
+        var html = '<table class="summary-table"><thead><tr>';
+        html += '<th>Department</th><th>Core Focus</th><th>Delivered</th><th>Projects &amp; Action Items</th>';
+        html += '</tr></thead><tbody>';
+
+        depts.forEach(function(d) {
+            var dept = meeting.departments[d] || { core_focus: '', delivered: [], projects: [] };
+            html += '<tr>';
+            html += '<td class="summary-dept">' + escapeHtml(d) + '</td>';
+            html += '<td class="summary-focus">' + (escapeHtml(dept.core_focus) || '<span style="color:var(--text-muted);">—</span>') + '</td>';
+
+            // Delivered
+            html += '<td>';
+            if (dept.delivered && dept.delivered.length > 0) {
+                html += '<ul class="summary-list">';
+                dept.delivered.forEach(function(item) {
+                    var text = typeof item === 'string' ? item : item.text;
+                    html += '<li>' + escapeHtml(text) + '</li>';
+                });
+                html += '</ul>';
+            } else {
+                html += '<span style="color:var(--text-muted);font-size:0.8rem;">—</span>';
+            }
+            html += '</td>';
+
+            // Projects
+            html += '<td>';
+            if (dept.projects && dept.projects.length > 0) {
+                html += '<ul class="summary-list">';
+                dept.projects.forEach(function(item) {
+                    var isDone = item.status === 'done';
+                    html += '<li' + (isDone ? ' class="done"' : '') + '>' + escapeHtml(item.text);
+                    html += ' <span class="summary-status s-' + (item.status || 'in-progress') + '">' + (item.status || 'in-progress') + '</span>';
+                    html += '</li>';
+                });
+                html += '</ul>';
+            } else {
+                html += '<span style="color:var(--text-muted);font-size:0.8rem;">—</span>';
+            }
+            html += '</td>';
+
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        document.getElementById('summary-content').innerHTML = html;
+    }
 
     // ── Type switching ──
     window.switchType = function(type) {
