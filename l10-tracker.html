@@ -304,6 +304,34 @@
             color: var(--text);
         }
 
+        /* Meeting Type Toggle */
+        .type-toggle {
+            display: flex; gap: 0; margin-bottom: 1.5rem;
+            background: #fff;
+            border: 2px solid rgba(7,55,79,0.1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            width: fit-content;
+        }
+        .type-toggle-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem; font-weight: 600;
+            padding: 0.65rem 1.5rem;
+            border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .type-toggle-btn:not(:last-child) {
+            border-right: 2px solid rgba(7,55,79,0.1);
+        }
+        .type-toggle-btn.active {
+            background: var(--navy); color: var(--yellow);
+        }
+        .type-toggle-btn:hover:not(.active) {
+            background: rgba(7,55,79,0.05);
+        }
+
         /* Last Week Carry Forward */
         .carry-forward {
             background: rgba(60,148,209,0.06);
@@ -433,6 +461,12 @@
 
 <div class="main">
 
+    <!-- Meeting Type Toggle -->
+    <div class="type-toggle" id="type-toggle">
+        <button class="type-toggle-btn active" onclick="switchType('sales')">Sales L10</button>
+        <button class="type-toggle-btn" onclick="switchType('leadership')">Revenue Leadership L10</button>
+    </div>
+
     <!-- Meeting Selector -->
     <div class="meeting-bar">
         <select id="meeting-select" onchange="selectMeeting(this.value)">
@@ -511,12 +545,24 @@
 (function() {
     var SUPABASE_URL = 'https://ryxrgbvymudmqqpefmmf.supabase.co';
     var TABLE = 'l10_meetings';
-    var DEPARTMENTS = ['Leadership', 'PIM', 'Sales', 'BDR', 'Marketing', 'RevOps'];
+
+    var MEETING_TYPES = {
+        sales: {
+            label: 'Sales L10',
+            departments: ['Sales', 'BDR', 'Marketing', 'RevOps']
+        },
+        leadership: {
+            label: 'Revenue Leadership L10',
+            departments: ['Leadership', 'PIM', 'Sales', 'BDR', 'Marketing', 'RevOps']
+        }
+    };
 
     var sb = window.rkSupabase;
-    var meetings = [];
+    var allMeetings = [];
+    var meetings = []; // filtered by current type
     var currentMeetingId = null;
-    var currentDept = DEPARTMENTS[0];
+    var currentType = 'sales';
+    var currentDept = MEETING_TYPES.sales.departments[0];
 
     // ── Helpers ──
     function escapeHtml(s) {
@@ -535,9 +581,13 @@
         return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
     }
 
+    function getDepartments() {
+        return MEETING_TYPES[currentType].departments;
+    }
+
     function emptyDepartments() {
         var depts = {};
-        DEPARTMENTS.forEach(function(d) {
+        getDepartments().forEach(function(d) {
             depts[d] = { core_focus: '', delivered: [], projects: [] };
         });
         return depts;
@@ -547,6 +597,7 @@
     function fromRow(r) {
         return {
             id: r.id,
+            meetingType: r.meeting_type || 'sales',
             meetingDate: r.meeting_date,
             transcript: r.transcript || '',
             departments: r.departments || emptyDepartments(),
@@ -558,6 +609,7 @@
     function toRow(m) {
         return {
             id: m.id,
+            meeting_type: m.meetingType || currentType,
             meeting_date: m.meetingDate,
             transcript: m.transcript,
             departments: m.departments,
@@ -567,10 +619,14 @@
     }
 
     // ── CRUD ──
-    async function loadMeetings() {
+    async function loadAllMeetings() {
         var res = await sb.from(TABLE).select('*').order('meeting_date', { ascending: false });
         if (res.error) { console.error('Load error:', res.error); return []; }
         return res.data.map(fromRow);
+    }
+
+    function filterMeetings() {
+        meetings = allMeetings.filter(function(m) { return m.meetingType === currentType; });
     }
 
     async function insertMeeting(m) {
@@ -597,7 +653,8 @@
     // ── Render meeting selector ──
     function renderSelector() {
         var sel = document.getElementById('meeting-select');
-        var html = '<option value="">Select a meeting...</option>';
+        var typeLabel = MEETING_TYPES[currentType].label;
+        var html = '<option value="">Select a ' + typeLabel + ' meeting...</option>';
         meetings.forEach(function(m) {
             var selected = m.id === currentMeetingId ? ' selected' : '';
             html += '<option value="' + m.id + '"' + selected + '>' + formatDate(m.meetingDate) + '</option>';
@@ -610,7 +667,7 @@
     function renderDeptTabs() {
         var container = document.getElementById('dept-tabs');
         var html = '';
-        DEPARTMENTS.forEach(function(d) {
+        getDepartments().forEach(function(d) {
             var cls = d === currentDept ? ' active' : '';
             html += '<button class="dept-tab' + cls + '" onclick="window._l10.setDept(\'' + d + '\')">' + d + '</button>';
         });
@@ -805,6 +862,29 @@
         }
     };
 
+    // ── Type switching ──
+    window.switchType = function(type) {
+        currentType = type;
+        currentDept = getDepartments()[0];
+        currentMeetingId = null;
+        filterMeetings();
+
+        // Update toggle buttons
+        document.querySelectorAll('.type-toggle-btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        document.querySelector('.type-toggle-btn[onclick*="' + type + '"]').classList.add('active');
+
+        renderSelector();
+        if (meetings.length > 0) {
+            currentMeetingId = meetings[0].id;
+            renderSelector();
+            showMeetingView();
+        } else {
+            showEmptyState();
+        }
+    };
+
     // ── Global functions ──
     window.selectMeeting = function(id) {
         currentMeetingId = id || null;
@@ -853,10 +933,10 @@
         var carryForward = document.getElementById('carry-forward-check').checked;
         var depts = emptyDepartments();
 
-        // Carry forward open projects from most recent meeting
+        // Carry forward open projects from most recent meeting of same type
         if (carryForward && meetings.length > 0) {
-            var prev = meetings[0]; // newest first
-            DEPARTMENTS.forEach(function(d) {
+            var prev = meetings[0]; // newest first, already filtered by type
+            getDepartments().forEach(function(d) {
                 if (prev.departments[d] && prev.departments[d].projects) {
                     var open = prev.departments[d].projects.filter(function(p) { return p.status !== 'done'; });
                     depts[d].projects = open.map(function(p) {
@@ -868,6 +948,7 @@
 
         var meeting = {
             id: generateId(),
+            meetingType: currentType,
             meetingDate: dateVal,
             transcript: '',
             departments: depts,
@@ -876,7 +957,8 @@
         };
 
         await insertMeeting(meeting);
-        meetings = await loadMeetings();
+        allMeetings = await loadAllMeetings();
+        filterMeetings();
         currentMeetingId = meeting.id;
         renderSelector();
         showMeetingView();
@@ -887,7 +969,8 @@
         if (!currentMeetingId) return;
         if (!confirm('Delete this meeting? This cannot be undone.')) return;
         await deleteMeetingFromDb(currentMeetingId);
-        meetings = await loadMeetings();
+        allMeetings = await loadAllMeetings();
+        filterMeetings();
         currentMeetingId = null;
         renderSelector();
         showEmptyState();
@@ -906,7 +989,8 @@
     // ── Real-time ──
     sb.channel('l10-realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async function() {
-            meetings = await loadMeetings();
+            allMeetings = await loadAllMeetings();
+            filterMeetings();
             renderSelector();
             if (currentMeetingId) renderDeptPanel();
         })
@@ -914,7 +998,8 @@
 
     // ── Init ──
     (async function init() {
-        meetings = await loadMeetings();
+        allMeetings = await loadAllMeetings();
+        filterMeetings();
         renderSelector();
         if (meetings.length > 0) {
             currentMeetingId = meetings[0].id;
