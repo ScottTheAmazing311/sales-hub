@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L10 Tracker — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --destructive: #c0392b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .stripe { height: 5px; background: linear-gradient(90deg, var(--navy-light), var(--yellow-warm)); }
+
+        /* Header */
+        .header {
+            background: var(--navy);
+            color: var(--cream);
+            padding: 1.5rem 2rem;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logo {
+            width: 40px; height: 40px;
+            background: var(--navy);
+            border: 2px solid var(--yellow);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700; font-size: 0.85rem; color: var(--yellow);
+        }
+        .header-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700; font-size: 1.35rem; letter-spacing: -0.5px;
+        }
+        .header-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--yellow-warm); opacity: 0.8;
+        }
+        .header-right {
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        /* Buttons */
+        .btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.75px;
+            padding: 0.6rem 1.2rem; border-radius: var(--radius);
+            border: none; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-primary { background: var(--yellow); color: var(--navy); }
+        .btn-primary:hover { background: #d4e85e; }
+        .btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+        .btn-secondary:hover { border-color: #fff; color: #fff; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.65rem; }
+        .btn-ghost { background: transparent; color: var(--sky); border: 1px solid var(--sky); }
+        .btn-ghost:hover { background: var(--sky); color: #fff; }
+        .btn-danger { background: transparent; color: var(--destructive); border: 1px solid var(--destructive); }
+        .btn-danger:hover { background: var(--destructive); color: #fff; }
+
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        /* Meeting Selector Bar */
+        .meeting-bar {
+            display: flex; align-items: center; gap: 1rem;
+            margin-bottom: 1.5rem; flex-wrap: wrap;
+        }
+        .meeting-bar select {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem; padding: 0.5rem 0.75rem;
+            border: 2px solid rgba(7,55,79,0.15);
+            border-radius: var(--radius);
+            background: var(--cream); color: var(--text);
+            cursor: pointer; min-width: 220px;
+        }
+        .meeting-bar select:focus {
+            outline: none; border-color: var(--navy);
+        }
+
+        /* Transcript Section */
+        .transcript-section {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .transcript-header {
+            background: var(--navy);
+            padding: 0.85rem 1.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer;
+        }
+        .transcript-header h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--yellow);
+        }
+        .transcript-toggle {
+            color: rgba(255,255,255,0.5); font-size: 0.8rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        .transcript-body {
+            display: none; padding: 1.25rem;
+        }
+        .transcript-body.open { display: block; }
+        .transcript-body textarea {
+            width: 100%; min-height: 150px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.85rem; line-height: 1.6;
+            padding: 1rem; border: 2px solid rgba(7,55,79,0.1);
+            border-radius: 8px; background: var(--cream);
+            color: var(--text); resize: vertical;
+        }
+        .transcript-body textarea:focus {
+            outline: none; border-color: var(--navy);
+        }
+        .transcript-actions {
+            display: flex; gap: 0.5rem; margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        /* Department Tabs */
+        .dept-tabs {
+            display: flex; gap: 0; border-bottom: 2px solid rgba(7,55,79,0.1);
+            margin-bottom: 1.5rem; overflow-x: auto;
+        }
+        .dept-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--text-muted);
+            background: none; border: none;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .dept-tab:hover { color: var(--navy); }
+        .dept-tab.active {
+            color: var(--navy); font-weight: 600;
+            border-bottom-color: var(--yellow);
+        }
+
+        /* Department Panel */
+        .dept-panel { display: none; }
+        .dept-panel.active { display: block; }
+
+        .dept-section {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+        .dept-section-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(7,55,79,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .dept-section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--navy);
+        }
+        .dept-section-body {
+            padding: 1rem 1.25rem;
+        }
+
+        /* Core Focus */
+        .core-focus-input {
+            width: 100%;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem; line-height: 1.5;
+            padding: 0.75rem; border: 2px solid rgba(7,55,79,0.1);
+            border-radius: 8px; background: var(--cream);
+            color: var(--text); resize: vertical; min-height: 60px;
+        }
+        .core-focus-input:focus {
+            outline: none; border-color: var(--navy);
+        }
+
+        /* Item Lists (Delivered / Projects) */
+        .item-list { list-style: none; }
+        .item-row {
+            display: flex; align-items: flex-start; gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(7,55,79,0.05);
+        }
+        .item-row:last-child { border-bottom: none; }
+
+        .item-checkbox {
+            width: 18px; height: 18px; min-width: 18px;
+            border: 2px solid rgba(7,55,79,0.2);
+            border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 2px; transition: all 0.2s;
+        }
+        .item-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        .item-checkbox.checked::after {
+            content: '✓'; color: #fff; font-size: 11px; font-weight: 700;
+        }
+
+        .item-text {
+            flex: 1; font-size: 0.85rem; line-height: 1.5;
+        }
+        .item-text.done {
+            text-decoration: line-through; color: var(--text-muted);
+        }
+
+        .item-status {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 2px 8px; border-radius: 99px;
+            white-space: nowrap;
+        }
+        .status-in-progress { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .status-done { background: rgba(34,197,94,0.15); color: var(--success); }
+        .status-blocked { background: rgba(192,57,43,0.15); color: var(--destructive); }
+        .status-carried { background: rgba(60,148,209,0.15); color: var(--sky); }
+
+        .item-remove {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 1rem; padding: 0 4px;
+            opacity: 0.4; transition: opacity 0.2s;
+        }
+        .item-remove:hover { opacity: 1; color: var(--destructive); }
+
+        .add-item-row {
+            display: flex; gap: 0.5rem; margin-top: 0.75rem;
+        }
+        .add-item-input {
+            flex: 1; font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.85rem; padding: 0.5rem 0.75rem;
+            border: 2px solid rgba(7,55,79,0.1);
+            border-radius: 8px; background: var(--cream);
+            color: var(--text);
+        }
+        .add-item-input:focus {
+            outline: none; border-color: var(--navy);
+        }
+        .add-item-select {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem; padding: 0.5rem;
+            border: 2px solid rgba(7,55,79,0.1);
+            border-radius: 8px; background: var(--cream);
+            color: var(--text);
+        }
+
+        /* Last Week Carry Forward */
+        .carry-forward {
+            background: rgba(60,148,209,0.06);
+            border: 1px dashed var(--sky);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .carry-forward-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--sky); margin-bottom: 0.75rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center; padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state-icon {
+            width: 56px; height: 56px;
+            background: rgba(7,55,79,0.06);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .empty-state-icon svg { width: 24px; height: 24px; fill: var(--text-muted); }
+        .empty-state-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--navy); margin-bottom: 0.35rem;
+        }
+        .empty-state-desc { font-size: 0.8rem; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(7,55,79,0.55);
+            z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #fff; border-radius: var(--radius);
+            width: 480px; max-width: 90vw; max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem; font-weight: 600; color: var(--navy);
+        }
+        .modal-close {
+            background: none; border: none; font-size: 1.25rem;
+            color: var(--text-muted); cursor: pointer;
+        }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(7,55,79,0.08);
+            display: flex; justify-content: flex-end; gap: 0.5rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.75px;
+            color: var(--text-muted); margin-bottom: 0.35rem;
+            display: block;
+        }
+        .form-input {
+            width: 100%; font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem; padding: 0.6rem 0.9rem;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 8px; background: var(--cream);
+            color: var(--text);
+        }
+        .form-input:focus {
+            outline: none; border-color: var(--navy);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--cream);
+            border-top: 1px solid rgba(7,55,79,0.08);
+            padding: 1.5rem 2rem; text-align: center;
+        }
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem; color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; align-items: flex-start; }
+            .main { padding: 1rem; }
+            .dept-tabs { overflow-x: auto; }
+            .dept-tab { font-size: 0.68rem; padding: 0.6rem 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="header-left">
+            <div class="logo">L10</div>
+            <div>
+                <div class="header-subtitle">Revenue Kitchen — Weekly Meetings</div>
+                <div class="header-title">L10 Tracker</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+            <button class="btn btn-primary" onclick="openNewMeetingModal()">+ New Meeting</button>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+
+    <!-- Meeting Selector -->
+    <div class="meeting-bar">
+        <select id="meeting-select" onchange="selectMeeting(this.value)">
+            <option value="">Select a meeting...</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="deleteMeeting()" id="delete-meeting-btn" style="display:none;">Delete Meeting</button>
+    </div>
+
+    <!-- Content Area -->
+    <div id="content-area">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>
+            </div>
+            <div class="empty-state-title">No meeting selected</div>
+            <div class="empty-state-desc">Select a meeting from the dropdown or create a new one.</div>
+        </div>
+    </div>
+
+    <!-- Meeting View (hidden until selected) -->
+    <div id="meeting-view" style="display:none;">
+
+        <!-- Transcript -->
+        <div class="transcript-section">
+            <div class="transcript-header" onclick="toggleTranscript()">
+                <h3>Meeting Transcript</h3>
+                <span class="transcript-toggle" id="transcript-toggle-text">Show ▾</span>
+            </div>
+            <div class="transcript-body" id="transcript-body">
+                <textarea id="transcript-input" placeholder="Paste the meeting transcript here..."></textarea>
+                <div class="transcript-actions">
+                    <button class="btn btn-primary btn-sm" onclick="saveTranscript()">Save Transcript</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Tabs -->
+        <div class="dept-tabs" id="dept-tabs"></div>
+
+        <!-- Department Panels -->
+        <div id="dept-panels"></div>
+
+    </div>
+</div>
+
+<!-- New Meeting Modal -->
+<div class="modal-overlay" id="new-meeting-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">New L10 Meeting</div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Meeting Date</label>
+                <input type="date" class="form-input" id="new-meeting-date">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="carry-forward-check" checked> Carry forward open projects from last meeting
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="createMeeting()">Create Meeting</button>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-text">Revenue Kitchen — L10 Tracker &copy; 2026</div>
+</footer>
+
+<script>
+(function() {
+    var SUPABASE_URL = 'https://ryxrgbvymudmqqpefmmf.supabase.co';
+    var TABLE = 'l10_meetings';
+    var DEPARTMENTS = ['Leadership', 'PIM', 'Sales', 'BDR', 'Marketing', 'RevOps'];
+
+    var sb = window.rkSupabase;
+    var meetings = [];
+    var currentMeetingId = null;
+    var currentDept = DEPARTMENTS[0];
+
+    // ── Helpers ──
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s || '';
+        return d.innerHTML;
+    }
+
+    function generateId() {
+        return 'l10_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr + 'T12:00:00');
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function emptyDepartments() {
+        var depts = {};
+        DEPARTMENTS.forEach(function(d) {
+            depts[d] = { core_focus: '', delivered: [], projects: [] };
+        });
+        return depts;
+    }
+
+    // ── DB mapping ──
+    function fromRow(r) {
+        return {
+            id: r.id,
+            meetingDate: r.meeting_date,
+            transcript: r.transcript || '',
+            departments: r.departments || emptyDepartments(),
+            createdAt: r.created_at,
+            updatedAt: r.updated_at
+        };
+    }
+
+    function toRow(m) {
+        return {
+            id: m.id,
+            meeting_date: m.meetingDate,
+            transcript: m.transcript,
+            departments: m.departments,
+            created_at: m.createdAt,
+            updated_at: new Date().toISOString()
+        };
+    }
+
+    // ── CRUD ──
+    async function loadMeetings() {
+        var res = await sb.from(TABLE).select('*').order('meeting_date', { ascending: false });
+        if (res.error) { console.error('Load error:', res.error); return []; }
+        return res.data.map(fromRow);
+    }
+
+    async function insertMeeting(m) {
+        var res = await sb.from(TABLE).insert(toRow(m));
+        if (res.error) console.error('Insert error:', res.error);
+    }
+
+    async function updateMeeting(m) {
+        m.updatedAt = new Date().toISOString();
+        var res = await sb.from(TABLE).update(toRow(m)).eq('id', m.id);
+        if (res.error) console.error('Update error:', res.error);
+    }
+
+    async function deleteMeetingFromDb(id) {
+        var res = await sb.from(TABLE).delete().eq('id', id);
+        if (res.error) console.error('Delete error:', res.error);
+    }
+
+    // ── Get current meeting ──
+    function getCurrentMeeting() {
+        return meetings.find(function(m) { return m.id === currentMeetingId; });
+    }
+
+    // ── Render meeting selector ──
+    function renderSelector() {
+        var sel = document.getElementById('meeting-select');
+        var html = '<option value="">Select a meeting...</option>';
+        meetings.forEach(function(m) {
+            var selected = m.id === currentMeetingId ? ' selected' : '';
+            html += '<option value="' + m.id + '"' + selected + '>' + formatDate(m.meetingDate) + '</option>';
+        });
+        sel.innerHTML = html;
+        document.getElementById('delete-meeting-btn').style.display = currentMeetingId ? '' : 'none';
+    }
+
+    // ── Render department tabs ──
+    function renderDeptTabs() {
+        var container = document.getElementById('dept-tabs');
+        var html = '';
+        DEPARTMENTS.forEach(function(d) {
+            var cls = d === currentDept ? ' active' : '';
+            html += '<button class="dept-tab' + cls + '" onclick="window._l10.setDept(\'' + d + '\')">' + d + '</button>';
+        });
+        container.innerHTML = html;
+    }
+
+    // ── Render department panel ──
+    function renderDeptPanel() {
+        var meeting = getCurrentMeeting();
+        if (!meeting) return;
+
+        var container = document.getElementById('dept-panels');
+        var dept = meeting.departments[currentDept] || { core_focus: '', delivered: [], projects: [] };
+
+        // Check for last week's open projects
+        var prevMeeting = getPreviousMeeting(meeting);
+        var carriedItems = [];
+        if (prevMeeting && prevMeeting.departments[currentDept]) {
+            var prevProjects = prevMeeting.departments[currentDept].projects || [];
+            carriedItems = prevProjects.filter(function(p) { return p.status !== 'done'; });
+        }
+
+        var html = '';
+
+        // Carry forward notice
+        if (carriedItems.length > 0) {
+            html += '<div class="carry-forward">';
+            html += '<div class="carry-forward-title">Open Items from ' + formatDate(prevMeeting.meetingDate) + '</div>';
+            html += '<ul class="item-list">';
+            carriedItems.forEach(function(item, i) {
+                var statusCls = 'status-' + (item.status || 'in-progress');
+                html += '<li class="item-row">';
+                html += '<span class="item-text">' + escapeHtml(item.text) + '</span>';
+                html += '<span class="item-status ' + statusCls + '">' + (item.status || 'in-progress') + '</span>';
+                html += '</li>';
+            });
+            html += '</ul></div>';
+        }
+
+        // Core Focus
+        html += '<div class="dept-section">';
+        html += '<div class="dept-section-header"><span class="dept-section-title">Core Focus</span></div>';
+        html += '<div class="dept-section-body">';
+        html += '<textarea class="core-focus-input" placeholder="What is the core focus this week?" onchange="window._l10.saveCoreFocus(this.value)">' + escapeHtml(dept.core_focus) + '</textarea>';
+        html += '</div></div>';
+
+        // Delivered
+        html += '<div class="dept-section">';
+        html += '<div class="dept-section-header"><span class="dept-section-title">Delivered This Week</span></div>';
+        html += '<div class="dept-section-body">';
+        html += '<ul class="item-list">';
+        (dept.delivered || []).forEach(function(item, i) {
+            html += '<li class="item-row">';
+            html += '<div class="item-checkbox checked"></div>';
+            html += '<span class="item-text">' + escapeHtml(typeof item === 'string' ? item : item.text) + '</span>';
+            html += '<button class="item-remove" onclick="window._l10.removeDelivered(' + i + ')">&times;</button>';
+            html += '</li>';
+        });
+        html += '</ul>';
+        html += '<div class="add-item-row">';
+        html += '<input class="add-item-input" id="add-delivered-input" placeholder="Add delivered item..." onkeydown="if(event.key===\'Enter\')window._l10.addDelivered()">';
+        html += '<button class="btn btn-primary btn-sm" onclick="window._l10.addDelivered()">Add</button>';
+        html += '</div></div></div>';
+
+        // Projects / Action Items
+        html += '<div class="dept-section">';
+        html += '<div class="dept-section-header"><span class="dept-section-title">Projects &amp; Action Items</span></div>';
+        html += '<div class="dept-section-body">';
+        html += '<ul class="item-list">';
+        (dept.projects || []).forEach(function(item, i) {
+            var isDone = item.status === 'done';
+            var statusCls = 'status-' + (item.status || 'in-progress');
+            html += '<li class="item-row">';
+            html += '<div class="item-checkbox' + (isDone ? ' checked' : '') + '" onclick="window._l10.toggleProject(' + i + ')"></div>';
+            html += '<span class="item-text' + (isDone ? ' done' : '') + '">' + escapeHtml(item.text) + '</span>';
+            html += '<select class="add-item-select" onchange="window._l10.setProjectStatus(' + i + ', this.value)" style="font-size:0.65rem;">';
+            ['in-progress', 'done', 'blocked', 'carried'].forEach(function(s) {
+                html += '<option value="' + s + '"' + (item.status === s ? ' selected' : '') + '>' + s + '</option>';
+            });
+            html += '</select>';
+            html += '<button class="item-remove" onclick="window._l10.removeProject(' + i + ')">&times;</button>';
+            html += '</li>';
+        });
+        html += '</ul>';
+        html += '<div class="add-item-row">';
+        html += '<input class="add-item-input" id="add-project-input" placeholder="Add project or action item..." onkeydown="if(event.key===\'Enter\')window._l10.addProject()">';
+        html += '<button class="btn btn-primary btn-sm" onclick="window._l10.addProject()">Add</button>';
+        html += '</div></div></div>';
+
+        container.innerHTML = html;
+    }
+
+    function getPreviousMeeting(current) {
+        var idx = meetings.findIndex(function(m) { return m.id === current.id; });
+        if (idx < 0 || idx >= meetings.length - 1) return null;
+        return meetings[idx + 1]; // meetings sorted newest first
+    }
+
+    // ── Meeting view toggle ──
+    function showMeetingView() {
+        document.getElementById('content-area').style.display = 'none';
+        document.getElementById('meeting-view').style.display = '';
+        renderDeptTabs();
+        renderDeptPanel();
+        updateTranscript();
+    }
+
+    function showEmptyState() {
+        document.getElementById('content-area').style.display = '';
+        document.getElementById('meeting-view').style.display = 'none';
+    }
+
+    function updateTranscript() {
+        var meeting = getCurrentMeeting();
+        if (!meeting) return;
+        document.getElementById('transcript-input').value = meeting.transcript || '';
+    }
+
+    // ── Public API ──
+    window._l10 = {
+        setDept: function(d) {
+            currentDept = d;
+            renderDeptTabs();
+            renderDeptPanel();
+        },
+
+        saveCoreFocus: async function(val) {
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            if (!meeting.departments[currentDept]) meeting.departments[currentDept] = { core_focus: '', delivered: [], projects: [] };
+            meeting.departments[currentDept].core_focus = val;
+            await updateMeeting(meeting);
+        },
+
+        addDelivered: async function() {
+            var input = document.getElementById('add-delivered-input');
+            var text = input.value.trim();
+            if (!text) return;
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            if (!meeting.departments[currentDept]) meeting.departments[currentDept] = { core_focus: '', delivered: [], projects: [] };
+            meeting.departments[currentDept].delivered.push(text);
+            await updateMeeting(meeting);
+            input.value = '';
+            renderDeptPanel();
+        },
+
+        removeDelivered: async function(idx) {
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            meeting.departments[currentDept].delivered.splice(idx, 1);
+            await updateMeeting(meeting);
+            renderDeptPanel();
+        },
+
+        addProject: async function() {
+            var input = document.getElementById('add-project-input');
+            var text = input.value.trim();
+            if (!text) return;
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            if (!meeting.departments[currentDept]) meeting.departments[currentDept] = { core_focus: '', delivered: [], projects: [] };
+            meeting.departments[currentDept].projects.push({ text: text, status: 'in-progress' });
+            await updateMeeting(meeting);
+            input.value = '';
+            renderDeptPanel();
+        },
+
+        removeProject: async function(idx) {
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            meeting.departments[currentDept].projects.splice(idx, 1);
+            await updateMeeting(meeting);
+            renderDeptPanel();
+        },
+
+        toggleProject: async function(idx) {
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            var proj = meeting.departments[currentDept].projects[idx];
+            proj.status = proj.status === 'done' ? 'in-progress' : 'done';
+            await updateMeeting(meeting);
+            renderDeptPanel();
+        },
+
+        setProjectStatus: async function(idx, status) {
+            var meeting = getCurrentMeeting();
+            if (!meeting) return;
+            meeting.departments[currentDept].projects[idx].status = status;
+            await updateMeeting(meeting);
+            renderDeptPanel();
+        }
+    };
+
+    // ── Global functions ──
+    window.selectMeeting = function(id) {
+        currentMeetingId = id || null;
+        renderSelector();
+        if (currentMeetingId) {
+            showMeetingView();
+        } else {
+            showEmptyState();
+        }
+    };
+
+    window.toggleTranscript = function() {
+        var body = document.getElementById('transcript-body');
+        var toggle = document.getElementById('transcript-toggle-text');
+        if (body.classList.contains('open')) {
+            body.classList.remove('open');
+            toggle.textContent = 'Show ▾';
+        } else {
+            body.classList.add('open');
+            toggle.textContent = 'Hide ▴';
+        }
+    };
+
+    window.saveTranscript = async function() {
+        var meeting = getCurrentMeeting();
+        if (!meeting) return;
+        meeting.transcript = document.getElementById('transcript-input').value;
+        await updateMeeting(meeting);
+    };
+
+    window.openNewMeetingModal = function() {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('new-meeting-date').value = today;
+        document.getElementById('carry-forward-check').checked = true;
+        document.getElementById('new-meeting-modal').classList.add('open');
+    };
+
+    window.closeModal = function() {
+        document.getElementById('new-meeting-modal').classList.remove('open');
+    };
+
+    window.createMeeting = async function() {
+        var dateVal = document.getElementById('new-meeting-date').value;
+        if (!dateVal) { alert('Please select a date.'); return; }
+
+        var carryForward = document.getElementById('carry-forward-check').checked;
+        var depts = emptyDepartments();
+
+        // Carry forward open projects from most recent meeting
+        if (carryForward && meetings.length > 0) {
+            var prev = meetings[0]; // newest first
+            DEPARTMENTS.forEach(function(d) {
+                if (prev.departments[d] && prev.departments[d].projects) {
+                    var open = prev.departments[d].projects.filter(function(p) { return p.status !== 'done'; });
+                    depts[d].projects = open.map(function(p) {
+                        return { text: p.text, status: 'carried' };
+                    });
+                }
+            });
+        }
+
+        var meeting = {
+            id: generateId(),
+            meetingDate: dateVal,
+            transcript: '',
+            departments: depts,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        await insertMeeting(meeting);
+        meetings = await loadMeetings();
+        currentMeetingId = meeting.id;
+        renderSelector();
+        showMeetingView();
+        closeModal();
+    };
+
+    window.deleteMeeting = async function() {
+        if (!currentMeetingId) return;
+        if (!confirm('Delete this meeting? This cannot be undone.')) return;
+        await deleteMeetingFromDb(currentMeetingId);
+        meetings = await loadMeetings();
+        currentMeetingId = null;
+        renderSelector();
+        showEmptyState();
+    };
+
+    // Close modal on escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Click overlay to close
+    document.getElementById('new-meeting-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ── Real-time ──
+    sb.channel('l10-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async function() {
+            meetings = await loadMeetings();
+            renderSelector();
+            if (currentMeetingId) renderDeptPanel();
+        })
+        .subscribe();
+
+    // ── Init ──
+    (async function init() {
+        meetings = await loadMeetings();
+        renderSelector();
+        if (meetings.length > 0) {
+            currentMeetingId = meetings[0].id;
+            renderSelector();
+            showMeetingView();
+        }
+    })();
+
+})();
+</script>
+</body>
+</html>
