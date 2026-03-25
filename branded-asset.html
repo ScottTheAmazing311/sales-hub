@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branded Asset Generator — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .dash {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .dash-header {
+            margin-bottom: 1.5rem;
+        }
+        .dash-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .dash-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ── Form sections ── */
+        .form-section {
+            background: var(--cream);
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .form-section h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* ── Pill buttons ── */
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .pill {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border: 2px solid rgba(7,55,79,0.12);
+            background: transparent;
+            color: rgba(7,55,79,0.45);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .pill:hover {
+            border-color: rgba(7,55,79,0.3);
+            color: var(--navy);
+        }
+        .pill.active {
+            background: var(--navy);
+            color: #fff;
+            border-color: var(--navy);
+        }
+
+        /* ── Upload area ── */
+        .upload-zone {
+            border: 2px dashed rgba(7,55,79,0.15);
+            border-radius: var(--radius);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--navy);
+            background: rgba(255,255,255,0.5);
+        }
+        .upload-zone h4 {
+            font-size: 1rem;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+        .upload-zone p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .upload-zone .file-name {
+            font-weight: 700;
+            color: var(--navy);
+            font-size: 0.9rem;
+        }
+        .upload-zone .file-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ── Textarea ── */
+        .paste-area {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid rgba(7,55,79,0.1);
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text);
+            background: #fff;
+            resize: vertical;
+            outline: none;
+        }
+        .paste-area:focus {
+            border-color: rgba(7,55,79,0.3);
+        }
+
+        /* ── Toggle link ── */
+        .toggle-link {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--sky);
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .toggle-link:hover { color: var(--navy); }
+
+        /* ── Action button ── */
+        .btn-generate {
+            padding: 0.75rem 1.5rem;
+            background: var(--yellow);
+            color: var(--navy);
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-generate:hover { filter: brightness(1.05); }
+        .btn-generate:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* ── Error ── */
+        .error-bar {
+            border-left: 4px solid #c0392b;
+            background: #fef2f2;
+            padding: 0.75rem 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.8rem;
+            color: #991b1b;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* ── Result bar ── */
+        .result-bar {
+            background: var(--navy);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .result-bar h3 {
+            color: #fff;
+            font-size: 0.85rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .result-actions {
+            display: flex;
+            gap: 0.4rem;
+        }
+        .result-btn {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .result-btn:hover { background: rgba(255,255,255,0.1); }
+        .result-btn.primary {
+            background: var(--yellow);
+            color: var(--navy);
+            border-color: var(--yellow);
+        }
+        .result-btn.primary:hover { filter: brightness(1.1); }
+
+        .result-iframe {
+            width: 100%;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            min-height: 700px;
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--navy);
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="stripe"></div>
+<div class="back-bar">
+    <a href="index.html" class="back-link">&larr; Revenue Kitchen</a>
+</div>
+
+<div class="dash">
+    <div class="dash-header">
+        <h1>Branded Asset Generator</h1>
+        <p>Upload any document and transform it into a branded Rankings.io asset. Export as PDF or HTML.</p>
+    </div>
+
+    <!-- Document Type -->
+    <div class="form-section">
+        <h3>Document Type</h3>
+        <div class="pill-group" id="docTypeGroup">
+            <button class="pill active" data-value="general">General</button>
+            <button class="pill" data-value="offer-letter">Offer Letter / Role</button>
+            <button class="pill" data-value="proposal">Proposal / RFP</button>
+            <button class="pill" data-value="case-study">Case Study</button>
+            <button class="pill" data-value="report">Report / Analysis</button>
+            <button class="pill" data-value="partnership">Partnership</button>
+            <button class="pill" data-value="process">Process / Playbook</button>
+        </div>
+    </div>
+
+    <!-- Page Target -->
+    <div class="form-section">
+        <h3>Output Length</h3>
+        <div class="pill-group" id="pageTargetGroup">
+            <button class="pill active" data-value="0">Auto</button>
+            <button class="pill" data-value="2">2 Pages</button>
+            <button class="pill" data-value="4">4 Pages</button>
+            <button class="pill" data-value="6">6 Pages</button>
+            <button class="pill" data-value="8">8 Pages</button>
+            <button class="pill" data-value="10">10 Pages</button>
+            <button class="pill" data-value="12">12+ Pages</button>
+        </div>
+        <p style="font-size:0.7rem; color:var(--text-muted); margin-top:0.5rem;">
+            Auto scales based on document length. Set a target to control how much detail is preserved.
+        </p>
+    </div>
+
+    <!-- Document Content -->
+    <div class="form-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+            <h3 style="margin:0;">Document Content</h3>
+            <button class="toggle-link" id="toggleMode">Paste Text Instead</button>
+        </div>
+
+        <div id="uploadView">
+            <div class="upload-zone" id="dropZone">
+                <div id="uploadEmpty">
+                    <h4>Drop a file here</h4>
+                    <p>or click to browse &mdash; PDF, DOCX, TXT</p>
+                </div>
+                <div id="uploadFilled" style="display:none;">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-meta" id="fileMeta"></div>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.md" style="display:none;">
+        </div>
+
+        <div id="pasteView" style="display:none;">
+            <textarea class="paste-area" id="rawText" placeholder="Paste your document content here..."></textarea>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-bar" id="errorBar"></div>
+
+    <!-- Generate -->
+    <button class="btn-generate" id="generateBtn" disabled>Generate Branded Asset</button>
+
+    <!-- Result -->
+    <div class="result-container" id="resultContainer">
+        <div class="result-bar">
+            <h3 id="resultTitle">Document</h3>
+            <div class="result-actions">
+                <button class="result-btn" id="previewBtn">Preview</button>
+                <button class="result-btn" id="downloadBtn">Download HTML</button>
+                <button class="result-btn primary" id="exportBtn">Export PDF</button>
+            </div>
+        </div>
+        <iframe class="result-iframe" id="resultIframe" title="Branded asset preview"></iframe>
+    </div>
+</div>
+
+<script>
+(function() {
+    var API_URL = 'https://rankings-audit-tools.vercel.app/api/branded-asset';
+
+    // State
+    var docType = 'general';
+    var pageTarget = 0;
+    var file = null;
+    var pasteMode = false;
+    var resultHTML = '';
+    var resultTitle = '';
+
+    // Elements
+    var docTypeGroup = document.getElementById('docTypeGroup');
+    var pageTargetGroup = document.getElementById('pageTargetGroup');
+    var toggleMode = document.getElementById('toggleMode');
+    var dropZone = document.getElementById('dropZone');
+    var fileInput = document.getElementById('fileInput');
+    var uploadView = document.getElementById('uploadView');
+    var pasteView = document.getElementById('pasteView');
+    var rawText = document.getElementById('rawText');
+    var errorBar = document.getElementById('errorBar');
+    var generateBtn = document.getElementById('generateBtn');
+    var resultContainer = document.getElementById('resultContainer');
+    var resultIframe = document.getElementById('resultIframe');
+    var resultTitleEl = document.getElementById('resultTitle');
+
+    // ── Pill group handler ──
+    function setupPillGroup(group, onChange) {
+        group.addEventListener('click', function(e) {
+            var pill = e.target.closest('.pill');
+            if (!pill) return;
+            group.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('active'); });
+            pill.classList.add('active');
+            onChange(pill.dataset.value);
+        });
+    }
+
+    setupPillGroup(docTypeGroup, function(val) { docType = val; });
+    setupPillGroup(pageTargetGroup, function(val) { pageTarget = parseInt(val, 10); });
+
+    // ── Toggle upload/paste ──
+    toggleMode.addEventListener('click', function() {
+        pasteMode = !pasteMode;
+        file = null;
+        rawText.value = '';
+        fileInput.value = '';
+        document.getElementById('uploadEmpty').style.display = '';
+        document.getElementById('uploadFilled').style.display = 'none';
+        errorBar.style.display = 'none';
+        resultContainer.style.display = 'none';
+
+        if (pasteMode) {
+            uploadView.style.display = 'none';
+            pasteView.style.display = '';
+            toggleMode.textContent = 'Switch to Upload';
+        } else {
+            uploadView.style.display = '';
+            pasteView.style.display = 'none';
+            toggleMode.textContent = 'Paste Text Instead';
+        }
+        updateGenerateBtn();
+    });
+
+    // ── File handling ──
+    function handleFile(f) {
+        var ext = f.name.split('.').pop().toLowerCase();
+        var supported = ['pdf', 'docx', 'txt', 'md'];
+        if (supported.indexOf(ext) === -1) {
+            showError('Unsupported file type: .' + ext);
+            return;
+        }
+        file = f;
+        errorBar.style.display = 'none';
+        resultContainer.style.display = 'none';
+        document.getElementById('uploadEmpty').style.display = 'none';
+        document.getElementById('uploadFilled').style.display = '';
+        document.getElementById('fileName').textContent = f.name;
+        document.getElementById('fileMeta').textContent = Math.round(f.size / 1024) + ' KB — Click or drop to replace';
+        updateGenerateBtn();
+    }
+
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    fileInput.addEventListener('change', function() {
+        if (fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', function() {
+        dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    rawText.addEventListener('input', function() { updateGenerateBtn(); });
+
+    function updateGenerateBtn() {
+        var hasContent = pasteMode ? rawText.value.trim().length > 0 : !!file;
+        generateBtn.disabled = !hasContent;
+    }
+
+    function showError(msg) {
+        errorBar.textContent = msg;
+        errorBar.style.display = '';
+    }
+
+    // ── Generate ──
+    generateBtn.addEventListener('click', async function() {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<span class="spinner"></span> Generating...';
+        errorBar.style.display = 'none';
+        resultContainer.style.display = 'none';
+
+        try {
+            var res;
+            if (pasteMode || !file) {
+                if (!rawText.value.trim()) throw new Error('No text content provided');
+                res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rawText: rawText.value,
+                        docType: docType,
+                        pageTarget: String(pageTarget)
+                    })
+                });
+            } else {
+                var formData = new FormData();
+                formData.append('document', file);
+                formData.append('docType', docType);
+                formData.append('pageTarget', String(pageTarget));
+                res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+
+            var data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Generation failed');
+
+            resultHTML = data.html;
+            resultTitle = (data.structured && data.structured.title) || (file ? file.name : 'Document');
+            resultTitleEl.textContent = resultTitle;
+            resultIframe.srcdoc = resultHTML;
+            resultContainer.style.display = '';
+
+            // Auto-size iframe once loaded
+            resultIframe.onload = function() {
+                try {
+                    var h = resultIframe.contentDocument.body.scrollHeight + 40;
+                    resultIframe.style.height = Math.max(700, h) + 'px';
+                } catch(e) {}
+            };
+        } catch(err) {
+            showError(err.message || 'Generation failed');
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Branded Asset';
+            updateGenerateBtn();
+        }
+    });
+
+    // ── Preview ──
+    document.getElementById('previewBtn').addEventListener('click', function() {
+        if (!resultHTML) return;
+        var win = window.open('', '_blank');
+        if (win) { win.document.write(resultHTML); win.document.close(); }
+    });
+
+    // ── Download HTML ──
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        if (!resultHTML) return;
+        var blob = new Blob([resultHTML], { type: 'text/html' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = resultTitle.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() + '.html';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // ── Export PDF ──
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        if (!resultHTML) return;
+        var printHTML = resultHTML.replace('</body>',
+            '<script>document.fonts.ready.then(function(){setTimeout(function(){window.print();},300);});<\/script></body>'
+        );
+        var win = window.open('', '_blank');
+        if (win) { win.document.write(printHTML); win.document.close(); }
+    });
+})();
+</script>
+
+</body>
+</html>
