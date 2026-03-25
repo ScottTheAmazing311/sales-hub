@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbound Lead Tracker — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --destructive: #c0392b;
+            --warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .dash {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .dash-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .dash-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .dash-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ── Period Tabs ── */
+        .period-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid rgba(7,55,79,0.08);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .period-tab {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.2s;
+            border-right: 1px solid rgba(7,55,79,0.08);
+        }
+        .period-tab:last-child { border-right: none; }
+        .period-tab:hover { background: rgba(7,55,79,0.03); }
+        .period-tab.active {
+            background: var(--navy);
+            color: var(--yellow);
+        }
+        .period-tab .tab-range {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 400;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+
+        .section-block {
+            margin-bottom: 2rem;
+        }
+
+        /* ── Stat Cards ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .stat-card.highlight-card {
+            background: var(--navy);
+        }
+        .stat-card.highlight-card .stat-label { color: var(--yellow); opacity: 0.8; }
+        .stat-card.highlight-card .stat-value { color: #fff; }
+        .stat-card.highlight-card .stat-sub { color: rgba(255,255,255,0.5); }
+        .stat-card .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .stat-card .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+        .stat-card .stat-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        .stat-card .stat-sub .up { color: var(--success); font-weight: 600; }
+        .stat-card .stat-sub .down { color: var(--destructive); font-weight: 600; }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem 0;
+        }
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .card-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .card-content {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        /* ── Tables ── */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .report-table thead th {
+            background: var(--navy);
+            color: var(--yellow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .report-table thead th:first-child { border-radius: 6px 0 0 0; }
+        .report-table thead th:last-child { border-radius: 0 6px 0 0; }
+        .report-table tbody td {
+            padding: 0.6rem 0.85rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .report-table tbody tr:last-child td { border-bottom: none; }
+        .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
+        .report-table td.num { text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+        .report-table td.highlight {
+            background: rgba(234,255,106,0.18);
+            font-weight: 600;
+        }
+
+        /* ── Charts ── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem 1rem;
+            box-shadow: var(--shadow);
+        }
+        .chart-card .chart-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--yellow);
+            margin-bottom: 0.75rem;
+        }
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 250px;
+        }
+
+        /* ── Status Bar (mini) ── */
+        .status-bar {
+            display: flex;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+            gap: 2px;
+        }
+        .status-bar .bar-seg {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── BDR Grid ── */
+        .bdr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .bdr-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .bdr-card .bdr-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+        .bdr-card .bdr-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .bdr-card .bdr-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Loading ── */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .loading-state .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid rgba(7,55,79,0.15);
+            border-top-color: var(--navy);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: repeat(3, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+            .bdr-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .bdr-grid { grid-template-columns: 1fr; }
+            .dash { padding: 1rem; }
+            .period-tabs { flex-direction: column; }
+            .period-tab { border-right: none; border-bottom: 1px solid rgba(7,55,79,0.08); }
+            .period-tab:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stripe"></div>
+    <div class="back-bar">
+        <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+    </div>
+
+    <div class="dash">
+        <div class="dash-header">
+            <div>
+                <h1>Inbound Lead Tracker</h1>
+                <p>Weekly and month-to-date inbound lead performance</p>
+            </div>
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                Live from Google Sheets
+            </div>
+        </div>
+
+        <!-- Period Tabs -->
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="midweek">
+                Mid-Week Update
+                <span class="tab-range" id="midweek-range"></span>
+            </button>
+            <button class="period-tab" data-period="endweek">
+                End of Week Update
+                <span class="tab-range" id="endweek-range"></span>
+            </button>
+            <button class="period-tab" data-period="mtd">
+                Month to Date
+                <span class="tab-range" id="mtd-range"></span>
+            </button>
+        </div>
+
+        <div id="loading" class="loading-state">
+            <div class="spinner"></div>
+            Loading inbound data...
+        </div>
+
+        <div id="dashboard" style="display:none;">
+            <!-- Key Metrics -->
+            <div class="section-block">
+                <div class="section-title">Pipeline Summary</div>
+                <div class="stat-grid" id="stat-cards"></div>
+                <div class="status-bar" id="pipeline-bar"></div>
+            </div>
+
+            <!-- BDR Breakdown -->
+            <div class="section-block">
+                <div class="section-title">AE Assignment</div>
+                <div class="bdr-grid" id="bdr-cards"></div>
+            </div>
+
+            <!-- Charts -->
+            <div class="section-block">
+                <div class="section-title">Trends</div>
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-label">Daily Inbound Volume</div>
+                        <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-label">Lead Status Breakdown</div>
+                        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traffic Source -->
+            <div class="section-block">
+                <div class="section-title">Traffic Source Breakdown</div>
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-label">Leads by Source</div>
+                        <div class="chart-wrap"><canvas id="chart-source"></canvas></div>
+                    </div>
+                    <div class="card" style="display:flex;align-items:stretch;">
+                        <div style="width:100%;">
+                            <div class="card-header"><div class="card-title">Source Detail</div></div>
+                            <div class="card-content">
+                                <div style="overflow-x:auto;" id="source-table-wrap"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead List -->
+            <div class="section-block">
+                <div class="section-title">Lead Detail</div>
+                <div class="card">
+                    <div class="card-content" style="padding-top:0;">
+                        <div style="overflow-x:auto;" id="lead-table-wrap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ── Config ──
+const SHEET_ID = '1DgLjqbQzQTy2Ca6b81sCaEZx9znWQQ_XDSdLrhUf44Y';
+const SHEET_TAB = 'March 2026';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}`;
+
+// ── Column mapping (March 2026 tab) ──
+// A=Hubspot Link, B=Company Name, C=Practice Area, D=AE, E=Date Inbound,
+// F=FTA Date, G=FTA Show, H=AE Date Scheduled, I=Notes, J=City/State,
+// K=Traffic Source, L=(empty), M=Converted outbound/MDR, R=Booked Meeting
+const COL = {
+    URL: 0,           // A — Hubspot Link
+    NAME: 1,          // B — Company Name
+    PRACTICE: 2,      // C — Practice Area
+    AE: 3,            // D — AE
+    DATE_INBOUND: 4,  // E — Date Inbound
+    FTA_DATE: 5,      // F — FTA Date
+    FTA_SHOW: 6,      // G — FTA Show (Yes / CMN-Yes / NO)
+    AE_DATE: 7,       // H — AE Date Scheduled
+    NOTES: 8,         // I — Notes
+    CITY: 9,          // J — City/State
+    SOURCE: 10,       // K — Traffic Source
+    CONVERTED: 12,    // M — Converted outbound/MDR
+    BOOKED: 17,       // R — Booked Meeting - No meeting booked
+};
+
+// ── Date utilities ──
+function getMonday(d) {
+    const dt = new Date(d);
+    const day = dt.getDay();
+    const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+    dt.setDate(diff);
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+}
+function getWednesday(d) { const m = getMonday(d); m.setDate(m.getDate() + 2); return m; }
+function getFriday(d) { const m = getMonday(d); m.setDate(m.getDate() + 4); return m; }
+function getMonthStart(d) { const dt = new Date(d); dt.setDate(1); dt.setHours(0,0,0,0); return dt; }
+function formatDate(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+function formatDateFull(d) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate();
+}
+
+function parseGoogleDate(val) {
+    if (typeof val === 'string' && val.startsWith('Date(')) {
+        const parts = val.match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (parts) return new Date(parseInt(parts[1]), parseInt(parts[2]), parseInt(parts[3]));
+    }
+    return null;
+}
+
+function parseDateAny(cell) {
+    if (!cell) return null;
+    // Try gviz Date() format
+    let d = parseGoogleDate(cell.v);
+    if (d) return d;
+    // Try formatted value like "3/2" or "March 2"
+    const f = (cell.f || '').trim();
+    if (f) {
+        // M/D format — assume current year (2026 for March tab)
+        const slashMatch = f.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if (slashMatch) {
+            const year = slashMatch[3] ? (slashMatch[3].length === 2 ? 2000 + parseInt(slashMatch[3]) : parseInt(slashMatch[3])) : 2026;
+            return new Date(year, parseInt(slashMatch[1]) - 1, parseInt(slashMatch[2]));
+        }
+        // "March 2" format
+        const months = { january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11 };
+        const parts = f.toLowerCase().split(/\s+/);
+        if (parts.length >= 2 && months[parts[0]] !== undefined) {
+            return new Date(2026, months[parts[0]], parseInt(parts[1]));
+        }
+    }
+    // Try raw value as string date
+    if (typeof cell.v === 'string') {
+        const d2 = new Date(cell.v);
+        if (!isNaN(d2.getTime())) return d2;
+    }
+    return null;
+}
+
+// ── Cell helpers ──
+function cellVal(cells, idx) {
+    if (idx < 0 || idx >= cells.length || !cells[idx]) return '';
+    return (cells[idx].f || cells[idx].v || '').toString().trim();
+}
+
+// ── Normalize FTA Show into status ──
+function deriveStatus(ftaShow, aeDate, booked) {
+    const show = (ftaShow || '').trim().toLowerCase();
+    if (!show && !aeDate && !booked) return '';
+
+    // FTA Show = NO means no-show
+    if (show === 'no') return 'No Show';
+
+    // FTA Show = Yes or CMN-Yes means they showed up
+    if (show.includes('yes')) {
+        // If AE date is scheduled, they're pre-qualified
+        if (aeDate) return 'Pre-Qualified';
+        return 'Held';
+    }
+
+    // If booked column has "no meeting booked" or similar
+    if (booked && booked.toLowerCase().includes('no')) return 'Disqualified';
+
+    return '';
+}
+
+// ── Parse sheet data ──
+function parseSheetData(json) {
+    const rows = json.table.rows;
+    const leads = [];
+
+    for (const row of rows) {
+        const cells = row.c || [];
+        const name = cellVal(cells, COL.NAME);
+        if (!name) continue;
+
+        const url = cells[COL.URL] ? (cells[COL.URL].v || '') : '';
+        const date = parseDateAny(cells[COL.DATE_INBOUND]);
+        const practice = cellVal(cells, COL.PRACTICE);
+        const ae = cellVal(cells, COL.AE);
+        const ftaShow = cellVal(cells, COL.FTA_SHOW);
+        const aeDate = cellVal(cells, COL.AE_DATE);
+        const notes = cellVal(cells, COL.NOTES);
+        const city = cellVal(cells, COL.CITY);
+        const source = cellVal(cells, COL.SOURCE);
+        const booked = cellVal(cells, COL.BOOKED);
+
+        const status = deriveStatus(ftaShow, aeDate, booked);
+
+        leads.push({ name, url, date, ae, practice, ftaShow, aeDate, notes, city, source, status, booked });
+    }
+    return leads;
+}
+
+// ── Filter leads by date range ──
+function filterByRange(leads, start, end) {
+    return leads.filter(l => {
+        if (!l.date) return false;
+        return l.date >= start && l.date <= end;
+    });
+}
+
+// ── Count by field ──
+function countBy(leads, field) {
+    const counts = {};
+    for (const l of leads) {
+        const key = l[field] || 'Unknown';
+        counts[key] = (counts[key] || 0) + 1;
+    }
+    return counts;
+}
+
+// ── Normalize traffic source names (fix typos in sheet) ──
+function normalizeSource(src) {
+    if (!src) return '';
+    const s = src.trim();
+    // Fix common typos
+    if (s.match(/^go+d/i)) return s.replace(/^go+d\w*/i, 'Google');  // "Goodle" → "Google"
+    if (s.match(/serach/i)) return s.replace(/serach/i, 'Search');
+    return s;
+}
+
+// ── Render: Stat Cards ──
+function renderStatCards(leads) {
+    const total = leads.length;
+    const statusCounts = countBy(leads, 'status');
+    const preQual = statusCounts['Pre-Qualified'] || 0;
+    const disqual = statusCounts['Disqualified'] || 0;
+    const held = (statusCounts['Held'] || 0);
+    const noShow = (statusCounts['No Show'] || 0);
+    const pending = total - preQual - disqual - held - noShow;
+
+    const cards = [
+        { label: 'Total Inbound', value: total, cls: 'highlight-card', sub: 'all leads' },
+        { label: 'Pre-Qualified', value: preQual, cls: '', sub: total ? Math.round(preQual/total*100) + '% of total' : '—' },
+        { label: 'Disqualified', value: disqual, cls: '', sub: total ? Math.round(disqual/total*100) + '% of total' : '—' },
+        { label: 'Held', value: held, cls: '', sub: total ? Math.round(held/total*100) + '% of total' : '—' },
+        { label: 'No Show', value: noShow, cls: '', sub: total ? Math.round(noShow/total*100) + '% of total' : '—' },
+    ];
+
+    let html = '';
+    for (const c of cards) {
+        html += `<div class="stat-card ${c.cls}">
+            <div class="stat-label">${c.label}</div>
+            <div class="stat-value">${c.value}</div>
+            <div class="stat-sub">${c.sub}</div>
+        </div>`;
+    }
+    document.getElementById('stat-cards').innerHTML = html;
+
+    // Pipeline status bar
+    if (total > 0) {
+        const segments = [
+            { pct: preQual/total*100, color: 'var(--success)', label: 'Pre-Qualified' },
+            { pct: held/total*100, color: '#3c94d1', label: 'Held' },
+            { pct: noShow/total*100, color: 'var(--warning)', label: 'No Show' },
+            { pct: disqual/total*100, color: 'var(--destructive)', label: 'Disqualified' },
+            { pct: pending/total*100, color: 'rgba(7,55,79,0.15)', label: 'Pending' },
+        ];
+        let barHTML = '';
+        for (const s of segments) {
+            if (s.pct > 0) barHTML += `<div class="bar-seg" style="width:${s.pct}%;background:${s.color};" title="${s.label}: ${Math.round(s.pct)}%"></div>`;
+        }
+        document.getElementById('pipeline-bar').innerHTML = barHTML;
+    }
+}
+
+// ── Render: AE Cards (instead of BDR) ──
+function renderBDRCards(leads) {
+    const aeCounts = countBy(leads, 'ae');
+    // Get all AEs sorted by count
+    const sorted = Object.entries(aeCounts).filter(([k]) => k !== 'Unknown').sort((a,b) => b[1] - a[1]);
+
+    let html = '';
+    for (const [name, count] of sorted) {
+        html += `<div class="bdr-card">
+            <div class="bdr-name">${name}</div>
+            <div class="bdr-count">${count}</div>
+            <div class="bdr-label">leads assigned</div>
+        </div>`;
+    }
+    const unassigned = aeCounts['Unknown'] || 0;
+    if (unassigned > 0) {
+        html += `<div class="bdr-card">
+            <div class="bdr-name">Unassigned</div>
+            <div class="bdr-count">${unassigned}</div>
+            <div class="bdr-label">leads</div>
+        </div>`;
+    }
+    document.getElementById('bdr-cards').innerHTML = html;
+}
+
+// ── Render: Daily Chart ──
+function renderDailyChart(leads, startDate, endDate) {
+    const ctx = document.getElementById('chart-daily');
+    if (!ctx) return;
+    if (window._chartDaily) window._chartDaily.destroy();
+
+    const dayCounts = {};
+    const current = new Date(startDate);
+    while (current <= endDate) {
+        dayCounts[formatDate(current)] = 0;
+        current.setDate(current.getDate() + 1);
+    }
+    for (const l of leads) {
+        if (!l.date) continue;
+        const key = formatDate(l.date);
+        if (dayCounts[key] !== undefined) dayCounts[key]++;
+    }
+
+    window._chartDaily = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(dayCounts),
+            datasets: [{ label: 'Leads', data: Object.values(dayCounts), backgroundColor: 'rgba(234,255,106,0.7)', borderColor: '#eaff6a', borderWidth: 1, borderRadius: 3 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 } },
+            scales: {
+                x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+// ── Render: Status Chart ──
+function renderStatusChart(leads) {
+    const ctx = document.getElementById('chart-status');
+    if (!ctx) return;
+    if (window._chartStatus) window._chartStatus.destroy();
+
+    const statusCounts = countBy(leads, 'status');
+    const labels = Object.keys(statusCounts).map(k => k || 'Pending');
+    const values = Object.values(statusCounts);
+    const colorMap = { 'Pre-Qualified': '#22c55e', 'Disqualified': '#c0392b', 'No Show': '#f59e0b', 'Held': '#3c94d1', 'Pending': 'rgba(255,255,255,0.2)', 'Unknown': 'rgba(255,255,255,0.15)' };
+    const colors = labels.map(l => colorMap[l] || 'rgba(255,255,255,0.2)');
+
+    window._chartStatus = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: 'rgba(7,55,79,0.8)', borderWidth: 2 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11, family: "'IBM Plex Mono', monospace" }, padding: 16, boxWidth: 12 } },
+                tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 }
+            }
+        }
+    });
+}
+
+// ── Render: Source Chart ──
+function renderSourceChart(leads) {
+    const ctx = document.getElementById('chart-source');
+    if (!ctx) return;
+    if (window._chartSource) window._chartSource.destroy();
+
+    // Normalize and group sources
+    const rawCounts = {};
+    for (const l of leads) {
+        const src = normalizeSource(l.source) || 'Not Tagged';
+        rawCounts[src] = (rawCounts[src] || 0) + 1;
+    }
+    const sorted = Object.entries(rawCounts).sort((a,b) => b[1] - a[1]);
+    const labels = sorted.map(s => s[0]);
+    const values = sorted.map(s => s[1]);
+    const palette = ['#eaff6a','#eedc82','#3c94d1','#22c55e','#f59e0b','#c0392b','#9b59b6','#1abc9c','#e74c3c','#2ecc71'];
+
+    window._chartSource = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{ label: 'Leads', data: values, backgroundColor: palette.slice(0, labels.length).map(c => c + 'bb'), borderColor: palette.slice(0, labels.length), borderWidth: 1, borderRadius: 3 }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 } },
+            scales: {
+                x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+                y: { ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 11, family: "'IBM Plex Mono', monospace" } }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+// ── Render: Source Table ──
+function renderSourceTable(leads) {
+    const rawCounts = {};
+    for (const l of leads) {
+        const src = normalizeSource(l.source) || 'Not Tagged';
+        rawCounts[src] = (rawCounts[src] || 0) + 1;
+    }
+    const total = leads.length;
+    const sorted = Object.entries(rawCounts).sort((a,b) => b[1] - a[1]);
+
+    let html = '<table class="report-table"><thead><tr><th>Traffic Source</th><th>Leads</th><th>% of Total</th></tr></thead><tbody>';
+    for (const [src, count] of sorted) {
+        const pct = total > 0 ? Math.round(count/total*100) : 0;
+        html += `<tr><td>${src}</td><td class="num">${count}</td><td class="num">${pct}%</td></tr>`;
+    }
+    html += `<tr style="font-weight:700;background:rgba(234,255,106,0.12);"><td>Total</td><td class="num">${total}</td><td class="num">100%</td></tr>`;
+    html += '</tbody></table>';
+    document.getElementById('source-table-wrap').innerHTML = html;
+}
+
+// ── Render: Lead Table ──
+function renderLeadTable(leads) {
+    if (leads.length === 0) {
+        document.getElementById('lead-table-wrap').innerHTML = '<div class="empty-state">No leads in this period</div>';
+        return;
+    }
+
+    let html = '<table class="report-table"><thead><tr><th>Company</th><th>Practice Area</th><th>AE</th><th>Date</th><th>FTA Show</th><th>Status</th><th>Source</th><th>City/State</th></tr></thead><tbody>';
+    const sorted = [...leads].sort((a,b) => (b.date || 0) - (a.date || 0));
+    for (const l of sorted) {
+        const nameCell = l.url
+            ? `<a href="${l.url}" target="_blank" style="color:var(--navy);text-decoration:underline;">${l.name}</a>`
+            : l.name;
+        const dateStr = l.date ? formatDateFull(l.date) : '—';
+        const statusColors = {
+            'Pre-Qualified': 'rgba(34,197,94,0.15);color:#16a34a',
+            'Disqualified': 'rgba(192,57,43,0.15);color:#c0392b',
+            'No Show': 'rgba(245,158,11,0.15);color:#d97706',
+            'Held': 'rgba(60,148,209,0.15);color:#2563eb',
+        };
+        const statusBadge = l.status
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600;background:${statusColors[l.status] || 'rgba(0,0,0,0.05);color:#666'}">${l.status}</span>`
+            : '<span style="color:#ccc;">—</span>';
+        html += `<tr>
+            <td>${nameCell}</td>
+            <td>${l.practice || '—'}</td>
+            <td>${l.ae || '—'}</td>
+            <td style="white-space:nowrap;">${dateStr}</td>
+            <td>${l.ftaShow || '—'}</td>
+            <td>${statusBadge}</td>
+            <td>${normalizeSource(l.source) || '<span style="color:#ccc;">—</span>'}</td>
+            <td style="white-space:nowrap;">${l.city || '—'}</td>
+        </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('lead-table-wrap').innerHTML = html;
+}
+
+// ── Main render ──
+let allLeads = [];
+
+function getReferenceDate() {
+    // Use today's actual date since data is current (March 2026)
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d;
+}
+
+function render(period) {
+    const refDate = getReferenceDate();
+    let start, end;
+
+    if (period === 'midweek') {
+        start = getMonday(refDate);
+        end = getWednesday(refDate);
+        end.setHours(23, 59, 59, 999);
+    } else if (period === 'endweek') {
+        start = getMonday(refDate);
+        end = getFriday(refDate);
+        end.setHours(23, 59, 59, 999);
+    } else {
+        start = getMonthStart(refDate);
+        end = new Date(refDate);
+    }
+
+    const filtered = filterByRange(allLeads, start, end);
+
+    document.getElementById('midweek-range').textContent = formatDateFull(getMonday(refDate)) + ' – ' + formatDateFull(getWednesday(refDate));
+    document.getElementById('endweek-range').textContent = formatDateFull(getMonday(refDate)) + ' – ' + formatDateFull(getFriday(refDate));
+    document.getElementById('mtd-range').textContent = formatDateFull(getMonthStart(refDate)) + ' – ' + formatDateFull(refDate);
+
+    renderStatCards(filtered);
+    renderBDRCards(filtered);
+    renderDailyChart(filtered, start, end);
+    renderStatusChart(filtered);
+    renderSourceChart(filtered);
+    renderSourceTable(filtered);
+    renderLeadTable(filtered);
+}
+
+// ── Tab switching ──
+document.querySelectorAll('.period-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render(btn.dataset.period);
+    });
+});
+
+// ── Chart.js defaults ──
+Chart.defaults.color = 'rgba(255,255,255,0.5)';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// ── Init ──
+async function init() {
+    try {
+        const res = await fetch(SHEET_URL);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const text = await res.text();
+
+        const jsonStr = text.replace(/^[^{]*/, '').replace(/\);?\s*$/, '');
+        const json = JSON.parse(jsonStr);
+        allLeads = parseSheetData(json);
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        render('midweek');
+    } catch (e) {
+        console.error('Load error:', e);
+        document.getElementById('loading').innerHTML =
+            '<p style="color:var(--destructive);">Failed to load data. Please refresh.</p>';
+    }
+}
+
+init();
+</script>
+</body>
+</html>
