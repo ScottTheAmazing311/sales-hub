@@ -551,34 +551,15 @@ document.getElementById('strategy-form').addEventListener('submit', async functi
     btn.textContent = 'Submitting...';
 
     try {
-        // Use a hidden form POST to avoid CORS issues with Apps Script
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = APPS_SCRIPT_URL;
-        form.target = 'hidden-iframe';
-        form.style.display = 'none';
+        const formData = new URLSearchParams();
+        formData.append('payload', JSON.stringify(payload));
 
-        const input = document.createElement('input');
-        input.name = 'payload';
-        input.value = JSON.stringify(payload);
-        form.appendChild(input);
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData,
+        });
 
-        // Create hidden iframe to capture response
-        let iframe = document.getElementById('hidden-iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.name = 'hidden-iframe';
-            iframe.id = 'hidden-iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-        form.remove();
-
-        // Give it a moment, then show success
-        await new Promise(r => setTimeout(r, 1500));
         msg.textContent = 'Strategy request submitted! It will appear in the tracking sheet.';
         msg.className = 'form-message success';
 
