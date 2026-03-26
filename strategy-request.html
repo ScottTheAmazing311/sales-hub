@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Request — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --destructive: #c0392b;
+            --warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        .page-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .page-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Form Card ── */
+        .form-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+        .form-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: var(--bg);
+            border: 1.5px solid rgba(7,55,79,0.15);
+            border-radius: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(7,55,79,0.08);
+        }
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2307374F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.9rem center;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* ── Urgency Options ── */
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .option-card {
+            position: relative;
+            border: 2px solid rgba(7,55,79,0.12);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+        .option-card:hover {
+            border-color: rgba(7,55,79,0.3);
+        }
+        .option-card.selected {
+            border-color: var(--navy);
+            background: rgba(7,55,79,0.04);
+        }
+        .option-card input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .option-card .option-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .option-card .option-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .option-card .option-badge {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        .option-card.urgent .option-badge {
+            background: rgba(245,158,11,0.15);
+            color: #d97706;
+        }
+        .option-card.normal .option-badge {
+            background: rgba(34,197,94,0.15);
+            color: #16a34a;
+        }
+        .option-card.light .option-badge {
+            background: rgba(60,148,209,0.15);
+            color: #2563eb;
+        }
+        .option-card.deep .option-badge {
+            background: rgba(7,55,79,0.1);
+            color: var(--navy);
+        }
+
+        /* ── Submit Button ── */
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.85rem 2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+            background: var(--yellow);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-submit:hover {
+            background: #d4e860;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ── Success / Error ── */
+        .form-message {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .form-message.success {
+            background: rgba(34,197,94,0.1);
+            color: #16a34a;
+            display: block;
+        }
+        .form-message.error {
+            background: rgba(192,57,43,0.1);
+            color: #c0392b;
+            display: block;
+        }
+
+        /* ── Divider ── */
+        .form-divider {
+            border: none;
+            border-top: 1.5px solid rgba(7,55,79,0.08);
+            margin: 1.75rem 0;
+        }
+
+        /* ── Recent Requests ── */
+        .recent-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .recent-item {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .recent-item .ri-left {
+            flex: 1;
+        }
+        .recent-item .ri-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--navy);
+        }
+        .recent-item .ri-context {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .recent-item .ri-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .recent-item .ri-date {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .recent-item .ri-badge {
+            display: inline-block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        .ri-badge.urgent { background: rgba(245,158,11,0.15); color: #d97706; }
+        .ri-badge.normal { background: rgba(34,197,94,0.15); color: #16a34a; }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .page { padding: 1rem; }
+            .form-card { padding: 1.25rem; }
+            .option-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stripe"></div>
+    <div class="back-bar">
+        <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+    </div>
+
+    <div class="page">
+        <div class="page-header">
+            <h1>Strategy Request</h1>
+            <p>Submit a strategy call request — data pushes directly to the tracking sheet.</p>
+        </div>
+
+        <div class="form-card">
+            <form id="strategy-form">
+                <!-- Submitter Name (auto-filled from auth) -->
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="field-name" placeholder="e.g. Mike" required>
+                </div>
+
+                <!-- Strategy Call Date -->
+                <div class="form-group">
+                    <label class="form-label">Strategy Call Date</label>
+                    <div class="form-hint">When is the strategy call scheduled?</div>
+                    <input type="date" class="form-input" id="field-date" required>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- Urgency -->
+                <div class="form-group">
+                    <label class="form-label">Urgency</label>
+                    <div class="option-grid">
+                        <label class="option-card urgent selected" data-value="Urgent">
+                            <input type="radio" name="urgency" value="Urgent" checked>
+                            <div class="option-title">Urgent</div>
+                            <div class="option-desc">Same day turnaround</div>
+                            <span class="option-badge">Same Day</span>
+                        </label>
+                        <label class="option-card normal" data-value="Normal">
+                            <input type="radio" name="urgency" value="Normal">
+                            <div class="option-title">Normal</div>
+                            <div class="option-desc">Standard turnaround</div>
+                            <span class="option-badge">48 Hours</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Depth -->
+                <div class="form-group">
+                    <label class="form-label">How Deep to Go</label>
+                    <div class="option-grid">
+                        <label class="option-card light selected" data-value="Light">
+                            <input type="radio" name="depth" value="Light" checked>
+                            <div class="option-title">Light</div>
+                            <div class="option-desc">Quick overview and talking points</div>
+                            <span class="option-badge">~30 min prep</span>
+                        </label>
+                        <label class="option-card deep" data-value="Very Deep">
+                            <input type="radio" name="depth" value="Very Deep">
+                            <div class="option-title">Very Deep</div>
+                            <div class="option-desc">Full audit, competitive analysis, detailed strategy</div>
+                            <span class="option-badge">3+ hours prep</span>
+                        </label>
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- Call Recording Link -->
+                <div class="form-group">
+                    <label class="form-label">Call Recording Link</label>
+                    <div class="form-hint">Paste the link to the discovery call recording</div>
+                    <input type="url" class="form-input" id="field-recording" placeholder="https://...">
+                </div>
+
+                <!-- Context -->
+                <div class="form-group">
+                    <label class="form-label">Context</label>
+                    <div class="form-hint">What should the strategist know? Practice area, firm size, goals, any special notes.</div>
+                    <textarea class="form-textarea" id="field-context" placeholder="e.g. PI firm in Dallas, 4 attorneys, currently spending $8k/mo on Google Ads with poor results. Looking for full SEO engagement..." required></textarea>
+                </div>
+
+                <!-- Company / Prospect Name -->
+                <div class="form-group">
+                    <label class="form-label">Company / Prospect Name</label>
+                    <input type="text" class="form-input" id="field-company" placeholder="e.g. Smith & Associates" required>
+                </div>
+
+                <hr class="form-divider">
+
+                <button type="submit" class="btn-submit" id="btn-submit">
+                    Submit Strategy Request
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+
+                <div id="form-message" class="form-message"></div>
+            </form>
+        </div>
+
+        <!-- Recent Requests -->
+        <div class="recent-header">Recent Requests</div>
+        <div id="recent-list" class="recent-list">
+            <div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;font-family:'IBM Plex Mono',monospace;">Loading...</div>
+        </div>
+    </div>
+
+<script>
+// ── Google Sheets Integration ──
+// This uses a Google Apps Script web app as a proxy to write to your sheet.
+// Setup instructions:
+// 1. Create a new Google Sheet (or use an existing one)
+// 2. Go to Extensions → Apps Script
+// 3. Paste the script below and deploy as a web app (execute as you, access = anyone)
+// 4. Replace APPS_SCRIPT_URL with the deployed web app URL
+//
+// Apps Script code:
+// function doPost(e) {
+//   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+//   var data = JSON.parse(e.postData.contents);
+//   sheet.appendRow([
+//     new Date(),
+//     data.name,
+//     data.company,
+//     data.callDate,
+//     data.urgency,
+//     data.depth,
+//     data.recording,
+//     data.context,
+//     'New'
+//   ]);
+//   return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+//     .setMimeType(ContentService.MimeType.JSON);
+// }
+// function doGet(e) {
+//   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+//   var data = sheet.getDataRange().getValues();
+//   var rows = [];
+//   for (var i = 1; i < data.length; i++) {
+//     rows.push({
+//       timestamp: data[i][0],
+//       name: data[i][1],
+//       company: data[i][2],
+//       callDate: data[i][3],
+//       urgency: data[i][4],
+//       depth: data[i][5],
+//       recording: data[i][6],
+//       context: data[i][7],
+//       status: data[i][8]
+//     });
+//   }
+//   return ContentService.createTextOutput(JSON.stringify(rows))
+//     .setMimeType(ContentService.MimeType.JSON);
+// }
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybCsrzukqDgGlHAGe_G6F_YrJ5qyW_HI2CDzHE9PBlBkSfMpI0S8dle-hctvTJfvLKdg/exec';
+
+// ── Option card selection ──
+document.querySelectorAll('.option-grid').forEach(grid => {
+    const cards = grid.querySelectorAll('.option-card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            cards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            card.querySelector('input').checked = true;
+        });
+    });
+});
+
+// ── Set default date to today ──
+document.getElementById('field-date').valueAsDate = new Date();
+
+// ── Auto-fill name from auth ──
+document.addEventListener('rk-auth-ready', function() {
+    if (window.rkSupabase) {
+        window.rkSupabase.auth.getSession().then(function(res) {
+            if (res.data && res.data.session && res.data.session.user) {
+                const meta = res.data.session.user.user_metadata;
+                if (meta && meta.first_name) {
+                    document.getElementById('field-name').value = meta.first_name;
+                }
+            }
+        });
+    }
+});
+
+// ── Form submit ──
+document.getElementById('strategy-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('btn-submit');
+    const msg = document.getElementById('form-message');
+    msg.className = 'form-message';
+    msg.style.display = 'none';
+
+    const payload = {
+        name: document.getElementById('field-name').value.trim(),
+        company: document.getElementById('field-company').value.trim(),
+        callDate: document.getElementById('field-date').value,
+        urgency: document.querySelector('input[name="urgency"]:checked').value,
+        depth: document.querySelector('input[name="depth"]:checked').value,
+        recording: document.getElementById('field-recording').value.trim(),
+        context: document.getElementById('field-context').value.trim(),
+    };
+
+    if (!APPS_SCRIPT_URL) {
+        msg.textContent = 'Google Sheets integration not configured yet. Ask Scott to set up the Apps Script URL.';
+        msg.className = 'form-message error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        // no-cors means we can't read the response, but if it didn't throw, it likely worked
+        msg.textContent = 'Strategy request submitted! It will appear in the tracking sheet.';
+        msg.className = 'form-message success';
+
+        // Reset form
+        document.getElementById('field-company').value = '';
+        document.getElementById('field-recording').value = '';
+        document.getElementById('field-context').value = '';
+        document.getElementById('field-date').valueAsDate = new Date();
+
+        // Reload recent
+        loadRecent();
+    } catch (err) {
+        msg.textContent = 'Failed to submit. Please try again.';
+        msg.className = 'form-message error';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Submit Strategy Request';
+});
+
+// ── Load recent requests ──
+async function loadRecent() {
+    const container = document.getElementById('recent-list');
+
+    if (!APPS_SCRIPT_URL) {
+        container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;font-family:\'IBM Plex Mono\',monospace;">Connect a Google Sheet to see recent requests</div>';
+        return;
+    }
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL);
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;">No requests yet</div>';
+            return;
+        }
+
+        // Show most recent first, limit to 10
+        const recent = data.reverse().slice(0, 10);
+        let html = '';
+        for (const r of recent) {
+            const dateStr = r.callDate || '—';
+            const urgClass = (r.urgency || '').toLowerCase().includes('urgent') ? 'urgent' : 'normal';
+            html += `<div class="recent-item">
+                <div class="ri-left">
+                    <div class="ri-name">${r.company || 'Unnamed'}</div>
+                    <div class="ri-context">${r.context || 'No context provided'}</div>
+                </div>
+                <div class="ri-right">
+                    <div class="ri-date">Call: ${dateStr}</div>
+                    <span class="ri-badge ${urgClass}">${r.urgency || '—'}</span>
+                </div>
+            </div>`;
+        }
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;">Could not load recent requests</div>';
+    }
+}
+
+loadRecent();
+</script>
+</body>
+</html>
