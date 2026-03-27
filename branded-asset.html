@@ -276,6 +276,50 @@
             margin-top: 1.5rem;
         }
 
+        /* ── Screenshot thumbs ── */
+        .screenshot-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .screenshot-thumb {
+            position: relative;
+        }
+        .screenshot-thumb img {
+            height: 72px;
+            width: auto;
+            border: 1px solid rgba(7,55,79,0.1);
+            object-fit: cover;
+            display: block;
+        }
+        .screenshot-thumb .remove-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            font-size: 10px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 50%;
+            display: none;
+        }
+        .screenshot-thumb:hover .remove-btn { display: block; }
+        .screenshot-thumb .thumb-name {
+            font-size: 9px;
+            color: var(--text-muted);
+            max-width: 72px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+
         /* ── Spinner ── */
         .spinner {
             display: inline-block;
@@ -361,6 +405,17 @@
         </div>
     </div>
 
+    <!-- Screenshots -->
+    <div class="form-section">
+        <h3>Screenshots <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--text-muted);">(optional — charts, pricing tables, etc.)</span></h3>
+        <div class="upload-zone" id="screenshotZone">
+            <p style="font-size:0.85rem; color:var(--navy);">Drop screenshots here or click to browse</p>
+            <p>PNG, JPG — these will be analyzed and rebuilt as branded elements</p>
+        </div>
+        <input type="file" id="screenshotInput" accept="image/*" multiple style="display:none;">
+        <div class="screenshot-grid" id="screenshotGrid"></div>
+    </div>
+
     <!-- Error -->
     <div class="error-bar" id="errorBar"></div>
 
@@ -390,6 +445,7 @@
     var pageTarget = 0;
     var file = null;
     var pasteMode = false;
+    var screenshots = []; // Array of File objects
     var resultHTML = '';
     var resultTitle = '';
 
@@ -407,6 +463,9 @@
     var resultContainer = document.getElementById('resultContainer');
     var resultIframe = document.getElementById('resultIframe');
     var resultTitleEl = document.getElementById('resultTitle');
+    var screenshotZone = document.getElementById('screenshotZone');
+    var screenshotInput = document.getElementById('screenshotInput');
+    var screenshotGrid = document.getElementById('screenshotGrid');
 
     // ── Pill group handler ──
     function setupPillGroup(group, onChange) {
@@ -481,8 +540,63 @@
     });
     rawText.addEventListener('input', function() { updateGenerateBtn(); });
 
+    // ── Screenshot handling ──
+    function addScreenshots(files) {
+        for (var i = 0; i < files.length; i++) {
+            if (!files[i].type.startsWith('image/')) continue;
+            screenshots.push(files[i]);
+        }
+        renderScreenshotGrid();
+        updateGenerateBtn();
+    }
+
+    function removeScreenshot(index) {
+        screenshots.splice(index, 1);
+        renderScreenshotGrid();
+        updateGenerateBtn();
+    }
+
+    function renderScreenshotGrid() {
+        screenshotGrid.innerHTML = '';
+        screenshots.forEach(function(f, i) {
+            var thumb = document.createElement('div');
+            thumb.className = 'screenshot-thumb';
+            var img = document.createElement('img');
+            img.src = URL.createObjectURL(f);
+            var removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'x';
+            removeBtn.onclick = function(e) { e.stopPropagation(); removeScreenshot(i); };
+            var name = document.createElement('div');
+            name.className = 'thumb-name';
+            name.textContent = f.name;
+            thumb.appendChild(img);
+            thumb.appendChild(removeBtn);
+            thumb.appendChild(name);
+            screenshotGrid.appendChild(thumb);
+        });
+    }
+
+    screenshotZone.addEventListener('click', function() { screenshotInput.click(); });
+    screenshotInput.addEventListener('change', function() {
+        if (screenshotInput.files && screenshotInput.files.length) addScreenshots(screenshotInput.files);
+        screenshotInput.value = '';
+    });
+    screenshotZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        screenshotZone.classList.add('dragover');
+    });
+    screenshotZone.addEventListener('dragleave', function() {
+        screenshotZone.classList.remove('dragover');
+    });
+    screenshotZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        screenshotZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) addScreenshots(e.dataTransfer.files);
+    });
+
     function updateGenerateBtn() {
-        var hasContent = pasteMode ? rawText.value.trim().length > 0 : !!file;
+        var hasContent = (pasteMode ? rawText.value.trim().length > 0 : !!file) || screenshots.length > 0;
         generateBtn.disabled = !hasContent;
     }
 
@@ -499,28 +613,28 @@
         resultContainer.style.display = 'none';
 
         try {
-            var res;
+            var formData = new FormData();
+            formData.append('docType', docType);
+            formData.append('pageTarget', String(pageTarget));
+
             if (pasteMode || !file) {
-                if (!rawText.value.trim()) throw new Error('No text content provided');
-                res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        rawText: rawText.value,
-                        docType: docType,
-                        pageTarget: String(pageTarget)
-                    })
-                });
+                if (!rawText.value.trim() && screenshots.length === 0) throw new Error('No content provided');
+                if (rawText.value.trim()) {
+                    var textBlob = new Blob([rawText.value], { type: 'text/plain' });
+                    formData.append('document', textBlob, 'pasted-text.txt');
+                }
             } else {
-                var formData = new FormData();
                 formData.append('document', file);
-                formData.append('docType', docType);
-                formData.append('pageTarget', String(pageTarget));
-                res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData
-                });
             }
+
+            for (var i = 0; i < screenshots.length; i++) {
+                formData.append('screenshots', screenshots[i]);
+            }
+
+            var res = await fetch(API_URL, {
+                method: 'POST',
+                body: formData
+            });
 
             var data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Generation failed');
