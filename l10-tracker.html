@@ -1181,14 +1181,18 @@
         }
     }
 
-    // If rkSupabase is already available, init now; otherwise wait for auth
-    if (window.rkSupabase) {
-        init();
-    } else {
-        window.addEventListener('rk-auth-ready', function() {
-            init();
-        });
+    // Wait for auth to be ready, then init
+    var _initDone = false;
+    function tryInit() {
+        if (_initDone) return;
+        if (window.rkSupabase) { _initDone = true; init(); }
     }
+    // Try now (cached session may already be resolved)
+    tryInit();
+    // Listen for auth event (fires after session verified)
+    window.addEventListener('rk-auth-ready', tryInit);
+    // Fallback poll in case event was missed
+    var _poll = setInterval(function() { tryInit(); if (_initDone) clearInterval(_poll); }, 200);
 
 })();
 </script>
