@@ -658,7 +658,7 @@
         }
     };
 
-    var sb = window.rkSupabase;
+    var sb = window.rkSupabase || null;
     var allMeetings = [];
     var meetings = []; // filtered by current type
     var currentMeetingId = null;
@@ -1169,7 +1169,8 @@
         .subscribe();
 
     // ── Init ──
-    (async function init() {
+    async function init() {
+        sb = window.rkSupabase;
         allMeetings = await loadAllMeetings();
         filterMeetings();
         renderSelector();
@@ -1178,7 +1179,16 @@
             renderSelector();
             showMeetingView();
         }
-    })();
+    }
+
+    // If rkSupabase is already available, init now; otherwise wait for auth
+    if (window.rkSupabase) {
+        init();
+    } else {
+        window.addEventListener('rk-auth-ready', function() {
+            init();
+        });
+    }
 
 })();
 </script>
