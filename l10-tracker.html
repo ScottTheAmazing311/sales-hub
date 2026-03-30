@@ -1158,30 +1158,30 @@
         if (e.target === this) closeModal();
     });
 
-    // ── Real-time ──
-    sb.channel('l10-realtime')
-        .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async function() {
-            allMeetings = await loadAllMeetings();
-            filterMeetings();
-            renderSelector();
-            if (currentMeetingId) renderDeptPanel();
-        })
-        .subscribe();
+    // ── Real-time (set up in init after sb is ready) ──
+    function setupRealtime() {
+        sb.channel('l10-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async function() {
+                allMeetings = await loadAllMeetings();
+                filterMeetings();
+                renderSelector();
+                if (currentMeetingId) renderDeptPanel();
+            })
+            .subscribe();
+    }
 
     // ── Init ──
     async function init() {
         sb = window.rkSupabase;
-        console.log('[L10] init called, sb:', !!sb);
         allMeetings = await loadAllMeetings();
-        console.log('[L10] allMeetings loaded:', allMeetings.length, allMeetings);
         filterMeetings();
-        console.log('[L10] filtered for type:', currentType, 'count:', meetings.length);
         renderSelector();
         if (meetings.length > 0) {
             currentMeetingId = meetings[0].id;
             renderSelector();
             showMeetingView();
         }
+        setupRealtime();
     }
 
     // Wait for auth to be ready, then init
