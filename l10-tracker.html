@@ -1171,8 +1171,11 @@
     // ── Init ──
     async function init() {
         sb = window.rkSupabase;
+        console.log('[L10] init called, sb:', !!sb);
         allMeetings = await loadAllMeetings();
+        console.log('[L10] allMeetings loaded:', allMeetings.length, allMeetings);
         filterMeetings();
+        console.log('[L10] filtered for type:', currentType, 'count:', meetings.length);
         renderSelector();
         if (meetings.length > 0) {
             currentMeetingId = meetings[0].id;
