@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --navy: #07374F;
@@ -41,6 +42,9 @@
         .back-bar {
             background: var(--navy);
             padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .back-link {
             color: rgba(255,255,255,0.6);
@@ -53,6 +57,25 @@
             transition: color 0.2s;
         }
         .back-link:hover { color: #fff; }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 1rem;
+            background: var(--yellow);
+            color: var(--navy);
+            border: none;
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-download:hover { opacity: 0.85; }
+        .btn-download:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-download svg { width: 14px; height: 14px; }
 
         .dash {
             max-width: 1200px;
@@ -145,18 +168,16 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--yellow);
         }
-
-        .section-block {
-            margin-bottom: 2rem;
-        }
+        .section-block { margin-bottom: 2rem; }
 
         /* ── Stat Cards ── */
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
+        .stat-grid.two-col { grid-template-columns: repeat(2, 1fr); }
         .stat-card {
             background: #fff;
             border: 1px solid rgba(7,55,79,0.08);
@@ -164,9 +185,7 @@
             padding: 1.25rem 1.5rem;
             box-shadow: var(--shadow);
         }
-        .stat-card.highlight-card {
-            background: var(--navy);
-        }
+        .stat-card.highlight-card { background: var(--navy); }
         .stat-card.highlight-card .stat-label { color: var(--yellow); opacity: 0.8; }
         .stat-card.highlight-card .stat-value { color: #fff; }
         .stat-card.highlight-card .stat-sub { color: rgba(255,255,255,0.5); }
@@ -192,8 +211,6 @@
             margin-top: 4px;
             font-family: 'IBM Plex Mono', monospace;
         }
-        .stat-card .stat-sub .up { color: var(--success); font-weight: 600; }
-        .stat-card .stat-sub .down { color: var(--destructive); font-weight: 600; }
 
         /* ── Card ── */
         .card {
@@ -203,23 +220,14 @@
             box-shadow: var(--shadow);
             margin-bottom: 1.5rem;
         }
-        .card-header {
-            padding: 1.25rem 1.5rem 0;
-        }
+        .card-header { padding: 1.25rem 1.5rem 0; }
         .card-title {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--navy);
         }
-        .card-desc {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        .card-content {
-            padding: 1rem 1.5rem 1.5rem;
-        }
+        .card-content { padding: 1rem 1.5rem 1.5rem; }
 
         /* ── Tables ── */
         .report-table {
@@ -250,9 +258,65 @@
         .report-table tbody tr:last-child td { border-bottom: none; }
         .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
         .report-table td.num { text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
-        .report-table td.highlight {
-            background: rgba(234,255,106,0.18);
+
+        /* ── Traffic Source Feature ── */
+        .traffic-hero {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .traffic-hero .traffic-hero-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow);
+            margin-bottom: 1.5rem;
+        }
+        .traffic-bars { display: flex; flex-direction: column; gap: 0.75rem; }
+        .traffic-row { display: flex; align-items: center; gap: 12px; }
+        .traffic-row .source-name {
+            width: 140px;
+            flex-shrink: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            text-align: right;
+        }
+        .traffic-row .bar-track {
+            flex: 1;
+            height: 28px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .traffic-row .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+        .traffic-row .bar-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .traffic-row .bar-pct {
+            width: 50px;
+            flex-shrink: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
             font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            text-align: right;
         }
 
         /* ── Charts ── */
@@ -277,34 +341,16 @@
             color: var(--yellow);
             margin-bottom: 0.75rem;
         }
-        .chart-wrap {
-            position: relative;
-            width: 100%;
-            height: 250px;
-        }
+        .chart-wrap { position: relative; width: 100%; height: 250px; }
 
-        /* ── Status Bar (mini) ── */
-        .status-bar {
-            display: flex;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.75rem;
-            gap: 2px;
-        }
-        .status-bar .bar-seg {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.4s ease;
-        }
-
-        /* ── BDR Grid ── */
-        .bdr-grid {
+        /* ── Status breakdown cards ── */
+        .status-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
+            margin-bottom: 1rem;
         }
-        .bdr-card {
+        .status-card {
             background: #fff;
             border: 1px solid rgba(7,55,79,0.08);
             border-radius: var(--radius);
@@ -312,26 +358,69 @@
             box-shadow: var(--shadow);
             text-align: center;
         }
-        .bdr-card .bdr-name {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--navy);
-            margin-bottom: 0.5rem;
-        }
-        .bdr-card .bdr-count {
+        .status-card .status-count {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.6rem;
             font-weight: 700;
             color: var(--navy);
         }
-        .bdr-card .bdr-label {
-            font-size: 0.68rem;
-            color: var(--text-muted);
+        .status-card .status-label {
             font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
         }
+        .status-bar-visual {
+            display: flex;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            gap: 2px;
+            margin-bottom: 1.5rem;
+        }
+        .status-bar-visual .seg {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Year accordion ── */
+        .month-group { margin-bottom: 0.5rem; }
+        .month-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--navy);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .month-header:hover { opacity: 0.9; }
+        .month-header .month-count {
+            background: var(--yellow);
+            color: var(--navy);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+        }
+        .month-header .chevron {
+            transition: transform 0.2s;
+            color: var(--yellow);
+        }
+        .month-header.open .chevron { transform: rotate(180deg); }
+        .month-body {
+            display: none;
+            padding: 0.5rem 0;
+        }
+        .month-body.open { display: block; }
 
         /* ── Loading ── */
         .loading-state {
@@ -351,7 +440,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Empty state ── */
         .empty-state {
             text-align: center;
             padding: 2rem;
@@ -361,31 +449,38 @@
 
         /* ── Responsive ── */
         @media (max-width: 900px) {
-            .stat-grid { grid-template-columns: repeat(3, 1fr); }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; }
-            .bdr-grid { grid-template-columns: repeat(3, 1fr); }
+            .traffic-row .source-name { width: 100px; font-size: 0.7rem; }
         }
         @media (max-width: 600px) {
-            .stat-grid { grid-template-columns: repeat(2, 1fr); }
-            .bdr-grid { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            .status-grid { grid-template-columns: 1fr 1fr; }
             .dash { padding: 1rem; }
             .period-tabs { flex-direction: column; }
             .period-tab { border-right: none; border-bottom: 1px solid rgba(7,55,79,0.08); }
             .period-tab:last-child { border-bottom: none; }
+            .traffic-row { flex-wrap: wrap; }
+            .traffic-row .source-name { width: 100%; text-align: left; }
         }
     </style>
 </head>
 <body>
     <div class="stripe"></div>
     <div class="back-bar">
-        <a href="index.html" class="back-link">← Back to Revenue Kitchen</a>
+        <a href="index.html" class="back-link">&larr; Back to Revenue Kitchen</a>
+        <button class="btn-download" id="btn-snapshot" onclick="downloadSnapshot()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Snapshot
+        </button>
     </div>
 
-    <div class="dash">
+    <div class="dash" id="snapshot-area">
         <div class="dash-header">
             <div>
                 <h1>Inbound Lead Tracker</h1>
-                <p>Weekly and month-to-date inbound lead performance</p>
+                <p>Live inbound lead performance</p>
             </div>
             <div class="live-badge">
                 <span class="live-dot"></span>
@@ -395,17 +490,17 @@
 
         <!-- Period Tabs -->
         <div class="period-tabs">
-            <button class="period-tab active" data-period="midweek">
-                Mid-Week Update
-                <span class="tab-range" id="midweek-range"></span>
-            </button>
-            <button class="period-tab" data-period="endweek">
-                End of Week Update
-                <span class="tab-range" id="endweek-range"></span>
+            <button class="period-tab active" data-period="wtd">
+                Week to Date
+                <span class="tab-range" id="wtd-range"></span>
             </button>
             <button class="period-tab" data-period="mtd">
                 Month to Date
                 <span class="tab-range" id="mtd-range"></span>
+            </button>
+            <button class="period-tab" data-period="ytd">
+                Year to Date
+                <span class="tab-range" id="ytd-range"></span>
             </button>
         </div>
 
@@ -414,93 +509,30 @@
             Loading inbound data...
         </div>
 
-        <div id="dashboard" style="display:none;">
-            <!-- Key Metrics -->
-            <div class="section-block">
-                <div class="section-title">Pipeline Summary</div>
-                <div class="stat-grid" id="stat-cards"></div>
-                <div class="status-bar" id="pipeline-bar"></div>
-            </div>
-
-            <!-- BDR Breakdown -->
-            <div class="section-block">
-                <div class="section-title">AE Assignment</div>
-                <div class="bdr-grid" id="bdr-cards"></div>
-            </div>
-
-            <!-- Charts -->
-            <div class="section-block">
-                <div class="section-title">Trends</div>
-                <div class="chart-grid">
-                    <div class="chart-card">
-                        <div class="chart-label">Daily Inbound Volume</div>
-                        <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-label">Lead Status Breakdown</div>
-                        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Traffic Source -->
-            <div class="section-block">
-                <div class="section-title">Traffic Source Breakdown</div>
-                <div class="chart-grid">
-                    <div class="chart-card">
-                        <div class="chart-label">Leads by Source</div>
-                        <div class="chart-wrap"><canvas id="chart-source"></canvas></div>
-                    </div>
-                    <div class="card" style="display:flex;align-items:stretch;">
-                        <div style="width:100%;">
-                            <div class="card-header"><div class="card-title">Source Detail</div></div>
-                            <div class="card-content">
-                                <div style="overflow-x:auto;" id="source-table-wrap"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lead List -->
-            <div class="section-block">
-                <div class="section-title">Lead Detail</div>
-                <div class="card">
-                    <div class="card-content" style="padding-top:0;">
-                        <div style="overflow-x:auto;" id="lead-table-wrap"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="dashboard" style="display:none;"></div>
     </div>
 
 <script>
 // ── Config ──
-const SHEET_ID = '1DgLjqbQzQTy2Ca6b81sCaEZx9znWQQ_XDSdLrhUf44Y';
-const SHEET_TAB = 'March 2026';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}`;
+const SHEET_ID = '1hDJka4XRZmbTTFyDGxIyJzV3btYMlPrk';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
-// ── Column mapping (March 2026 tab) ──
-// A=Hubspot Link, B=Company Name, C=Practice Area, D=AE, E=Date Inbound,
-// F=FTA Date, G=FTA Show, H=AE Date Scheduled, I=Notes, J=City/State,
-// K=Traffic Source, L=(empty), M=Converted outbound/MDR, R=Booked Meeting
 const COL = {
-    URL: 0,           // A — Hubspot Link
-    NAME: 1,          // B — Company Name
-    PRACTICE: 2,      // C — Practice Area
-    AE: 3,            // D — AE
-    DATE_INBOUND: 4,  // E — Date Inbound
-    FTA_DATE: 5,      // F — FTA Date
-    FTA_SHOW: 6,      // G — FTA Show (Yes / CMN-Yes / NO)
-    AE_DATE: 7,       // H — AE Date Scheduled
-    NOTES: 8,         // I — Notes
-    CITY: 9,          // J — City/State
-    SOURCE: 10,       // K — Traffic Source
-    CONVERTED: 12,    // M — Converted outbound/MDR
-    BOOKED: 17,       // R — Booked Meeting - No meeting booked
+    NUM: 0,
+    NAME: 1,
+    PRACTICE: 2,
+    AE: 3,
+    DATE_INBOUND: 4,
+    FTA_DATE: 5,
+    FTA_SHOW: 6,
+    AE_DATE: 7,
+    CITY: 8,
+    SOURCE: 9,
 };
 
 // ── Date utilities ──
+const NOW = new Date();
+
 function getMonday(d) {
     const dt = new Date(d);
     const day = dt.getDay();
@@ -509,13 +541,18 @@ function getMonday(d) {
     dt.setHours(0, 0, 0, 0);
     return dt;
 }
-function getWednesday(d) { const m = getMonday(d); m.setDate(m.getDate() + 2); return m; }
-function getFriday(d) { const m = getMonday(d); m.setDate(m.getDate() + 4); return m; }
+
 function getMonthStart(d) { const dt = new Date(d); dt.setDate(1); dt.setHours(0,0,0,0); return dt; }
-function formatDate(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
-function formatDateFull(d) {
+function getYearStart(d) { return new Date(d.getFullYear(), 0, 1); }
+
+function formatShort(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+function formatFull(d) {
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return months[d.getMonth()] + ' ' + d.getDate();
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function formatMonthYear(d) {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return months[d.getMonth()] + ' ' + d.getFullYear();
 }
 
 function parseGoogleDate(val) {
@@ -528,26 +565,16 @@ function parseGoogleDate(val) {
 
 function parseDateAny(cell) {
     if (!cell) return null;
-    // Try gviz Date() format
     let d = parseGoogleDate(cell.v);
     if (d) return d;
-    // Try formatted value like "3/2" or "March 2"
     const f = (cell.f || '').trim();
     if (f) {
-        // M/D format — assume current year (2026 for March tab)
         const slashMatch = f.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
         if (slashMatch) {
-            const year = slashMatch[3] ? (slashMatch[3].length === 2 ? 2000 + parseInt(slashMatch[3]) : parseInt(slashMatch[3])) : 2026;
+            const year = slashMatch[3] ? (slashMatch[3].length === 2 ? 2000 + parseInt(slashMatch[3]) : parseInt(slashMatch[3])) : NOW.getFullYear();
             return new Date(year, parseInt(slashMatch[1]) - 1, parseInt(slashMatch[2]));
         }
-        // "March 2" format
-        const months = { january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11 };
-        const parts = f.toLowerCase().split(/\s+/);
-        if (parts.length >= 2 && months[parts[0]] !== undefined) {
-            return new Date(2026, months[parts[0]], parseInt(parts[1]));
-        }
     }
-    // Try raw value as string date
     if (typeof cell.v === 'string') {
         const d2 = new Date(cell.v);
         if (!isNaN(d2.getTime())) return d2;
@@ -555,386 +582,426 @@ function parseDateAny(cell) {
     return null;
 }
 
-// ── Cell helpers ──
 function cellVal(cells, idx) {
     if (idx < 0 || idx >= cells.length || !cells[idx]) return '';
     return (cells[idx].f || cells[idx].v || '').toString().trim();
 }
 
-// ── Normalize FTA Show into status ──
-function deriveStatus(ftaShow, aeDate, booked) {
-    const show = (ftaShow || '').trim().toLowerCase();
-    if (!show && !aeDate && !booked) return '';
-
-    // FTA Show = NO means no-show
-    if (show === 'no') return 'No Show';
-
-    // FTA Show = Yes or CMN-Yes means they showed up
-    if (show.includes('yes')) {
-        // If AE date is scheduled, they're pre-qualified
-        if (aeDate) return 'Pre-Qualified';
-        return 'Held';
-    }
-
-    // If booked column has "no meeting booked" or similar
-    if (booked && booked.toLowerCase().includes('no')) return 'Disqualified';
-
-    return '';
+function normalizeSource(raw) {
+    let s = (raw || 'Unknown').trim();
+    if (!s) s = 'Unknown';
+    s = s.replace(/goodle/gi, 'Google');
+    // Capitalize first letter of each word
+    return s.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// ── Parse sheet data ──
-function parseSheetData(json) {
-    const rows = json.table.rows;
-    const leads = [];
+// ── Derive status from FTA Show ──
+function deriveStatus(ftaShow) {
+    const show = (ftaShow || '').trim().toLowerCase();
+    if (!show) return 'Pending';
+    if (show === 'no') return 'No Show';
+    if (show.includes('yes')) return 'Held';
+    return 'Pending';
+}
 
+// ── Source color palette ──
+const SOURCE_COLORS = [
+    '#eaff6a', '#3c94d1', '#22c55e', '#f59e0b', '#a78bfa',
+    '#fb923c', '#f472b6', '#2dd4bf', '#94a3b8', '#e879f9',
+];
+
+// ── State ──
+let allLeads = [];
+let currentPeriod = 'wtd';
+let charts = {};
+
+// ── Fetch data ──
+async function fetchData() {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+
+    allLeads = [];
     for (const row of rows) {
         const cells = row.c || [];
         const name = cellVal(cells, COL.NAME);
         if (!name) continue;
 
-        const url = cells[COL.URL] ? (cells[COL.URL].v || '') : '';
-        const date = parseDateAny(cells[COL.DATE_INBOUND]);
-        const practice = cellVal(cells, COL.PRACTICE);
-        const ae = cellVal(cells, COL.AE);
-        const ftaShow = cellVal(cells, COL.FTA_SHOW);
-        const aeDate = cellVal(cells, COL.AE_DATE);
-        const notes = cellVal(cells, COL.NOTES);
-        const city = cellVal(cells, COL.CITY);
-        const source = cellVal(cells, COL.SOURCE);
-        const booked = cellVal(cells, COL.BOOKED);
+        const dateInbound = parseDateAny(cells[COL.DATE_INBOUND]);
+        if (!dateInbound) continue;
 
-        const status = deriveStatus(ftaShow, aeDate, booked);
-
-        leads.push({ name, url, date, ae, practice, ftaShow, aeDate, notes, city, source, status, booked });
+        allLeads.push({
+            name,
+            practice: cellVal(cells, COL.PRACTICE),
+            ae: cellVal(cells, COL.AE),
+            dateInbound,
+            ftaDate: parseDateAny(cells[COL.FTA_DATE]),
+            ftaShow: cellVal(cells, COL.FTA_SHOW),
+            aeDate: parseDateAny(cells[COL.AE_DATE]),
+            city: cellVal(cells, COL.CITY),
+            source: normalizeSource(cellVal(cells, COL.SOURCE)),
+            status: deriveStatus(cellVal(cells, COL.FTA_SHOW)),
+        });
     }
-    return leads;
+
+    allLeads.sort((a, b) => b.dateInbound - a.dateInbound);
 }
 
-// ── Filter leads by date range ──
-function filterByRange(leads, start, end) {
-    return leads.filter(l => {
-        if (!l.date) return false;
-        return l.date >= start && l.date <= end;
-    });
-}
+// ── Filter leads by period ──
+function getFilteredLeads() {
+    const monday = getMonday(NOW);
+    const monthStart = getMonthStart(NOW);
+    const yearStart = getYearStart(NOW);
 
-// ── Count by field ──
-function countBy(leads, field) {
-    const counts = {};
-    for (const l of leads) {
-        const key = l[field] || 'Unknown';
-        counts[key] = (counts[key] || 0) + 1;
-    }
-    return counts;
-}
-
-// ── Normalize traffic source names (fix typos in sheet) ──
-function normalizeSource(src) {
-    if (!src) return '';
-    const s = src.trim();
-    // Fix common typos
-    if (s.match(/^go+d/i)) return s.replace(/^go+d\w*/i, 'Google');  // "Goodle" → "Google"
-    if (s.match(/serach/i)) return s.replace(/serach/i, 'Search');
-    return s;
-}
-
-// ── Render: Stat Cards ──
-function renderStatCards(leads) {
-    const total = leads.length;
-    const statusCounts = countBy(leads, 'status');
-    const preQual = statusCounts['Pre-Qualified'] || 0;
-    const disqual = statusCounts['Disqualified'] || 0;
-    const held = (statusCounts['Held'] || 0);
-    const noShow = (statusCounts['No Show'] || 0);
-    const pending = total - preQual - disqual - held - noShow;
-
-    const cards = [
-        { label: 'Total Inbound', value: total, cls: 'highlight-card', sub: 'all leads' },
-        { label: 'Pre-Qualified', value: preQual, cls: '', sub: total ? Math.round(preQual/total*100) + '% of total' : '—' },
-        { label: 'Disqualified', value: disqual, cls: '', sub: total ? Math.round(disqual/total*100) + '% of total' : '—' },
-        { label: 'Held', value: held, cls: '', sub: total ? Math.round(held/total*100) + '% of total' : '—' },
-        { label: 'No Show', value: noShow, cls: '', sub: total ? Math.round(noShow/total*100) + '% of total' : '—' },
-    ];
-
-    let html = '';
-    for (const c of cards) {
-        html += `<div class="stat-card ${c.cls}">
-            <div class="stat-label">${c.label}</div>
-            <div class="stat-value">${c.value}</div>
-            <div class="stat-sub">${c.sub}</div>
-        </div>`;
-    }
-    document.getElementById('stat-cards').innerHTML = html;
-
-    // Pipeline status bar
-    if (total > 0) {
-        const segments = [
-            { pct: preQual/total*100, color: 'var(--success)', label: 'Pre-Qualified' },
-            { pct: held/total*100, color: '#3c94d1', label: 'Held' },
-            { pct: noShow/total*100, color: 'var(--warning)', label: 'No Show' },
-            { pct: disqual/total*100, color: 'var(--destructive)', label: 'Disqualified' },
-            { pct: pending/total*100, color: 'rgba(7,55,79,0.15)', label: 'Pending' },
-        ];
-        let barHTML = '';
-        for (const s of segments) {
-            if (s.pct > 0) barHTML += `<div class="bar-seg" style="width:${s.pct}%;background:${s.color};" title="${s.label}: ${Math.round(s.pct)}%"></div>`;
-        }
-        document.getElementById('pipeline-bar').innerHTML = barHTML;
-    }
-}
-
-// ── Render: AE Cards (instead of BDR) ──
-function renderBDRCards(leads) {
-    const aeCounts = countBy(leads, 'ae');
-    // Get all AEs sorted by count
-    const sorted = Object.entries(aeCounts).filter(([k]) => k !== 'Unknown').sort((a,b) => b[1] - a[1]);
-
-    let html = '';
-    for (const [name, count] of sorted) {
-        html += `<div class="bdr-card">
-            <div class="bdr-name">${name}</div>
-            <div class="bdr-count">${count}</div>
-            <div class="bdr-label">leads assigned</div>
-        </div>`;
-    }
-    const unassigned = aeCounts['Unknown'] || 0;
-    if (unassigned > 0) {
-        html += `<div class="bdr-card">
-            <div class="bdr-name">Unassigned</div>
-            <div class="bdr-count">${unassigned}</div>
-            <div class="bdr-label">leads</div>
-        </div>`;
-    }
-    document.getElementById('bdr-cards').innerHTML = html;
-}
-
-// ── Render: Daily Chart ──
-function renderDailyChart(leads, startDate, endDate) {
-    const ctx = document.getElementById('chart-daily');
-    if (!ctx) return;
-    if (window._chartDaily) window._chartDaily.destroy();
-
-    const dayCounts = {};
-    const current = new Date(startDate);
-    while (current <= endDate) {
-        dayCounts[formatDate(current)] = 0;
-        current.setDate(current.getDate() + 1);
-    }
-    for (const l of leads) {
-        if (!l.date) continue;
-        const key = formatDate(l.date);
-        if (dayCounts[key] !== undefined) dayCounts[key]++;
-    }
-
-    window._chartDaily = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(dayCounts),
-            datasets: [{ label: 'Leads', data: Object.values(dayCounts), backgroundColor: 'rgba(234,255,106,0.7)', borderColor: '#eaff6a', borderWidth: 1, borderRadius: 3 }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 } },
-            scales: {
-                x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
-            }
-        }
-    });
-}
-
-// ── Render: Status Chart ──
-function renderStatusChart(leads) {
-    const ctx = document.getElementById('chart-status');
-    if (!ctx) return;
-    if (window._chartStatus) window._chartStatus.destroy();
-
-    const statusCounts = countBy(leads, 'status');
-    const labels = Object.keys(statusCounts).map(k => k || 'Pending');
-    const values = Object.values(statusCounts);
-    const colorMap = { 'Pre-Qualified': '#22c55e', 'Disqualified': '#c0392b', 'No Show': '#f59e0b', 'Held': '#3c94d1', 'Pending': 'rgba(255,255,255,0.2)', 'Unknown': 'rgba(255,255,255,0.15)' };
-    const colors = labels.map(l => colorMap[l] || 'rgba(255,255,255,0.2)');
-
-    window._chartStatus = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: 'rgba(7,55,79,0.8)', borderWidth: 2 }] },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11, family: "'IBM Plex Mono', monospace" }, padding: 16, boxWidth: 12 } },
-                tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 }
-            }
-        }
-    });
-}
-
-// ── Render: Source Chart ──
-function renderSourceChart(leads) {
-    const ctx = document.getElementById('chart-source');
-    if (!ctx) return;
-    if (window._chartSource) window._chartSource.destroy();
-
-    // Normalize and group sources
-    const rawCounts = {};
-    for (const l of leads) {
-        const src = normalizeSource(l.source) || 'Not Tagged';
-        rawCounts[src] = (rawCounts[src] || 0) + 1;
-    }
-    const sorted = Object.entries(rawCounts).sort((a,b) => b[1] - a[1]);
-    const labels = sorted.map(s => s[0]);
-    const values = sorted.map(s => s[1]);
-    const palette = ['#eaff6a','#eedc82','#3c94d1','#22c55e','#f59e0b','#c0392b','#9b59b6','#1abc9c','#e74c3c','#2ecc71'];
-
-    window._chartSource = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{ label: 'Leads', data: values, backgroundColor: palette.slice(0, labels.length).map(c => c + 'bb'), borderColor: palette.slice(0, labels.length), borderWidth: 1, borderRadius: 3 }]
-        },
-        options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(7,55,79,0.95)', padding: 10, cornerRadius: 6 } },
-            scales: {
-                x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
-                y: { ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 11, family: "'IBM Plex Mono', monospace" } }, grid: { display: false } }
-            }
-        }
-    });
-}
-
-// ── Render: Source Table ──
-function renderSourceTable(leads) {
-    const rawCounts = {};
-    for (const l of leads) {
-        const src = normalizeSource(l.source) || 'Not Tagged';
-        rawCounts[src] = (rawCounts[src] || 0) + 1;
-    }
-    const total = leads.length;
-    const sorted = Object.entries(rawCounts).sort((a,b) => b[1] - a[1]);
-
-    let html = '<table class="report-table"><thead><tr><th>Traffic Source</th><th>Leads</th><th>% of Total</th></tr></thead><tbody>';
-    for (const [src, count] of sorted) {
-        const pct = total > 0 ? Math.round(count/total*100) : 0;
-        html += `<tr><td>${src}</td><td class="num">${count}</td><td class="num">${pct}%</td></tr>`;
-    }
-    html += `<tr style="font-weight:700;background:rgba(234,255,106,0.12);"><td>Total</td><td class="num">${total}</td><td class="num">100%</td></tr>`;
-    html += '</tbody></table>';
-    document.getElementById('source-table-wrap').innerHTML = html;
-}
-
-// ── Render: Lead Table ──
-function renderLeadTable(leads) {
-    if (leads.length === 0) {
-        document.getElementById('lead-table-wrap').innerHTML = '<div class="empty-state">No leads in this period</div>';
-        return;
-    }
-
-    let html = '<table class="report-table"><thead><tr><th>Company</th><th>Practice Area</th><th>AE</th><th>Date</th><th>FTA Show</th><th>Status</th><th>Source</th><th>City/State</th></tr></thead><tbody>';
-    const sorted = [...leads].sort((a,b) => (b.date || 0) - (a.date || 0));
-    for (const l of sorted) {
-        const nameCell = l.url
-            ? `<a href="${l.url}" target="_blank" style="color:var(--navy);text-decoration:underline;">${l.name}</a>`
-            : l.name;
-        const dateStr = l.date ? formatDateFull(l.date) : '—';
-        const statusColors = {
-            'Pre-Qualified': 'rgba(34,197,94,0.15);color:#16a34a',
-            'Disqualified': 'rgba(192,57,43,0.15);color:#c0392b',
-            'No Show': 'rgba(245,158,11,0.15);color:#d97706',
-            'Held': 'rgba(60,148,209,0.15);color:#2563eb',
-        };
-        const statusBadge = l.status
-            ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600;background:${statusColors[l.status] || 'rgba(0,0,0,0.05);color:#666'}">${l.status}</span>`
-            : '<span style="color:#ccc;">—</span>';
-        html += `<tr>
-            <td>${nameCell}</td>
-            <td>${l.practice || '—'}</td>
-            <td>${l.ae || '—'}</td>
-            <td style="white-space:nowrap;">${dateStr}</td>
-            <td>${l.ftaShow || '—'}</td>
-            <td>${statusBadge}</td>
-            <td>${normalizeSource(l.source) || '<span style="color:#ccc;">—</span>'}</td>
-            <td style="white-space:nowrap;">${l.city || '—'}</td>
-        </tr>`;
-    }
-    html += '</tbody></table>';
-    document.getElementById('lead-table-wrap').innerHTML = html;
-}
-
-// ── Main render ──
-let allLeads = [];
-
-function getReferenceDate() {
-    // Use today's actual date since data is current (March 2026)
-    const d = new Date();
-    d.setHours(23, 59, 59, 999);
-    return d;
-}
-
-function render(period) {
-    const refDate = getReferenceDate();
-    let start, end;
-
-    if (period === 'midweek') {
-        start = getMonday(refDate);
-        end = getWednesday(refDate);
-        end.setHours(23, 59, 59, 999);
-    } else if (period === 'endweek') {
-        start = getMonday(refDate);
-        end = getFriday(refDate);
-        end.setHours(23, 59, 59, 999);
+    if (currentPeriod === 'wtd') {
+        return allLeads.filter(l => l.dateInbound >= monday && l.dateInbound <= NOW);
+    } else if (currentPeriod === 'mtd') {
+        return allLeads.filter(l => l.dateInbound >= monthStart && l.dateInbound <= NOW);
     } else {
-        start = getMonthStart(refDate);
-        end = new Date(refDate);
+        return allLeads.filter(l => l.dateInbound >= yearStart && l.dateInbound <= NOW);
+    }
+}
+
+// ── Compute traffic source data ──
+function getTrafficData(leads) {
+    const map = {};
+    leads.forEach(l => {
+        map[l.source] = (map[l.source] || 0) + 1;
+    });
+    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    return sorted;
+}
+
+// ── Compute status counts ──
+function getStatusCounts(leads) {
+    let held = 0, noShow = 0, pending = 0;
+    leads.forEach(l => {
+        if (l.status === 'Held') held++;
+        else if (l.status === 'No Show') noShow++;
+        else pending++;
+    });
+    return { held, noShow, pending, total: leads.length };
+}
+
+// ── Render ──
+function render() {
+    const leads = getFilteredLeads();
+    const trafficData = getTrafficData(leads);
+    const statusCounts = getStatusCounts(leads);
+    const dashboard = document.getElementById('dashboard');
+
+    // Update tab ranges
+    const monday = getMonday(NOW);
+    const monthStart = getMonthStart(NOW);
+    const yearStart = getYearStart(NOW);
+    document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
+    document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
+    document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
+
+    let html = '';
+
+    // ── Key Metrics ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Pipeline Summary</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Inbound', leads.length, '', true);
+    html += statCard('Held', statusCounts.held, pct(statusCounts.held, leads.length));
+    html += statCard('No Show', statusCounts.noShow, pct(statusCounts.noShow, leads.length));
+    html += statCard('Pending', statusCounts.pending, 'Awaiting FTA');
+    html += '</div>';
+    html += '</div>';
+
+    // ── Status breakdown (MTD & YTD only) ──
+    if (currentPeriod !== 'wtd') {
+        html += '<div class="section-block">';
+        html += '<div class="section-title">Status Breakdown</div>';
+
+        // Visual bar
+        const total = statusCounts.total || 1;
+        html += '<div class="status-bar-visual">';
+        html += `<div class="seg" style="width:${(statusCounts.held/total*100)}%;background:var(--success)"></div>`;
+        html += `<div class="seg" style="width:${(statusCounts.noShow/total*100)}%;background:var(--destructive)"></div>`;
+        html += `<div class="seg" style="width:${(statusCounts.pending/total*100)}%;background:var(--warning)"></div>`;
+        html += '</div>';
+
+        html += '<div class="status-grid">';
+        html += statusCard(statusCounts.total, 'Total Leads');
+        html += statusCard(statusCounts.held, 'Held');
+        html += statusCard(statusCounts.noShow, 'No-Showed');
+        html += statusCard(statusCounts.pending, 'Pending');
+        html += '</div>';
+        html += '</div>';
     }
 
-    const filtered = filterByRange(allLeads, start, end);
+    // ── Traffic Source Hero ──
+    html += '<div class="section-block">';
+    html += '<div class="traffic-hero" id="traffic-hero">';
+    html += '<div class="traffic-hero-title">Traffic Source Breakdown</div>';
+    if (trafficData.length === 0) {
+        html += '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;text-align:center;padding:1rem;">No data for this period</div>';
+    } else {
+        const maxCount = trafficData[0][1];
+        html += '<div class="traffic-bars">';
+        trafficData.forEach(([source, count], i) => {
+            const pctVal = leads.length ? Math.round(count / leads.length * 100) : 0;
+            const barWidth = maxCount ? Math.max(count / maxCount * 100, 8) : 0;
+            const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+            html += '<div class="traffic-row">';
+            html += `<div class="source-name">${escapeHtml(source)}</div>`;
+            html += '<div class="bar-track">';
+            html += `<div class="bar-fill" style="width:${barWidth}%;background:${color}"><span class="bar-count">${count}</span></div>`;
+            html += '</div>';
+            html += `<div class="bar-pct">${pctVal}%</div>`;
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+    html += '</div>';
 
-    document.getElementById('midweek-range').textContent = formatDateFull(getMonday(refDate)) + ' – ' + formatDateFull(getWednesday(refDate));
-    document.getElementById('endweek-range').textContent = formatDateFull(getMonday(refDate)) + ' – ' + formatDateFull(getFriday(refDate));
-    document.getElementById('mtd-range').textContent = formatDateFull(getMonthStart(refDate)) + ' – ' + formatDateFull(refDate);
+    // Traffic source table
+    if (trafficData.length > 0) {
+        html += '<div class="card">';
+        html += '<div class="card-header"><div class="card-title">Source Detail</div></div>';
+        html += '<div class="card-content"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr>';
+        html += '<th>Source</th><th style="text-align:right">Leads</th><th style="text-align:right">% of Total</th>';
+        html += '<th style="text-align:right">Held</th><th style="text-align:right">No Show</th>';
+        html += '</tr></thead><tbody>';
+        trafficData.forEach(([source, count]) => {
+            const sourceLeads = leads.filter(l => l.source === source);
+            const sHeld = sourceLeads.filter(l => l.status === 'Held').length;
+            const sNoShow = sourceLeads.filter(l => l.status === 'No Show').length;
+            const pctVal = leads.length ? Math.round(count / leads.length * 100) : 0;
+            html += '<tr>';
+            html += `<td>${escapeHtml(source)}</td>`;
+            html += `<td class="num">${count}</td>`;
+            html += `<td class="num">${pctVal}%</td>`;
+            html += `<td class="num">${sHeld}</td>`;
+            html += `<td class="num">${sNoShow}</td>`;
+            html += '</tr>';
+        });
+        html += '</tbody></table></div></div></div>';
+    }
+    html += '</div>';
 
-    renderStatCards(filtered);
-    renderBDRCards(filtered);
-    renderDailyChart(filtered, start, end);
-    renderStatusChart(filtered);
-    renderSourceChart(filtered);
-    renderSourceTable(filtered);
-    renderLeadTable(filtered);
+    // ── Charts ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Trends</div>';
+    html += '<div class="chart-grid">';
+    html += '<div class="chart-card"><div class="chart-label">Daily Inbound Volume</div><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>';
+    html += '<div class="chart-card"><div class="chart-label">Leads by Source</div><div class="chart-wrap"><canvas id="chart-source"></canvas></div></div>';
+    html += '</div>';
+    html += '</div>';
+
+    // ── Lead Detail ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Lead Detail</div>';
+
+    if (currentPeriod === 'ytd') {
+        // Group by month, accordion style
+        const monthGroups = {};
+        leads.forEach(l => {
+            const key = l.dateInbound.getFullYear() + '-' + String(l.dateInbound.getMonth()).padStart(2, '0');
+            if (!monthGroups[key]) monthGroups[key] = { label: formatMonthYear(l.dateInbound), leads: [] };
+            monthGroups[key].leads.push(l);
+        });
+        const sortedMonths = Object.keys(monthGroups).sort().reverse();
+        sortedMonths.forEach(key => {
+            const group = monthGroups[key];
+            html += '<div class="month-group">';
+            html += `<div class="month-header" onclick="toggleMonth(this)">`;
+            html += `<span>${escapeHtml(group.label)}</span>`;
+            html += `<span style="display:flex;align-items:center;gap:8px;"><span class="month-count">${group.leads.length} leads</span><span class="chevron">&#9660;</span></span>`;
+            html += '</div>';
+            html += '<div class="month-body">';
+            html += buildLeadTable(group.leads);
+            html += '</div></div>';
+        });
+    } else {
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += buildLeadTable(leads);
+        html += '</div></div></div>';
+    }
+
+    html += '</div>';
+
+    dashboard.innerHTML = html;
+
+    // Render charts
+    renderCharts(leads, trafficData);
+}
+
+function statCard(label, value, sub, highlight) {
+    return `<div class="stat-card${highlight ? ' highlight-card' : ''}">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value">${value}</div>
+        ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+    </div>`;
+}
+
+function statusCard(count, label) {
+    return `<div class="status-card">
+        <div class="status-count">${count}</div>
+        <div class="status-label">${label}</div>
+    </div>`;
+}
+
+function pct(n, total) {
+    if (!total) return '0%';
+    return Math.round(n / total * 100) + '% of total';
+}
+
+function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+}
+
+function buildLeadTable(leads) {
+    if (leads.length === 0) return '<div class="empty-state">No leads for this period</div>';
+    let html = '<table class="report-table"><thead><tr>';
+    html += '<th>Company</th><th>Practice Area</th><th>AE</th><th>Date</th><th>FTA Show</th><th>Source</th><th>City/State</th>';
+    html += '</tr></thead><tbody>';
+    leads.forEach(l => {
+        const statusColor = l.status === 'Held' ? 'var(--success)' : l.status === 'No Show' ? 'var(--destructive)' : 'var(--warning)';
+        html += '<tr>';
+        html += `<td><strong>${escapeHtml(l.name)}</strong></td>`;
+        html += `<td>${escapeHtml(l.practice)}</td>`;
+        html += `<td>${escapeHtml(l.ae)}</td>`;
+        html += `<td style="white-space:nowrap">${formatShort(l.dateInbound)}</td>`;
+        html += `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${statusColor};margin-right:6px;"></span>${escapeHtml(l.status)}</td>`;
+        html += `<td>${escapeHtml(l.source)}</td>`;
+        html += `<td>${escapeHtml(l.city)}</td>`;
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    return html;
+}
+
+// ── Charts ──
+function renderCharts(leads, trafficData) {
+    // Destroy existing charts
+    Object.values(charts).forEach(c => c.destroy());
+    charts = {};
+
+    // Daily volume
+    const dailyMap = {};
+    leads.forEach(l => {
+        const key = formatShort(l.dateInbound);
+        dailyMap[key] = (dailyMap[key] || 0) + 1;
+    });
+    const dailyLabels = Object.keys(dailyMap);
+    const dailyValues = Object.values(dailyMap);
+
+    const dailyCtx = document.getElementById('chart-daily');
+    if (dailyCtx) {
+        charts.daily = new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: dailyLabels.reverse(),
+                datasets: [{
+                    data: dailyValues.reverse(),
+                    backgroundColor: 'rgba(234,255,106,0.85)',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: 'rgba(255,255,255,0.6)', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { family: 'IBM Plex Mono', size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                }
+            }
+        });
+    }
+
+    // Source doughnut
+    const sourceCtx = document.getElementById('chart-source');
+    if (sourceCtx && trafficData.length > 0) {
+        charts.source = new Chart(sourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: trafficData.map(t => t[0]),
+                datasets: [{
+                    data: trafficData.map(t => t[1]),
+                    backgroundColor: trafficData.map((_, i) => SOURCE_COLORS[i % SOURCE_COLORS.length]),
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: 'rgba(255,255,255,0.8)', font: { family: 'IBM Plex Mono', size: 11 }, padding: 12 }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// ── Toggle month accordion ──
+function toggleMonth(el) {
+    el.classList.toggle('open');
+    const body = el.nextElementSibling;
+    body.classList.toggle('open');
+}
+
+// ── Download snapshot ──
+async function downloadSnapshot() {
+    const btn = document.getElementById('btn-snapshot');
+    btn.disabled = true;
+    btn.textContent = 'Capturing...';
+
+    try {
+        const area = document.getElementById('snapshot-area');
+        const canvas = await html2canvas(area, {
+            backgroundColor: '#f4f0e6',
+            scale: 2,
+            useCORS: true,
+            logging: false,
+        });
+
+        const link = document.createElement('a');
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : 'Year';
+        link.download = `Inbound-Leads-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error('Snapshot error:', err);
+        alert('Failed to capture snapshot. Try again.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Snapshot';
 }
 
 // ── Tab switching ──
-document.querySelectorAll('.period-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(btn.dataset.period);
+document.querySelectorAll('.period-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentPeriod = tab.dataset.period;
+        render();
     });
 });
-
-// ── Chart.js defaults ──
-Chart.defaults.color = 'rgba(255,255,255,0.5)';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
-Chart.defaults.font.family = "'IBM Plex Mono', monospace";
-Chart.defaults.font.size = 11;
 
 // ── Init ──
 async function init() {
     try {
-        const res = await fetch(SHEET_URL);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const text = await res.text();
-
-        const jsonStr = text.replace(/^[^{]*/, '').replace(/\);?\s*$/, '');
-        const json = JSON.parse(jsonStr);
-        allLeads = parseSheetData(json);
-
+        await fetchData();
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        render('midweek');
-    } catch (e) {
-        console.error('Load error:', e);
-        document.getElementById('loading').innerHTML =
-            '<p style="color:var(--destructive);">Failed to load data. Please refresh.</p>';
+        document.getElementById('dashboard').style.display = '';
+        render();
+    } catch (err) {
+        console.error('Failed to load data:', err);
+        document.getElementById('loading').innerHTML = '<div style="color:var(--destructive);">Failed to load data. Please refresh.</div>';
     }
 }
 
