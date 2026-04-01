@@ -454,6 +454,51 @@
             display: block;
         }
 
+        /* ── MRR Mountain Tracker ── */
+        .mrr-tracker {
+            background: linear-gradient(180deg, #0a4a6b 0%, var(--navy) 100%);
+            padding: 1.25rem 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .mrr-tracker-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .mrr-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .mrr-header .mrr-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow);
+        }
+        .mrr-header .mrr-values {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .mrr-header .mrr-values strong {
+            color: #fff;
+            font-size: 1rem;
+        }
+        .mrr-mountain-wrap {
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+        .mrr-mountain-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+
         /* ── Responsive ── */
         @media (max-width: 600px) {
             .header {
@@ -520,6 +565,102 @@
     </div>
 </div>
 
+<!-- ── MRR Mountain Tracker ── -->
+<div class="mrr-tracker">
+    <div class="mrr-tracker-inner">
+        <div class="mrr-header">
+            <div class="mrr-title">MRR Goal Tracker</div>
+            <div class="mrr-values"><strong>$18,000</strong> / $140,000</div>
+        </div>
+        <div class="mrr-mountain-wrap">
+            <svg viewBox="0 0 1000 240" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Sky gradient -->
+                <defs>
+                    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="rgba(60,148,209,0.15)"/>
+                        <stop offset="100%" stop-color="rgba(7,55,79,0)"/>
+                    </linearGradient>
+                    <linearGradient id="mtnGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#4a7a8a"/>
+                        <stop offset="100%" stop-color="#1a3d4f"/>
+                    </linearGradient>
+                    <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ffffff"/>
+                        <stop offset="100%" stop-color="#c8dce4"/>
+                    </linearGradient>
+                    <linearGradient id="pathGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="rgba(234,255,106,0.3)"/>
+                        <stop offset="100%" stop-color="rgba(234,255,106,0.8)"/>
+                    </linearGradient>
+                    <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#eaff6a"/>
+                        <stop offset="100%" stop-color="#c8e636"/>
+                    </linearGradient>
+                    <filter id="toWhite">
+                        <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/>
+                    </filter>
+                </defs>
+
+                <!-- Background mountain (far) -->
+                <polygon points="200,240 350,100 420,135 500,65 600,120 680,80 750,240" fill="rgba(74,122,138,0.3)"/>
+
+                <!-- Main mountain -->
+                <polygon points="0,240 80,185 180,160 300,120 420,90 500,45 580,90 650,105 750,130 850,165 950,195 1000,240" fill="url(#mtnGrad)"/>
+
+                <!-- Snow cap -->
+                <polygon points="460,65 500,45 540,65 530,68 510,58 490,58 470,68" fill="url(#snowGrad)" opacity="0.9"/>
+
+                <!-- Trail path (full) -->
+                <polyline points="30,225 100,205 200,185 300,158 400,125 500,80"
+                    fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round"/>
+
+                <!-- Trail path (progress) — 18k/140k = ~12.86% -->
+                <polyline id="mrr-progress-path" points="30,225 100,205 200,185 300,158 400,125 500,80"
+                    fill="none" stroke="url(#progressGrad)" stroke-width="3" stroke-linecap="round"
+                    stroke-dasharray="520" stroke-dashoffset="453"/>
+
+                <!-- Flag at summit -->
+                <g transform="translate(495, 18)">
+                    <line x1="0" y1="0" x2="0" y2="22" stroke="#fff" stroke-width="1.5"/>
+                    <polygon points="0,0 16,5 0,10" fill="var(--yellow)"/>
+                </g>
+                <text x="500" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="700" fill="var(--yellow)">$140K</text>
+
+                <!-- Milestone markers -->
+                <g>
+                    <circle cx="155" cy="192" r="3" fill="rgba(255,255,255,0.5)"/>
+                    <text x="155" y="185" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$25K</text>
+                </g>
+                <g>
+                    <circle cx="280" cy="165" r="3" fill="rgba(255,255,255,0.5)"/>
+                    <text x="280" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$50K</text>
+                </g>
+                <g>
+                    <circle cx="370" cy="135" r="3" fill="rgba(255,255,255,0.5)"/>
+                    <text x="370" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$75K</text>
+                </g>
+                <g>
+                    <circle cx="440" cy="105" r="3" fill="rgba(255,255,255,0.5)"/>
+                    <text x="440" y="98" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$100K</text>
+                </g>
+
+                <!-- Goat at current position (~12.86% along trail) -->
+                <image id="mrr-goat" href="goat.png" x="68" y="182" width="45" height="45" filter="url(#toWhite)"/>
+
+                <!-- Ground line -->
+                <line x1="0" y1="240" x2="1000" y2="240" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            </svg>
+        </div>
+        <!-- Progress bar below mountain -->
+        <div style="display:flex;align-items:center;gap:8px;padding-bottom:1rem;">
+            <div style="flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+                <div style="width:12.86%;height:100%;background:linear-gradient(90deg,#eaff6a,#c8e636);border-radius:3px;transition:width 0.6s ease;"></div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:600;color:var(--yellow);white-space:nowrap;">12.9%</span>
+        </div>
+    </div>
+</div>
+
 <main class="main">
 
     <!-- ═══════════════════════════════════════════════════════ -->
@@ -540,7 +681,7 @@
             <div class="card-grid">
 
                 <!-- Unified Audit -->
-                <a href="https://rankings-audit-tools.vercel.app/unified-audit" class="card" target="_blank">
+                <a href="https://rankings-audit-tools-8a17.vercel.app/unified-audit" class="card" target="_blank">
                     <div class="card-preview">
                         <div class="card-preview-icon">
                             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -587,7 +728,7 @@
 
             <div class="card-grid">
 
-                <a href="https://rankings-audit-tools.vercel.app/website-evaluator" class="card" target="_blank">
+                <a href="https://rankings-audit-tools-8a17.vercel.app/website-evaluator" class="card" target="_blank">
                     <div class="card-preview">
                         <div class="card-preview-icon">
                             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
@@ -1043,7 +1184,7 @@
                 </a>
 
                 <!-- Branded Asset Generator -->
-                <a href="https://rankings-audit-tools.vercel.app/branded-asset" class="card" target="_blank">
+                <a href="https://rankings-audit-tools-8a17.vercel.app/branded-asset" class="card" target="_blank">
                     <div class="card-preview">
                         <div class="card-preview-icon">
                             <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
@@ -1060,7 +1201,7 @@
                 </a>
 
                 <!-- Assets & Audits -->
-                <a href="https://rankings-audit-tools.vercel.app/" class="card" target="_blank">
+                <a href="https://rankings-audit-tools-8a17.vercel.app/" class="card" target="_blank">
                     <div class="card-preview">
                         <div class="card-preview-icon">
                             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
