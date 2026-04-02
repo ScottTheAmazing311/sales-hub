@@ -199,7 +199,7 @@
         /* ═══════════════════════════════════════════ */
         .kanban {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 1rem;
             margin: 1.25rem 2rem 3rem;
             min-height: 60vh;
@@ -248,6 +248,7 @@
         .kanban-column[data-status="request"] .kanban-column-accent { background: var(--sky); }
         .kanban-column[data-status="planning"] .kanban-column-accent { background: var(--yellow); }
         .kanban-column[data-status="building"] .kanban-column-accent { background: var(--warning); }
+        .kanban-column[data-status="stalled"] .kanban-column-accent { background: var(--destructive); }
         .kanban-column[data-status="review"] .kanban-column-accent { background: var(--navy-light); }
         .kanban-column[data-status="complete"] .kanban-column-accent { background: var(--success); }
 
