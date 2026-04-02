@@ -467,6 +467,8 @@
         .type-internal-tool { background: rgba(7,55,79,0.08); color: var(--navy); border-color: rgba(7,55,79,0.2); }
         .type-external-asset { background: rgba(34,197,94,0.08); color: var(--success); border-color: rgba(34,197,94,0.2); }
         .type-software-duplication { background: rgba(245,158,11,0.08); color: var(--warning); border-color: rgba(245,158,11,0.2); }
+        .type-vibe-code { background: rgba(167,139,250,0.08); color: #7c3aed; border-color: rgba(167,139,250,0.2); }
+        .type-process-doc { background: rgba(244,114,182,0.08); color: #db2777; border-color: rgba(244,114,182,0.2); }
         .type-miscellaneous { background: rgba(0,0,0,0.04); color: var(--text-muted); border-color: rgba(0,0,0,0.1); }
 
         /* Priority */
@@ -892,6 +894,8 @@
                     <option value="internal-tool">Internal Tool</option>
                     <option value="external-asset">External Asset</option>
                     <option value="software-duplication">Software Duplication</option>
+                    <option value="vibe-code">Vibe Code</option>
+                    <option value="process-doc">Process Doc</option>
                     <option value="miscellaneous">Miscellaneous</option>
                 </select>
             </div>
@@ -970,7 +974,7 @@ const TABLE = 'vibe_projects';
 
 const STATUSES = ['request','planning','building','stalled','review','complete'];
 const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', stalled: 'Stalled', review: 'Review', complete: 'Complete' };
-const TYPE_LABELS = { 'dashboard': 'Dashboard', 'internal-tool': 'Internal Tool', 'external-asset': 'External Asset', 'software-duplication': 'Software Duplication', 'miscellaneous': 'Miscellaneous' };
+const TYPE_LABELS = { 'dashboard': 'Dashboard', 'internal-tool': 'Internal Tool', 'external-asset': 'External Asset', 'software-duplication': 'Software Duplication', 'vibe-code': 'Vibe Code', 'process-doc': 'Process Doc', 'miscellaneous': 'Miscellaneous' };
 
 function generateId() { return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
 
