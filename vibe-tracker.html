@@ -448,6 +448,7 @@
         .badge-request { background: rgba(60,148,209,0.12); color: var(--sky); }
         .badge-planning { background: rgba(234,255,106,0.3); color: #7a8a00; }
         .badge-building { background: rgba(245,158,11,0.12); color: var(--warning); }
+        .badge-stalled { background: rgba(192,57,43,0.12); color: var(--destructive); }
         .badge-review { background: rgba(14,95,135,0.12); color: var(--navy-light); }
         .badge-complete { background: rgba(34,197,94,0.12); color: var(--success); }
 
@@ -842,6 +843,7 @@
             <button class="tab" data-filter="request" onclick="setFilter('request', this)">Requests <span class="count" id="count-request">0</span></button>
             <button class="tab" data-filter="planning" onclick="setFilter('planning', this)">Planning <span class="count" id="count-planning">0</span></button>
             <button class="tab" data-filter="building" onclick="setFilter('building', this)">Building <span class="count" id="count-building">0</span></button>
+            <button class="tab" data-filter="stalled" onclick="setFilter('stalled', this)">Stalled <span class="count" id="count-stalled">0</span></button>
             <button class="tab" data-filter="review" onclick="setFilter('review', this)">Review <span class="count" id="count-review">0</span></button>
             <button class="tab" data-filter="complete" onclick="setFilter('complete', this)">Complete <span class="count" id="count-complete">0</span></button>
         </div>
@@ -920,6 +922,7 @@
                         <option value="request">Request</option>
                         <option value="planning">Planning</option>
                         <option value="building">Building</option>
+                        <option value="stalled">Stalled</option>
                         <option value="review">Review</option>
                         <option value="complete">Complete</option>
                     </select>
@@ -965,8 +968,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const TABLE = 'vibe_projects';
 
-const STATUSES = ['request','planning','building','review','complete'];
-const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', review: 'Review', complete: 'Complete' };
+const STATUSES = ['request','planning','building','stalled','review','complete'];
+const STATUS_LABELS = { request: 'Requests', planning: 'Planning', building: 'Building', stalled: 'Stalled', review: 'Review', complete: 'Complete' };
 const TYPE_LABELS = { 'dashboard': 'Dashboard', 'internal-tool': 'Internal Tool', 'external-asset': 'External Asset', 'software-duplication': 'Software Duplication', 'miscellaneous': 'Miscellaneous' };
 
 function generateId() { return 'vt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
@@ -1309,7 +1312,7 @@ function renderProjects() {
     if (currentFilter !== 'all') filtered = filtered.filter(p => p.status === currentFilter);
     if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.requester || '').toLowerCase().includes(search) || (p.team || '').toLowerCase().includes(search));
 
-    const statusOrder = { request: 0, planning: 1, building: 2, review: 3, complete: 4 };
+    const statusOrder = { request: 0, planning: 1, building: 2, stalled: 3, review: 4, complete: 5 };
     filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.createdAt) - new Date(a.createdAt));
 
     const list = document.getElementById('projectList');
