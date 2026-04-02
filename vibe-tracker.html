@@ -4,7 +4,7 @@
     <script src="auth.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vibe Tracker — Revenue Kitchen</title>
+    <title>Revenue Leadership Projects — Revenue Kitchen</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -795,8 +795,8 @@
         <div class="header-left">
             <div class="logo">RK</div>
             <div>
-                <div class="header-title">Vibe Tracker</div>
-                <div class="header-subtitle">Revenue Kitchen — Project Manager</div>
+                <div class="header-title">Revenue Leadership Projects</div>
+                <div class="header-subtitle">Revenue Kitchen — Cross-Team Project Board</div>
             </div>
         </div>
         <div class="header-right">
@@ -814,6 +814,20 @@
 </header>
 
 <div class="stats-bar" id="statsBar"></div>
+
+<!-- Team Filter -->
+<div class="tabs-container" style="padding:0 2rem;margin-bottom:0.5rem;">
+    <div class="tabs" id="teamTabs">
+        <button class="tab active" onclick="setTeamFilter('all', this)">All Teams</button>
+        <button class="tab" onclick="setTeamFilter('Sales', this)">Sales</button>
+        <button class="tab" onclick="setTeamFilter('BDR', this)">BDR</button>
+        <button class="tab" onclick="setTeamFilter('MDR', this)">MDR</button>
+        <button class="tab" onclick="setTeamFilter('Brand', this)">Brand</button>
+        <button class="tab" onclick="setTeamFilter('Marketing', this)">Marketing</button>
+        <button class="tab" onclick="setTeamFilter('RevOps', this)">RevOps</button>
+        <button class="tab" onclick="setTeamFilter('Leadership', this)">Leadership</button>
+    </div>
+</div>
 
 <!-- KANBAN BOARD VIEW -->
 <div class="kanban" id="kanbanBoard">
@@ -839,7 +853,7 @@
 </div>
 
 <footer class="footer">
-    Revenue Kitchen — Vibe Tracker &copy; 2026
+    Revenue Kitchen — Leadership Projects &copy; 2026
 </footer>
 
 <!-- Detail Modal (used by kanban) -->
@@ -857,7 +871,7 @@
 <div class="modal-overlay" id="newProjectModal">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title" id="modalTitle">New Vibe Code Request</div>
+            <div class="modal-title" id="modalTitle">New Project</div>
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -867,7 +881,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <textarea class="form-textarea" id="formDesc" placeholder="Describe the vibe code request — what do you want built and why?"></textarea>
+                <textarea class="form-textarea" id="formDesc" placeholder="Describe the project — goals, scope, and key deliverables."></textarea>
             </div>
             <div class="form-group">
                 <label class="form-label">Type</label>
@@ -877,6 +891,18 @@
                     <option value="external-asset">External Asset</option>
                     <option value="software-duplication">Software Duplication</option>
                     <option value="miscellaneous">Miscellaneous</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Team</label>
+                <select class="form-select" id="formTeam">
+                    <option value="Sales">Sales</option>
+                    <option value="BDR">BDR</option>
+                    <option value="MDR">MDR</option>
+                    <option value="Brand">Brand</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="RevOps">RevOps</option>
+                    <option value="Leadership">Leadership</option>
                 </select>
             </div>
             <div class="form-row">
@@ -901,7 +927,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Requested By</label>
-                <input type="text" class="form-input" id="formRequester" placeholder="Name or team">
+                <input type="text" class="form-input" id="formRequester" placeholder="Name">
             </div>
             <div class="form-group">
                 <label class="form-label">Target Date (optional)</label>
@@ -935,6 +961,7 @@ function fromRow(r) {
         id: r.id, name: r.name, description: r.description || '',
         type: r.type || 'miscellaneous', priority: r.priority || 'medium',
         status: r.status || 'request', requester: r.requester || '',
+        team: r.team || 'Leadership',
         targetDate: r.target_date || '', tasks: r.tasks || [],
         notes: r.notes || [], createdAt: r.created_at, updatedAt: r.updated_at,
     };
@@ -943,11 +970,15 @@ function toRow(p) {
     return {
         id: p.id, name: p.name, description: p.description,
         type: p.type, priority: p.priority, status: p.status,
-        requester: p.requester, target_date: p.targetDate,
+        requester: p.requester, team: p.team,
+        target_date: p.targetDate,
         tasks: p.tasks, notes: p.notes,
         created_at: p.createdAt, updated_at: p.updatedAt,
     };
 }
+
+const TEAMS = ['Sales','BDR','MDR','Brand','Marketing','RevOps','Leadership'];
+const TEAM_COLORS = { Sales:'#3c94d1', BDR:'#22c55e', MDR:'#f59e0b', Brand:'#a78bfa', Marketing:'#fb923c', RevOps:'#f472b6', Leadership:'#eaff6a' };
 
 // ── Data Layer (Supabase) ────────────────────────────────────
 async function loadProjects() {
@@ -974,10 +1005,23 @@ async function deleteProjectFromDb(id) {
 // ── State ────────────────────────────────────────────────────
 let projects = [];
 let currentFilter = 'all';
+let currentTeamFilter = 'all';
 let currentView = 'board';
 let editingId = null;
 let selectedProjectId = null;
 let draggedId = null;
+
+function setTeamFilter(team, btn) {
+    currentTeamFilter = team;
+    document.querySelectorAll('#teamTabs .tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCurrentView();
+}
+
+function getFilteredByTeam(list) {
+    if (currentTeamFilter === 'all') return list;
+    return list.filter(p => p.team === currentTeamFilter);
+}
 
 // ── Realtime subscription ────────────────────────────────────
 sb.channel('vibe-realtime')
@@ -1032,12 +1076,13 @@ function renderKanban() {
     const board = document.getElementById('kanbanBoard');
 
     board.innerHTML = STATUSES.map(status => {
-        let cards = projects.filter(p => p.status === status);
+        let cards = getFilteredByTeam(projects).filter(p => p.status === status);
         if (search) {
             cards = cards.filter(p =>
                 p.name.toLowerCase().includes(search) ||
                 (p.description || '').toLowerCase().includes(search) ||
-                (p.requester || '').toLowerCase().includes(search)
+                (p.requester || '').toLowerCase().includes(search) ||
+                (p.team || '').toLowerCase().includes(search)
             );
         }
         // Sort by priority (high first), then by date
@@ -1073,7 +1118,10 @@ function renderKanbanCard(p) {
         <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.3rem;">
             <div class="kanban-card-name" style="margin-bottom:0;">${escapeHtml(p.name)}</div>
         </div>
-        ${p.type ? `<span class="type-badge type-${p.type}" style="margin-bottom:0.35rem; display:inline-block;">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
+        <div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.35rem;">
+            ${p.team ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:600;background:${TEAM_COLORS[p.team] || '#94a3b8'};color:${p.team === 'Leadership' ? 'var(--navy)' : '#fff'};">${p.team}</span>` : ''}
+            ${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
+        </div>
         ${p.description ? `<div class="kanban-card-desc">${escapeHtml(p.description)}</div>` : ''}
         <div class="kanban-card-footer">
             <div class="kanban-card-meta">
@@ -1241,16 +1289,16 @@ function setFilter(filter, tabEl) {
 
 function renderProjects() {
     const search = document.getElementById('searchInput').value.toLowerCase();
-    let filtered = projects;
+    let filtered = getFilteredByTeam(projects);
     if (currentFilter !== 'all') filtered = filtered.filter(p => p.status === currentFilter);
-    if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.requester || '').toLowerCase().includes(search));
+    if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search) || (p.requester || '').toLowerCase().includes(search) || (p.team || '').toLowerCase().includes(search));
 
     const statusOrder = { request: 0, planning: 1, building: 2, review: 3, complete: 4 };
     filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.createdAt) - new Date(a.createdAt));
 
     const list = document.getElementById('projectList');
     if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">◇</div><div class="empty-state-title">No projects yet</div><div class="empty-state-desc">Click "+ New Request" to submit your first vibe code request.</div></div>`;
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">◇</div><div class="empty-state-title">No projects yet</div><div class="empty-state-desc">Click "+ New Request" to add a project.</div></div>`;
         return;
     }
     list.innerHTML = filtered.map(p => {
@@ -1263,6 +1311,7 @@ function renderProjects() {
             <div class="project-card-header">
                 <div><div class="project-name">${escapeHtml(p.name)}</div></div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
+                    ${p.team ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:600;background:${TEAM_COLORS[p.team] || '#94a3b8'};color:${p.team === 'Leadership' ? 'var(--navy)' : '#fff'};">${p.team}</span>` : ''}
                     ${p.type ? `<span class="type-badge type-${p.type}">${TYPE_LABELS[p.type] || p.type}</span>` : ''}
                     <span class="priority priority-${p.priority}">${p.priority}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
@@ -1374,11 +1423,12 @@ function closeDetail() {
 // ── CRUD ─────────────────────────────────────────────────────
 function openNewProjectModal() {
     editingId = null;
-    document.getElementById('modalTitle').textContent = 'New Vibe Code Request';
-    document.getElementById('formSubmitBtn').textContent = 'Submit Request';
+    document.getElementById('modalTitle').textContent = 'New Project';
+    document.getElementById('formSubmitBtn').textContent = 'Submit Project';
     document.getElementById('formName').value = '';
     document.getElementById('formDesc').value = '';
     document.getElementById('formType').value = 'miscellaneous';
+    document.getElementById('formTeam').value = currentTeamFilter !== 'all' ? currentTeamFilter : 'Leadership';
     document.getElementById('formPriority').value = 'medium';
     document.getElementById('formStatus').value = 'request';
     document.getElementById('formRequester').value = '';
@@ -1396,6 +1446,7 @@ function openEditModal(id) {
     document.getElementById('formName').value = p.name;
     document.getElementById('formDesc').value = p.description || '';
     document.getElementById('formType').value = p.type || 'miscellaneous';
+    document.getElementById('formTeam').value = p.team || 'Leadership';
     document.getElementById('formPriority').value = p.priority;
     document.getElementById('formStatus').value = p.status;
     document.getElementById('formRequester').value = p.requester || '';
@@ -1416,6 +1467,7 @@ async function saveProject() {
         name,
         description: document.getElementById('formDesc').value.trim(),
         type: document.getElementById('formType').value,
+        team: document.getElementById('formTeam').value,
         priority: document.getElementById('formPriority').value,
         status: document.getElementById('formStatus').value,
         requester: document.getElementById('formRequester').value.trim(),
