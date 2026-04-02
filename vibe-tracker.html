@@ -925,9 +925,25 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Requested By</label>
-                <input type="text" class="form-input" id="formRequester" placeholder="Name">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Requested By</label>
+                    <input type="text" class="form-input" id="formRequester" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assigned To</label>
+                    <select class="form-select" id="formAssignee">
+                        <option value="">Unassigned</option>
+                        <option value="Scott">Scott</option>
+                        <option value="Jess">Jess</option>
+                        <option value="Gui">Gui</option>
+                        <option value="Cole">Cole</option>
+                        <option value="Carson">Carson</option>
+                        <option value="Jacqui">Jacqui</option>
+                        <option value="Tyler">Tyler</option>
+                        <option value="Zach">Zach</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Target Date (optional)</label>
@@ -961,7 +977,7 @@ function fromRow(r) {
         id: r.id, name: r.name, description: r.description || '',
         type: r.type || 'miscellaneous', priority: r.priority || 'medium',
         status: r.status || 'request', requester: r.requester || '',
-        team: r.team || 'Leadership',
+        assignee: r.assignee || '', team: r.team || 'Leadership',
         targetDate: r.target_date || '', tasks: r.tasks || [],
         notes: r.notes || [], createdAt: r.created_at, updatedAt: r.updated_at,
     };
@@ -970,7 +986,7 @@ function toRow(p) {
     return {
         id: p.id, name: p.name, description: p.description,
         type: p.type, priority: p.priority, status: p.status,
-        requester: p.requester, team: p.team,
+        requester: p.requester, assignee: p.assignee, team: p.team,
         target_date: p.targetDate,
         tasks: p.tasks, notes: p.notes,
         created_at: p.createdAt, updated_at: p.updatedAt,
@@ -1126,7 +1142,7 @@ function renderKanbanCard(p) {
         <div class="kanban-card-footer">
             <div class="kanban-card-meta">
                 <span class="kanban-card-priority ${p.priority}">${p.priority}</span>
-                ${p.requester ? `<span class="meta-item">${escapeHtml(p.requester)}</span>` : ''}
+                ${p.assignee ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--yellow);font-family:'IBM Plex Mono',monospace;font-size:0.55rem;font-weight:700;" title="${escapeHtml(p.assignee)}">${p.assignee.charAt(0)}</span>` : ''}
             </div>
             ${tasks.length > 0 ? `
                 <div class="kanban-card-progress">
@@ -1319,7 +1335,8 @@ function renderProjects() {
             </div>
             <div class="project-desc">${escapeHtml(p.description || '—')}</div>
             <div class="project-meta">
-                ${p.requester ? `<span class="meta-item">▪ ${escapeHtml(p.requester)}</span>` : ''}
+                ${p.assignee ? `<span class="meta-item">▪ Assigned: ${escapeHtml(p.assignee)}</span>` : ''}
+                ${p.requester ? `<span class="meta-item">▪ By: ${escapeHtml(p.requester)}</span>` : ''}
                 ${p.targetDate ? `<span class="meta-item">▪ Due ${p.targetDate}</span>` : ''}
                 <span class="meta-item">▪ Created ${formatDate(p.createdAt)}</span>
                 ${tasks.length > 0 ? `<span class="meta-item">${done}/${tasks.length} tasks</span><div class="progress-bar"><div class="progress-fill${isComplete ? ' complete' : ''}" style="width:${progress}%"></div></div>` : ''}
@@ -1432,6 +1449,7 @@ function openNewProjectModal() {
     document.getElementById('formPriority').value = 'medium';
     document.getElementById('formStatus').value = 'request';
     document.getElementById('formRequester').value = '';
+    document.getElementById('formAssignee').value = '';
     document.getElementById('formDate').value = '';
     document.getElementById('newProjectModal').classList.add('active');
     document.getElementById('formName').focus();
@@ -1450,6 +1468,7 @@ function openEditModal(id) {
     document.getElementById('formPriority').value = p.priority;
     document.getElementById('formStatus').value = p.status;
     document.getElementById('formRequester').value = p.requester || '';
+    document.getElementById('formAssignee').value = p.assignee || '';
     document.getElementById('formDate').value = p.targetDate || '';
     document.getElementById('newProjectModal').classList.add('active');
     document.getElementById('formName').focus();
@@ -1471,6 +1490,7 @@ async function saveProject() {
         priority: document.getElementById('formPriority').value,
         status: document.getElementById('formStatus').value,
         requester: document.getElementById('formRequester').value.trim(),
+        assignee: document.getElementById('formAssignee').value,
         targetDate: document.getElementById('formDate').value,
     };
     if (editingId) {
