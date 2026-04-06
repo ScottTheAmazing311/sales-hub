@@ -965,12 +965,9 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ── Supabase ─────────────────────────────────────────────────
-const SUPABASE_URL = 'https://ryxrgbvymudmqqpefmmf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eHJnYnZ5bXVkbXFxcGVmbW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMDM5MTEsImV4cCI6MjA4Njc3OTkxMX0.o9TKcIBHO4whilqiqKoHrGmRR8BCuCzgzwI0quA75H0';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let sb = null;
 const TABLE = 'vibe_projects';
 
 const STATUSES = ['request','planning','building','stalled','review','complete'];
@@ -1047,13 +1044,15 @@ function getFilteredByTeam(list) {
     return list.filter(p => p.team === currentTeamFilter);
 }
 
-// ── Realtime subscription ────────────────────────────────────
-sb.channel('vibe-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
-        projects = await loadProjects();
-        renderCurrentView();
-    })
-    .subscribe();
+// ── Realtime subscription (set up in init) ──────────────────
+function setupRealtime() {
+    sb.channel('vibe-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
+            projects = await loadProjects();
+            renderCurrentView();
+        })
+        .subscribe();
+}
 
 // ── View toggle ──────────────────────────────────────────────
 function setView(view) {
@@ -1650,11 +1649,22 @@ async function migrateLocalStorage() {
 }
 
 // ── Init ─────────────────────────────────────────────────────
-(async function init() {
+async function init() {
+    sb = window.rkSupabase;
     await migrateLocalStorage();
     projects = await loadProjects();
     renderCurrentView();
-})();
+    setupRealtime();
+}
+
+var _initDone = false;
+function tryInit() {
+    if (_initDone) return;
+    if (window.rkSupabase) { _initDone = true; init(); }
+}
+tryInit();
+window.addEventListener('rk-auth-ready', tryInit);
+var _poll = setInterval(function() { tryInit(); if (_initDone) clearInterval(_poll); }, 200);
 </script>
 
 </body>
