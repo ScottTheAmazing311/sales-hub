@@ -677,19 +677,19 @@ button { cursor: pointer; font-family: inherit; }
         <div class="card-body">
           <div class="card-panel active" id="rankings-core">
             <button class="offering-tile" onclick="openOffering('rankings-core-10k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Base</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Local Authority</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('rankings-core-15k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Accelerator</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Regional Contender</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('rankings-core-25k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Velocity</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Market Leader</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('rankings-core-40k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">40K/Mo — Apex</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">40K/Mo — Category Dominance</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
           </div>
@@ -1278,63 +1278,95 @@ const offerings = {
 
   // ── RANKINGS CORE ────────────────────────────────────────────
   'rankings-core-10k': {
-    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '10K/Mo — Base',
+    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '10K/Mo — Local Authority',
     docId: '1Jfmpe5B_QiSYznhfuNKt18ZhzzECXeVT_3XWvOhZslM',
-    html: rankTierHTML(1, 'Authority', [
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
-      ['Content Marketing (English &amp; Spanish)', '12,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 3 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', 'Core'],
-      ['Digital PR Link Acquisition', false],
+    html: rankTierHTML(1, 'Local Authority', [
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '10–12 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '4–6 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Quarterly'],
+      ['CRO &amp; UX Optimization', 'Baseline'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', '1 to 3 GBPs'],
+      ['Link Building', '4 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', false],
+      ['Meta Ads (Facebook &amp; Instagram)', false],
+      ['Omnipresence (OTT &amp; Programmatic Ads)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', true],
     ], '$10,000 / month')
   },
   'rankings-core-15k': {
-    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '15K/Mo — Accelerator',
+    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '15K/Mo — Regional Contender',
     docId: '1B-kb75WI8KR2_-YN6UeFYgNjsdS9hqYG7tkPI7T1Rq8',
-    html: rankTierHTML(2, 'Ascend', [
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Authority Stack'],
-      ['Content Marketing (English &amp; Spanish)', '18,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 5 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', 'Premium'],
-      ['Digital PR Link Acquisition', true],
+    html: rankTierHTML(2, 'Regional Contender', [
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '20–25 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '6–8 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Monthly'],
+      ['CRO &amp; UX Optimization', 'Refinement'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', 'Up to 5 GBPs'],
+      ['Link Building', '6 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', true],
+      ['Meta Ads (Facebook &amp; Instagram)', false],
+      ['Omnipresence (OTT &amp; Programmatic Ads)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', true],
     ], '$15,000 / month')
   },
   'rankings-core-25k': {
-    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '25K/Mo — Velocity',
+    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '25K/Mo — Market Leader',
     docId: '1NUVu_JycVjVMpuQVu1TMNhTrQwBEl-nWW6dykr4VRHM',
-    html: rankTierHTML(3, 'Prestige', [
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Directory Optimizer + AI Authority Stack'],
-      ['Content Marketing (English &amp; Spanish)', '32,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 10 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', 'Elite'],
-      ['Digital PR Link Acquisition', true],
+    html: rankTierHTML(3, 'Market Leader', [
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '25–30 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '8–10 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Bi-Weekly'],
+      ['CRO &amp; UX Optimization', 'Testing'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', 'Up to 10 GBPs'],
+      ['Link Building', '10 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', true],
+      ['Meta Ads (Facebook &amp; Instagram)', true],
+      ['Omnipresence (OTT &amp; Programmatic Ads)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', 'Senior Account Management'],
     ], '$25,000 / month')
   },
   'rankings-core-40k': {
-    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '40K/Mo — Apex',
+    entity: 'Personal Injury', entityKey: 'rankings', category: 'Flagship', title: '40K/Mo — Category Dominance',
     docId: '1B26ZUXzcuSdsPs8pP9JjMYqRsMJ7qW_bYGlYqIxgI0Q',
-    html: rankTierHTML(4, 'Apex', [
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', '+AI Citation Magnet + AI Directory Optimizer + AI Authority Stack'],
-      ['Content Marketing (English &amp; Spanish)', '50,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 20 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', 'Pinnacle'],
-      ['Digital PR Link Acquisition', true],
+    html: rankTierHTML(4, 'Category Dominance', [
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '30–40 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '10–15 Strategic Assets (Saturation)'],
+      ['Content: Refresh &amp; Tuning', 'Weekly'],
+      ['CRO &amp; UX Optimization', 'Engineering'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', 'Up to 20 GBPs'],
+      ['Link Building', '20 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', true],
+      ['Meta Ads (Facebook &amp; Instagram)', true],
+      ['Omnipresence (OTT &amp; Programmatic Ads)', true],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', 'Key Account Management'],
     ], '$40,000 / month')
   },
 
