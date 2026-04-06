@@ -1261,6 +1261,12 @@ function openDetailModal(id) {
                         ${STATUSES.map(s => `<button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}'); openDetailModal('${p.id}');">${s}</button>`).join('')}
                     </div>
                 </div>
+                <div class="detail-section">
+                    <div class="detail-section-title">Team</div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        ${TEAMS.map(t => `<button class="btn btn-sm" style="${p.team === t ? 'background:' + TEAM_COLORS[t] + ';color:' + (t === 'Leadership' ? 'var(--navy)' : '#fff') + ';border-color:' + TEAM_COLORS[t] : ''}" onclick="updateTeam('${p.id}','${t}'); openDetailModal('${p.id}');">${t}</button>`).join('')}
+                    </div>
+                </div>
             </div>
             <div>
                 <div class="detail-section">
@@ -1406,6 +1412,12 @@ function openDetail(id) {
                             ${STATUSES.map(s => `<button class="btn btn-sm ${p.status === s ? 'btn-primary' : 'btn-ghost'}" onclick="updateStatus('${p.id}','${s}')">${s}</button>`).join('')}
                         </div>
                     </div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">Team</div>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            ${TEAMS.map(t => `<button class="btn btn-sm" style="${p.team === t ? 'background:' + TEAM_COLORS[t] + ';color:' + (t === 'Leadership' ? 'var(--navy)' : '#fff') + ';border-color:' + TEAM_COLORS[t] : ''}" onclick="updateTeam('${p.id}','${t}')">${t}</button>`).join('')}
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <div class="detail-section">
@@ -1532,6 +1544,17 @@ async function updateStatus(id, status) {
     const p = projects.find(x => x.id === id);
     if (p) {
         p.status = status;
+        p.updatedAt = new Date().toISOString();
+        await updateProject(p);
+        renderCurrentView();
+        if (currentView === 'list') openDetail(id);
+    }
+}
+
+async function updateTeam(id, team) {
+    const p = projects.find(x => x.id === id);
+    if (p) {
+        p.team = team;
         p.updatedAt = new Date().toISOString();
         await updateProject(p);
         renderCurrentView();
