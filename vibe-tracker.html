@@ -1009,13 +1009,19 @@ async function loadProjects() {
 }
 
 async function insertProject(p) {
+    if (!sb) { console.error('Insert failed: Supabase client not ready'); return; }
     const { error } = await sb.from(TABLE).insert(toRow(p));
     if (error) console.error('Insert error:', error);
 }
 
 async function updateProject(p) {
-    const { error } = await sb.from(TABLE).update(toRow(p)).eq('id', p.id);
+    if (!sb) { console.error('Update failed: Supabase client not ready'); return; }
+    const row = toRow(p);
+    delete row.id;
+    delete row.created_at;
+    const { data, error } = await sb.from(TABLE).update(row).eq('id', p.id).select();
     if (error) console.error('Update error:', error);
+    else console.log('Update success:', data);
 }
 
 async function deleteProjectFromDb(id) {
