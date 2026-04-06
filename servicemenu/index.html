@@ -761,15 +761,19 @@ button { cursor: pointer; font-family: inherit; }
         <div class="card-body">
                     <div class="card-panel active" id="gladiator-core">
             <button class="offering-tile" onclick="openOffering('gladiator-core-3k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Maintenance</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Foundation</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('gladiator-core-5k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Base</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Local Authority</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
             <button class="offering-tile" onclick="openOffering('gladiator-core-7k5')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Accelerator</span></div>
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Regional Contender</span></div>
+              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+            <button class="offering-tile" onclick="openOffering('gladiator-core-12k5')">
+              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">12.5K/Mo — Market Leader</span></div>
               <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
           </div>
@@ -1225,44 +1229,92 @@ const offerings = {
 
   // ── GLADIATOR CORE ───────────────────────────────────────────
   'gladiator-core-3k': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '3K/Mo — Maintenance',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '3K/Mo — Foundation',
     docId: '1_ct6v99VZTYOL-148UFFfb0DheorBEpGVfEWHV05iO8',
     html: gladTierHTML([
-      ['SEO: Search Engine Optimization', true],
-      ['Content Marketing (English &amp; Spanish)', '3,000 words/mo'],
-      ['Local SEO + GBP Optimization &amp; Publishing', '1 GBP'],
-      ['Yelp Premium', true],
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '4–8 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '1–3 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Quarterly'],
+      ['CRO &amp; UX Optimization', 'Foundational'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', '1 GBP'],
       ['Link Building', true],
+      ['Digital PR', false],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', false],
+      ['Meta Ads (Facebook &amp; Instagram)', false],
+      ['Growth Reporting &amp; Attribution', false],
+      ['Account Management', 'Pod-Level'],
     ], '$3,000 / month')
   },
   'gladiator-core-5k': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '5K/Mo — Base',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '5K/Mo — Local Authority',
     docId: '1V1zAT1ZCSgt8b_7bEdZFsJy_QL10sheCO7d_1rsxAt0',
     html: gladTierHTML([
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
-      ['Content Marketing (English &amp; Spanish)', '6,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 2 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', true],
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '10–12 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '4–6 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Quarterly'],
+      ['CRO &amp; UX Optimization', 'Baseline'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', '1 to 3 GBPs'],
+      ['Link Building', '4 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', false],
+      ['Meta Ads (Facebook &amp; Instagram)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', true],
     ], '$5,000 / month')
   },
   'gladiator-core-7k5': {
-    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '7.5K/Mo — Accelerator',
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '7.5K/Mo — Regional Contender',
     docId: '13yhLaMsCwcsmpT9mzMnS4oqQuzpuxovjMiUe3BXYdUI',
     html: gladTierHTML([
-      ['SEO: Search Engine Optimization', true],
-      ['AIO: Search Optimization (ChatGPT + LLMs)', true],
-      ['Content Marketing (English &amp; Spanish)', '9,000 words/mo'],
-      ['Web Maintenance', true],
-      ['Local SEO + GBP Optimization &amp; Publishing', 'Up to 3 GBPs'],
-      ['Yelp Premium', true],
-      ['Link Building', true],
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '12–15 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '6–8 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Monthly'],
+      ['CRO &amp; UX Optimization', 'Refinement'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', 'Up to 5 GBPs'],
+      ['Link Building', '6 Authority Links min.'],
+      ['Digital PR', true],
       ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', true],
+      ['Meta Ads (Facebook &amp; Instagram)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', true],
     ], '$7,500 / month')
+  },
+  'gladiator-core-12k5': {
+    entity: 'Law Firm', entityKey: 'gladiator', category: 'Flagship', title: '12.5K/Mo — Market Leader',
+    docId: '',
+    html: gladTierHTML([
+      ['Search Engine Optimization (SEO)', true],
+      ['Generative Engine Optimization (GEO) &amp; AIO', true],
+      ['Content: Launch (Months 1-4)', '15–20 Strategic Assets'],
+      ['Content: Growth (Months 5+)', '8–10 Strategic Assets'],
+      ['Content: Refresh &amp; Tuning', 'Bi-Weekly'],
+      ['CRO &amp; UX Optimization', 'Testing'],
+      ['Web Maintenance &amp; Web Ops', true],
+      ['Local SEO Optimization', true],
+      ['Google Business Profile (GBP) Management', 'Up to 10 GBPs'],
+      ['Link Building', '10 Authority Links min.'],
+      ['Digital PR', true],
+      ['Local Services Ads (LSA)', true],
+      ['Google Ads (PPC)', true],
+      ['Meta Ads (Facebook &amp; Instagram)', true],
+      ['Growth Reporting &amp; Attribution', true],
+      ['Account Management', 'Senior Account Management'],
+    ], '$12,500 / month')
   },
   // ── GLADIATOR A-LA-CART ──────────────────────────────────────
   'gladiator-alacart-ppc':   { entity:'Law Firm', entityKey:'gladiator', category:'A-La-Cart', title:'PPC / Google Ads',
