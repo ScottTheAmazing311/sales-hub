@@ -1206,12 +1206,14 @@ async function onDrop(e, newStatus) {
     if (col) col.classList.remove('drag-over');
 
     const id = e.dataTransfer.getData('text/plain') || draggedId;
+    console.log('[DROP] id:', id, 'newStatus:', newStatus, 'sb:', !!sb);
     if (!id) return;
 
     const p = projects.find(x => x.id === id);
     if (p && p.status !== newStatus) {
         p.status = newStatus;
         p.updatedAt = new Date().toISOString();
+        console.log('[DROP] calling updateProject for:', p.name);
         await updateProject(p);
         renderCurrentView();
     }
