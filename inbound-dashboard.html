@@ -635,14 +635,17 @@ async function fetchData() {
     for (const row of rows) {
         const cells = row.c || [];
 
-        // MDR Sets are independent of lead rows — parse them regardless of name
+        // MDR Sets are independent of lead rows — parse them regardless of name.
+        // Column R can hold a count (1+) representing multiple sets that day.
         const mdrFlag = cellVal(cells, COL.MDR_SET);
-        if (mdrFlag && parseFloat(mdrFlag) >= 1) {
+        const mdrQty = parseFloat(mdrFlag);
+        if (!isNaN(mdrQty) && mdrQty >= 1) {
             const mdrDate = parseDateAny(cells[COL.MDR_DATE]);
             if (mdrDate) {
                 allMdrSets.push({
                     date: mdrDate,
                     rep: cellVal(cells, COL.MDR_REP),
+                    qty: mdrQty,
                 });
             }
         }
@@ -672,7 +675,9 @@ async function fetchData() {
 
 // ── Count MDR Sets whose set-date falls within [start, end] ──
 function countMdrSetsInRange(start, end) {
-    return allMdrSets.filter(m => m.date >= start && m.date <= end).length;
+    return allMdrSets
+        .filter(m => m.date >= start && m.date <= end)
+        .reduce((sum, m) => sum + (m.qty || 1), 0);
 }
 
 function getMdrSetsForPeriod() {
