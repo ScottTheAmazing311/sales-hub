@@ -212,6 +212,67 @@
             font-family: 'IBM Plex Mono', monospace;
         }
 
+        /* ── Goal Cards ── */
+        .goal-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 900px) { .goal-grid { grid-template-columns: repeat(2, 1fr); } }
+        .goal-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1.1rem 1.25rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .goal-card.met { border-color: rgba(34,197,94,0.4); }
+        .goal-card .goal-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .goal-card .goal-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+        .goal-card .goal-value .goal-target {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .goal-card .goal-bar {
+            margin-top: 0.6rem;
+            height: 6px;
+            background: rgba(7,55,79,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .goal-card .goal-bar-fill {
+            height: 100%;
+            background: var(--navy);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .goal-card.met .goal-bar-fill { background: var(--success); }
+        .goal-card .goal-pct {
+            margin-top: 0.35rem;
+            font-size: 0.7rem;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-muted);
+        }
+        .goal-card.met .goal-pct { color: var(--success); font-weight: 600; }
+
         /* ── Card ── */
         .card {
             background: #fff;
@@ -535,6 +596,11 @@ const COL = {
     MDR_SET: 17,   // Column R — 1 when an MDR set occurs
     MDR_DATE: 18,  // Column S
     MDR_REP: 19,   // Column T
+    GOAL_TOTAL: 21,    // Column V — Total Inbound goal (optional)
+    GOAL_DIRECT: 22,   // Column W
+    GOAL_ORGANIC: 23,  // Column X
+    GOAL_GADS: 24,     // Column Y
+    GOAL_MDR: 25,      // Column Z
 };
 
 // ── Date utilities ──
@@ -620,8 +686,18 @@ const SOURCE_COLORS = [
 // ── State ──
 let allLeads = [];
 let allMdrSets = [];
+let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0 };
 let currentPeriod = 'wtd';
 let charts = {};
+
+// ── Categorize a traffic source into goal buckets ──
+function sourceCategory(source) {
+    const s = (source || '').toLowerCase();
+    if (s.startsWith('direct')) return 'direct';
+    if (s.includes('organic')) return 'organic';
+    if (s.startsWith('ga ') || s.startsWith('google ads')) return 'gads';
+    return null;
+}
 
 // ── Fetch data ──
 async function fetchData() {
@@ -632,6 +708,28 @@ async function fetchData() {
 
     allLeads = [];
     allMdrSets = [];
+
+    // Weekly goals live on row 1 (constant per-week targets)
+    if (rows.length > 0) {
+        const gc = rows[0].c || [];
+        const num = (idx) => {
+            if (idx >= gc.length || !gc[idx]) return 0;
+            const v = parseFloat(gc[idx].v);
+            return isNaN(v) ? 0 : v;
+        };
+        weeklyGoals = {
+            total: num(COL.GOAL_TOTAL),
+            direct: num(COL.GOAL_DIRECT),
+            organic: num(COL.GOAL_ORGANIC),
+            gads: num(COL.GOAL_GADS),
+            mdr: num(COL.GOAL_MDR),
+        };
+        // If total isn't explicitly set, derive it from the inbound source goals
+        if (!weeklyGoals.total) {
+            weeklyGoals.total = weeklyGoals.direct + weeklyGoals.organic + weeklyGoals.gads;
+        }
+    }
+
     for (const row of rows) {
         const cells = row.c || [];
 
@@ -678,6 +776,17 @@ function countMdrSetsInRange(start, end) {
     return allMdrSets
         .filter(m => m.date >= start && m.date <= end)
         .reduce((sum, m) => sum + (m.qty || 1), 0);
+}
+
+// ── Count leads in each goal-category bucket ──
+function getCategoryCounts(leads) {
+    const out = { direct: 0, organic: 0, gads: 0, other: 0 };
+    leads.forEach(l => {
+        const cat = sourceCategory(l.source);
+        if (cat) out[cat]++;
+        else out.other++;
+    });
+    return out;
 }
 
 function getMdrSetsForPeriod() {
@@ -798,6 +907,18 @@ function render() {
     html += statCard('MDR Sets', mdrCount, 'Running total');
     html += '</div>';
     html += '</div>';
+
+    // ── Weekly Goals (WTD only) ──
+    if (currentPeriod === 'wtd') {
+        const cats = getCategoryCounts(leads);
+        html += renderWeeklyGoals({
+            'Total Inbound': [leads.length, weeklyGoals.total],
+            'Direct': [cats.direct, weeklyGoals.direct],
+            'Organic': [cats.organic, weeklyGoals.organic],
+            'Google Ads': [cats.gads, weeklyGoals.gads],
+            'MDR Sets': [mdrCount, weeklyGoals.mdr],
+        });
+    }
 
     // ── Status breakdown (MTD & YTD only) ──
     if (currentPeriod !== 'wtd') {
@@ -944,40 +1065,78 @@ function renderWoW(leads) {
     html += '<div class="section-title">Week by Week</div>';
     html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
     html += '<table class="report-table"><thead><tr>';
+    const g = weeklyGoals;
+    const goalHdr = (val) => val ? `<div style="font-size:0.6rem;font-weight:400;opacity:0.7;text-transform:none;letter-spacing:0;">goal ${val}</div>` : '';
+    const goalCell = (actual, goal) => {
+        if (!goal) return `<td class="num">${actual}</td>`;
+        const met = actual >= goal;
+        const color = met ? 'var(--success)' : 'var(--text-muted)';
+        const weight = met ? '700' : '400';
+        return `<td class="num" style="color:${color};font-weight:${weight}">${actual}</td>`;
+    };
+
     html += '<th>Week</th>';
-    html += '<th style="text-align:right">Total</th>';
+    html += `<th style="text-align:right">Total${goalHdr(g.total)}</th>`;
+    html += `<th style="text-align:right">Direct${goalHdr(g.direct)}</th>`;
+    html += `<th style="text-align:right">Organic${goalHdr(g.organic)}</th>`;
+    html += `<th style="text-align:right">Google Ads${goalHdr(g.gads)}</th>`;
+    html += `<th style="text-align:right">MDR Sets${goalHdr(g.mdr)}</th>`;
     html += '<th style="text-align:right">Held</th>';
     html += '<th style="text-align:right">No Show</th>';
-    html += '<th style="text-align:right">Pending</th>';
     html += '<th style="text-align:right">Held %</th>';
-    html += '<th style="text-align:right">MDR Sets</th>';
-    html += '<th>Top Source</th>';
     html += '</tr></thead><tbody>';
 
     buckets.forEach(b => {
         const counts = getStatusCounts(b.leads);
+        const cats = getCategoryCounts(b.leads);
         const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
         const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--primary);color:var(--dark);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
         const heldPct = counts.total ? Math.round(counts.held / counts.total * 100) + '%' : '—';
-        const sources = getTrafficData(b.leads);
-        const topSource = sources.length ? `${escapeHtml(sources[0][0])} (${sources[0][1]})` : '—';
         const mdrWeek = countMdrSetsInRange(b.start, b.end);
 
         html += '<tr>';
         html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
-        html += `<td class="num"><strong>${counts.total}</strong></td>`;
+        html += goalCell(counts.total, g.total);
+        html += goalCell(cats.direct, g.direct);
+        html += goalCell(cats.organic, g.organic);
+        html += goalCell(cats.gads, g.gads);
+        html += goalCell(mdrWeek, g.mdr);
         html += `<td class="num" style="color:var(--success)">${counts.held}</td>`;
         html += `<td class="num" style="color:var(--destructive)">${counts.noShow}</td>`;
-        html += `<td class="num" style="color:var(--warning)">${counts.pending}</td>`;
         html += `<td class="num">${heldPct}</td>`;
-        html += `<td class="num">${mdrWeek}</td>`;
-        html += `<td>${topSource}</td>`;
         html += '</tr>';
     });
 
     html += '</tbody></table></div></div></div>';
     html += '</div>';
 
+    return html;
+}
+
+function renderWeeklyGoals(items) {
+    let html = '<div class="section-block">';
+    html += '<div class="section-title">Weekly Goals</div>';
+    html += '<div class="goal-grid">';
+    Object.entries(items).forEach(([label, [actual, goal]]) => {
+        if (!goal) {
+            html += `<div class="goal-card">
+                <div class="goal-label">${label}</div>
+                <div class="goal-value">${actual}</div>
+                <div class="goal-pct">No goal set</div>
+            </div>`;
+            return;
+        }
+        const pctVal = Math.round(actual / goal * 100);
+        const barWidth = Math.min(pctVal, 100);
+        const met = actual >= goal;
+        html += `<div class="goal-card${met ? ' met' : ''}">
+            <div class="goal-label">${label}</div>
+            <div class="goal-value">${actual} <span class="goal-target">/ ${goal}</span></div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:${barWidth}%"></div></div>
+            <div class="goal-pct">${pctVal}%${met ? ' — goal met' : ''}</div>
+        </div>`;
+    });
+    html += '</div></div>';
     return html;
 }
 
