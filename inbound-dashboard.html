@@ -502,6 +502,10 @@
                 Year to Date
                 <span class="tab-range" id="ytd-range"></span>
             </button>
+            <button class="period-tab" data-period="wow">
+                Week over Week
+                <span class="tab-range" id="wow-range"></span>
+            </button>
         </div>
 
         <div id="loading" class="loading-state">
@@ -658,9 +662,36 @@ function getFilteredLeads() {
         return allLeads.filter(l => l.dateInbound >= monday && l.dateInbound <= NOW);
     } else if (currentPeriod === 'mtd') {
         return allLeads.filter(l => l.dateInbound >= monthStart && l.dateInbound <= NOW);
+    } else if (currentPeriod === 'wow') {
+        // WoW shows trailing 52 weeks; use all leads within that window
+        const start = getMonday(NOW);
+        start.setDate(start.getDate() - 7 * 51);
+        return allLeads.filter(l => l.dateInbound >= start && l.dateInbound <= NOW);
     } else {
         return allLeads.filter(l => l.dateInbound >= yearStart && l.dateInbound <= NOW);
     }
+}
+
+// ── Group leads into 52 weekly buckets (most recent first) ──
+function getWeeklyBuckets(leads) {
+    const buckets = [];
+    const thisMonday = getMonday(NOW);
+    for (let i = 0; i < 52; i++) {
+        const weekStart = new Date(thisMonday);
+        weekStart.setDate(weekStart.getDate() - 7 * i);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        const weekLeads = leads.filter(l => l.dateInbound >= weekStart && l.dateInbound <= weekEnd);
+        buckets.push({
+            start: weekStart,
+            end: weekEnd,
+            isCurrent: i === 0,
+            leads: weekLeads,
+        });
+    }
+    return buckets;
 }
 
 // ── Compute traffic source data ──
@@ -695,9 +726,20 @@ function render() {
     const monday = getMonday(NOW);
     const monthStart = getMonthStart(NOW);
     const yearStart = getYearStart(NOW);
+    const wowStart = new Date(monday);
+    wowStart.setDate(wowStart.getDate() - 7 * 51);
     document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
     document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
+    document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
+
+    if (currentPeriod === 'wow') {
+        dashboard.innerHTML = renderWoW(leads);
+        // Destroy any existing charts from previous view
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+        return;
+    }
 
     let html = '';
 
@@ -830,6 +872,63 @@ function render() {
 
     // Render charts
     renderCharts(leads, trafficData);
+}
+
+// ── Week over Week render ──
+function renderWoW(leads) {
+    const buckets = getWeeklyBuckets(leads);
+
+    let html = '';
+
+    // Summary for whole 52-week window
+    const totals = getStatusCounts(leads);
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Trailing 52 Weeks</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Inbound', leads.length, '', true);
+    html += statCard('Held', totals.held, pct(totals.held, leads.length));
+    html += statCard('No Show', totals.noShow, pct(totals.noShow, leads.length));
+    html += statCard('Pending', totals.pending, 'Awaiting FTA');
+    html += '</div>';
+    html += '</div>';
+
+    // Weekly table
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Week by Week</div>';
+    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+    html += '<table class="report-table"><thead><tr>';
+    html += '<th>Week</th>';
+    html += '<th style="text-align:right">Total</th>';
+    html += '<th style="text-align:right">Held</th>';
+    html += '<th style="text-align:right">No Show</th>';
+    html += '<th style="text-align:right">Pending</th>';
+    html += '<th style="text-align:right">Held %</th>';
+    html += '<th>Top Source</th>';
+    html += '</tr></thead><tbody>';
+
+    buckets.forEach(b => {
+        const counts = getStatusCounts(b.leads);
+        const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
+        const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--primary);color:var(--dark);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
+        const heldPct = counts.total ? Math.round(counts.held / counts.total * 100) + '%' : '—';
+        const sources = getTrafficData(b.leads);
+        const topSource = sources.length ? `${escapeHtml(sources[0][0])} (${sources[0][1]})` : '—';
+
+        html += '<tr>';
+        html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
+        html += `<td class="num"><strong>${counts.total}</strong></td>`;
+        html += `<td class="num" style="color:var(--success)">${counts.held}</td>`;
+        html += `<td class="num" style="color:var(--destructive)">${counts.noShow}</td>`;
+        html += `<td class="num" style="color:var(--warning)">${counts.pending}</td>`;
+        html += `<td class="num">${heldPct}</td>`;
+        html += `<td>${topSource}</td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div></div>';
+    html += '</div>';
+
+    return html;
 }
 
 function statCard(label, value, sub, highlight) {
@@ -969,7 +1068,7 @@ async function downloadSnapshot() {
         });
 
         const link = document.createElement('a');
-        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : 'Year';
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'wow' ? 'WoW' : 'Year';
         link.download = `Inbound-Leads-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
