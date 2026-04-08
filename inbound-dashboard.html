@@ -532,6 +532,9 @@ const COL = {
     AE_DATE: 7,
     CITY: 8,
     SOURCE: 9,
+    MDR_SET: 17,   // Column R — 1 when an MDR set occurs
+    MDR_DATE: 18,  // Column S
+    MDR_REP: 19,   // Column T
 };
 
 // ── Date utilities ──
@@ -616,6 +619,7 @@ const SOURCE_COLORS = [
 
 // ── State ──
 let allLeads = [];
+let allMdrSets = [];
 let currentPeriod = 'wtd';
 let charts = {};
 
@@ -627,8 +631,22 @@ async function fetchData() {
     const rows = json.table.rows;
 
     allLeads = [];
+    allMdrSets = [];
     for (const row of rows) {
         const cells = row.c || [];
+
+        // MDR Sets are independent of lead rows — parse them regardless of name
+        const mdrFlag = cellVal(cells, COL.MDR_SET);
+        if (mdrFlag && parseFloat(mdrFlag) >= 1) {
+            const mdrDate = parseDateAny(cells[COL.MDR_DATE]);
+            if (mdrDate) {
+                allMdrSets.push({
+                    date: mdrDate,
+                    rep: cellVal(cells, COL.MDR_REP),
+                });
+            }
+        }
+
         const name = cellVal(cells, COL.NAME);
         if (!name) continue;
 
@@ -650,6 +668,26 @@ async function fetchData() {
     }
 
     allLeads.sort((a, b) => b.dateInbound - a.dateInbound);
+}
+
+// ── Count MDR Sets whose set-date falls within [start, end] ──
+function countMdrSetsInRange(start, end) {
+    return allMdrSets.filter(m => m.date >= start && m.date <= end).length;
+}
+
+function getMdrSetsForPeriod() {
+    const monday = getMonday(NOW);
+    const monthStart = getMonthStart(NOW);
+    const yearStart = getYearStart(NOW);
+    if (currentPeriod === 'wtd') return countMdrSetsInRange(monday, NOW);
+    if (currentPeriod === 'mtd') return countMdrSetsInRange(monthStart, NOW);
+    if (currentPeriod === 'ytd') return countMdrSetsInRange(yearStart, NOW);
+    if (currentPeriod === 'wow') {
+        const start = new Date(monday);
+        start.setDate(start.getDate() - 7 * 51);
+        return countMdrSetsInRange(start, NOW);
+    }
+    return 0;
 }
 
 // ── Filter leads by period ──
@@ -744,6 +782,7 @@ function render() {
     let html = '';
 
     // ── Key Metrics ──
+    const mdrCount = getMdrSetsForPeriod();
     html += '<div class="section-block">';
     html += '<div class="section-title">Pipeline Summary</div>';
     html += '<div class="stat-grid">';
@@ -751,6 +790,7 @@ function render() {
     html += statCard('Held', statusCounts.held, pct(statusCounts.held, leads.length));
     html += statCard('No Show', statusCounts.noShow, pct(statusCounts.noShow, leads.length));
     html += statCard('Pending', statusCounts.pending, 'Awaiting FTA');
+    html += statCard('MDR Sets', mdrCount, 'Running total');
     html += '</div>';
     html += '</div>';
 
@@ -882,6 +922,7 @@ function renderWoW(leads) {
 
     // Summary for whole 52-week window
     const totals = getStatusCounts(leads);
+    const mdrTotal = getMdrSetsForPeriod();
     html += '<div class="section-block">';
     html += '<div class="section-title">Trailing 52 Weeks</div>';
     html += '<div class="stat-grid">';
@@ -889,6 +930,7 @@ function renderWoW(leads) {
     html += statCard('Held', totals.held, pct(totals.held, leads.length));
     html += statCard('No Show', totals.noShow, pct(totals.noShow, leads.length));
     html += statCard('Pending', totals.pending, 'Awaiting FTA');
+    html += statCard('MDR Sets', mdrTotal, 'Running total');
     html += '</div>';
     html += '</div>';
 
@@ -903,6 +945,7 @@ function renderWoW(leads) {
     html += '<th style="text-align:right">No Show</th>';
     html += '<th style="text-align:right">Pending</th>';
     html += '<th style="text-align:right">Held %</th>';
+    html += '<th style="text-align:right">MDR Sets</th>';
     html += '<th>Top Source</th>';
     html += '</tr></thead><tbody>';
 
@@ -913,6 +956,7 @@ function renderWoW(leads) {
         const heldPct = counts.total ? Math.round(counts.held / counts.total * 100) + '%' : '—';
         const sources = getTrafficData(b.leads);
         const topSource = sources.length ? `${escapeHtml(sources[0][0])} (${sources[0][1]})` : '—';
+        const mdrWeek = countMdrSetsInRange(b.start, b.end);
 
         html += '<tr>';
         html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
@@ -921,6 +965,7 @@ function renderWoW(leads) {
         html += `<td class="num" style="color:var(--destructive)">${counts.noShow}</td>`;
         html += `<td class="num" style="color:var(--warning)">${counts.pending}</td>`;
         html += `<td class="num">${heldPct}</td>`;
+        html += `<td class="num">${mdrWeek}</td>`;
         html += `<td>${topSource}</td>`;
         html += '</tr>';
     });
