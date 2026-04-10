@@ -272,11 +272,21 @@
     // ═══════════════════════════════════════════════
     //  SALES TAB
     // ═══════════════════════════════════════════════
-    fetchSheet('0').then(renderSales).catch(function(err) {
+    // Fetch the full sales sheet + a second range fetch for Pipeline (col B is number-typed
+    // globally, so string values like "$145k / $1.74M" get dropped in the full fetch).
+    function fetchPipelineRange() {
+        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=0&range=A20:C40';
+        return fetch(url).then(function(r) { return r.text(); }).then(function(text) {
+            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table;
+        });
+    }
+    Promise.all([fetchSheet('0'), fetchPipelineRange()]).then(function(results) {
+        renderSales(results[0], results[1]);
+    }).catch(function(err) {
         document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';
     });
 
-    function renderSales(table) {
+    function renderSales(table, pipelineTable) {
         var rows = table.rows;
         var el = document.getElementById('tab-sales');
         var html = '';
@@ -392,7 +402,7 @@
         // Pipeline
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
         if (pipeRows.length > 0) {
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Deal count &amp; closed won ARR (' + monthLabels[monthLabels.length - 1] + ')</div></div><div class="card-content"><div id="pipeline-content"></div></div></div>';
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">MRR / ARR &amp; deal count</div></div><div class="card-content"><div id="pipeline-content"></div></div></div>';
         }
 
         el.innerHTML = html;
@@ -469,56 +479,50 @@
                 }
             });
 
-            // Pipeline table with inline ARR bars
+            // Pipeline table — uses the range-fetched pipelineTable where col B is string-typed
+            // so MRR/ARR values like "$145k / $1.74M" are preserved (they get dropped in the
+            // full-sheet fetch because col B is typed as number there).
             var pipeContent = document.getElementById('pipeline-content');
-            if (pipeContent) {
+            if (pipeContent && pipelineTable) {
+                var ptRows = pipelineTable.rows;
                 var pipeData = [];
-                var repArrMap = {};
-                repRows.forEach(function(r) {
-                    var name = (gv(r, 0) || '').trim();
-                    var arr = gv(r, lastCol) || 0;
-                    repArrMap[name.toLowerCase()] = arr;
-                });
-                pipeRows.forEach(function(r) {
-                    var name = (gv(r, 0) || '').trim();
-                    var d = 0;
-                    for (var ci = monthCols.length - 1; ci >= 0; ci--) {
-                        d = gv(r, monthCols[ci].idx) || 0;
-                        if (d > 0) break;
+                var totalMrrArr = '', totalDeals = 0;
+                var headerLabel = 'MRR / ARR';
+                var inPipeline = false;
+
+                for (var pi = 0; pi < ptRows.length; pi++) {
+                    var ptA = (gv(ptRows[pi], 0) || '').toString().trim();
+                    var ptB = (gv(ptRows[pi], 1) || '').toString().trim();
+                    var ptC = gv(ptRows[pi], 2) || 0;
+
+                    if (ptA === 'Pipeline') {
+                        if (ptB) headerLabel = ptB;
+                        inPipeline = true;
+                        continue;
                     }
-                    if (d > 0) {
-                        pipeData.push({ name: name, deals: d, arr: repArrMap[name.toLowerCase()] || 0 });
+                    if (!inPipeline) continue;
+
+                    if (ptA.toLowerCase().indexOf('total pipeline') !== -1) {
+                        totalMrrArr = ptB;
+                        totalDeals = ptC;
+                        break;
                     }
-                });
-                // Sort by ARR descending, reps with no ARR go to bottom sorted by deals
-                pipeData.sort(function(a, b) { return (b.arr || 0) - (a.arr || 0) || b.deals - a.deals; });
-                var maxArr = Math.max.apply(null, pipeData.map(function(d) { return d.arr; })) || 1;
-                var maxDeals = Math.max.apply(null, pipeData.map(function(d) { return d.deals; })) || 1;
-                var pipeHtml = '<table class="dtable dtable-lg"><thead><tr><th>Rep</th><th style="text-align:right">Deals</th><th>Closed Won ARR</th></tr></thead><tbody>';
-                var barColors = [COLORS.primary, COLORS.blue, '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#eedc82'];
-                pipeData.forEach(function(d, i) {
-                    var barWidth = d.arr ? Math.max((d.arr / maxArr) * 100, 4) : 0;
-                    var color = barColors[i % barColors.length];
+                    if (ptC > 0) {
+                        pipeData.push({ name: ptA, mrrArr: ptB, deals: ptC });
+                    }
+                }
+
+                var pipeHtml = '<table class="dtable dtable-lg"><thead><tr><th>Rep</th><th>' + headerLabel + '</th><th style="text-align:right">Deals</th></tr></thead><tbody>';
+                pipeData.forEach(function(d) {
                     pipeHtml += '<tr>';
                     pipeHtml += '<td><strong>' + d.name + '</strong></td>';
+                    pipeHtml += '<td class="mono">' + (d.mrrArr || '\u2014') + '</td>';
                     pipeHtml += '<td class="mono" style="text-align:right">' + d.deals + '</td>';
-                    pipeHtml += '<td style="width:55%">';
-                    if (d.arr) {
-                        pipeHtml += '<div style="display:flex;align-items:center;gap:8px;">';
-                        pipeHtml += '<div style="flex:1;height:22px;background:rgba(7,55,79,0.06);border-radius:4px;overflow:hidden;">';
-                        pipeHtml += '<div style="width:' + barWidth + '%;height:100%;background:' + color + ';border-radius:4px;"></div></div>';
-                        pipeHtml += '<span class="mono" style="white-space:nowrap;font-weight:600;min-width:70px;text-align:right;">' + fmtMoney(d.arr) + '</span>';
-                        pipeHtml += '</div>';
-                    } else {
-                        pipeHtml += '<span class="muted" style="font-size:0.8rem;">No closed won data</span>';
-                    }
-                    pipeHtml += '</td></tr>';
+                    pipeHtml += '</tr>';
                 });
-                // Total row
-                var totalDeals = pipeData.reduce(function(s, d) { return s + d.deals; }, 0);
-                var totalArr = pipeData.reduce(function(s, d) { return s + d.arr; }, 0);
-                pipeHtml += '<tr class="total-row"><td><strong>Total</strong></td><td class="mono" style="text-align:right">' + totalDeals + '</td>';
-                pipeHtml += '<td><span class="mono" style="font-weight:700;">' + fmtMoney(totalArr) + '</span></td></tr>';
+                pipeHtml += '<tr class="total-row"><td><strong>Total Pipeline</strong></td>';
+                pipeHtml += '<td class="mono">' + (totalMrrArr || '\u2014') + '</td>';
+                pipeHtml += '<td class="mono" style="text-align:right">' + totalDeals + '</td></tr>';
                 pipeHtml += '</tbody></table>';
                 pipeContent.innerHTML = pipeHtml;
             }
