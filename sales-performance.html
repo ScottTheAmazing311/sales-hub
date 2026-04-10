@@ -935,19 +935,24 @@
                 }
             });
 
-            // Podcast activity bar (Episodes & Guests — similar scale)
-            var podActivityMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed'];
-            var podActivityDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = podActivityMetrics.map(function(pm) {
-                    var r = mktRow(pm);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                podActivityDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            // Podcast activity — months on x-axis, metrics as datasets
+            var podActivityItems = [
+                { label: 'Episodes Released', metric: 'Episodes Released', color: COLORS.primary },
+                { label: 'Guests Booked', metric: 'Guests Booked', color: COLORS.blue },
+                { label: 'Guests Interviewed', metric: 'Guests Interviewed', color: '#22c55e' }
+            ];
+            var podActivityDatasets = podActivityItems.map(function(pa) {
+                var r = mktRow(pa.metric);
+                return {
+                    label: pa.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: pa.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-podcast'), {
                 type: 'bar',
-                data: { labels: podActivityMetrics, datasets: podActivityDatasets },
+                data: { labels: mktMonthLabels, datasets: podActivityDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
@@ -955,19 +960,23 @@
                 }
             });
 
-            // Podcast audience bar (Downloads & Listener Reach — thousands scale)
-            var podAudienceMetrics = ['Downloads + Streams', 'Unique Listener Reach'];
-            var podAudienceDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = podAudienceMetrics.map(function(pm) {
-                    var r = mktRow(pm);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                podAudienceDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            // Podcast audience — months on x-axis, metrics as datasets
+            var podAudienceItems = [
+                { label: 'Downloads + Streams', metric: 'Downloads + Streams', color: COLORS.primary },
+                { label: 'Unique Listeners', metric: 'Unique Listener Reach', color: COLORS.blue }
+            ];
+            var podAudienceDatasets = podAudienceItems.map(function(pa) {
+                var r = mktRow(pa.metric);
+                return {
+                    label: pa.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: pa.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-podcast-audience'), {
                 type: 'bar',
-                data: { labels: ['Downloads + Streams', 'Unique Listeners'], datasets: podAudienceDatasets },
+                data: { labels: mktMonthLabels, datasets: podAudienceDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
