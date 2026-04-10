@@ -314,7 +314,7 @@
         var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
         var mrrLast = lastVal('Total MRR'), mrrPrev = prevVal('Total MRR');
         var dealsLast = lastVal('Deals Closed'), dealsPrev = prevVal('Deals Closed');
-        var wrLast = lastVal('Win Rate (From Qualified)'), wrPrev = prevVal('Win Rate (From Qualified)');
+        var wrLast = lastVal('Win Rate (From Qualifed)'), wrPrev = prevVal('Win Rate (From Qualifed)');
 
         // Stat cards
         html += '<div class="stat-grid">';
@@ -334,7 +334,7 @@
             ['Total ARR', 'money'], ['Total MRR', 'money'], ['Deals Closed', 'num'],
             ['Average MRR Per Deal', 'money'], ['Average ARR Per Deal', 'money'],
             ['Average Sales Cycle (Days)', 'days', true],
-            ['Win Rate (From Qualified)', 'pct']
+            ['Win Rate (From Qualifed)', 'pct']
         ];
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
