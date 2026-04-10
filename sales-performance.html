@@ -392,7 +392,7 @@
         // Pipeline
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
         if (pipeRows.length > 0) {
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Deal count with ARR value</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Deal count &amp; closed won ARR (' + monthLabels[monthLabels.length - 1] + ')</div></div><div class="card-content"><div id="pipeline-content"></div></div></div>';
         }
 
         el.innerHTML = html;
@@ -469,11 +469,10 @@
                 }
             });
 
-            // Pipeline bar chart with ARR labels
-            var pipeEl = document.getElementById('chart-pipeline');
-            if (pipeEl) {
-                var pipeNames = [], pipeDeals = [], pipeArr = [];
-                // Build a lookup of rep name → latest ARR from Sales Rep section
+            // Pipeline table with inline ARR bars
+            var pipeContent = document.getElementById('pipeline-content');
+            if (pipeContent) {
+                var pipeData = [];
                 var repArrMap = {};
                 repRows.forEach(function(r) {
                     var name = (gv(r, 0) || '').trim();
@@ -488,52 +487,40 @@
                         if (d > 0) break;
                     }
                     if (d > 0) {
-                        pipeNames.push(name);
-                        pipeDeals.push(d);
-                        pipeArr.push(repArrMap[name.toLowerCase()] || 0);
+                        pipeData.push({ name: name, deals: d, arr: repArrMap[name.toLowerCase()] || 0 });
                     }
                 });
-                if (pipeNames.length > 0) {
-                    var pipeLabelPlugin = {
-                        id: 'pipelineLabels',
-                        afterDatasetsDraw: function(chart) {
-                            var ctx = chart.ctx;
-                            var meta = chart.getDatasetMeta(0);
-                            meta.data.forEach(function(bar, i) {
-                                var deals = pipeDeals[i];
-                                var label = deals + (deals === 1 ? ' deal' : ' deals');
-                                ctx.save();
-                                ctx.font = '600 11px Inter, sans-serif';
-                                ctx.fillStyle = '#07374F';
-                                ctx.textAlign = 'center';
-                                ctx.fillText(label, bar.x, bar.y - 6);
-                                ctx.restore();
-                            });
-                        }
-                    };
-                    new Chart(pipeEl, {
-                        type: 'bar',
-                        data: {
-                            labels: pipeNames,
-                            datasets: [{
-                                label: 'Pipeline ARR',
-                                data: pipeArr,
-                                backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'],
-                                borderRadius: 4
-                            }]
-                        },
-                        plugins: [pipeLabelPlugin],
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            layout: { padding: { top: 20 } },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: function(c) { return fmtMoney(c.raw); }, afterLabel: function(c) { return pipeDeals[c.dataIndex] + ' deals'; } } }
-                            },
-                            scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
-                        }
-                    });
-                }
+                // Sort by ARR descending, reps with no ARR go to bottom sorted by deals
+                pipeData.sort(function(a, b) { return (b.arr || 0) - (a.arr || 0) || b.deals - a.deals; });
+                var maxArr = Math.max.apply(null, pipeData.map(function(d) { return d.arr; })) || 1;
+                var maxDeals = Math.max.apply(null, pipeData.map(function(d) { return d.deals; })) || 1;
+                var pipeHtml = '<table class="dtable dtable-lg"><thead><tr><th>Rep</th><th style="text-align:right">Deals</th><th>Closed Won ARR</th></tr></thead><tbody>';
+                var barColors = [COLORS.primary, COLORS.blue, '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#eedc82'];
+                pipeData.forEach(function(d, i) {
+                    var barWidth = d.arr ? Math.max((d.arr / maxArr) * 100, 4) : 0;
+                    var color = barColors[i % barColors.length];
+                    pipeHtml += '<tr>';
+                    pipeHtml += '<td><strong>' + d.name + '</strong></td>';
+                    pipeHtml += '<td class="mono" style="text-align:right">' + d.deals + '</td>';
+                    pipeHtml += '<td style="width:55%">';
+                    if (d.arr) {
+                        pipeHtml += '<div style="display:flex;align-items:center;gap:8px;">';
+                        pipeHtml += '<div style="flex:1;height:22px;background:rgba(7,55,79,0.06);border-radius:4px;overflow:hidden;">';
+                        pipeHtml += '<div style="width:' + barWidth + '%;height:100%;background:' + color + ';border-radius:4px;"></div></div>';
+                        pipeHtml += '<span class="mono" style="white-space:nowrap;font-weight:600;min-width:70px;text-align:right;">' + fmtMoney(d.arr) + '</span>';
+                        pipeHtml += '</div>';
+                    } else {
+                        pipeHtml += '<span class="muted" style="font-size:0.8rem;">No closed won data</span>';
+                    }
+                    pipeHtml += '</td></tr>';
+                });
+                // Total row
+                var totalDeals = pipeData.reduce(function(s, d) { return s + d.deals; }, 0);
+                var totalArr = pipeData.reduce(function(s, d) { return s + d.arr; }, 0);
+                pipeHtml += '<tr class="total-row"><td><strong>Total</strong></td><td class="mono" style="text-align:right">' + totalDeals + '</td>';
+                pipeHtml += '<td><span class="mono" style="font-weight:700;">' + fmtMoney(totalArr) + '</span></td></tr>';
+                pipeHtml += '</tbody></table>';
+                pipeContent.innerHTML = pipeHtml;
             }
         }, 50);
     }
