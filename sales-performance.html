@@ -646,7 +646,7 @@
 
         // ── Charts row 1: Social followers + Podcast ──
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (' + mktMonthLabels[mktMonthLabels.length - 1] + ')</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (latest available)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Activity</div><div class="card-desc">Episodes & guests</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
         html += '</div>';
 
@@ -730,12 +730,21 @@
                 { label: 'TikTok', metric: 'Rankings TikTok Followers' },
                 { label: 'X / Twitter', metric: 'Rankings X Followers' }
             ];
+            // Get most recent non-null value for a metric (falls back through months)
+            function mktMostRecent(label) {
+                var r = mktRow(label);
+                if (!r) return 0;
+                for (var ci = mktMonths.length - 1; ci >= 0; ci--) {
+                    var v = gv(r, mktMonths[ci].idx);
+                    if (v != null && v !== 0) return v;
+                }
+                return 0;
+            }
             var socialLabels = [], socialValues = [];
             socialPlatforms.forEach(function(sp) {
-                var val = mktLatest(sp.metric);
+                var val = mktMostRecent(sp.metric);
                 if (!val) {
-                    // Try alternate capitalization
-                    val = mktLatest(sp.metric.replace('Linkedin', 'LinkedIn'));
+                    val = mktMostRecent(sp.metric.replace('Linkedin', 'LinkedIn'));
                 }
                 socialLabels.push(sp.label);
                 socialValues.push(val || 0);
