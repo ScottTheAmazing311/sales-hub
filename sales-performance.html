@@ -402,7 +402,7 @@
         // Pipeline
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
         if (pipeRows.length > 0) {
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">MRR / ARR &amp; deal count</div></div><div class="card-content"><div id="pipeline-content"></div></div></div>';
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">MRR / ARR &amp; deal count</div></div><div class="card-content"><div class="chart-wrap" style="height:320px;"><canvas id="chart-pipeline"></canvas></div><div id="pipeline-total" style="margin-top:12px;"></div></div></div>';
         }
 
         el.innerHTML = html;
@@ -479,15 +479,13 @@
                 }
             });
 
-            // Pipeline table — uses the range-fetched pipelineTable where col B is string-typed
-            // so MRR/ARR values like "$145k / $1.74M" are preserved (they get dropped in the
-            // full-sheet fetch because col B is typed as number there).
-            var pipeContent = document.getElementById('pipeline-content');
-            if (pipeContent && pipelineTable) {
+            // Pipeline chart — horizontal bar using ARR parsed from MRR/ARR strings
+            var pipeCanvas = document.getElementById('chart-pipeline');
+            var pipeTotalEl = document.getElementById('pipeline-total');
+            if (pipeCanvas && pipelineTable) {
                 var ptRows = pipelineTable.rows;
                 var pipeData = [];
                 var totalMrrArr = '', totalDeals = 0;
-                var headerLabel = 'MRR / ARR';
                 var inPipeline = false;
 
                 for (var pi = 0; pi < ptRows.length; pi++) {
@@ -495,36 +493,114 @@
                     var ptB = (gv(ptRows[pi], 1) || '').toString().trim();
                     var ptC = gv(ptRows[pi], 2) || 0;
 
-                    if (ptA === 'Pipeline') {
-                        if (ptB) headerLabel = ptB;
-                        inPipeline = true;
-                        continue;
-                    }
+                    if (ptA === 'Pipeline') { inPipeline = true; continue; }
                     if (!inPipeline) continue;
-
                     if (ptA.toLowerCase().indexOf('total pipeline') !== -1) {
                         totalMrrArr = ptB;
                         totalDeals = ptC;
                         break;
                     }
-                    if (ptC > 0) {
-                        pipeData.push({ name: ptA, mrrArr: ptB, deals: ptC });
-                    }
+                    if (ptC > 0) pipeData.push({ name: ptA, mrrArr: ptB, deals: ptC });
                 }
 
-                var pipeHtml = '<table class="dtable dtable-lg"><thead><tr><th>Rep</th><th>' + headerLabel + '</th><th style="text-align:right">Deals</th></tr></thead><tbody>';
-                pipeData.forEach(function(d) {
-                    pipeHtml += '<tr>';
-                    pipeHtml += '<td><strong>' + d.name + '</strong></td>';
-                    pipeHtml += '<td class="mono">' + (d.mrrArr || '\u2014') + '</td>';
-                    pipeHtml += '<td class="mono" style="text-align:right">' + d.deals + '</td>';
-                    pipeHtml += '</tr>';
+                // Parse ARR from strings like "$145k / $1.74M" → 1740000
+                function parseArr(str) {
+                    if (!str) return 0;
+                    var parts = str.split('/');
+                    var arrPart = (parts.length > 1 ? parts[1] : parts[0]).trim().replace(/[^0-9.kmb]/gi, '');
+                    var num = parseFloat(arrPart) || 0;
+                    if (/m/i.test(arrPart)) num *= 1000000;
+                    else if (/k/i.test(arrPart)) num *= 1000;
+                    return num;
+                }
+
+                // Sort by ARR descending
+                pipeData.sort(function(a, b) { return parseArr(b.mrrArr) - parseArr(a.mrrArr); });
+
+                var pipeLabels = pipeData.map(function(d) { return d.name; });
+                var pipeArrVals = pipeData.map(function(d) { return parseArr(d.mrrArr); });
+                var pipeDealVals = pipeData.map(function(d) { return d.deals; });
+                var pipeMrrArrLabels = pipeData.map(function(d) { return d.mrrArr; });
+
+                var pipeBarColors = pipeData.map(function(d, i) { return BAR_COLORS[i % BAR_COLORS.length]; });
+
+                // Plugin to draw MRR/ARR + deals on each bar
+                var pipeLabelPlugin = {
+                    id: 'pipelineLabels',
+                    afterDatasetsDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        var meta = chart.getDatasetMeta(0);
+                        meta.data.forEach(function(bar, i) {
+                            var mrrArr = pipeMrrArrLabels[i] || '';
+                            var deals = pipeDealVals[i] + ' deals';
+                            ctx.save();
+                            ctx.font = '600 11px Inter, sans-serif';
+                            ctx.fillStyle = '#fff';
+                            ctx.textBaseline = 'middle';
+                            var barWidth = bar.width;
+                            var textWidth = ctx.measureText(mrrArr + '  ·  ' + deals).width;
+                            // If bar is wide enough, draw inside; otherwise draw outside
+                            if (barWidth > textWidth + 20) {
+                                ctx.textAlign = 'left';
+                                ctx.fillText(mrrArr + '  ·  ' + deals, bar.x - barWidth + 10, bar.y);
+                            } else {
+                                ctx.fillStyle = '#07374F';
+                                ctx.textAlign = 'left';
+                                ctx.fillText(mrrArr + '  ·  ' + deals, bar.x + 8, bar.y);
+                            }
+                            ctx.restore();
+                        });
+                    }
+                };
+
+                new Chart(pipeCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: pipeLabels,
+                        datasets: [{
+                            data: pipeArrVals,
+                            backgroundColor: pipeBarColors,
+                            borderRadius: 6,
+                            barThickness: 32
+                        }]
+                    },
+                    plugins: [pipeLabelPlugin],
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { right: 20 } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(c) {
+                                        return pipeMrrArrLabels[c.dataIndex] + ' · ' + pipeDealVals[c.dataIndex] + ' deals';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { callback: function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + (v/1000) + 'K' : '$' + v; } },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            y: {
+                                ticks: { font: { weight: '600', size: 12 } }
+                            }
+                        }
+                    }
                 });
-                pipeHtml += '<tr class="total-row"><td><strong>Total Pipeline</strong></td>';
-                pipeHtml += '<td class="mono">' + (totalMrrArr || '\u2014') + '</td>';
-                pipeHtml += '<td class="mono" style="text-align:right">' + totalDeals + '</td></tr>';
-                pipeHtml += '</tbody></table>';
-                pipeContent.innerHTML = pipeHtml;
+
+                // Total summary below chart
+                if (totalMrrArr) {
+                    pipeTotalEl.innerHTML = '<div style="display:flex;justify-content:flex-end;align-items:center;gap:16px;padding:8px 4px;border-top:2px solid var(--primary);font-size:0.95rem;">'
+                        + '<strong>Total Pipeline</strong>'
+                        + '<span class="mono" style="font-weight:700;">' + totalMrrArr + '</span>'
+                        + '<span class="mono" style="color:var(--muted-fg);">' + totalDeals + ' deals</span>'
+                        + '</div>';
+                }
             }
         }, 50);
     }
