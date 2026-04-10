@@ -733,10 +733,10 @@
         html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Audience</div><div class="card-desc">Downloads + streams & unique reach</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-audience"></canvas></div></div></div>';
         html += '</div>';
 
-        // Podcast consumption row
+        // Podcast consumption + PIM Socials row
         html += '<div class="chart-grid">';
         html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Consumption</div><div class="card-desc">Average consumption rate</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-consumption"></canvas></div></div></div>';
-        html += '<div class="card"></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">PIM Socials</div><div class="card-desc">Followers by platform</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pim-socials"></canvas></div></div></div>';
         html += '</div>';
 
         // ── Charts row 2: Inbound vs MDR + PIMCON ──
@@ -874,6 +874,31 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
                     scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // PIM Socials — followers by platform across months
+            var pimPlatforms = [
+                { label: 'Instagram', metric: 'PIM Instagram Followers' },
+                { label: 'Facebook', metric: 'PIM Facebook Followers' },
+                { label: 'LinkedIn', metric: 'PIM LinkedIn Followers' },
+                { label: 'TikTok', metric: 'PIM TikTok Followers' }
+            ];
+            var pimDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = pimPlatforms.map(function(pp) {
+                    var r = mktRow(pp.metric);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                pimDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-pim-socials'), {
+                type: 'bar',
+                data: { labels: pimPlatforms.map(function(p) { return p.label; }), datasets: pimDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v; } } } }
                 }
             });
 
