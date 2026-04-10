@@ -595,9 +595,19 @@
         if (!sponsorship.last) { sponsorship.last = mktLatest('Total sponnsorship sold'); sponsorship.prev = mktPrevious('Total sponnsorship sold'); }
         if (!podcast.last) { podcast.last = mktLatest('Podcast Downlads + Streams'); podcast.prev = mktPrevious('Podcast Downlads + Streams'); }
 
-        // YTD sums for cumulative metrics; try primary then fallback spelling
+        // YTD sums for additive metrics; try primary then fallback spelling
         var podYtd = mktYtdSum('Podcast Downloads + Streams') || mktYtdSum('Podcast Downlads + Streams');
-        var sponsYtd = mktYtdSum('Total PIMCON sponsorship sold cumulative') || mktYtdSum('Total sponsorship sold') || mktYtdSum('Total sponnsorship sold');
+        // Sponsorship is cumulative — YTD = latest non-null value, not sum of months
+        function mktLatestNonNull(label) {
+            var r = mktRow(label);
+            if (!r) return 0;
+            for (var ci = mktMonths.length - 1; ci >= 0; ci--) {
+                var v = gv(r, mktMonths[ci].idx);
+                if (v != null && v !== 0) return v;
+            }
+            return 0;
+        }
+        var sponsYtd = mktLatestNonNull('Total PIMCON sponsorship sold cumulative') || mktLatestNonNull('Total sponnsorship sold') || mktLatestNonNull('Total sponsorship sold');
 
         html += '<div class="stat-grid">';
         html += statCard('Total Followers', followers.last ? fmtNum(followers.last) : fmtNum(chrisFollowers.last), pctChangeFromPrev(followers.prev || chrisFollowers.prev, followers.last || chrisFollowers.last, mktPrevLabel), ICONS.heart, fmtNum(followers.prev || chrisFollowers.prev));
