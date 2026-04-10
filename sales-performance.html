@@ -739,10 +739,16 @@
         html += '<div class="card"><div class="card-header"><div class="card-title">PIM Socials</div><div class="card-desc">Followers by platform</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pim-socials"></canvas></div></div></div>';
         html += '</div>';
 
-        // ── Charts row 2: Inbound vs MDR + PIMCON ──
+        // ── Personal Social (Chris) + Inbound vs MDR ──
         html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Personal Social (Chris)</div><div class="card-desc">Followers by platform</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-chris-socials"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">Inbound vs MDR</div><div class="card-desc">Sets, Holds & Closed Won ARR by month</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-inbound-mdr"></canvas></div></div></div>';
+        html += '</div>';
+
+        // ── Charts row 2: PIMCON ──
+        html += '<div class="chart-grid">';
         html += '<div class="card"><div class="card-header"><div class="card-title">PIMCON</div><div class="card-desc">Event metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pimcon"></canvas></div></div></div>';
+        html += '<div class="card"></div>';
         html += '</div>';
 
         // ── Charts row 3: Newsletter & YouTube ──
@@ -895,6 +901,32 @@
             new Chart(document.getElementById('chart-pim-socials'), {
                 type: 'bar',
                 data: { labels: pimPlatforms.map(function(p) { return p.label; }), datasets: pimDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v; } } } }
+                }
+            });
+
+            // Personal Social (Chris) — followers by platform across months
+            var chrisPlatforms = [
+                { label: 'Instagram', metric: 'Instagram Followers' },
+                { label: 'LinkedIn', metric: 'LinkedIn Followers' },
+                { label: 'Facebook', metric: 'Facebook Followers' },
+                { label: 'X / Twitter', metric: 'X Followers' }
+            ];
+            var chrisDatasets = [];
+            // Chris metrics are in the PERSONAL SOCIAL (CHRIS) section — use mktRow which searches col 1
+            mktMonths.forEach(function(m, mi) {
+                var data = chrisPlatforms.map(function(cp) {
+                    var r = mktRow(cp.metric);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                chrisDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-chris-socials'), {
+                type: 'bar',
+                data: { labels: chrisPlatforms.map(function(p) { return p.label; }), datasets: chrisDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
