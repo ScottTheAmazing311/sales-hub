@@ -721,16 +721,22 @@
         html += statCard('MDR Closed ARR', fmtMoney(rowLatest(mdrArrRow)), pctChangeFromPrev(rowPrev(mdrArrRow), rowLatest(mdrArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(mdrArrRow)), fmtMoney(rowYtdSum(mdrArrRow)));
         html += '</div>';
 
-        // ── Charts row 1: Social followers + Podcast ──
+        // ── Charts row 1: Social followers + Social posts ──
         html += '<div class="chart-grid">';
         html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (latest available)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Activity</div><div class="card-desc">Episodes & guests</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Social Posts Published</div><div class="card-desc">Posts by platform (PIM + Rankings combined)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social-posts"></canvas></div></div></div>';
         html += '</div>';
 
-        // Podcast audience row
+        // ── Charts row 1b: Podcast ──
         html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Activity</div><div class="card-desc">Episodes & guests</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Audience</div><div class="card-desc">Downloads + streams & unique reach</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-audience"></canvas></div></div></div>';
+        html += '</div>';
+
+        // Podcast consumption row
+        html += '<div class="chart-grid">';
         html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Consumption</div><div class="card-desc">Average consumption rate</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-consumption"></canvas></div></div></div>';
+        html += '<div class="card"></div>';
         html += '</div>';
 
         // ── Charts row 2: Inbound vs MDR + PIMCON ──
@@ -839,6 +845,35 @@
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000) + 'K' : v; } } } }
+                }
+            });
+
+            // Social Posts Published — grouped bar by platform (PIM + Rankings combined)
+            var postPlatforms = [
+                { label: 'Instagram', metrics: ['PIM Instagram # Posts', 'Rankings Instagram # posts'] },
+                { label: 'Facebook', metrics: ['PIM Facebook # Posts', 'Rankings Facebook # posts'] },
+                { label: 'LinkedIn', metrics: ['PIM LinkedIn # posts', 'Rankings LinkedIn # posts'] },
+                { label: 'TikTok', metrics: ['PIM TikTok # Posts'] }
+            ];
+            var postDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = postPlatforms.map(function(pp) {
+                    var total = 0;
+                    pp.metrics.forEach(function(metric) {
+                        var r = mktRow(metric);
+                        if (r) total += (gv(r, m.idx) || 0);
+                    });
+                    return total;
+                });
+                postDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-social-posts'), {
+                type: 'bar',
+                data: { labels: postPlatforms.map(function(p) { return p.label; }), datasets: postDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
 
