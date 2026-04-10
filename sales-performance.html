@@ -648,7 +648,13 @@
         // ── Charts row 1: Social followers + Podcast ──
         html += '<div class="chart-grid">';
         html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (' + mktMonthLabels[mktMonthLabels.length - 1] + ')</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Performance</div><div class="card-desc">' + mktMonthLabels.join(' vs ') + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Activity</div><div class="card-desc">Episodes & guests</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        html += '</div>';
+
+        // Podcast audience row
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Audience</div><div class="card-desc">Downloads + streams & unique reach</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-audience"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Consumption</div><div class="card-desc">Average consumption rate</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast-consumption"></canvas></div></div></div>';
         html += '</div>';
 
         // ── Charts row 2: Inbound vs MDR + PIMCON ──
@@ -751,23 +757,74 @@
                 }
             });
 
-            // Podcast grouped bar
-            var podMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed', 'Unique Listener Reach'];
-            var podDatasets = [];
+            // Podcast activity bar (Episodes & Guests — similar scale)
+            var podActivityMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed'];
+            var podActivityDatasets = [];
             mktMonths.forEach(function(m, mi) {
-                var data = podMetrics.map(function(pm) {
+                var data = podActivityMetrics.map(function(pm) {
                     var r = mktRow(pm);
                     return r ? (gv(r, m.idx) || 0) : 0;
                 });
-                podDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+                podActivityDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
             });
             new Chart(document.getElementById('chart-podcast'), {
                 type: 'bar',
-                data: { labels: podMetrics, datasets: podDatasets },
+                data: { labels: podActivityMetrics, datasets: podActivityDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
                     scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // Podcast audience bar (Downloads & Listener Reach — thousands scale)
+            var podAudienceMetrics = ['Downloads + Streams', 'Unique Listener Reach'];
+            var podAudienceDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = podAudienceMetrics.map(function(pm) {
+                    var r = mktRow(pm);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                podAudienceDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-podcast-audience'), {
+                type: 'bar',
+                data: { labels: ['Downloads + Streams', 'Unique Listeners'], datasets: podAudienceDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1) + 'K' : v; } } } }
+                }
+            });
+
+            // Podcast consumption line chart (percentage)
+            var consumptionRow = mktRow('Average Consumption');
+            var consumptionVals = mktMonths.map(function(m) {
+                if (!consumptionRow) return 0;
+                var v = gv(consumptionRow, m.idx);
+                return v != null ? (v < 1 ? v * 100 : v) : 0;
+            });
+            new Chart(document.getElementById('chart-podcast-consumption'), {
+                type: 'line',
+                data: {
+                    labels: mktMonthLabels,
+                    datasets: [{
+                        label: 'Avg Consumption %',
+                        data: consumptionVals,
+                        borderColor: COLORS.primary,
+                        backgroundColor: 'rgba(7,55,79,0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: COLORS.primary
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false },
+                        tooltip: { callbacks: { label: function(c) { return c.raw.toFixed(0) + '%'; } } }
+                    },
+                    scales: { y: { min: 0, max: 100, ticks: { callback: function(v) { return v + '%'; } } } }
                 }
             });
 
