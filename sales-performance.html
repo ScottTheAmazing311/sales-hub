@@ -883,24 +883,25 @@
                 }
             });
 
-            // PIM Socials — followers by platform across months
+            // PIM Socials — months on x-axis, platforms as datasets
             var pimPlatforms = [
-                { label: 'Instagram', metric: 'PIM Instagram Followers' },
-                { label: 'Facebook', metric: 'PIM Facebook Followers' },
-                { label: 'LinkedIn', metric: 'PIM LinkedIn Followers' },
-                { label: 'TikTok', metric: 'PIM TikTok Followers' }
+                { label: 'Instagram', metric: 'PIM Instagram Followers', color: '#e4405f' },
+                { label: 'Facebook', metric: 'PIM Facebook Followers', color: '#1877f2' },
+                { label: 'LinkedIn', metric: 'PIM LinkedIn Followers', color: COLORS.primary },
+                { label: 'TikTok', metric: 'PIM TikTok Followers', color: '#000' }
             ];
-            var pimDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = pimPlatforms.map(function(pp) {
-                    var r = mktRow(pp.metric);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                pimDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            var pimDatasets = pimPlatforms.map(function(pp) {
+                var r = mktRow(pp.metric);
+                return {
+                    label: pp.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: pp.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-pim-socials'), {
                 type: 'bar',
-                data: { labels: pimPlatforms.map(function(p) { return p.label; }), datasets: pimDatasets },
+                data: { labels: mktMonthLabels, datasets: pimDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
@@ -908,25 +909,25 @@
                 }
             });
 
-            // Personal Social (Chris) — followers by platform across months
+            // Personal Social (Chris) — months on x-axis, platforms as datasets
             var chrisPlatforms = [
-                { label: 'Instagram', metric: 'Instagram Followers' },
-                { label: 'LinkedIn', metric: 'LinkedIn Followers' },
-                { label: 'Facebook', metric: 'Facebook Followers' },
-                { label: 'X / Twitter', metric: 'X Followers' }
+                { label: 'Instagram', metric: 'Instagram Followers', color: '#e4405f' },
+                { label: 'LinkedIn', metric: 'LinkedIn Followers', color: COLORS.primary },
+                { label: 'Facebook', metric: 'Facebook Followers', color: '#1877f2' },
+                { label: 'X / Twitter', metric: 'X Followers', color: '#000' }
             ];
-            var chrisDatasets = [];
-            // Chris metrics are in the PERSONAL SOCIAL (CHRIS) section — use mktRow which searches col 1
-            mktMonths.forEach(function(m, mi) {
-                var data = chrisPlatforms.map(function(cp) {
-                    var r = mktRow(cp.metric);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                chrisDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            var chrisDatasets = chrisPlatforms.map(function(cp) {
+                var r = mktRow(cp.metric);
+                return {
+                    label: cp.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: cp.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-chris-socials'), {
                 type: 'bar',
-                data: { labels: chrisPlatforms.map(function(p) { return p.label; }), datasets: chrisDatasets },
+                data: { labels: mktMonthLabels, datasets: chrisDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
