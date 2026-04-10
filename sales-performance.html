@@ -248,9 +248,10 @@
         return results;
     }
 
-    function statCard(title, value, changeObj, iconSvg, prevValue) {
+    function statCard(title, value, changeObj, iconSvg, prevValue, ytdValue) {
         var prevHtml = prevValue ? '<div style="font-size:0.75rem;color:var(--muted-fg);margin-top:2px;">prev: ' + prevValue + '</div>' : '';
-        return '<div class="card"><div class="card-header"><div class="card-header-row"><span class="card-title">' + title + '</span><span class="card-icon">' + iconSvg + '</span></div></div><div class="card-content"><div class="stat-value">' + value + '</div>' + prevHtml + '<div class="stat-change"><span class="' + changeObj.cls + '">' + changeObj.text + '</span></div></div></div>';
+        var ytdHtml = ytdValue != null ? '<div style="font-size:0.75rem;color:var(--primary);margin-top:2px;font-weight:600;">YTD: ' + ytdValue + '</div>' : '';
+        return '<div class="card"><div class="card-header"><div class="card-header-row"><span class="card-title">' + title + '</span><span class="card-icon">' + iconSvg + '</span></div></div><div class="card-content"><div class="stat-value">' + value + '</div>' + prevHtml + ytdHtml + '<div class="stat-change"><span class="' + changeObj.cls + '">' + changeObj.text + '</span></div></div></div>';
     }
 
     var ICONS = {
@@ -310,6 +311,13 @@
 
         function lastVal(key) { var r = findRow(rows, key); return r ? (gv(r, lastCol) || 0) : 0; }
         function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return r ? (gv(r, prevCol) || 0) : 0; }
+        function ytdSum(key) {
+            var r = findRow(rows, key);
+            if (!r) return 0;
+            var sum = 0;
+            monthCols.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            return sum;
+        }
 
         var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
         var mrrLast = lastVal('Total MRR'), mrrPrev = prevVal('Total MRR');
@@ -318,9 +326,9 @@
 
         // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev));
-        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev));
-        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev));
+        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev), fmtMoney(ytdSum('Total ARR')));
+        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev), fmtMoney(ytdSum('Total MRR')));
+        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev), fmtNum(ytdSum('Deals Closed')));
         html += statCard('Win Rate', typeof wrLast === 'number' && wrLast < 1 ? (wrLast * 100).toFixed(0) + '%' : fmtNum(wrLast) + '%',
             pctChangeFromPrev(wrPrev, wrLast, prevLabel), ICONS.trending,
             typeof wrPrev === 'number' && wrPrev < 1 ? (wrPrev * 100).toFixed(0) + '%' : fmtNum(wrPrev) + '%');
@@ -507,6 +515,19 @@
         function mktRow(label) { return findRow(rows, label, 1); }
         function mktLatest(label) { var r = mktRow(label); return r ? (gv(r, mktLast) || 0) : 0; }
         function mktPrevious(label) { var r = mktRow(label); return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
+        function mktYtdSum(label) {
+            var r = mktRow(label);
+            if (!r) return 0;
+            var sum = 0;
+            mktMonths.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            return sum;
+        }
+        function rowYtdSum(r) {
+            if (!r) return 0;
+            var sum = 0;
+            mktMonths.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            return sum;
+        }
         function mktAllMonths(label) {
             var r = mktRow(label);
             return mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; });
@@ -522,11 +543,15 @@
         if (!sponsorship.last) { sponsorship.last = mktLatest('Total sponnsorship sold'); sponsorship.prev = mktPrevious('Total sponnsorship sold'); }
         if (!podcast.last) { podcast.last = mktLatest('Podcast Downlads + Streams'); podcast.prev = mktPrevious('Podcast Downlads + Streams'); }
 
+        // YTD sums for cumulative metrics; try primary then fallback spelling
+        var podYtd = mktYtdSum('Podcast Downloads + Streams') || mktYtdSum('Podcast Downlads + Streams');
+        var sponsYtd = mktYtdSum('Total PIMCON sponsorship sold cumulative') || mktYtdSum('Total sponsorship sold') || mktYtdSum('Total sponnsorship sold');
+
         html += '<div class="stat-grid">';
         html += statCard('Total Followers', followers.last ? fmtNum(followers.last) : fmtNum(chrisFollowers.last), pctChangeFromPrev(followers.prev || chrisFollowers.prev, followers.last || chrisFollowers.last, mktPrevLabel), ICONS.heart, fmtNum(followers.prev || chrisFollowers.prev));
         html += statCard('Newsletter Subs', fmtNum(newsletter.last), pctChangeFromPrev(newsletter.prev, newsletter.last, mktPrevLabel), ICONS.mail, fmtNum(newsletter.prev));
-        html += statCard('Podcast Downloads', fmtNum(podcast.last), pctChangeFromPrev(podcast.prev, podcast.last, mktPrevLabel), ICONS.mic, fmtNum(podcast.prev));
-        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.last), pctChangeFromPrev(sponsorship.prev, sponsorship.last, mktPrevLabel), ICONS.dollar, fmtMoney(sponsorship.prev));
+        html += statCard('Podcast Downloads', fmtNum(podcast.last), pctChangeFromPrev(podcast.prev, podcast.last, mktPrevLabel), ICONS.mic, fmtNum(podcast.prev), fmtNum(podYtd));
+        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.last), pctChangeFromPrev(sponsorship.prev, sponsorship.last, mktPrevLabel), ICONS.dollar, fmtMoney(sponsorship.prev), fmtMoney(sponsYtd));
         html += '</div>';
 
         // ── Inbound vs MDR summary cards ──
@@ -552,10 +577,10 @@
         function rowPrev(r) { return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
 
         html += '<div class="stat-grid">';
-        html += statCard('Inbound Sets', fmtNum(rowLatest(inbSetsRow)), pctChangeFromPrev(rowPrev(inbSetsRow), rowLatest(inbSetsRow), mktPrevLabel), ICONS.inbox, fmtNum(rowPrev(inbSetsRow)));
-        html += statCard('Inbound Closed ARR', fmtMoney(rowLatest(inbArrRow)), pctChangeFromPrev(rowPrev(inbArrRow), rowLatest(inbArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(inbArrRow)));
-        html += statCard('MDR Sets', fmtNum(rowLatest(mdrSetsRow)), pctChangeFromPrev(rowPrev(mdrSetsRow), rowLatest(mdrSetsRow), mktPrevLabel), ICONS.phone, fmtNum(rowPrev(mdrSetsRow)));
-        html += statCard('MDR Closed ARR', fmtMoney(rowLatest(mdrArrRow)), pctChangeFromPrev(rowPrev(mdrArrRow), rowLatest(mdrArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(mdrArrRow)));
+        html += statCard('Inbound Sets', fmtNum(rowLatest(inbSetsRow)), pctChangeFromPrev(rowPrev(inbSetsRow), rowLatest(inbSetsRow), mktPrevLabel), ICONS.inbox, fmtNum(rowPrev(inbSetsRow)), fmtNum(rowYtdSum(inbSetsRow)));
+        html += statCard('Inbound Closed ARR', fmtMoney(rowLatest(inbArrRow)), pctChangeFromPrev(rowPrev(inbArrRow), rowLatest(inbArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(inbArrRow)), fmtMoney(rowYtdSum(inbArrRow)));
+        html += statCard('MDR Sets', fmtNum(rowLatest(mdrSetsRow)), pctChangeFromPrev(rowPrev(mdrSetsRow), rowLatest(mdrSetsRow), mktPrevLabel), ICONS.phone, fmtNum(rowPrev(mdrSetsRow)), fmtNum(rowYtdSum(mdrSetsRow)));
+        html += statCard('MDR Closed ARR', fmtMoney(rowLatest(mdrArrRow)), pctChangeFromPrev(rowPrev(mdrArrRow), rowLatest(mdrArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(mdrArrRow)), fmtMoney(rowYtdSum(mdrArrRow)));
         html += '</div>';
 
         // ── Charts row 1: Social followers + Podcast ──
