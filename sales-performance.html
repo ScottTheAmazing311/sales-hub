@@ -97,7 +97,7 @@
         .stat-change .down { color: var(--destructive); font-weight: 600; }
 
         /* ── Chart grid ── */
-        .chart-grid { display: grid; grid-template-columns: 4fr 3fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
         .chart-full { margin-bottom: 1.5rem; }
         .chart-wrap { position: relative; width: 100%; height: 300px; }
         .chart-wrap canvas { display: block; }
@@ -147,7 +147,7 @@
 <div class="dash">
     <div class="dash-header">
         <h1>Performance Dashboard</h1>
-        <p>January &ndash; February 2025 &nbsp;&middot;&nbsp; Rankings.io</p>
+        <p id="dash-subtitle">Loading&hellip;</p>
     </div>
 
     <div class="tabs">
@@ -176,11 +176,6 @@
     });
 
     var SHEET_ID = '18WMXkoKVY-JiWvPMt6e06fljsufO4YziLropqidkYek';
-    var chartDefaults = {
-        borderRadius: 4,
-        barPercentage: 0.65,
-        categoryPercentage: 0.8
-    };
     var COLORS = {
         primary: '#07374F',
         primaryLight: 'rgba(7,55,79,0.7)',
@@ -192,6 +187,7 @@
         muted: '#e5e5e5',
         warmYellow: '#eedc82'
     };
+    var BAR_COLORS = [COLORS.primary, COLORS.blue, '#22c55e', '#f97316', '#8b5cf6', '#ec4899'];
 
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 12;
@@ -220,16 +216,24 @@
         return '$' + n.toLocaleString();
     }
     function fmtNum(n) { return (n == null || isNaN(n)) ? '0' : n.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
-    function pctStr(jan, feb, invert) {
-        if (!jan) return { text: '\u2014', cls: '' };
-        var pct = ((feb - jan) / Math.abs(jan)) * 100;
+    function pctChange(prev, curr, invert) {
+        if (!prev) return { text: '\u2014', cls: '' };
+        var pct = ((curr - prev) / Math.abs(prev)) * 100;
         var arrow = pct >= 0 ? '\u2191' : '\u2193';
         var cls = invert ? (pct >= 0 ? 'down' : 'up') : (pct >= 0 ? 'up' : 'down');
-        return { text: arrow + ' ' + Math.abs(pct).toFixed(1) + '% from Jan', cls: cls };
+        return { text: arrow + ' ' + Math.abs(pct).toFixed(1) + '%', cls: cls };
+    }
+    function pctChangeFromPrev(prev, curr, prevLabel, invert) {
+        var ch = pctChange(prev, curr, invert);
+        if (ch.cls && prevLabel) ch.text += ' from ' + prevLabel;
+        return ch;
     }
     function findRow(rows, label, col) {
         col = col || 0;
-        for (var i = 0; i < rows.length; i++) { var c = gv(rows[i], col); if (c && c.trim() === label.trim()) return rows[i]; }
+        for (var i = 0; i < rows.length; i++) {
+            var c = gv(rows[i], col);
+            if (c && c.toString().trim().toLowerCase() === label.trim().toLowerCase()) return rows[i];
+        }
         return null;
     }
     function sectionRows(rows, start, ends, colA) {
@@ -237,8 +241,8 @@
         var results = [], inSec = false;
         for (var i = 0; i < rows.length; i++) {
             var label = gv(rows[i], colA);
-            if (label && label.trim() === start.trim()) { inSec = true; continue; }
-            if (inSec && label && ends.indexOf(label.trim()) !== -1) break;
+            if (label && label.toString().trim() === start.trim()) { inSec = true; continue; }
+            if (inSec && label && ends.indexOf(label.toString().trim()) !== -1) break;
             if (inSec) results.push(rows[i]);
         }
         return results;
@@ -259,13 +263,15 @@
         mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>',
         mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
         globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
-        heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
+        heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+        phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+        inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>'
     };
 
     // ═══════════════════════════════════════════════
     //  SALES TAB
     // ═══════════════════════════════════════════════
-    fetchSheet('1217173270').then(renderSales).catch(function(err) {
+    fetchSheet('0').then(renderSales).catch(function(err) {
         document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';
     });
 
@@ -274,97 +280,128 @@
         var el = document.getElementById('tab-sales');
         var html = '';
 
-        // Extract month labels dynamically from column headers (skip col 0 = labels)
+        // Extract month labels dynamically from column headers
         var monthCols = [];
         for (var ci = 1; ci < table.cols.length; ci++) {
             var lbl = (table.cols[ci].label || '').trim();
-            if (lbl && table.cols[ci].type === 'number') {
-                monthCols.push({ idx: ci, label: lbl.replace(/[\s-]+$/, '') });
+            if (lbl && lbl.length > 0 && (table.cols[ci].type === 'number' || table.cols[ci].type === 'string')) {
+                // Check if it looks like a month name
+                if (/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(lbl)) {
+                    monthCols.push({ idx: ci, label: lbl.replace(/[\s-]+$/, '') });
+                }
+            }
+        }
+        if (monthCols.length === 0) {
+            // Fallback: grab any non-empty labeled columns after col 0
+            for (var ci2 = 1; ci2 < table.cols.length; ci2++) {
+                var lbl2 = (table.cols[ci2].label || '').trim();
+                if (lbl2) monthCols.push({ idx: ci2, label: lbl2 });
             }
         }
         var monthLabels = monthCols.map(function(m) { return m.label; });
         var lastCol = monthCols.length ? monthCols[monthCols.length - 1].idx : 1;
         var prevCol = monthCols.length > 1 ? monthCols[monthCols.length - 2].idx : null;
+        var prevLabel = monthCols.length > 1 ? monthCols[monthCols.length - 2].label : '';
 
-        // Helper: get all month values for a metric
-        function monthVals(key) {
-            var r = findRow(rows, key);
-            return monthCols.map(function(m) { return gv(r, m.idx) || 0; });
+        // Update subtitle
+        if (monthLabels.length > 0) {
+            document.getElementById('dash-subtitle').textContent = monthLabels[0] + ' \u2013 ' + monthLabels[monthLabels.length - 1] + ' 2026 \u00B7 Rankings.io';
         }
-        function lastVal(key) { var r = findRow(rows, key); return gv(r, lastCol) || 0; }
-        function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return gv(r, prevCol) || 0; }
+
+        function lastVal(key) { var r = findRow(rows, key); return r ? (gv(r, lastCol) || 0) : 0; }
+        function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return r ? (gv(r, prevCol) || 0) : 0; }
 
         var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
         var mrrLast = lastVal('Total MRR'), mrrPrev = prevVal('Total MRR');
         var dealsLast = lastVal('Deals Closed'), dealsPrev = prevVal('Deals Closed');
-        var wrLast = lastVal('Win Rate (From Qualifed)'), wrPrev = prevVal('Win Rate (From Qualifed)');
+        var wrLast = lastVal('Win Rate (From Qualified)'), wrPrev = prevVal('Win Rate (From Qualified)');
 
         // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Total ARR', fmtMoney(arrLast), pctStr(arrPrev, arrLast), ICONS.dollar, fmtMoney(arrPrev));
-        html += statCard('Total MRR', fmtMoney(mrrLast), pctStr(mrrPrev, mrrLast), ICONS.dollar, fmtMoney(mrrPrev));
-        html += statCard('Deals Closed', fmtNum(dealsLast), pctStr(dealsPrev, dealsLast), ICONS.target, fmtNum(dealsPrev));
-        html += statCard('Win Rate', (wrLast * 100).toFixed(0) + '%', pctStr(wrPrev, wrLast), ICONS.trending, (wrPrev * 100).toFixed(0) + '%');
+        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev));
+        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev));
+        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev));
+        html += statCard('Win Rate', typeof wrLast === 'number' && wrLast < 1 ? (wrLast * 100).toFixed(0) + '%' : fmtNum(wrLast) + '%',
+            pctChangeFromPrev(wrPrev, wrLast, prevLabel), ICONS.trending,
+            typeof wrPrev === 'number' && wrPrev < 1 ? (wrPrev * 100).toFixed(0) + '%' : fmtNum(wrPrev) + '%');
         html += '</div>';
 
-        // Key Metrics Detail — full width, right after stat cards
+        // Key Metrics Detail table
         html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th>';
         monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
         html += '<th>Change</th></tr></thead><tbody>';
         var kpiRows = [
             ['Total ARR', 'money'], ['Total MRR', 'money'], ['Deals Closed', 'num'],
             ['Average MRR Per Deal', 'money'], ['Average ARR Per Deal', 'money'],
-            ['Average Sales Cycle (Days)', 'days', true], ['Deals Lost to Price', 'num', true],
-            ['Win Rate (From Qualifed)', 'pct']
+            ['Average Sales Cycle (Days)', 'days', true],
+            ['Win Rate (From Qualified)', 'pct']
         ];
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
+            if (!r) return;
             var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
-            var ch = vals.length > 1 ? pctStr(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
+            var ch = vals.length > 1 ? pctChange(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
             html += '<tr><td>' + k[0] + '</td>';
             vals.forEach(function(v, vi) {
                 var str;
                 if (k[1] === 'money') str = fmtMoney(v);
                 else if (k[1] === 'days') str = fmtNum(v) + 'd';
-                else if (k[1] === 'pct') str = (v * 100).toFixed(0) + '%';
+                else if (k[1] === 'pct') str = typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
                 else str = fmtNum(v);
-                // Color the latest month value red/green based on direction
                 if (vi === vals.length - 1 && vals.length > 1) {
                     html += '<td class="mono ' + ch.cls + '">' + str + '</td>';
                 } else {
                     html += '<td class="mono">' + str + '</td>';
                 }
             });
-            html += '<td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td></tr>';
+            html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td></tr>';
         });
         html += '</tbody></table></div></div>';
 
-        // Chart row: Rep performance bar chart + Outbound bar chart
+        // Charts: Rep ARR + Outbound
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + ' comparison</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
         html += '</div>';
 
+        // Outbound detail table
+        var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Outbound Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
+        monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+        html += '<th>Change</th></tr></thead><tbody>';
+        outRows.forEach(function(r) {
+            var metric = gv(r, 0);
+            if (!metric || !metric.trim()) return;
+            var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
+            var isMoney = metric.toLowerCase().indexOf('arr') !== -1;
+            var ch = vals.length > 1 ? pctChange(vals[vals.length - 2], vals[vals.length - 1]) : { text: '\u2014', cls: '' };
+            html += '<tr><td>' + metric.trim() + '</td>';
+            vals.forEach(function(v) { html += '<td class="mono">' + (isMoney ? fmtMoney(v) : fmtNum(v)) + '</td>'; });
+            html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td></tr>';
+        });
+        html += '</tbody></table></div></div>';
+
         // Pipeline
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
-        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+        if (pipeRows.length > 0) {
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+        }
 
         el.innerHTML = html;
 
         // ── Build charts ──
         setTimeout(function() {
-            // ── Rep ARR bar chart ──
+            // Rep ARR bar chart
             var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
             var repNames = [];
             var repDatasets = [];
-            var repBarColors = [COLORS.primary, COLORS.blue, '#22c55e', '#f97316', '#8b5cf6', '#ec4899'];
             monthCols.forEach(function(m, mi) {
                 var data = [];
                 repRows.forEach(function(r, ri) {
-                    if (mi === 0) repNames.push(gv(r, 0));
+                    if (mi === 0) repNames.push(gv(r, 0) || '');
                     data.push(gv(r, m.idx) || 0);
                 });
-                repDatasets.push({ label: m.label, data: data, backgroundColor: repBarColors[mi % repBarColors.length], borderRadius: 4 });
+                repDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi % BAR_COLORS.length], borderRadius: 4 });
             });
             new Chart(document.getElementById('chart-rep-arr'), {
                 type: 'bar',
@@ -378,19 +415,18 @@
                 }
             });
 
-            // ── Outbound bar chart ──
-            var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+            // Outbound bar chart (sets, holds, avg daily dials — skip Closed Won ARR)
             var outLabels = [];
             var outDatasets = [];
             monthCols.forEach(function(m, mi) {
                 var data = [];
                 outRows.forEach(function(r, ri) {
-                    var name = gv(r, 0);
-                    if (name.trim() === 'Closed Won ARR') return;
+                    var name = (gv(r, 0) || '').trim();
+                    if (name.toLowerCase().indexOf('closed won') !== -1) return;
                     if (mi === 0) outLabels.push(name);
                     data.push(gv(r, m.idx) || 0);
                 });
-                outDatasets.push({ label: m.label, data: data, backgroundColor: repBarColors[mi % repBarColors.length], borderRadius: 4 });
+                outDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi % BAR_COLORS.length], borderRadius: 4 });
             });
             new Chart(document.getElementById('chart-outbound'), {
                 type: 'bar',
@@ -402,23 +438,34 @@
                 }
             });
 
-            // ── Pipeline doughnut ──
-            var pipeNames = [], pipeDeals = [];
-            pipeRows.forEach(function(r) {
-                var d = gv(r, lastCol) || 0;
-                if (d > 0) { pipeNames.push(gv(r, 0).trim()); pipeDeals.push(d); }
-            });
-            new Chart(document.getElementById('chart-pipeline'), {
-                type: 'doughnut',
-                data: {
-                    labels: pipeNames,
-                    datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '60%',
-                    plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+            // Pipeline doughnut
+            var pipeEl = document.getElementById('chart-pipeline');
+            if (pipeEl) {
+                var pipeNames = [], pipeDeals = [];
+                pipeRows.forEach(function(r) {
+                    var name = (gv(r, 0) || '').trim();
+                    // Try latest month, then fall back
+                    var d = 0;
+                    for (var ci = monthCols.length - 1; ci >= 0; ci--) {
+                        d = gv(r, monthCols[ci].idx) || 0;
+                        if (d > 0) break;
+                    }
+                    if (d > 0) { pipeNames.push(name); pipeDeals.push(d); }
+                });
+                if (pipeNames.length > 0) {
+                    new Chart(pipeEl, {
+                        type: 'doughnut',
+                        data: {
+                            labels: pipeNames,
+                            datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, cutout: '60%',
+                            plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+                        }
+                    });
                 }
-            });
+            }
         }, 50);
     }
 
@@ -434,60 +481,146 @@
         var el = document.getElementById('tab-marketing');
         var html = '';
 
+        // Detect month columns dynamically (columns after A:Category and B:Metric)
+        var mktMonths = [];
+        for (var ci = 2; ci < table.cols.length; ci++) {
+            var lbl = (table.cols[ci].label || '').trim();
+            if (/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(lbl)) {
+                mktMonths.push({ idx: ci, label: lbl });
+            }
+        }
+        // Fallback: if no month labels found, use columns 2,3,4 as Jan, Feb, Mar
+        if (mktMonths.length === 0) {
+            mktMonths = [
+                { idx: 2, label: 'January' },
+                { idx: 3, label: 'February' },
+                { idx: 4, label: 'March' }
+            ];
+        }
+        var mktMonthLabels = mktMonths.map(function(m) { return m.label; });
+        var mktLast = mktMonths[mktMonths.length - 1].idx;
+        var mktPrev = mktMonths.length > 1 ? mktMonths[mktMonths.length - 2].idx : null;
+        var mktPrevLabel = mktMonths.length > 1 ? mktMonths[mktMonths.length - 2].label : '';
+        // Notes column is after months
+        var notesCol = mktMonths[mktMonths.length - 1].idx + 1;
+
         function mktRow(label) { return findRow(rows, label, 1); }
-        function mktVal(label) { var r = mktRow(label); return { jan: gv(r, 2), feb: gv(r, 3) }; }
+        function mktLatest(label) { var r = mktRow(label); return r ? (gv(r, mktLast) || 0) : 0; }
+        function mktPrevious(label) { var r = mktRow(label); return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
+        function mktAllMonths(label) {
+            var r = mktRow(label);
+            return mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; });
+        }
 
-        var followers = mktVal('Chris Personal Followers (All Platforms)');
-        var newsletter = mktVal('Total Newsletter Subscribers');
-        var podcast = mktVal('Podcast Downlads + Streams');
-        var sponsorship = mktVal('Total sponnsorship sold');
+        // ── Top-level stat cards ──
+        var followers = { last: mktLatest('Total Social Followers (All Platforms)'), prev: mktPrevious('Total Social Followers (All Platforms)') };
+        var chrisFollowers = { last: mktLatest('Chris Personal Followers (All Platforms)'), prev: mktPrevious('Chris Personal Followers (All Platforms)') };
+        var newsletter = { last: mktLatest('Total Newsletter Subscribers'), prev: mktPrevious('Total Newsletter Subscribers') };
+        var podcast = { last: mktLatest('Podcast Downloads + Streams'), prev: mktPrevious('Podcast Downloads + Streams') };
+        var sponsorship = { last: mktLatest('Total sponsorship sold'), prev: mktPrevious('Total sponsorship sold') };
+        // Fallback: try alternate spelling
+        if (!sponsorship.last) { sponsorship.last = mktLatest('Total sponnsorship sold'); sponsorship.prev = mktPrevious('Total sponnsorship sold'); }
+        if (!podcast.last) { podcast.last = mktLatest('Podcast Downlads + Streams'); podcast.prev = mktPrevious('Podcast Downlads + Streams'); }
 
-        // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Chris Followers', followers.feb != null ? fmtNum(followers.feb) : '\u2014', followers.jan ? pctStr(followers.jan, followers.feb) : { text: '\u2014', cls: '' }, ICONS.heart, followers.jan ? fmtNum(followers.jan) : null);
-        html += statCard('Newsletter Subs', fmtNum(newsletter.feb), pctStr(newsletter.jan, newsletter.feb), ICONS.mail, fmtNum(newsletter.jan));
-        html += statCard('Podcast Downloads', fmtNum(podcast.feb), pctStr(podcast.jan, podcast.feb), ICONS.mic, fmtNum(podcast.jan));
-        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.feb), pctStr(sponsorship.jan, sponsorship.feb), ICONS.dollar, fmtMoney(sponsorship.jan));
+        html += statCard('Total Followers', followers.last ? fmtNum(followers.last) : fmtNum(chrisFollowers.last), pctChangeFromPrev(followers.prev || chrisFollowers.prev, followers.last || chrisFollowers.last, mktPrevLabel), ICONS.heart, fmtNum(followers.prev || chrisFollowers.prev));
+        html += statCard('Newsletter Subs', fmtNum(newsletter.last), pctChangeFromPrev(newsletter.prev, newsletter.last, mktPrevLabel), ICONS.mail, fmtNum(newsletter.prev));
+        html += statCard('Podcast Downloads', fmtNum(podcast.last), pctChangeFromPrev(podcast.prev, podcast.last, mktPrevLabel), ICONS.mic, fmtNum(podcast.prev));
+        html += statCard('Sponsorship Sold', fmtMoney(sponsorship.last), pctChangeFromPrev(sponsorship.prev, sponsorship.last, mktPrevLabel), ICONS.dollar, fmtMoney(sponsorship.prev));
         html += '</div>';
 
-        // Charts row: Social followers bar + Podcast metrics
-        html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (Feb)</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Performance</div><div class="card-desc">January vs February</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        // ── Inbound vs MDR summary cards ──
+        var inbSets = { last: mktLatest('Sets'), prev: mktPrevious('Sets') };
+        // Need to differentiate MDR Sets from Inbound Sets — use section rows
+        var mdrSecRows = mktSectionRows(rows, 'MDR', ['Inbound Leads']);
+        var inbSecRows = mktSectionRows(rows, 'Inbound Leads', ['__END__']);
+        var mdrSetsRow = null, mdrHoldsRow = null, mdrArrRow = null;
+        var inbSetsRow = null, inbHoldsRow = null, inbArrRow = null;
+        mdrSecRows.forEach(function(r) {
+            var m = (gv(r, 1) || '').trim();
+            if (m === 'Sets') mdrSetsRow = r;
+            if (m === 'Holds') mdrHoldsRow = r;
+            if (m.indexOf('Closed Won') !== -1) mdrArrRow = r;
+        });
+        inbSecRows.forEach(function(r) {
+            var m = (gv(r, 1) || '').trim();
+            if (m === 'Sets') inbSetsRow = r;
+            if (m === 'Holds') inbHoldsRow = r;
+            if (m.indexOf('Closed Won') !== -1) inbArrRow = r;
+        });
+        function rowLatest(r) { return r ? (gv(r, mktLast) || 0) : 0; }
+        function rowPrev(r) { return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
+
+        html += '<div class="stat-grid">';
+        html += statCard('Inbound Sets', fmtNum(rowLatest(inbSetsRow)), pctChangeFromPrev(rowPrev(inbSetsRow), rowLatest(inbSetsRow), mktPrevLabel), ICONS.inbox, fmtNum(rowPrev(inbSetsRow)));
+        html += statCard('Inbound Closed ARR', fmtMoney(rowLatest(inbArrRow)), pctChangeFromPrev(rowPrev(inbArrRow), rowLatest(inbArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(inbArrRow)));
+        html += statCard('MDR Sets', fmtNum(rowLatest(mdrSetsRow)), pctChangeFromPrev(rowPrev(mdrSetsRow), rowLatest(mdrSetsRow), mktPrevLabel), ICONS.phone, fmtNum(rowPrev(mdrSetsRow)));
+        html += statCard('MDR Closed ARR', fmtMoney(rowLatest(mdrArrRow)), pctChangeFromPrev(rowPrev(mdrArrRow), rowLatest(mdrArrRow), mktPrevLabel), ICONS.dollar, fmtMoney(rowPrev(mdrArrRow)));
         html += '</div>';
 
-        // Second row: Newsletter + YouTube + Website
+        // ── Charts row 1: Social followers + Podcast ──
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Newsletter & YouTube</div><div class="card-desc">Audience growth metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-newsletter"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Social Media Followers</div><div class="card-desc">Rankings.io platform breakdown (' + mktMonthLabels[mktMonthLabels.length - 1] + ')</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-social"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Podcast Performance</div><div class="card-desc">' + mktMonthLabels.join(' vs ') + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-podcast"></canvas></div></div></div>';
+        html += '</div>';
+
+        // ── Charts row 2: Inbound vs MDR + PIMCON ──
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Inbound vs MDR</div><div class="card-desc">Sets, Holds & Closed Won ARR by month</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-inbound-mdr"></canvas></div></div></div>';
         html += '<div class="card"><div class="card-header"><div class="card-title">PIMCON</div><div class="card-desc">Event metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pimcon"></canvas></div></div></div>';
         html += '</div>';
 
-        // Full-width detail tables
+        // ── Charts row 3: Newsletter & YouTube ──
+        html += '<div class="chart-grid">';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Newsletter Growth</div><div class="card-desc">Subscriber & engagement trends</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-newsletter"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">YouTube Growth</div><div class="card-desc">Subscribers & views</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-youtube"></canvas></div></div></div>';
+        html += '</div>';
+
+        // ── Detail tables for every section ──
         var sections = [
+            { title: 'Inbound Executive KPIs', rows: getKpiRows(rows) },
             { title: 'Social Media', start: 'SOCIAL MEDIA', end: ['PERSONAL SOCIAL (CHRIS)'] },
             { title: 'Personal Social (Chris)', start: 'PERSONAL SOCIAL (CHRIS)', end: ['PODCAST'] },
             { title: 'Podcast', start: 'PODCAST', end: ['NEWSLETTER'] },
             { title: 'Newsletter', start: 'NEWSLETTER', end: ['YouTube'] },
             { title: 'YouTube', start: 'YouTube', end: ['WEBSITE & SEO'] },
             { title: 'Website & SEO', start: 'WEBSITE & SEO', end: ['PIMCON'] },
-            { title: 'PIMCON', start: 'PIMCON', end: ['__END__'] }
+            { title: 'PIMCON', start: 'PIMCON', end: ['MDR'] },
+            { title: 'MDR', start: 'MDR', end: ['Inbound Leads'] },
+            { title: 'Inbound Leads', start: 'Inbound Leads', end: ['__END__'] }
         ];
 
         sections.forEach(function(sec) {
-            var secRows = mktSectionRows(rows, sec.start, sec.end);
+            var secRows = sec.rows || mktSectionRows(rows, sec.start, sec.end);
             if (secRows.length === 0) return;
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">' + sec.title + '</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>Jan</th><th>Feb</th><th>Change</th><th>Notes</th></tr></thead><tbody>';
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">' + sec.title + '</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
+            mktMonthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+            html += '<th>Change</th><th>Notes</th></tr></thead><tbody>';
             secRows.forEach(function(r) {
                 var metric = gv(r, 1); if (!metric || !metric.trim()) return;
-                var jan = gv(r, 2), feb = gv(r, 3), note = gv(r, 5) || '';
+                var vals = mktMonths.map(function(m) { return gv(r, m.idx); });
+                var note = gv(r, notesCol) || '';
                 var isPct = (metric.toLowerCase().indexOf('rate') !== -1 || metric.toLowerCase().indexOf('consumption') !== -1);
-                var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1);
-                var jStr, fStr;
-                if (isPct) { jStr = jan != null ? gf(r, 2) : '\u2014'; fStr = feb != null ? gf(r, 3) : '\u2014'; }
-                else if (isMoney) { jStr = jan != null ? fmtMoney(jan) : '\u2014'; fStr = feb != null ? fmtMoney(feb) : '\u2014'; }
-                else { jStr = jan != null ? fmtNum(jan) : '\u2014'; fStr = feb != null ? fmtNum(feb) : '\u2014'; }
-                var ch = (jan != null && feb != null) ? pctStr(jan, feb) : { text: '\u2014', cls: '' };
-                html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + jStr + '</td><td class="mono">' + fStr + '</td><td><span class="' + ch.cls + '">' + ch.text.split(' from')[0] + '</span></td><td class="muted" style="font-size:0.78rem;font-style:italic">' + note + '</td></tr>';
+                var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1 || metric.toLowerCase().indexOf('arr') !== -1);
+
+                // Calculate change from last two non-null values
+                var lastTwo = [];
+                for (var vi = vals.length - 1; vi >= 0 && lastTwo.length < 2; vi--) {
+                    if (vals[vi] != null) lastTwo.unshift(vals[vi]);
+                }
+                var ch = lastTwo.length === 2 ? pctChange(lastTwo[0], lastTwo[1]) : { text: '\u2014', cls: '' };
+
+                html += '<tr><td>' + metric.trim() + '</td>';
+                vals.forEach(function(v) {
+                    var str;
+                    if (v == null) str = '\u2014';
+                    else if (isPct) str = typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
+                    else if (isMoney) str = fmtMoney(v);
+                    else str = fmtNum(v);
+                    html += '<td class="mono">' + str + '</td>';
+                });
+                html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td>';
+                html += '<td class="muted" style="font-size:0.78rem;font-style:italic">' + (note || '') + '</td></tr>';
             });
             html += '</tbody></table></div></div>';
         });
@@ -495,100 +628,185 @@
         el.innerHTML = html;
 
         // ── Build marketing charts ──
+        setTimeout(function() {
+            // Social followers horizontal bar (latest month, Rankings platforms)
+            var socialPlatforms = [
+                { label: 'LinkedIn', metric: 'Rankings Linkedin Followers' },
+                { label: 'Instagram', metric: 'Rankings Instagram Followers' },
+                { label: 'Facebook', metric: 'Rankings Facebook Followers' },
+                { label: 'YouTube', metric: 'YouTube Total Subscribers' },
+                { label: 'TikTok', metric: 'Rankings TikTok Followers' },
+                { label: 'X / Twitter', metric: 'Rankings X Followers' }
+            ];
+            var socialLabels = [], socialValues = [];
+            socialPlatforms.forEach(function(sp) {
+                var val = mktLatest(sp.metric);
+                if (!val) {
+                    // Try alternate capitalization
+                    val = mktLatest(sp.metric.replace('Linkedin', 'LinkedIn'));
+                }
+                socialLabels.push(sp.label);
+                socialValues.push(val || 0);
+            });
+            // Sort descending
+            var socialPairs = socialLabels.map(function(l, i) { return { l: l, v: socialValues[i] }; });
+            socialPairs.sort(function(a, b) { return b.v - a.v; });
+            var socialColors = { 'LinkedIn': COLORS.primary, 'X / Twitter': '#000', 'Instagram': '#e4405f', 'Facebook': '#1877f2', 'YouTube': '#ff0000', 'TikTok': '#000' };
+            new Chart(document.getElementById('chart-social'), {
+                type: 'bar',
+                data: {
+                    labels: socialPairs.map(function(d) { return d.l; }),
+                    datasets: [{ data: socialPairs.map(function(d) { return d.v; }), backgroundColor: socialPairs.map(function(d) { return socialColors[d.l] || COLORS.blue; }), borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000) + 'K' : v; } } } }
+                }
+            });
 
-        // Social followers horizontal bar
-        var socialData = [
-            { label: 'LinkedIn', val: gv(mktRow('Rankings LinkedIn New Followers'), 6) || gv(findRow(rows, 'Rankings LinkedIn New Followers', 1), 6) || 18962 },
-            { label: 'X / Twitter', val: gv(mktRow('Rankings X Followers'), 3) || 78786 },
-            { label: 'Instagram', val: 17177 },
-            { label: 'Facebook', val: gv(mktRow('Rankings Facebook New Followers'), 6) || 4000 },
-            { label: 'YouTube', val: gv(mktRow('YouTube Total Subscribers'), 3) || 775 },
-            { label: 'TikTok', val: gv(mktRow('Rankings TikTok Followers'), 3) || 514 }
-        ];
-        socialData.sort(function(a, b) { return b.val - a.val; });
-        new Chart(document.getElementById('chart-social'), {
-            type: 'bar',
-            data: {
-                labels: socialData.map(function(d) { return d.label; }),
-                datasets: [{ data: socialData.map(function(d) { return d.val; }), backgroundColor: [COLORS.primary, COLORS.blue, '#e4405f', '#1877f2', '#ff0000', '#000000'], borderRadius: 4, borderWidth: 0 }]
-            },
-            options: {
-                indexAxis: 'y', responsive: true,
-                scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000) + 'K' : v; } } } }
-            }
-        });
+            // Podcast grouped bar
+            var podMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed', 'Unique Listener Reach'];
+            var podDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = podMetrics.map(function(pm) {
+                    var r = mktRow(pm);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                podDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-podcast'), {
+                type: 'bar',
+                data: { labels: podMetrics, datasets: podDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
 
-        // Podcast grouped bar
-        var podMetrics = ['Episodes Released', 'Guests Booked', 'Guests Interviewed'];
-        var podJan = [], podFeb = [];
-        podMetrics.forEach(function(m) { var d = mktVal(m); podJan.push(d.jan || 0); podFeb.push(d.feb || 0); });
-        new Chart(document.getElementById('chart-podcast'), {
-            type: 'bar',
-            data: {
-                labels: podMetrics,
-                datasets: [
-                    { label: 'January', data: podJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                    { label: 'February', data: podFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
+            // Inbound vs MDR chart
+            var inbMdrLabels = mktMonthLabels;
+            var inbSetsVals = mktMonths.map(function(m) { return inbSetsRow ? (gv(inbSetsRow, m.idx) || 0) : 0; });
+            var inbHoldsVals = mktMonths.map(function(m) { return inbHoldsRow ? (gv(inbHoldsRow, m.idx) || 0) : 0; });
+            var mdrSetsVals = mktMonths.map(function(m) { return mdrSetsRow ? (gv(mdrSetsRow, m.idx) || 0) : 0; });
+            var mdrHoldsVals = mktMonths.map(function(m) { return mdrHoldsRow ? (gv(mdrHoldsRow, m.idx) || 0) : 0; });
+            new Chart(document.getElementById('chart-inbound-mdr'), {
+                type: 'bar',
+                data: {
+                    labels: inbMdrLabels,
+                    datasets: [
+                        { label: 'Inbound Sets', data: inbSetsVals, backgroundColor: COLORS.primary, borderRadius: 4 },
+                        { label: 'Inbound Holds', data: inbHoldsVals, backgroundColor: COLORS.blue, borderRadius: 4 },
+                        { label: 'MDR Sets', data: mdrSetsVals, backgroundColor: '#eedc82', borderRadius: 4 },
+                        { label: 'MDR Holds', data: mdrHoldsVals, backgroundColor: '#f97316', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
 
-        // Newsletter + YouTube grouped bar
-        var nlMetrics = ['Total Subscribers', 'New Subscribers', 'Total Views', 'Newsletter Issues Published'];
-        var ytMetrics = ['YouTube New Subscribers', 'YouTube Total Subscribers', 'YouTube Long Form Published', 'YouTube Shorts Published'];
-        var allMetrics = nlMetrics.concat(ytMetrics);
-        var nlLabels = ['NL Subs', 'New NL Subs', 'NL Views', 'NL Issues', 'YT New Subs', 'YT Total Subs', 'YT Long Form', 'YT Shorts'];
-        var nlJan = [], nlFeb = [];
-        allMetrics.forEach(function(m) { var d = mktVal(m); nlJan.push(d.jan || 0); nlFeb.push(d.feb || 0); });
-        new Chart(document.getElementById('chart-newsletter'), {
-            type: 'bar',
-            data: {
-                labels: nlLabels,
-                datasets: [
-                    { label: 'January', data: nlJan, backgroundColor: COLORS.primary, borderRadius: 4 },
-                    { label: 'February', data: nlFeb, backgroundColor: COLORS.blue, borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
-                scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } }
-            }
-        });
+            // PIMCON chart
+            var pimconMetrics = [
+                { label: 'Projected Attendance', metric: 'Projected attendance cumulative' },
+                { label: 'Registered', metric: 'Registered attendees cumulative' },
+                { label: 'Sponsorship ($K)', metric: 'Total PIMCON sponsorship sold cumulative', divisor: 1000 }
+            ];
+            // Fallback metric names
+            var pimconFallbacks = {
+                'Projected attendance cumulative': ['Projected attendance'],
+                'Registered attendees cumulative': ['Registered attendees'],
+                'Total PIMCON sponsorship sold cumulative': ['Total sponnsorship sold', 'Total sponsorship sold', 'Total PIMCON sponsorship sold']
+            };
+            var pcDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = pimconMetrics.map(function(pm) {
+                    var r = mktRow(pm.metric);
+                    if (!r && pimconFallbacks[pm.metric]) {
+                        pimconFallbacks[pm.metric].some(function(fb) { r = mktRow(fb); return !!r; });
+                    }
+                    var val = r ? (gv(r, m.idx) || 0) : 0;
+                    return pm.divisor ? val / pm.divisor : val;
+                });
+                pcDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-pimcon'), {
+                type: 'bar',
+                data: { labels: pimconMetrics.map(function(pm) { return pm.label; }), datasets: pcDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
 
-        // PIMCON metrics
-        var pimconMetrics = ['Projected attendance', 'Registered attendees'];
-        var pcJan = [], pcFeb = [];
-        pimconMetrics.forEach(function(m) { var d = mktVal(m); pcJan.push(d.jan || 0); pcFeb.push(d.feb || 0); });
-        var pcSponsor = mktVal('Total sponnsorship sold');
-        new Chart(document.getElementById('chart-pimcon'), {
-            type: 'bar',
-            data: {
-                labels: ['Projected Attendance', 'Registered', 'Sponsorship ($K)'],
-                datasets: [
-                    { label: 'January', data: [pcJan[0], pcJan[1], (pcSponsor.jan || 0) / 1000], backgroundColor: COLORS.primary, borderRadius: 4 },
-                    { label: 'February', data: [pcFeb[0], pcFeb[1], (pcSponsor.feb || 0) / 1000], backgroundColor: COLORS.blue, borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
+            // Newsletter chart
+            var nlMetrics = ['Total Subscribers', 'New Subscribers', 'Total Views'];
+            var nlDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = nlMetrics.map(function(nm) {
+                    var r = mktRow(nm);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                nlDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-newsletter'), {
+                type: 'bar',
+                data: { labels: nlMetrics, datasets: nlDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // YouTube chart
+            var ytMetrics = [
+                { label: 'Subscribers', metric: 'YouTube Total Subscribers' },
+                { label: 'Long Form Views', metric: 'YouTube Long Form Average Views' },
+                { label: 'Shorts Views', metric: 'YouTube Shorts Average Views' }
+            ];
+            var ytDatasets = [];
+            mktMonths.forEach(function(m, mi) {
+                var data = ytMetrics.map(function(ym) {
+                    var r = mktRow(ym.metric);
+                    return r ? (gv(r, m.idx) || 0) : 0;
+                });
+                ytDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            });
+            new Chart(document.getElementById('chart-youtube'), {
+                type: 'bar',
+                data: { labels: ytMetrics.map(function(ym) { return ym.label; }), datasets: ytDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }, 50);
+    }
+
+    // Get the top-level KPI rows (before the first section header in col A)
+    function getKpiRows(rows) {
+        var result = [];
+        for (var i = 0; i < rows.length; i++) {
+            var colA = gv(rows[i], 0);
+            var colB = gv(rows[i], 1);
+            // Stop when we hit a section header (text in column A)
+            if (colA && colA.toString().trim() === 'SOCIAL MEDIA') break;
+            if (colB && colB.toString().trim()) result.push(rows[i]);
+        }
+        return result;
     }
 
     function mktSectionRows(rows, startLabel, endLabels) {
         var results = [], inSection = false;
         for (var i = 0; i < rows.length; i++) {
             var labelA = gv(rows[i], 0);
-            if (labelA && labelA.trim() === startLabel.trim()) { inSection = true; continue; }
-            if (inSection && labelA && endLabels.indexOf(labelA.trim()) !== -1) break;
+            if (labelA && labelA.toString().trim() === startLabel.trim()) { inSection = true; continue; }
+            if (inSection && labelA && endLabels.indexOf(labelA.toString().trim()) !== -1) break;
             if (inSection) results.push(rows[i]);
         }
         return results;
