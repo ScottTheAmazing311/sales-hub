@@ -392,7 +392,7 @@
         // Pipeline
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
         if (pipeRows.length > 0) {
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Current deal count</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">Deal count with ARR value</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-pipeline"></canvas></div></div></div>';
         }
 
         el.innerHTML = html;
@@ -469,30 +469,69 @@
                 }
             });
 
-            // Pipeline doughnut
+            // Pipeline bar chart with ARR labels
             var pipeEl = document.getElementById('chart-pipeline');
             if (pipeEl) {
-                var pipeNames = [], pipeDeals = [];
+                var pipeNames = [], pipeDeals = [], pipeArr = [];
+                // Build a lookup of rep name → latest ARR from Sales Rep section
+                var repArrMap = {};
+                repRows.forEach(function(r) {
+                    var name = (gv(r, 0) || '').trim();
+                    var arr = gv(r, lastCol) || 0;
+                    repArrMap[name.toLowerCase()] = arr;
+                });
                 pipeRows.forEach(function(r) {
                     var name = (gv(r, 0) || '').trim();
-                    // Try latest month, then fall back
                     var d = 0;
                     for (var ci = monthCols.length - 1; ci >= 0; ci--) {
                         d = gv(r, monthCols[ci].idx) || 0;
                         if (d > 0) break;
                     }
-                    if (d > 0) { pipeNames.push(name); pipeDeals.push(d); }
+                    if (d > 0) {
+                        pipeNames.push(name);
+                        pipeDeals.push(d);
+                        pipeArr.push(repArrMap[name.toLowerCase()] || 0);
+                    }
                 });
                 if (pipeNames.length > 0) {
+                    var pipeLabelPlugin = {
+                        id: 'pipelineLabels',
+                        afterDatasetsDraw: function(chart) {
+                            var ctx = chart.ctx;
+                            var meta = chart.getDatasetMeta(0);
+                            meta.data.forEach(function(bar, i) {
+                                var arr = pipeArr[i];
+                                var label = arr ? fmtMoney(arr) : '';
+                                if (!label) return;
+                                ctx.save();
+                                ctx.font = '600 11px Inter, sans-serif';
+                                ctx.fillStyle = '#07374F';
+                                ctx.textAlign = 'center';
+                                ctx.fillText(label, bar.x, bar.y - 6);
+                                ctx.restore();
+                            });
+                        }
+                    };
                     new Chart(pipeEl, {
-                        type: 'doughnut',
+                        type: 'bar',
                         data: {
                             labels: pipeNames,
-                            datasets: [{ data: pipeDeals, backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'], borderWidth: 0, spacing: 2 }]
+                            datasets: [{
+                                label: 'Deals in Pipeline',
+                                data: pipeDeals,
+                                backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'],
+                                borderRadius: 4
+                            }]
                         },
+                        plugins: [pipeLabelPlugin],
                         options: {
-                            responsive: true, maintainAspectRatio: false, cutout: '60%',
-                            plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+                            responsive: true, maintainAspectRatio: false,
+                            layout: { padding: { top: 20 } },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { afterLabel: function(c) { return pipeArr[c.dataIndex] ? 'ARR: ' + fmtMoney(pipeArr[c.dataIndex]) : ''; } } }
+                            },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                         }
                     });
                 }
