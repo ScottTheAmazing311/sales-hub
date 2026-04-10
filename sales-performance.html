@@ -854,28 +854,31 @@
                 }
             });
 
-            // Social Posts Published — grouped bar by platform (PIM + Rankings combined)
+            // Social Posts Published — months on x-axis, platforms as datasets
             var postPlatforms = [
-                { label: 'Instagram', metrics: ['PIM Instagram # Posts', 'Rankings Instagram # posts'] },
-                { label: 'Facebook', metrics: ['PIM Facebook # Posts', 'Rankings Facebook # posts'] },
-                { label: 'LinkedIn', metrics: ['PIM LinkedIn # posts', 'Rankings LinkedIn # posts'] },
-                { label: 'TikTok', metrics: ['PIM TikTok # Posts'] }
+                { label: 'Instagram', metrics: ['PIM Instagram # Posts', 'Rankings Instagram # posts'], color: '#e4405f' },
+                { label: 'Facebook', metrics: ['PIM Facebook # Posts', 'Rankings Facebook # posts'], color: '#1877f2' },
+                { label: 'LinkedIn', metrics: ['PIM LinkedIn # posts', 'Rankings LinkedIn # posts'], color: COLORS.primary },
+                { label: 'TikTok', metrics: ['PIM TikTok # Posts'], color: '#000' }
             ];
-            var postDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = postPlatforms.map(function(pp) {
-                    var total = 0;
-                    pp.metrics.forEach(function(metric) {
-                        var r = mktRow(metric);
-                        if (r) total += (gv(r, m.idx) || 0);
-                    });
-                    return total;
-                });
-                postDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            var postDatasets = postPlatforms.map(function(pp) {
+                return {
+                    label: pp.label,
+                    data: mktMonths.map(function(m) {
+                        var total = 0;
+                        pp.metrics.forEach(function(metric) {
+                            var r = mktRow(metric);
+                            if (r) total += (gv(r, m.idx) || 0);
+                        });
+                        return total;
+                    }),
+                    backgroundColor: pp.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-social-posts'), {
                 type: 'bar',
-                data: { labels: postPlatforms.map(function(p) { return p.label; }), datasets: postDatasets },
+                data: { labels: mktMonthLabels, datasets: postDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
@@ -1039,33 +1042,35 @@
                 }
             });
 
-            // PIMCON chart
+            // PIMCON chart — months on x-axis, metrics as datasets
             var pimconMetrics = [
-                { label: 'Projected Attendance', metric: 'Projected attendance cumulative' },
-                { label: 'Registered', metric: 'Registered attendees cumulative' },
-                { label: 'Sponsorship ($K)', metric: 'Total PIMCON sponsorship sold cumulative', divisor: 1000 }
+                { label: 'Projected Attendance', metric: 'Projected attendance cumulative', color: COLORS.primary },
+                { label: 'Registered', metric: 'Registered attendees cumulative', color: COLORS.blue },
+                { label: 'Sponsorship ($K)', metric: 'Total PIMCON sponsorship sold cumulative', divisor: 1000, color: '#22c55e' }
             ];
-            // Fallback metric names
             var pimconFallbacks = {
                 'Projected attendance cumulative': ['Projected attendance'],
                 'Registered attendees cumulative': ['Registered attendees'],
                 'Total PIMCON sponsorship sold cumulative': ['Total sponnsorship sold', 'Total sponsorship sold', 'Total PIMCON sponsorship sold']
             };
-            var pcDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = pimconMetrics.map(function(pm) {
-                    var r = mktRow(pm.metric);
-                    if (!r && pimconFallbacks[pm.metric]) {
-                        pimconFallbacks[pm.metric].some(function(fb) { r = mktRow(fb); return !!r; });
-                    }
-                    var val = r ? (gv(r, m.idx) || 0) : 0;
-                    return pm.divisor ? val / pm.divisor : val;
-                });
-                pcDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            var pcDatasets = pimconMetrics.map(function(pm) {
+                var r = mktRow(pm.metric);
+                if (!r && pimconFallbacks[pm.metric]) {
+                    pimconFallbacks[pm.metric].some(function(fb) { r = mktRow(fb); return !!r; });
+                }
+                return {
+                    label: pm.label,
+                    data: mktMonths.map(function(m) {
+                        var val = r ? (gv(r, m.idx) || 0) : 0;
+                        return pm.divisor ? val / pm.divisor : val;
+                    }),
+                    backgroundColor: pm.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-pimcon'), {
                 type: 'bar',
-                data: { labels: pimconMetrics.map(function(pm) { return pm.label; }), datasets: pcDatasets },
+                data: { labels: mktMonthLabels, datasets: pcDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
