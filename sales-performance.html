@@ -500,9 +500,8 @@
                             var ctx = chart.ctx;
                             var meta = chart.getDatasetMeta(0);
                             meta.data.forEach(function(bar, i) {
-                                var arr = pipeArr[i];
-                                var label = arr ? fmtMoney(arr) : '';
-                                if (!label) return;
+                                var deals = pipeDeals[i];
+                                var label = deals + (deals === 1 ? ' deal' : ' deals');
                                 ctx.save();
                                 ctx.font = '600 11px Inter, sans-serif';
                                 ctx.fillStyle = '#07374F';
@@ -517,8 +516,8 @@
                         data: {
                             labels: pipeNames,
                             datasets: [{
-                                label: 'Deals in Pipeline',
-                                data: pipeDeals,
+                                label: 'Pipeline ARR',
+                                data: pipeArr,
                                 backgroundColor: [COLORS.primary, COLORS.blue, '#eedc82', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'],
                                 borderRadius: 4
                             }]
@@ -529,9 +528,9 @@
                             layout: { padding: { top: 20 } },
                             plugins: {
                                 legend: { display: false },
-                                tooltip: { callbacks: { afterLabel: function(c) { return pipeArr[c.dataIndex] ? 'ARR: ' + fmtMoney(pipeArr[c.dataIndex]) : ''; } } }
+                                tooltip: { callbacks: { label: function(c) { return fmtMoney(c.raw); }, afterLabel: function(c) { return pipeDeals[c.dataIndex] + ' deals'; } } }
                             },
-                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                            scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
                         }
                     });
                 }
