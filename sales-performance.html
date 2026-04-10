@@ -1078,19 +1078,24 @@
                 }
             });
 
-            // Newsletter chart
-            var nlMetrics = ['Total Subscribers', 'New Subscribers', 'Total Views'];
-            var nlDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = nlMetrics.map(function(nm) {
-                    var r = mktRow(nm);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                nlDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            // Newsletter chart — months on x-axis, metrics as datasets
+            var nlItems = [
+                { label: 'Total Subscribers', metric: 'Total Subscribers', color: COLORS.primary },
+                { label: 'New Subscribers', metric: 'New Subscribers', color: COLORS.blue },
+                { label: 'Total Views', metric: 'Total Views', color: '#22c55e' }
+            ];
+            var nlDatasets = nlItems.map(function(nl) {
+                var r = mktRow(nl.metric);
+                return {
+                    label: nl.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: nl.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-newsletter'), {
                 type: 'bar',
-                data: { labels: nlMetrics, datasets: nlDatasets },
+                data: { labels: mktMonthLabels, datasets: nlDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
@@ -1098,23 +1103,24 @@
                 }
             });
 
-            // YouTube chart
-            var ytMetrics = [
-                { label: 'Subscribers', metric: 'YouTube Total Subscribers' },
-                { label: 'Long Form Views', metric: 'YouTube Long Form Average Views' },
-                { label: 'Shorts Views', metric: 'YouTube Shorts Average Views' }
+            // YouTube chart — months on x-axis, metrics as datasets
+            var ytItems = [
+                { label: 'Subscribers', metric: 'YouTube Total Subscribers', color: '#ff0000' },
+                { label: 'Long Form Views', metric: 'YouTube Long Form Average Views', color: COLORS.primary },
+                { label: 'Shorts Views', metric: 'YouTube Shorts Average Views', color: COLORS.blue }
             ];
-            var ytDatasets = [];
-            mktMonths.forEach(function(m, mi) {
-                var data = ytMetrics.map(function(ym) {
-                    var r = mktRow(ym.metric);
-                    return r ? (gv(r, m.idx) || 0) : 0;
-                });
-                ytDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi], borderRadius: 4 });
+            var ytDatasets = ytItems.map(function(yt) {
+                var r = mktRow(yt.metric);
+                return {
+                    label: yt.label,
+                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
+                    backgroundColor: yt.color,
+                    borderRadius: 4
+                };
             });
             new Chart(document.getElementById('chart-youtube'), {
                 type: 'bar',
-                data: { labels: ytMetrics.map(function(ym) { return ym.label; }), datasets: ytDatasets },
+                data: { labels: mktMonthLabels, datasets: ytDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
