@@ -425,6 +425,12 @@
                     <input type="text" class="form-input" id="field-company" placeholder="e.g. Smith & Associates" required>
                 </div>
 
+                <!-- URL -->
+                <div class="form-group">
+                    <label class="form-label">URL</label>
+                    <input type="url" class="form-input" id="field-url" placeholder="e.g. https://smithlaw.com">
+                </div>
+
                 <hr class="form-divider">
 
                 <button type="submit" class="btn-submit" id="btn-submit">
@@ -460,6 +466,7 @@
 //     new Date(),
 //     data.name,
 //     data.company,
+//     data.url,
 //     data.callDate,
 //     data.urgency,
 //     data.depth,
@@ -539,6 +546,7 @@ document.getElementById('strategy-form').addEventListener('submit', async functi
         depth: document.querySelector('input[name="depth"]:checked').value,
         recording: document.getElementById('field-recording').value.trim(),
         context: document.getElementById('field-context').value.trim(),
+        url: document.getElementById('field-url').value.trim(),
     };
 
     if (!APPS_SCRIPT_URL) {
@@ -565,6 +573,7 @@ document.getElementById('strategy-form').addEventListener('submit', async functi
 
         // Reset form
         document.getElementById('field-company').value = '';
+        document.getElementById('field-url').value = '';
         document.getElementById('field-recording').value = '';
         document.getElementById('field-context').value = '';
         document.getElementById('field-date').valueAsDate = new Date();
