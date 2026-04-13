@@ -823,7 +823,8 @@
                 <button class="view-toggle-btn active" id="viewBoard" onclick="setView('board')">Board</button>
                 <button class="view-toggle-btn" id="viewList" onclick="setView('list')">List</button>
             </div>
-            <button class="btn btn-primary" onclick="openNewProjectModal()">+ New Request</button>
+            <button class="btn btn-secondary" onclick="openNewProjectModal('idea')">+ Idea</button>
+            <button class="btn btn-primary" onclick="openNewProjectModal('request')">+ Request</button>
         </div>
     </div>
 </header>
@@ -1483,16 +1484,16 @@ function closeDetail() {
 }
 
 // ── CRUD ─────────────────────────────────────────────────────
-function openNewProjectModal() {
+function openNewProjectModal(status) {
     editingId = null;
-    document.getElementById('modalTitle').textContent = 'New Project';
-    document.getElementById('formSubmitBtn').textContent = 'Submit Project';
+    document.getElementById('modalTitle').textContent = status === 'idea' ? 'New Idea' : 'New Request';
+    document.getElementById('formSubmitBtn').textContent = status === 'idea' ? 'Submit Idea' : 'Submit Request';
     document.getElementById('formName').value = '';
     document.getElementById('formDesc').value = '';
     document.getElementById('formType').value = 'miscellaneous';
     document.getElementById('formTeam').value = currentTeamFilter !== 'all' ? currentTeamFilter : 'Leadership';
     document.getElementById('formPriority').value = 'medium';
-    document.getElementById('formStatus').value = 'request';
+    document.getElementById('formStatus').value = status || 'request';
     document.getElementById('formRequester').value = '';
     document.getElementById('formAssignee').value = '';
     document.getElementById('formDate').value = '';
