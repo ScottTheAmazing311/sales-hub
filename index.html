@@ -565,16 +565,15 @@
     </div>
 </div>
 
-<!-- ── MRR Mountain Tracker ── -->
+<!-- ── MRR Mountain Tracker (live from Google Sheet) ── -->
 <div class="mrr-tracker">
     <div class="mrr-tracker-inner">
         <div class="mrr-header">
-            <div class="mrr-title">MRR Goal Tracker</div>
-            <div class="mrr-values"><strong>$63,375</strong> / $140,000</div>
+            <div class="mrr-title">MRR Goal Tracker — <span id="mrr-month-label">Loading…</span></div>
+            <div class="mrr-values"><strong id="mrr-current">…</strong> / <span id="mrr-goal-label">…</span></div>
         </div>
         <div class="mrr-mountain-wrap">
             <svg viewBox="0 0 1000 240" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Sky gradient -->
                 <defs>
                     <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stop-color="rgba(60,148,209,0.15)"/>
@@ -588,10 +587,6 @@
                         <stop offset="0%" stop-color="#ffffff"/>
                         <stop offset="100%" stop-color="#c8dce4"/>
                     </linearGradient>
-                    <linearGradient id="pathGrad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="rgba(234,255,106,0.3)"/>
-                        <stop offset="100%" stop-color="rgba(234,255,106,0.8)"/>
-                    </linearGradient>
                     <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stop-color="#eaff6a"/>
                         <stop offset="100%" stop-color="#c8e636"/>
@@ -603,49 +598,31 @@
 
                 <!-- Background mountain (far) -->
                 <polygon points="200,240 350,100 420,135 500,65 600,120 680,80 750,240" fill="rgba(74,122,138,0.3)"/>
-
                 <!-- Main mountain -->
                 <polygon points="0,240 80,185 180,160 300,120 420,90 500,45 580,90 650,105 750,130 850,165 950,195 1000,240" fill="url(#mtnGrad)"/>
-
                 <!-- Snow cap -->
                 <polygon points="460,65 500,45 540,65 530,68 510,58 490,58 470,68" fill="url(#snowGrad)" opacity="0.9"/>
 
                 <!-- Trail path (full) -->
                 <polyline points="30,225 100,205 200,185 300,158 400,125 500,80"
                     fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round"/>
-
-                <!-- Trail path (progress) — 63.375k/140k = ~45.27% -->
+                <!-- Trail path (progress) — updated dynamically -->
                 <polyline id="mrr-progress-path" points="30,225 100,205 200,185 300,158 400,125 500,80"
                     fill="none" stroke="url(#progressGrad)" stroke-width="3" stroke-linecap="round"
-                    stroke-dasharray="520" stroke-dashoffset="285"/>
+                    stroke-dasharray="520" stroke-dashoffset="520"/>
 
                 <!-- Flag at summit -->
                 <g transform="translate(495, 18)">
                     <line x1="0" y1="0" x2="0" y2="22" stroke="#fff" stroke-width="1.5"/>
                     <polygon points="0,0 16,5 0,10" fill="var(--yellow)"/>
                 </g>
-                <text x="500" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="700" fill="var(--yellow)">$140K</text>
+                <text id="mrr-flag-label" x="500" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="700" fill="var(--yellow)">…</text>
 
-                <!-- Milestone markers -->
-                <g>
-                    <circle cx="155" cy="192" r="3" fill="rgba(255,255,255,0.5)"/>
-                    <text x="155" y="185" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$25K</text>
-                </g>
-                <g>
-                    <circle cx="280" cy="165" r="3" fill="rgba(255,255,255,0.5)"/>
-                    <text x="280" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$50K</text>
-                </g>
-                <g>
-                    <circle cx="370" cy="135" r="3" fill="rgba(255,255,255,0.5)"/>
-                    <text x="370" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$75K</text>
-                </g>
-                <g>
-                    <circle cx="440" cy="105" r="3" fill="rgba(255,255,255,0.5)"/>
-                    <text x="440" y="98" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="rgba(255,255,255,0.7)">$100K</text>
-                </g>
+                <!-- Milestone markers (positioned dynamically) -->
+                <g id="mrr-milestones"></g>
 
-                <!-- Goat at current position (~45.27% along trail) -->
-                <image id="mrr-goat" href="goat.png" x="240" y="158" width="45" height="45" filter="url(#toWhite)"/>
+                <!-- Goat at current position (updated dynamically) -->
+                <image id="mrr-goat" href="goat.png" x="30" y="200" width="45" height="45" filter="url(#toWhite)"/>
 
                 <!-- Ground line -->
                 <line x1="0" y1="240" x2="1000" y2="240" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
@@ -654,12 +631,186 @@
         <!-- Progress bar below mountain -->
         <div style="display:flex;align-items:center;gap:8px;padding-bottom:1rem;">
             <div style="flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
-                <div style="width:45.27%;height:100%;background:linear-gradient(90deg,#eaff6a,#c8e636);border-radius:3px;transition:width 0.6s ease;"></div>
+                <div id="mrr-bar-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#eaff6a,#c8e636);border-radius:3px;transition:width 0.6s ease;"></div>
             </div>
-            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:600;color:var(--yellow);white-space:nowrap;">45.3%</span>
+            <span id="mrr-bar-pct" style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:600;color:var(--yellow);white-space:nowrap;">0%</span>
         </div>
     </div>
 </div>
+
+<script>
+(function mrrTracker() {
+    var SHEET_ID = '1-urPmmHtiLdJDoAXEFb4SLIfcRhojlUm8rcmLeSVwyY';
+    var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var MONTH_FULL  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    // Trail waypoints (same as SVG polyline)
+    var trail = [{x:30,y:225},{x:100,y:205},{x:200,y:185},{x:300,y:158},{x:400,y:125},{x:500,y:80}];
+
+    function fetchSheet() {
+        // Use JSONP via <script> tag to avoid CORS restrictions
+        var callbackName = '__mrrData_' + Date.now();
+        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+            '/gviz/tq?tqx=responseHandler:' + callbackName;
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.head.removeChild(script);
+            processData(data);
+        };
+        var script = document.createElement('script');
+        script.src = url;
+        script.onerror = function() {
+            delete window[callbackName];
+            document.head.removeChild(script);
+            console.error('MRR Tracker: Failed to fetch sheet');
+        };
+        document.head.appendChild(script);
+    }
+
+    function processData(data) {
+        var rows = data.table.rows;
+        var cols = data.table.cols;
+        var now = new Date();
+        var curMonth = now.getMonth();     // 0-indexed
+        var curYear  = now.getFullYear();
+        var curMonthAbbr = MONTH_NAMES[curMonth]; // e.g. "Apr"
+
+        // 1) Find goal for current month from goal columns (H=7, I=8)
+        var goalAmount = 140000; // fallback
+        for (var i = 0; i < rows.length; i++) {
+            var goalMonthCell = rows[i].c[7];
+            var goalAmountCell = rows[i].c[8];
+            if (goalMonthCell && goalMonthCell.v && goalAmountCell && goalAmountCell.v) {
+                if (goalMonthCell.v === curMonthAbbr) {
+                    goalAmount = Number(goalAmountCell.v);
+                    break;
+                }
+            }
+        }
+
+        // 2) Sum MRR for deals closed in current month & year
+        var totalMRR = 0;
+        var deals = [];
+        for (var i = 0; i < rows.length; i++) {
+            var mrrCell  = rows[i].c[1];
+            var dateCell = rows[i].c[5];
+            if (!dateCell || !dateCell.v || !mrrCell) continue;
+
+            // Parse the date — gviz returns "Date(YYYY,M,D,H,m,s)" format
+            var dateVal = dateCell.v;
+            var d;
+            if (typeof dateVal === 'string' && dateVal.indexOf('Date(') !== -1) {
+                var parts = dateVal.replace('Date(','').replace(')','').split(',');
+                d = new Date(+parts[0], +parts[1], +parts[2]);
+            } else if (typeof dateVal === 'string') {
+                d = new Date(dateVal);
+            } else {
+                continue;
+            }
+
+            if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
+                var mrr = Number(mrrCell.v) || 0;
+                totalMRR += mrr;
+                deals.push({ name: rows[i].c[0] ? rows[i].c[0].v : '', mrr: mrr });
+            }
+        }
+
+        updateMountain(totalMRR, goalAmount, curMonth);
+    }
+
+    function updateMountain(current, goal, monthIdx) {
+        var pct = Math.min(current / goal, 1);
+
+        // Header labels
+        document.getElementById('mrr-month-label').textContent = MONTH_FULL[monthIdx];
+        document.getElementById('mrr-current').textContent = '$' + current.toLocaleString();
+        document.getElementById('mrr-goal-label').textContent = '$' + goal.toLocaleString();
+
+        // Flag label at summit
+        var goalK = goal >= 1000 ? '$' + Math.round(goal / 1000) + 'K' : '$' + goal.toLocaleString();
+        document.getElementById('mrr-flag-label').textContent = goalK;
+
+        // Progress path — total dash length is 520
+        var totalDash = 520;
+        var offset = totalDash - (totalDash * pct);
+        var pathEl = document.getElementById('mrr-progress-path');
+        pathEl.setAttribute('stroke-dashoffset', offset);
+
+        // Goat position along the trail
+        var pos = getPointOnTrail(pct);
+        var goat = document.getElementById('mrr-goat');
+        goat.setAttribute('x', pos.x - 22);
+        goat.setAttribute('y', pos.y - 35);
+
+        // Milestone markers — place 4 evenly: 25%, 50%, 75%, close to summit
+        var milestonesEl = document.getElementById('mrr-milestones');
+        milestonesEl.innerHTML = '';
+        var milestoneSteps = [0.25, 0.50, 0.75];
+        // Only show milestones if goal is large enough
+        if (goal >= 10000) {
+            for (var i = 0; i < milestoneSteps.length; i++) {
+                var mPct = milestoneSteps[i];
+                var mVal = Math.round(goal * mPct);
+                var mLabel = mVal >= 1000 ? '$' + Math.round(mVal / 1000) + 'K' : '$' + mVal;
+                var mPos = getPointOnTrail(mPct);
+                var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', mPos.x);
+                circle.setAttribute('cy', mPos.y);
+                circle.setAttribute('r', '3');
+                circle.setAttribute('fill', 'rgba(255,255,255,0.5)');
+                var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', mPos.x);
+                text.setAttribute('y', mPos.y - 7);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-family', 'IBM Plex Mono');
+                text.setAttribute('font-size', '12');
+                text.setAttribute('font-weight', '600');
+                text.setAttribute('fill', 'rgba(255,255,255,0.7)');
+                text.textContent = mLabel;
+                g.appendChild(circle);
+                g.appendChild(text);
+                milestonesEl.appendChild(g);
+            }
+        }
+
+        // Progress bar
+        var pctDisplay = Math.round(pct * 1000) / 10;
+        document.getElementById('mrr-bar-fill').style.width = pctDisplay + '%';
+        document.getElementById('mrr-bar-pct').textContent = pctDisplay + '%';
+    }
+
+    function getPointOnTrail(pct) {
+        // Walk along the trail polyline segments
+        var segs = [];
+        var totalLen = 0;
+        for (var i = 1; i < trail.length; i++) {
+            var dx = trail[i].x - trail[i-1].x;
+            var dy = trail[i].y - trail[i-1].y;
+            var len = Math.sqrt(dx*dx + dy*dy);
+            segs.push({ start: trail[i-1], end: trail[i], len: len });
+            totalLen += len;
+        }
+        var target = pct * totalLen;
+        var walked = 0;
+        for (var i = 0; i < segs.length; i++) {
+            if (walked + segs[i].len >= target) {
+                var frac = (target - walked) / segs[i].len;
+                return {
+                    x: segs[i].start.x + frac * (segs[i].end.x - segs[i].start.x),
+                    y: segs[i].start.y + frac * (segs[i].end.y - segs[i].start.y)
+                };
+            }
+            walked += segs[i].len;
+        }
+        return trail[trail.length - 1];
+    }
+
+    // Fetch on load and refresh every 5 minutes
+    fetchSheet();
+    setInterval(fetchSheet, 5 * 60 * 1000);
+})();
+</script>
 
 <main class="main">
 
