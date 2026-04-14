@@ -1,0 +1,1174 @@
+{
+  "clients": [
+    {
+      "name": "The Law Offices of Ivan M. Diamond",
+      "lat": 40.8568167,
+      "lng": -73.8283442
+    },
+    {
+      "name": "Michigan Injury Lawyers",
+      "lat": 42.6037574,
+      "lng": -83.2899304
+    },
+    {
+      "name": "Lorenz & Lorenz",
+      "lat": 30.273186,
+      "lng": -97.8167541
+    },
+    {
+      "name": "The Weisblatt Law Firm, PLLC",
+      "lat": 29.8075829,
+      "lng": -95.8053115
+    },
+    {
+      "name": "Hach & Rose, LLP",
+      "lat": 40.745176,
+      "lng": -73.985161
+    },
+    {
+      "name": "Gray Ritter Graham",
+      "lat": 38.626646,
+      "lng": -90.19264
+    },
+    {
+      "name": "Finz & Finz, P.C.",
+      "lat": 40.6979927,
+      "lng": -73.9556317
+    },
+    {
+      "name": "Pribanic & Pribanic",
+      "lat": 40.4370479,
+      "lng": -79.9977445
+    },
+    {
+      "name": "Vogelzang Law",
+      "lat": 41.8837612,
+      "lng": -87.6331433
+    },
+    {
+      "name": "Lulich & Attorneys",
+      "lat": 27.8175555,
+      "lng": -80.4736645
+    },
+    {
+      "name": "Yosha Law, Injury & Accident Lawyers",
+      "lat": 39.9290102,
+      "lng": -86.1537272
+    },
+    {
+      "name": "Maze Law Offices Accident & Injury Lawyers",
+      "lat": 38.0580767,
+      "lng": -84.4813152
+    },
+    {
+      "name": "Clearwater Auto Injury Litigation Center",
+      "lat": 27.9737757,
+      "lng": -82.7467335
+    },
+    {
+      "name": "Litigation Connect",
+      "lat": 27.93768,
+      "lng": -82.7936455
+    },
+    {
+      "name": "Maggiano, DiGirolamo & Lizzi P.C.",
+      "lat": 40.8314943,
+      "lng": -73.9794991
+    },
+    {
+      "name": "Frankl Kominsky Injury Lawyers",
+      "lat": 26.5126082,
+      "lng": -80.088197
+    },
+    {
+      "name": "Goodman Acker P.C.",
+      "lat": 42.4826312,
+      "lng": -83.2539084
+    },
+    {
+      "name": "Law Offices of Jason B. Kessler, PC",
+      "lat": 41.033535,
+      "lng": -73.767239
+    },
+    {
+      "name": "Cook Barkett Ponder & Wolz",
+      "lat": 37.3295477,
+      "lng": -89.5661796
+    },
+    {
+      "name": "Queller, Fisher, Washor, Fuchs & Kool and The Law Office Of William A. Gallina, LLP",
+      "lat": 40.7124491,
+      "lng": -74.0082925
+    },
+    {
+      "name": "Reinartz Law Firm",
+      "lat": 40.8792745,
+      "lng": -74.0453487
+    },
+    {
+      "name": "Richard Schwartz & Associates Injury Lawyers P.A.",
+      "lat": 32.3015314,
+      "lng": -90.1864603
+    },
+    {
+      "name": "Abels & Annes, P.C.",
+      "lat": 41.8833645,
+      "lng": -87.6328789
+    },
+    {
+      "name": "The Bruning Law Firm - Personal Injury Lawyers",
+      "lat": 39.0470189,
+      "lng": -94.5974363
+    },
+    {
+      "name": "Klezmer Maudlin PC",
+      "lat": 39.9117423,
+      "lng": -86.0589994
+    },
+    {
+      "name": "Joel M. Mann - Las Vegas Criminal Defense Lawyer",
+      "lat": 36.1620906,
+      "lng": -115.1420272
+    },
+    {
+      "name": "DM Injury Law",
+      "lat": 39.0445691,
+      "lng": -94.5976855
+    },
+    {
+      "name": "Haeggquist & Eck, LLP",
+      "lat": 32.7159073,
+      "lng": -117.1622012
+    },
+    {
+      "name": "Palmer Law Group",
+      "lat": 39.0265084,
+      "lng": -95.6835122
+    },
+    {
+      "name": "Bridges Dispute Resolution",
+      "lat": 47.2549707,
+      "lng": -122.4370932
+    },
+    {
+      "name": "Dickson Frohlich Phillips Burgess",
+      "lat": 47.6103182,
+      "lng": -122.3341399
+    },
+    {
+      "name": "The Perecman Firm, P.L.L.C.",
+      "lat": 40.7662801,
+      "lng": -73.9824591
+    },
+    {
+      "name": "Rosenberg & Gluck, LLP",
+      "lat": 40.7336486,
+      "lng": -73.6353163
+    },
+    {
+      "name": "Hasner Law: Atlanta Injury & Workers' Compensation Attorneys",
+      "lat": 33.8675275,
+      "lng": -84.4720008
+    },
+    {
+      "name": "Carr & Carr Injury Attorneys",
+      "lat": 36.100671,
+      "lng": -95.940787
+    },
+    {
+      "name": "The Rothenberg Law Firm Accident and Injury Lawyers",
+      "lat": 39.9492642,
+      "lng": -75.1654596
+    },
+    {
+      "name": "Nicoletti Accident Injury Lawyers",
+      "lat": 28.2809668,
+      "lng": -82.6985854
+    },
+    {
+      "name": "The Flood Law Firm LLC",
+      "lat": 41.5612045,
+      "lng": -72.6554672
+    },
+    {
+      "name": "Greg Jones Law",
+      "lat": 34.232442,
+      "lng": -77.82699
+    },
+    {
+      "name": "Terry Bryant Accident & Injury Law",
+      "lat": 29.786752,
+      "lng": -95.4976792
+    },
+    {
+      "name": "Fulgham Hampton Criminal Defense Attorneys",
+      "lat": 32.7243216,
+      "lng": -97.3818222
+    },
+    {
+      "name": "Reiner, Slaughter & Frankel, LLP",
+      "lat": 40.5731046,
+      "lng": -122.3730716
+    },
+    {
+      "name": "Holliday Karatinos Law Firm, PLLC",
+      "lat": 28.53463,
+      "lng": -82.4720738
+    },
+    {
+      "name": "Law Offices of James Scott Farrin",
+      "lat": 35.9908218,
+      "lng": -78.9024353
+    },
+    {
+      "name": "Law Office of Nathaniel Pitoniak",
+      "lat": 29.7499412,
+      "lng": -95.3324061
+    },
+    {
+      "name": "Ryan Orsatti Injury Lawyer",
+      "lat": 29.5690797,
+      "lng": -98.5760473
+    },
+    {
+      "name": "Lopez Law Group",
+      "lat": 27.7791824,
+      "lng": -82.6427799
+    },
+    {
+      "name": "BANDERAS LAW, PC",
+      "lat": 34.066803,
+      "lng": -117.5783372
+    },
+    {
+      "name": "BTL Family Law",
+      "lat": 33.6213001,
+      "lng": -111.8882054
+    },
+    {
+      "name": "Marcus & Mack",
+      "lat": 40.6216611,
+      "lng": -79.150576
+    },
+    {
+      "name": "Calvin Smith Law",
+      "lat": 33.8512366,
+      "lng": -84.3663771
+    },
+    {
+      "name": "Cohen & Bernstein, LLC",
+      "lat": 40.8536379,
+      "lng": -74.173447
+    },
+    {
+      "name": "Law Offices of David M. White",
+      "lat": 32.4018144,
+      "lng": -99.7418628
+    },
+    {
+      "name": "Crowson Law Group",
+      "lat": 61.2158829,
+      "lng": -149.8829668
+    },
+    {
+      "name": "Mann Wyatt Tanksley Injury Attorneys",
+      "lat": 38.0531,
+      "lng": -97.9278
+    },
+    {
+      "name": "Langston & Lott, PLLC",
+      "lat": 34.6560623,
+      "lng": -88.5638315
+    },
+    {
+      "name": "Alexander Law Group, LLP",
+      "lat": 37.3324673,
+      "lng": -121.8943707
+    },
+    {
+      "name": "Morris Bart Personal Injury Lawyers",
+      "lat": 29.9496972,
+      "lng": -90.0697298
+    },
+    {
+      "name": "Spetsas Buist Accident Injury Lawyers, PLLC",
+      "lat": 28.5460289,
+      "lng": -81.3745694
+    },
+    {
+      "name": "The Thumbs Up Guys - Personal Injury Attorneys",
+      "lat": 32.8710137,
+      "lng": -80.0199866
+    },
+    {
+      "name": "Manassa Law, P.C.",
+      "lat": 42.162879,
+      "lng": -88.15319
+    },
+    {
+      "name": "Anderson O'Brien, LLP",
+      "lat": 44.5232707,
+      "lng": -89.5810535
+    },
+    {
+      "name": "Rosenthal, Levy, Simon & Sosa Injury Lawyers",
+      "lat": 26.72618,
+      "lng": -80.0807581
+    },
+    {
+      "name": "ABC Law Centers: Birth Injury Lawyers",
+      "lat": 42.5829127,
+      "lng": -83.2422273
+    },
+    {
+      "name": "Stroleny Law",
+      "lat": 25.7739191,
+      "lng": -80.1949873
+    },
+    {
+      "name": "Tucker Lawyers PC",
+      "lat": 40.7093676,
+      "lng": -74.010048
+    },
+    {
+      "name": "Law Office of David Ellin",
+      "lat": 39.4732562,
+      "lng": -76.8358384
+    },
+    {
+      "name": "Walner Law",
+      "lat": 41.8827978,
+      "lng": -87.6321728
+    },
+    {
+      "name": "The Estate Plan",
+      "lat": 25.747303,
+      "lng": -80.2582089
+    },
+    {
+      "name": "Lawsuite Legal News",
+      "lat": 35.1982836,
+      "lng": -111.651302
+    },
+    {
+      "name": "Steven H. Heisler",
+      "lat": 39.301559,
+      "lng": -76.612952
+    },
+    {
+      "name": "The Atlantic Law Firm",
+      "lat": 32.0643643,
+      "lng": -81.0976906
+    },
+    {
+      "name": "Udall Shumway",
+      "lat": 33.4352149,
+      "lng": -111.8604965
+    },
+    {
+      "name": "Kantor & Kantor, LLP",
+      "lat": 34.2396788,
+      "lng": -118.5627453
+    },
+    {
+      "name": "Tysons Trial Law, PLLC",
+      "lat": 38.9239356,
+      "lng": -77.2227459
+    },
+    {
+      "name": "Lewis & Lewis, P.C.",
+      "lat": 42.8815907,
+      "lng": -78.8778227
+    },
+    {
+      "name": "Cindy Goldstein Law",
+      "lat": 26.272016,
+      "lng": -80.2610355
+    },
+    {
+      "name": "HALE LAW - ACCIDENT ATTORNEYS",
+      "lat": 27.3381545,
+      "lng": -82.5124529
+    },
+    {
+      "name": "DFW Injury Lawyers",
+      "lat": 32.8220045,
+      "lng": -96.8664868
+    },
+    {
+      "name": "Born & McCaffrey, PC",
+      "lat": 39.6959994,
+      "lng": -104.9388406
+    },
+    {
+      "name": "O'Connor, Acciani & Levy",
+      "lat": 39.1027433,
+      "lng": -84.5132017
+    },
+    {
+      "name": "Viloria, Oliphant, Oster & Aman L.L.P.",
+      "lat": 39.5203349,
+      "lng": -119.8151899
+    },
+    {
+      "name": "Brooks Law Firm",
+      "lat": 42.4182042,
+      "lng": -71.1101585
+    },
+    {
+      "name": "Your Insurance Attorney",
+      "lat": 25.732529,
+      "lng": -80.2342656
+    },
+    {
+      "name": "McConnell Family Law Group",
+      "lat": 41.7668644,
+      "lng": -72.7158967
+    },
+    {
+      "name": "The Law Offices of Bailey & Burke",
+      "lat": 42.4171757,
+      "lng": -71.6845867
+    },
+    {
+      "name": "Law Office of Parag L. Amin, P.C.",
+      "lat": 33.9460961,
+      "lng": -118.3865908
+    },
+    {
+      "name": "Olen Firm Criminal Defense Lawyers",
+      "lat": 34.1468647,
+      "lng": -118.1327162
+    },
+    {
+      "name": "Hurst Limontes Indiana Injury Lawyers",
+      "lat": 39.7658108,
+      "lng": -86.1585049
+    },
+    {
+      "name": "Tyroler Leonard Injury & Accident Lawyer",
+      "lat": 44.9534686,
+      "lng": -92.9616294
+    },
+    {
+      "name": "Gauthier & Maier Law Firm, P.C.",
+      "lat": 35.1023678,
+      "lng": -106.6143573
+    },
+    {
+      "name": "Law Offices of Mickey Fine",
+      "lat": 35.3736443,
+      "lng": -119.0127655
+    },
+    {
+      "name": "Car Crash Ash Accident Lawyer",
+      "lat": 32.7770217,
+      "lng": -117.1177429
+    },
+    {
+      "name": "Cummings & Kennedy Law Firm, PLLC",
+      "lat": 34.719203,
+      "lng": -76.65957
+    },
+    {
+      "name": "Coates Law Office",
+      "lat": 42.7845458,
+      "lng": -71.509328
+    },
+    {
+      "name": "Finn Trial Attorneys APC",
+      "lat": 32.7152364,
+      "lng": -117.1678963
+    },
+    {
+      "name": "Edward Smith Injury & Accident Lawyer",
+      "lat": 40.151902,
+      "lng": -105.1124653
+    },
+    {
+      "name": "Furman | Honick Law",
+      "lat": 39.3998374,
+      "lng": -76.7785932
+    },
+    {
+      "name": "Dihle Law Firm",
+      "lat": 37.7440081,
+      "lng": -89.003563
+    },
+    {
+      "name": "Slingshot Law - Injury Attorneys",
+      "lat": 30.2808012,
+      "lng": -97.7410125
+    },
+    {
+      "name": "Yellowstone Law",
+      "lat": 45.7837058,
+      "lng": -108.5238239
+    },
+    {
+      "name": "The Zinn Law Firm",
+      "lat": 37.8889652,
+      "lng": -122.5183627
+    },
+    {
+      "name": "Garnes Injury Law - Pembroke Pines Office",
+      "lat": 26.0063065,
+      "lng": -80.2913618
+    },
+    {
+      "name": "The Ye Law Firm Injury Lawyers",
+      "lat": 47.3159218,
+      "lng": -122.3351684
+    },
+    {
+      "name": "AP Law Group - Personal Injury & Accident Attorneys",
+      "lat": 29.76223,
+      "lng": -95.462213
+    },
+    {
+      "name": "Graves McLain Injury Lawyers",
+      "lat": 36.1025676,
+      "lng": -95.939485
+    },
+    {
+      "name": "Miller & Jacobs",
+      "lat": 26.2101499,
+      "lng": -80.1063932
+    },
+    {
+      "name": "Emmanuel Sheppard & Condon",
+      "lat": 30.4114375,
+      "lng": -87.2178485
+    },
+    {
+      "name": "Wapner Newman Personal Injury and Medical Malpractice Lawyers",
+      "lat": 39.9537032,
+      "lng": -75.1679701
+    },
+    {
+      "name": "The Law Offices of Alex Bonilla, P.C.",
+      "lat": 37.7772271,
+      "lng": -122.4178469
+    },
+    {
+      "name": "The Calderon Law Firm - Abogado José Calderón",
+      "lat": 29.7064317,
+      "lng": -95.4604379
+    },
+    {
+      "name": "Powell Law Firm",
+      "lat": 38.6380046,
+      "lng": -90.3913999
+    },
+    {
+      "name": "Williams Elleby Howard & Easter",
+      "lat": 34.0381494,
+      "lng": -84.6740382
+    },
+    {
+      "name": "Olan Law",
+      "lat": 33.9980904,
+      "lng": -118.4792141
+    },
+    {
+      "name": "Crain Brogdon, LLP",
+      "lat": 32.8471595,
+      "lng": -96.7714241
+    },
+    {
+      "name": "Cowen Rodriguez Peacock - The Trucking Trial Lawyers",
+      "lat": 29.4869809,
+      "lng": -98.5421581
+    },
+    {
+      "name": "Neale & Fhima: Accident, Injury, & Lemon Law Lawyers",
+      "lat": 33.4675568,
+      "lng": -117.6975291
+    },
+    {
+      "name": "Kaufman Workers' Compensation Law",
+      "lat": 40.1163443,
+      "lng": -75.121111
+    },
+    {
+      "name": "THE BROWN LAW FIRM",
+      "lat": 40.106827,
+      "lng": -74.2211945
+    },
+    {
+      "name": "Wade Litigation",
+      "lat": 33.873152,
+      "lng": -118.3765543
+    },
+    {
+      "name": "Lowenberg Law Firm",
+      "lat": 29.7383625,
+      "lng": -95.4715145
+    },
+    {
+      "name": "North Atlanta Injury Law",
+      "lat": 34.0891576,
+      "lng": -84.3437497
+    },
+    {
+      "name": "Pendergast Law",
+      "lat": 47.4691272,
+      "lng": -122.2113327
+    },
+    {
+      "name": "Leverty & Associates Law Chartered | Personal Injury & Insurance Lawyers",
+      "lat": 39.5244681,
+      "lng": -119.801587
+    },
+    {
+      "name": "Gross Law Group, P.A.",
+      "lat": 30.1559382,
+      "lng": -85.7287944
+    },
+    {
+      "name": "Cava Law Firm Personal Injury Attorneys",
+      "lat": 42.1048289,
+      "lng": -72.5881665
+    },
+    {
+      "name": "Bonnici Law Group, APC",
+      "lat": 32.7222484,
+      "lng": -117.1604929
+    },
+    {
+      "name": "Jacobs and Jacobs Injury Law Group",
+      "lat": 47.1908404,
+      "lng": -122.29289
+    },
+    {
+      "name": "Branch & Dhillon, P.C.",
+      "lat": 32.7371879,
+      "lng": -97.1141371
+    },
+    {
+      "name": "Brenton Legal P.A.",
+      "lat": 26.9334494,
+      "lng": -80.0746738
+    },
+    {
+      "name": "Wyant Law",
+      "lat": 39.9541461,
+      "lng": -86.0140507
+    },
+    {
+      "name": "Narwal Injury Law",
+      "lat": 48.7514002,
+      "lng": -122.4781183
+    },
+    {
+      "name": "Trust Law Partners LLP",
+      "lat": 34.1360833,
+      "lng": -118.1446116
+    },
+    {
+      "name": "RCG Law Group",
+      "lat": 40.5569335,
+      "lng": -111.9023101
+    },
+    {
+      "name": "Harris Personal Injury Lawyers, Inc.",
+      "lat": 32.7202691,
+      "lng": -117.1579928
+    },
+    {
+      "name": "Elizabeth Franklin-Best, P.C.",
+      "lat": 34.0182899,
+      "lng": -80.9868509
+    },
+    {
+      "name": "CLLB: Attorneys at Law",
+      "lat": 38.2855065,
+      "lng": -85.8225475
+    },
+    {
+      "name": "Maho | Prentice, LLP Attorneys at Law",
+      "lat": 34.4182769,
+      "lng": -119.6979875
+    },
+    {
+      "name": "The Rodriguez Law Group Los Angeles Criminal Defense Attorneys",
+      "lat": 34.0483082,
+      "lng": -118.2571576
+    },
+    {
+      "name": "Khonsari Law Group",
+      "lat": 27.773125,
+      "lng": -82.634923
+    },
+    {
+      "name": "The Popham Law Firm",
+      "lat": 39.1049531,
+      "lng": -94.5884227
+    },
+    {
+      "name": "Greenslade Cronk",
+      "lat": 34.0472988,
+      "lng": -118.2562544
+    },
+    {
+      "name": "Crouse Erickson - Family Law Attorneys",
+      "lat": 47.6587805,
+      "lng": -117.421684
+    },
+    {
+      "name": "Boohoff Law, P.A. - Auto Accident Lawyers",
+      "lat": 27.931685,
+      "lng": -82.3023242
+    },
+    {
+      "name": "Law Offices of Evan E. Zelig, P.C.",
+      "lat": 38.4403557,
+      "lng": -122.7129315
+    },
+    {
+      "name": "Elite Criminal Defense - San Diego",
+      "lat": 32.7765794,
+      "lng": -117.138715
+    },
+    {
+      "name": "The Hawk Firm Personal Injury Lawyers",
+      "lat": 33.4693758,
+      "lng": -81.9599248
+    },
+    {
+      "name": "Kajy Law Firm, PLLC",
+      "lat": 42.4593813,
+      "lng": -83.2181608
+    },
+    {
+      "name": "Preszler Injury Lawyers",
+      "lat": 43.2537771,
+      "lng": -79.8695769
+    },
+    {
+      "name": "Harbor Probate Law PC",
+      "lat": 32.9916729,
+      "lng": -117.2610758
+    },
+    {
+      "name": "Nicolet Law Accident & Injury Lawyers",
+      "lat": 44.9754366,
+      "lng": -92.757115
+    },
+    {
+      "name": "AMS Law Group",
+      "lat": 32.9405848,
+      "lng": -96.7428961
+    },
+    {
+      "name": "The Russo Firm - Boca Raton",
+      "lat": 26.3959876,
+      "lng": -80.1089796
+    },
+    {
+      "name": "Fischer & Van Thiel, PC",
+      "lat": 33.1267884,
+      "lng": -117.2787256
+    },
+    {
+      "name": "Martin Law Group",
+      "lat": 38.9181037,
+      "lng": -94.6475018
+    },
+    {
+      "name": "The Law Office of Carlos M. Amor, P.A.",
+      "lat": 26.1162085,
+      "lng": -80.2611046
+    },
+    {
+      "name": "Birk Law Firm",
+      "lat": 37.3066768,
+      "lng": -89.5664024
+    },
+    {
+      "name": "Lewis Roberts, PA",
+      "lat": 28.68231,
+      "lng": -81.3897019
+    },
+    {
+      "name": "Cody Villalon, Richmond Criminal Defense Attorney",
+      "lat": 37.5448049,
+      "lng": -77.4444274
+    },
+    {
+      "name": "Wolfe & Stec, Ltd.",
+      "lat": 41.7607004,
+      "lng": -88.0636925
+    },
+    {
+      "name": "Grainger Hawley & Shinbaum, LLC | Bankruptcy Lawyers",
+      "lat": 32.4568521,
+      "lng": -86.447884
+    },
+    {
+      "name": "The Farrish Law Firm, L.P.A.",
+      "lat": 39.1056878,
+      "lng": -84.5086716
+    },
+    {
+      "name": "Price Family Law",
+      "lat": 39.7037482,
+      "lng": -104.9399774
+    },
+    {
+      "name": "Lusk Law, LLC: Business, Landlord, and Real Estate Lawyers",
+      "lat": 39.4154467,
+      "lng": -77.4083192
+    },
+    {
+      "name": "Taracks & Associates, Criminal Defense and DUI Attorney",
+      "lat": 27.9518045,
+      "lng": -82.4960235
+    },
+    {
+      "name": "Shipon Law Injury and Disability Legal Services",
+      "lat": 40.0903341,
+      "lng": -75.1243457
+    },
+    {
+      "name": "Maginnis Howard Charlotte",
+      "lat": 35.1496931,
+      "lng": -80.8248464
+    },
+    {
+      "name": "FR Law, LLC",
+      "lat": 34.851547,
+      "lng": -82.3912544
+    },
+    {
+      "name": "Best Law",
+      "lat": 34.0483839,
+      "lng": -118.2563018
+    },
+    {
+      "name": "Liberty Law Group",
+      "lat": 41.2640774,
+      "lng": -96.1207849
+    },
+    {
+      "name": "Stark & Stark",
+      "lat": 40.2531402,
+      "lng": -74.7088426
+    },
+    {
+      "name": "Allen, Allen, Allen & Allen",
+      "lat": 37.5806434,
+      "lng": -77.4937595
+    },
+    {
+      "name": "Hawks Quindel, S.C.",
+      "lat": 43.110641,
+      "lng": -87.9154151
+    },
+    {
+      "name": "Bagen Law Accident Injury Lawyers - Gainesville",
+      "lat": 29.7120141,
+      "lng": -82.3552202
+    },
+    {
+      "name": "Parker & McConkie Personal Injury Lawyers Salt Lake City",
+      "lat": 40.7582182,
+      "lng": -111.8775
+    },
+    {
+      "name": "Mann Law Firm, P.C.",
+      "lat": 42.3041896,
+      "lng": -71.2201509
+    },
+    {
+      "name": "Seddiq Law",
+      "lat": 39.0829622,
+      "lng": -77.1525832
+    },
+    {
+      "name": "Roman Austin Car Accident and Personal Injury Lawyers - Clearwater Office",
+      "lat": 27.986424,
+      "lng": -82.745306
+    },
+    {
+      "name": "The Lemon Lawyers",
+      "lat": 30.2756365,
+      "lng": -97.7452224
+    },
+    {
+      "name": "Suits & Boots Injury Lawyers",
+      "lat": 29.7608273,
+      "lng": -95.4802305
+    },
+    {
+      "name": "William Mattar Accident Lawyers",
+      "lat": 42.9661355,
+      "lng": -78.7033208
+    },
+    {
+      "name": "Fuicelli & Lee Injury Lawyers",
+      "lat": 39.7439086,
+      "lng": -104.9675637
+    },
+    {
+      "name": "Emroch & Kilduff, PLLC",
+      "lat": 37.6046838,
+      "lng": -77.5334195
+    },
+    {
+      "name": "Horowitz Law",
+      "lat": 26.1219069,
+      "lng": -80.1416808
+    },
+    {
+      "name": "Billy Johnson Law Firm",
+      "lat": 37.4819455,
+      "lng": -82.5160047
+    },
+    {
+      "name": "Vogel Law Firm",
+      "lat": 46.8756505,
+      "lng": -96.7824678
+    },
+    {
+      "name": "Law Office of Kenneth E. Berger",
+      "lat": 34.0218,
+      "lng": -80.958841
+    },
+    {
+      "name": "Ben Hall Law",
+      "lat": 42.7588758,
+      "lng": -84.484934
+    },
+    {
+      "name": "M&A Law Firm, P.C. Trial Lawyers",
+      "lat": 42.0483417,
+      "lng": -88.0320671
+    },
+    {
+      "name": "Armstrong Lee & Baker: Personal Injury Lawyer Houston",
+      "lat": 29.8059808,
+      "lng": -95.4469275
+    },
+    {
+      "name": "Eric M. Swinyard & Associates, PLLC",
+      "lat": 40.562185,
+      "lng": -111.920667
+    },
+    {
+      "name": "M&Y Personal Injury Lawyers",
+      "lat": 34.0537223,
+      "lng": -118.2549921
+    },
+    {
+      "name": "Aghnami Law Group",
+      "lat": 34.0621553,
+      "lng": -118.4158259
+    },
+    {
+      "name": "The Law Offices of Omrani & Taub, P.C.",
+      "lat": 40.7588534,
+      "lng": -73.9750778
+    },
+    {
+      "name": "Wiggam Law",
+      "lat": 33.7894714,
+      "lng": -84.383808
+    },
+    {
+      "name": "Altman Nussbaum Shunnarah Trial Attorneys",
+      "lat": 42.357702,
+      "lng": -71.0596238
+    },
+    {
+      "name": "Onal Gallant Bayram & Amin PC",
+      "lat": 40.8986072,
+      "lng": -74.1252841
+    },
+    {
+      "name": "Pollack, Pollack, Isaac & DeCicco, LLP",
+      "lat": 40.7130079,
+      "lng": -74.0078212
+    },
+    {
+      "name": "Amourgis & Associates, Attorneys at Law",
+      "lat": 41.1314034,
+      "lng": -81.6179703
+    },
+    {
+      "name": "Law Firm of Aaron A. Herbert, P.C.",
+      "lat": 32.923056,
+      "lng": -96.7598608
+    },
+    {
+      "name": "Legal Help In Colorado",
+      "lat": 39.60802,
+      "lng": -104.89077
+    },
+    {
+      "name": "Sue My Landlord",
+      "lat": 39.60802,
+      "lng": -104.89077
+    },
+    {
+      "name": "Brown & Crouppen: Injury and Car Accident Lawyers",
+      "lat": 38.6160947,
+      "lng": -90.2672862
+    },
+    {
+      "name": "Vergara Miller Law Firm, PLLC",
+      "lat": 29.5479065,
+      "lng": -95.552774
+    },
+    {
+      "name": "Sloane Law Firm",
+      "lat": 32.7534049,
+      "lng": -97.3400519
+    },
+    {
+      "name": "Lorenz Law Firm",
+      "lat": 41.7563988,
+      "lng": -88.2190284
+    },
+    {
+      "name": "Florida Probate Law Firm, PLLC",
+      "lat": 26.4094446,
+      "lng": -80.0765115
+    },
+    {
+      "name": "Erez Law, PLLC",
+      "lat": 25.773897,
+      "lng": -80.1883347
+    },
+    {
+      "name": "Jesus R. Gonzalez, PA - Tu Abogado de Accidente",
+      "lat": 25.7918377,
+      "lng": -80.3378681
+    },
+    {
+      "name": "Power Trial Lawyers",
+      "lat": 34.0499896,
+      "lng": -118.2588065
+    },
+    {
+      "name": "Shapiro | Delgado - Sarasota",
+      "lat": 27.3391853,
+      "lng": -82.5442002
+    },
+    {
+      "name": "The Law Office of Nathaniel Gilbert, PLLC",
+      "lat": 29.5690897,
+      "lng": -98.5760894
+    },
+    {
+      "name": "Ory Law Group",
+      "lat": 29.7996787,
+      "lng": -90.8139559
+    },
+    {
+      "name": "The Rosenblum Allen Law Firm",
+      "lat": 36.057467,
+      "lng": -115.155335
+    },
+    {
+      "name": "Thorp Purdy Jewett Urness & Wilkinson, PC",
+      "lat": 44.0700176,
+      "lng": -123.0425099
+    },
+    {
+      "name": "Lindner Law, LLC",
+      "lat": 44.2630146,
+      "lng": -88.4960448
+    },
+    {
+      "name": "Felice Trial Attorneys - Injury Lawyers",
+      "lat": 26.7113411,
+      "lng": -80.1020234
+    },
+    {
+      "name": "Ty Robinson Personal Injury & Car Accident Law Firm Charleston",
+      "lat": 32.776995,
+      "lng": -79.9282559
+    },
+    {
+      "name": "Bush Injury Law, LLC",
+      "lat": 35.108299,
+      "lng": -106.5683505
+    },
+    {
+      "name": "Kapuza Lighty Accident Injury Lawyers, PLLC",
+      "lat": 46.5924884,
+      "lng": -120.560061
+    },
+    {
+      "name": "Buckman Tuinstra & Brown",
+      "lat": 42.7900569,
+      "lng": -86.0950374
+    },
+    {
+      "name": "Bogin, Munns & Munns Personal Injury & Car Accident Lawyers Orlando",
+      "lat": 28.5588584,
+      "lng": -81.3798998
+    },
+    {
+      "name": "Kirsch & Kirsch, LLC",
+      "lat": 38.5744153,
+      "lng": -92.1719369
+    },
+    {
+      "name": "Cardoso Law, PLLC",
+      "lat": 30.4253109,
+      "lng": -87.2032469
+    },
+    {
+      "name": "Youngberg Law Firm Divorce and Family Lawyers",
+      "lat": 33.1832934,
+      "lng": -97.109222
+    },
+    {
+      "name": "Mickey Keenan, P.A. - Tampa Personal Injury Attorneys",
+      "lat": 27.9483091,
+      "lng": -82.5060994
+    },
+    {
+      "name": "Havens & Associates, PLLC",
+      "lat": 29.75951,
+      "lng": -95.401236
+    },
+    {
+      "name": "George Salinas Injury Lawyers - San Antonio",
+      "lat": 29.487004,
+      "lng": -98.542097
+    },
+    {
+      "name": "Braker White",
+      "lat": 31.8460176,
+      "lng": -102.3704254
+    },
+    {
+      "name": "Leeson & Leeson",
+      "lat": 40.6220814,
+      "lng": -75.3762736
+    },
+    {
+      "name": "Templeton Law Firm",
+      "lat": 31.4522884,
+      "lng": -100.4425079
+    },
+    {
+      "name": "Connell Law Firm",
+      "lat": 34.2226209,
+      "lng": -80.6805953
+    },
+    {
+      "name": "Brown & Barron, LLC",
+      "lat": 39.2901018,
+      "lng": -76.6136987
+    },
+    {
+      "name": "Sumner Law Group, LLC",
+      "lat": 38.6478704,
+      "lng": -90.3361591
+    }
+  ]
+}
