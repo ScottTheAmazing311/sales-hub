@@ -593,9 +593,8 @@ const COL = {
     AE_DATE: 7,
     CITY: 8,
     SOURCE: 9,
-    MDR_SET: 17,   // Column R — 1 when an MDR set occurs
-    MDR_DATE: 18,  // Column S
-    MDR_REP: 19,   // Column T
+    MDR_TYPE: 9,   // Column J — check for "MDR Set"
+    MDR_DATE: 7,   // Column H — date of the MDR set
     GOAL_TOTAL: 21,    // Column V — Total Inbound goal (optional)
     GOAL_DIRECT: 22,   // Column W
     GOAL_ORGANIC: 23,  // Column X
@@ -733,17 +732,16 @@ async function fetchData() {
     for (const row of rows) {
         const cells = row.c || [];
 
-        // MDR Sets are independent of lead rows — parse them regardless of name.
-        // Column R can hold a count (1+) representing multiple sets that day.
-        const mdrFlag = cellVal(cells, COL.MDR_SET);
-        const mdrQty = parseFloat(mdrFlag);
-        if (!isNaN(mdrQty) && mdrQty >= 1) {
+        // MDR Sets — Column J (index 9) contains "MDR Set" when it's an MDR set,
+        // Column H (index 7) has the date.
+        const mdrType = cellVal(cells, COL.MDR_TYPE);
+        if (mdrType && mdrType.toLowerCase().includes('mdr set')) {
             const mdrDate = parseDateAny(cells[COL.MDR_DATE]);
             if (mdrDate) {
                 allMdrSets.push({
                     date: mdrDate,
-                    rep: cellVal(cells, COL.MDR_REP),
-                    qty: mdrQty,
+                    rep: '',
+                    qty: 1,
                 });
             }
         }
