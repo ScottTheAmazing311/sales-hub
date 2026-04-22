@@ -6,6 +6,7 @@
 <title>Attorney Rankings — Service Menu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 /* ==============================================
@@ -463,6 +464,17 @@ button { cursor: pointer; font-family: inherit; }
 }
 .cg-back-btn:hover { background: rgba(20,54,77,0.04); border-color: var(--navy); }
 .cg-back-btn svg { width: 12px; height: 12px; }
+.cg-toolbar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.cg-screenshot-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: var(--navy); border: none;
+  border-radius: 3px; padding: 0.35rem 0.75rem;
+  font-size: 0.7rem; font-weight: 600; color: var(--cream);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  cursor: pointer; transition: background 0.2s;
+}
+.cg-screenshot-btn:hover { background: var(--navy-2); }
+.cg-screenshot-btn svg { width: 12px; height: 12px; }
 .comparison-grid {
   width: 100%;
   border-collapse: separate;
@@ -2559,7 +2571,8 @@ function buildComparisonGrids() {
 
     const container = document.getElementById(data.gridId);
     if (container) {
-      container.innerHTML = `<button class="cg-back-btn" onclick="collapseComparison('${entityKey}')"><svg viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3L3 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>All Packages</button>` + html;
+      const toolbar = `<div class="cg-toolbar"><button class="cg-back-btn" onclick="collapseComparison('${entityKey}')"><svg viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3L3 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>All Packages</button><button class="cg-screenshot-btn" onclick="screenshotGrid('${entityKey}')"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>Screenshot</button></div>`;
+      container.innerHTML = toolbar + html;
     }
   }
 }
@@ -2621,6 +2634,34 @@ function focusTier(colIndex, entityKey) {
     const col = parseInt(th.getAttribute('data-col'));
     th.classList.toggle('cg-active', col === colIndex);
     th.classList.toggle('cg-dimmed', col !== colIndex);
+  });
+}
+
+function screenshotGrid(entityKey) {
+  const table = document.querySelector(`.comparison-grid[data-entity="${entityKey}"]`);
+  if (!table) return;
+  const btn = table.closest('[id$="-comparison"]').querySelector('.cg-screenshot-btn');
+  const origText = btn.innerHTML;
+  btn.innerHTML = 'Capturing…';
+  btn.disabled = true;
+
+  html2canvas(table, { backgroundColor: '#fefaed', scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    const data = comparisonData[entityKey];
+    const tierCol = activeTierCols[entityKey];
+    let suffix = 'all-tiers';
+    if (tierCol != null && data.tiers[tierCol]) {
+      suffix = data.tiers[tierCol].name.toLowerCase().replace(/\s+/g, '-');
+    }
+    link.download = `${entityKey}-${suffix}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }).catch(() => {
+    alert('Screenshot failed');
+    btn.innerHTML = origText;
+    btn.disabled = false;
   });
 }
 
