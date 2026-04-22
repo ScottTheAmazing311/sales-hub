@@ -856,13 +856,19 @@ function getTrafficData(leads) {
 }
 
 // ── Compute status counts ──
-function getStatusCounts(leads) {
-    let held = 0, noShow = 0, pending = 0;
-    leads.forEach(l => {
+// "Held" and "No Show" are based on FTA Date falling in the period,
+// not the inbound date, so meetings that were set earlier but held
+// this week still count.
+function getStatusCounts(leads, start, end) {
+    // Held/No Show: look at ALL leads whose ftaDate is in [start, end]
+    let held = 0, noShow = 0;
+    allLeads.forEach(l => {
+        if (!l.ftaDate || l.ftaDate < start || l.ftaDate > end) return;
         if (l.status === 'Held') held++;
         else if (l.status === 'No Show') noShow++;
-        else pending++;
     });
+    // Pending: from the inbound-filtered leads (no FTA Show yet)
+    let pending = leads.filter(l => l.status === 'Pending').length;
     return { held, noShow, pending, total: leads.length };
 }
 
@@ -870,7 +876,6 @@ function getStatusCounts(leads) {
 function render() {
     const leads = getFilteredLeads();
     const trafficData = getTrafficData(leads);
-    const statusCounts = getStatusCounts(leads);
     const dashboard = document.getElementById('dashboard');
 
     // Update tab ranges
@@ -879,6 +884,14 @@ function render() {
     const yearStart = getYearStart(NOW);
     const wowStart = new Date(monday);
     wowStart.setDate(wowStart.getDate() - 7 * 51);
+
+    // Determine period range for FTA-based status counts
+    let periodStart, periodEnd = NOW;
+    if (currentPeriod === 'wtd') periodStart = monday;
+    else if (currentPeriod === 'mtd') periodStart = monthStart;
+    else if (currentPeriod === 'wow') periodStart = wowStart;
+    else periodStart = yearStart;
+    const statusCounts = getStatusCounts(leads, periodStart, periodEnd);
     document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
     document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
@@ -1046,7 +1059,9 @@ function renderWoW(leads) {
     let html = '';
 
     // Summary for whole 52-week window
-    const totals = getStatusCounts(leads);
+    const wowStart52 = new Date(getMonday(NOW));
+    wowStart52.setDate(wowStart52.getDate() - 7 * 51);
+    const totals = getStatusCounts(leads, wowStart52, NOW);
     const mdrTotal = getMdrSetsForPeriod();
     html += '<div class="section-block">';
     html += '<div class="section-title">Trailing 52 Weeks</div>';
@@ -1086,11 +1101,11 @@ function renderWoW(leads) {
     html += '</tr></thead><tbody>';
 
     buckets.forEach(b => {
-        const counts = getStatusCounts(b.leads);
+        const counts = getStatusCounts(b.leads, b.start, b.end);
         const cats = getCategoryCounts(b.leads);
         const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
         const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--primary);color:var(--dark);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
-        const heldPct = counts.total ? Math.round(counts.held / counts.total * 100) + '%' : '—';
+        const heldPct = counts.held ? Math.round(counts.held / (counts.held + counts.noShow) * 100) + '%' : '—';
         const mdrWeek = countMdrSetsInRange(b.start, b.end);
 
         html += '<tr>';
