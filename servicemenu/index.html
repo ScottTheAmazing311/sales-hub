@@ -442,6 +442,134 @@ button { cursor: pointer; font-family: inherit; }
 .card-panel.expanded .expand-toggle svg { transform: rotate(180deg); }
 
 /* ==============================================
+   COMPARISON GRID (Flagship full-width)
+   ============================================== */
+.card.expanded {
+  grid-column: 1 / -1;
+  transition: grid-column 0.3s ease;
+}
+.card.expanded .card-panel.active {
+  padding: 0.5rem;
+  overflow-x: auto;
+}
+.cg-back-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: none; border: 1px solid rgba(20,54,77,0.15);
+  border-radius: 3px; padding: 0.35rem 0.75rem;
+  font-size: 0.7rem; font-weight: 600; color: var(--navy);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  cursor: pointer; margin-bottom: 0.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.cg-back-btn:hover { background: rgba(20,54,77,0.04); border-color: var(--navy); }
+.cg-back-btn svg { width: 12px; height: 12px; }
+.comparison-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8rem;
+}
+.comparison-grid thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--navy);
+  color: var(--cream);
+  padding: 0.75rem 0.6rem;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--yellow);
+}
+.comparison-grid thead th:first-child {
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(254,250,237,0.6);
+}
+.comparison-grid thead th .th-price {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  font-weight: 400;
+  margin-top: 2px;
+  color: var(--yellow);
+}
+.comparison-grid tbody tr {
+  border-bottom: 1px solid rgba(20,54,77,0.06);
+}
+.comparison-grid tbody tr:nth-child(even) {
+  background: rgba(20,54,77,0.02);
+}
+.comparison-grid tbody td {
+  padding: 0.55rem 0.6rem;
+  vertical-align: middle;
+  text-align: center;
+  color: var(--dark);
+  border-bottom: 1px solid rgba(20,54,77,0.06);
+}
+.comparison-grid tbody td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--navy);
+  padding-left: 0.75rem;
+}
+.comparison-grid .cg-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(76,175,80,0.12);
+  color: #2e7d32;
+}
+.comparison-grid .cg-check svg { width: 14px; height: 14px; }
+.comparison-grid .cg-none {
+  color: rgba(44,44,44,0.2);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.comparison-grid .cg-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--navy);
+  background: rgba(60,148,209,0.08);
+  border-radius: 3px;
+  padding: 2px 8px;
+  display: inline-block;
+}
+.comparison-grid tfoot td {
+  padding: 0.75rem 0.6rem;
+  text-align: center;
+  border-top: 2px solid rgba(20,54,77,0.1);
+}
+.comparison-grid tfoot td:first-child { text-align: left; }
+.comparison-grid tfoot .cg-cta {
+  display: inline-block;
+  background: var(--navy);
+  color: var(--cream);
+  padding: 0.45rem 1.2rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+.comparison-grid tfoot .cg-cta:hover { background: var(--navy-2); }
+
+/* Column highlight / dim state */
+.comparison-grid thead th { cursor: pointer; transition: opacity 0.25s, background 0.25s; }
+.comparison-grid thead th:first-child { cursor: default; }
+.comparison-grid.has-focus thead th.cg-dimmed { opacity: 0.35; background: #3a4a55; }
+.comparison-grid.has-focus thead th.cg-active { background: var(--navy-2); box-shadow: inset 0 -3px 0 var(--yellow); }
+.comparison-grid.has-focus tbody td.cg-dimmed { opacity: 0.25; }
+.comparison-grid.has-focus tbody td.cg-active { background: rgba(60,148,209,0.06); }
+.comparison-grid.has-focus tfoot td.cg-dimmed { opacity: 0.25; }
+.comparison-grid.has-focus tfoot td.cg-active { background: rgba(60,148,209,0.06); }
+
+/* ==============================================
    RESPONSIVE
    ============================================== */
 @media (max-width: 600px) {
@@ -675,22 +803,25 @@ button { cursor: pointer; font-family: inherit; }
         <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('rankings', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
         <div class="card-body">
           <div class="card-panel active" id="rankings-core">
-            <button class="offering-tile" onclick="openOffering('rankings-core-10k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Local Authority</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-core-15k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Regional Contender</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-core-25k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Market Leader</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-core-40k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">40K/Mo — Category Dominance</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
+            <div id="rankings-tiles">
+              <button class="offering-tile" onclick="expandComparison(0,'rankings')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Local Authority</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(1,'rankings')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Regional Contender</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(2,'rankings')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Market Leader</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(3,'rankings')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">40K/Mo — Category Dominance</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+            </div>
+            <div id="rankings-comparison" style="display:none"></div>
           </div>
           <div class="card-panel" id="rankings-alacart">
             <button class="offering-tile" onclick="openOffering('rankings-alacart-ppc')">
@@ -759,22 +890,25 @@ button { cursor: pointer; font-family: inherit; }
         <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('gladiator', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
         <div class="card-body">
                     <div class="card-panel active" id="gladiator-core">
-            <button class="offering-tile" onclick="openOffering('gladiator-core-3k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Foundation</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-core-5k')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Local Authority</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-core-7k5')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Regional Contender</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-core-12k5')">
-              <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">12.5K/Mo — Market Leader</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
+            <div id="gladiator-tiles">
+              <button class="offering-tile" onclick="expandComparison(0,'gladiator')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Foundation</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(1,'gladiator')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Local Authority</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(2,'gladiator')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Regional Contender</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(3,'gladiator')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">12.5K/Mo — Market Leader</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+            </div>
+            <div id="gladiator-comparison" style="display:none"></div>
           </div>
 
                     <div class="card-panel" id="gladiator-alacart">
@@ -1863,6 +1997,18 @@ function switchTab(btn, panelId) {
   const card = btn.closest('.card');
   card.querySelectorAll('.card-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(panelId).classList.add('active');
+
+  // Collapse any comparison grid when switching away from Flagship
+  for (const [entityKey, data] of Object.entries(comparisonData || {})) {
+    if (panelId !== data.panelId) {
+      card.classList.remove('expanded');
+      const tiles = document.getElementById(data.tilesId);
+      const grid = document.getElementById(data.gridId);
+      if (tiles) tiles.style.display = 'block';
+      if (grid) grid.style.display = 'none';
+      if (typeof activeTierCols !== 'undefined') activeTierCols[entityKey] = null;
+    }
+  }
 }
 
 /* ==============================================
@@ -2282,7 +2428,203 @@ async function loadDocOfferings() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadCustomTiles(); loadDocOfferings(); });
+/* ==============================================
+   COMPARISON GRIDS — All Flagship Hubs
+   ============================================== */
+const comparisonData = {
+  rankings: {
+    panelId: 'rankings-core',
+    tilesId: 'rankings-tiles',
+    gridId:  'rankings-comparison',
+    features: [
+      'Search Engine Optimization (SEO)',
+      'Generative Engine Optimization (GEO) &amp; AIO',
+      'Content: Launch (Months 1-4)',
+      'Content: Growth (Months 5+)',
+      'Content: Refresh &amp; Tuning',
+      'CRO &amp; UX Optimization',
+      'Web Maintenance &amp; Web Ops',
+      'Local SEO Optimization',
+      'Google Business Profile (GBP) Management',
+      'Link Building',
+      'Digital PR',
+      'Local Services Ads (LSA)',
+      'Google Ads (PPC)',
+      'Meta Ads (Facebook &amp; Instagram)',
+      'Omnipresence (OTT &amp; Programmatic Ads)',
+      'Growth Reporting &amp; Attribution',
+      'Account Management',
+    ],
+    tiers: [
+      { key: 'rankings-core-10k', name: 'Local Authority',    price: '$10,000/mo', values: [
+        true, true, '10–12 Strategic Assets', '4–6 Strategic Assets', 'Quarterly', 'Baseline',
+        true, true, '1 to 3 GBPs', '4 Authority Links min.', true, true,
+        false, false, false, true, 'Standard'
+      ]},
+      { key: 'rankings-core-15k', name: 'Regional Contender', price: '$15,000/mo', values: [
+        true, true, '20–25 Strategic Assets', '6–8 Strategic Assets', 'Monthly', 'Refinement',
+        true, true, 'Up to 5 GBPs', '6 Authority Links min.', true, true,
+        true, false, false, true, 'Standard'
+      ]},
+      { key: 'rankings-core-25k', name: 'Market Leader',      price: '$25,000/mo', values: [
+        true, true, '25–30 Strategic Assets', '8–10 Strategic Assets', 'Bi-Weekly', 'Testing',
+        true, true, 'Up to 10 GBPs', '10 Authority Links min.', true, true,
+        true, true, false, true, 'Senior Account Management'
+      ]},
+      { key: 'rankings-core-40k', name: 'Category Dominance', price: '$40,000/mo', values: [
+        true, true, '30–40 Strategic Assets', '10–15 Strategic Assets (Saturation)', 'Weekly', 'Engineering',
+        true, true, 'Up to 20 GBPs', '20 Authority Links min.', true, true,
+        true, true, true, true, 'Key Account Management'
+      ]},
+    ],
+  },
+  gladiator: {
+    panelId: 'gladiator-core',
+    tilesId: 'gladiator-tiles',
+    gridId:  'gladiator-comparison',
+    features: [
+      'Search Engine Optimization (SEO)',
+      'Generative Engine Optimization (GEO) &amp; AIO',
+      'Content: Launch (Months 1-4)',
+      'Content: Growth (Months 5+)',
+      'Content: Refresh &amp; Tuning',
+      'CRO &amp; UX Optimization',
+      'Web Maintenance &amp; Web Ops',
+      'Local SEO Optimization',
+      'Google Business Profile (GBP) Management',
+      'Link Building',
+      'Digital PR',
+      'Local Services Ads (LSA)',
+      'Google Ads (PPC)',
+      'Meta Ads (Facebook &amp; Instagram)',
+      'Growth Reporting &amp; Attribution',
+      'Account Management',
+    ],
+    tiers: [
+      { key: 'gladiator-core-3k', name: 'Foundation',          price: '$3,000/mo', values: [
+        true, true, '4–8 Strategic Assets', '1–3 Strategic Assets', 'Quarterly', 'Foundational',
+        true, true, '1 GBP', true, false, true,
+        false, false, false, 'Pod Support'
+      ]},
+      { key: 'gladiator-core-5k', name: 'Local Authority',     price: '$5,000/mo', values: [
+        true, true, '10–12 Strategic Assets', '4–6 Strategic Assets', 'Quarterly', 'Baseline',
+        true, true, '1 to 3 GBPs', '4 Authority Links min.', true, true,
+        false, false, true, 'Standard'
+      ]},
+      { key: 'gladiator-core-7k5', name: 'Regional Contender', price: '$7,500/mo', values: [
+        true, true, '12–15 Strategic Assets', '6–8 Strategic Assets', 'Monthly', 'Refinement',
+        true, true, 'Up to 5 GBPs', '6 Authority Links min.', true, true,
+        true, false, true, 'Standard'
+      ]},
+      { key: 'gladiator-core-12k5', name: 'Market Leader',     price: '$12,500/mo', values: [
+        true, true, '15–20 Strategic Assets', '8–10 Strategic Assets', 'Bi-Weekly', 'Testing',
+        true, true, 'Up to 10 GBPs', '10 Authority Links min.', true, true,
+        true, true, true, 'Senior Account Management'
+      ]},
+    ],
+  },
+};
+
+const checkSvg = '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function cellHTML(val) {
+  if (val === true) return `<span class="cg-check">${checkSvg}</span>`;
+  if (val === false) return `<span class="cg-none">—</span>`;
+  return `<span class="cg-text">${val}</span>`;
+}
+
+function buildComparisonGrids() {
+  for (const [entityKey, data] of Object.entries(comparisonData)) {
+    let html = `<table class="comparison-grid" data-entity="${entityKey}"><thead><tr>`;
+    html += '<th>Feature</th>';
+    data.tiers.forEach((tier, ci) => {
+      html += `<th data-col="${ci}" onclick="focusTier(${ci},'${entityKey}')">${tier.name}<span class="th-price">${tier.price}</span></th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    data.features.forEach((feature, i) => {
+      html += '<tr>';
+      html += `<td>${feature}</td>`;
+      data.tiers.forEach((tier, ci) => {
+        html += `<td data-col="${ci}">${cellHTML(tier.values[i])}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody><tfoot><tr><td></td>';
+    data.tiers.forEach((tier, ci) => {
+      html += `<td data-col="${ci}"><button class="cg-cta" onclick="event.stopPropagation();openOffering('${tier.key}')">${tier.price}</button></td>`;
+    });
+    html += '</tr></tfoot></table>';
+
+    const container = document.getElementById(data.gridId);
+    if (container) {
+      container.innerHTML = `<button class="cg-back-btn" onclick="collapseComparison('${entityKey}')"><svg viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3L3 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>All Packages</button>` + html;
+    }
+  }
+}
+
+// Track active column per entity
+const activeTierCols = {};
+
+function expandComparison(colIndex, entityKey) {
+  const data = comparisonData[entityKey];
+  if (!data) return;
+  const card = document.getElementById(data.panelId).closest('.card');
+  const tiles = document.getElementById(data.tilesId);
+  const grid = document.getElementById(data.gridId);
+
+  card.classList.add('expanded');
+  tiles.style.display = 'none';
+  grid.style.display = 'block';
+
+  activeTierCols[entityKey] = null;
+  focusTier(colIndex, entityKey);
+}
+
+function collapseComparison(entityKey) {
+  const data = comparisonData[entityKey];
+  if (!data) return;
+  const card = document.getElementById(data.panelId).closest('.card');
+  const tiles = document.getElementById(data.tilesId);
+  const grid = document.getElementById(data.gridId);
+
+  card.classList.remove('expanded');
+  tiles.style.display = 'block';
+  grid.style.display = 'none';
+  activeTierCols[entityKey] = null;
+}
+
+function focusTier(colIndex, entityKey) {
+  const table = document.querySelector(`.comparison-grid[data-entity="${entityKey}"]`);
+  if (!table) return;
+
+  if (activeTierCols[entityKey] === colIndex) {
+    activeTierCols[entityKey] = null;
+    table.classList.remove('has-focus');
+    table.querySelectorAll('[data-col]').forEach(el => el.classList.remove('cg-active', 'cg-dimmed'));
+    table.querySelectorAll('thead th').forEach(th => th.classList.remove('cg-active', 'cg-dimmed'));
+    return;
+  }
+
+  activeTierCols[entityKey] = colIndex;
+  table.classList.add('has-focus');
+
+  table.querySelectorAll('[data-col]').forEach(el => {
+    const col = parseInt(el.getAttribute('data-col'));
+    el.classList.toggle('cg-active', col === colIndex);
+    el.classList.toggle('cg-dimmed', col !== colIndex);
+  });
+
+  table.querySelectorAll('thead th').forEach((th, i) => {
+    if (i === 0) { th.classList.remove('cg-active', 'cg-dimmed'); return; }
+    const col = parseInt(th.getAttribute('data-col'));
+    th.classList.toggle('cg-active', col === colIndex);
+    th.classList.toggle('cg-dimmed', col !== colIndex);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => { buildComparisonGrids(); loadCustomTiles(); loadDocOfferings(); });
 </script>
 
 
