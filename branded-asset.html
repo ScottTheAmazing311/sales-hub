@@ -276,6 +276,131 @@
             margin-top: 1.5rem;
         }
 
+        /* ── Style picker ── */
+        .style-picker {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .style-card {
+            flex: 1;
+            border: 2px solid rgba(7,55,79,0.12);
+            border-radius: var(--radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: var(--cream);
+            text-align: center;
+        }
+        .style-card:hover {
+            border-color: rgba(7,55,79,0.3);
+        }
+        .style-card.active {
+            border-color: var(--navy);
+            background: rgba(7,55,79,0.04);
+        }
+        .style-card .style-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+        .style-card .style-desc {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+        .style-card .style-preview {
+            height: 48px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .style-preview-a {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .style-preview-a .sp-hero {
+            background: var(--navy);
+            height: 14px;
+            border-radius: 2px;
+        }
+        .style-preview-a .sp-boxes {
+            display: flex;
+            gap: 2px;
+        }
+        .style-preview-a .sp-box {
+            flex: 1;
+            height: 10px;
+            background: var(--cream);
+            border: 1px solid rgba(7,55,79,0.1);
+            border-radius: 1px;
+        }
+        .style-preview-a .sp-bar {
+            background: var(--navy);
+            height: 6px;
+            border-radius: 1px;
+        }
+        .style-preview-b {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .style-preview-b .sp-line {
+            height: 3px;
+            background: var(--navy);
+            border-radius: 1px;
+        }
+        .style-preview-b .sp-title {
+            height: 10px;
+            width: 70%;
+            background: var(--navy);
+            border-radius: 1px;
+        }
+        .style-preview-b .sp-text {
+            height: 4px;
+            width: 90%;
+            background: rgba(7,55,79,0.1);
+            border-radius: 1px;
+        }
+        .style-preview-b .sp-block {
+            height: 12px;
+            background: #f7f8fa;
+            border-radius: 3px;
+        }
+        .style-preview-c {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .style-preview-c .sp-accent {
+            width: 30px;
+            height: 3px;
+            background: var(--yellow);
+        }
+        .style-preview-c .sp-title {
+            height: 12px;
+            width: 75%;
+            background: var(--navy);
+            border-radius: 1px;
+        }
+        .style-preview-c .sp-rule {
+            width: 20px;
+            height: 2px;
+            background: var(--yellow);
+        }
+        .style-preview-c .sp-card {
+            height: 10px;
+            background: var(--cream);
+            border-left: 2px solid var(--yellow);
+        }
+
         /* ── Screenshot thumbs ── */
         .screenshot-grid {
             display: flex;
@@ -422,6 +547,52 @@
     <!-- Generate -->
     <button class="btn-generate" id="generateBtn" disabled>Generate Branded Asset</button>
 
+    <!-- Style Picker (shown after generation) -->
+    <div id="stylePicker" style="display:none;">
+        <div class="form-section">
+            <h3>Choose a Style</h3>
+            <div class="style-picker">
+                <div class="style-card active" data-style="A">
+                    <div class="style-preview">
+                        <div class="style-preview-a">
+                            <div class="sp-hero"></div>
+                            <div class="sp-boxes"><div class="sp-box"></div><div class="sp-box"></div><div class="sp-box"></div><div class="sp-box"></div></div>
+                            <div class="sp-bar"></div>
+                        </div>
+                    </div>
+                    <div class="style-label">Classic</div>
+                    <div class="style-desc">Navy hero, stat boxes, bold sections</div>
+                </div>
+                <div class="style-card" data-style="B">
+                    <div class="style-preview">
+                        <div class="style-preview-b">
+                            <div class="sp-title"></div>
+                            <div class="sp-line"></div>
+                            <div class="sp-text"></div>
+                            <div class="sp-text" style="width:60%"></div>
+                            <div class="sp-block"></div>
+                        </div>
+                    </div>
+                    <div class="style-label">Clean</div>
+                    <div class="style-desc">Minimal, white background, airy layout</div>
+                </div>
+                <div class="style-card" data-style="C">
+                    <div class="style-preview">
+                        <div class="style-preview-c">
+                            <div class="sp-accent"></div>
+                            <div class="sp-title"></div>
+                            <div class="sp-rule"></div>
+                            <div class="sp-card"></div>
+                            <div class="sp-card"></div>
+                        </div>
+                    </div>
+                    <div class="style-label">Editorial</div>
+                    <div class="style-desc">Magazine-style, yellow accents, elegant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Result -->
     <div class="result-container" id="resultContainer">
         <div class="result-bar">
@@ -438,7 +609,7 @@
 
 <script>
 (function() {
-    var API_URL = 'https://rankings-audit-tools.vercel.app/api/branded-asset';
+    var API_URL = 'https://rankings-audit-tools-8a17.vercel.app/api/branded-asset';
 
     // State
     var docType = 'general';
@@ -447,6 +618,9 @@
     var pasteMode = false;
     var screenshots = []; // Array of File objects
     var resultHTML = '';
+    var resultHTMLB = '';
+    var resultHTMLC = '';
+    var activeStyle = 'A';
     var resultTitle = '';
 
     // Elements
@@ -640,10 +814,17 @@
             if (!res.ok) throw new Error(data.error || 'Generation failed');
 
             resultHTML = data.html;
+            resultHTMLB = data.htmlB || data.html;
+            resultHTMLC = data.htmlC || data.html;
+            activeStyle = 'A';
             resultTitle = (data.structured && data.structured.title) || (file ? file.name : 'Document');
             resultTitleEl.textContent = resultTitle;
             resultIframe.srcdoc = resultHTML;
             resultContainer.style.display = '';
+            document.getElementById('stylePicker').style.display = '';
+            // Reset style picker
+            document.querySelectorAll('.style-card').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelector('.style-card[data-style="A"]').classList.add('active');
 
             // Auto-size iframe once loaded
             resultIframe.onload = function() {
@@ -661,17 +842,41 @@
         }
     });
 
+    // ── Style picker ──
+    function getActiveHTML() {
+        if (activeStyle === 'B') return resultHTMLB;
+        if (activeStyle === 'C') return resultHTMLC;
+        return resultHTML;
+    }
+
+    document.querySelectorAll('.style-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.style-card').forEach(function(c) { c.classList.remove('active'); });
+            card.classList.add('active');
+            activeStyle = card.dataset.style;
+            resultIframe.srcdoc = getActiveHTML();
+            resultIframe.onload = function() {
+                try {
+                    var h = resultIframe.contentDocument.body.scrollHeight + 40;
+                    resultIframe.style.height = Math.max(700, h) + 'px';
+                } catch(e) {}
+            };
+        });
+    });
+
     // ── Preview ──
     document.getElementById('previewBtn').addEventListener('click', function() {
-        if (!resultHTML) return;
+        var html = getActiveHTML();
+        if (!html) return;
         var win = window.open('', '_blank');
-        if (win) { win.document.write(resultHTML); win.document.close(); }
+        if (win) { win.document.write(html); win.document.close(); }
     });
 
     // ── Download HTML ──
     document.getElementById('downloadBtn').addEventListener('click', function() {
-        if (!resultHTML) return;
-        var blob = new Blob([resultHTML], { type: 'text/html' });
+        var html = getActiveHTML();
+        if (!html) return;
+        var blob = new Blob([html], { type: 'text/html' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
@@ -682,8 +887,9 @@
 
     // ── Export PDF ──
     document.getElementById('exportBtn').addEventListener('click', function() {
-        if (!resultHTML) return;
-        var printHTML = resultHTML.replace('</body>',
+        var html = getActiveHTML();
+        if (!html) return;
+        var printHTML = html.replace('</body>',
             '<script>document.fonts.ready.then(function(){setTimeout(function(){window.print();},300);});<\/script></body>'
         );
         var win = window.open('', '_blank');
