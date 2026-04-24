@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDR Outbound Tracker — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+            --success: #22c55e;
+            --destructive: #c0392b;
+            --warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .back-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .back-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 1rem;
+            background: var(--yellow);
+            color: var(--navy);
+            border: none;
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-download:hover { opacity: 0.85; }
+        .btn-download:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-download svg { width: 14px; height: 14px; }
+
+        .dash {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        .dash-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .dash-header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .dash-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ── Period Tabs ── */
+        .period-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid rgba(7,55,79,0.08);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .period-tab {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.2s;
+            border-right: 1px solid rgba(7,55,79,0.08);
+        }
+        .period-tab:last-child { border-right: none; }
+        .period-tab:hover { background: rgba(7,55,79,0.03); }
+        .period-tab.active {
+            background: var(--navy);
+            color: var(--yellow);
+        }
+        .period-tab .tab-range {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 400;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+        .section-block { margin-bottom: 2rem; }
+
+        /* ── Stat Cards ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stat-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .stat-card.highlight-card { background: var(--navy); }
+        .stat-card.highlight-card .stat-label { color: var(--yellow); opacity: 0.8; }
+        .stat-card.highlight-card .stat-value { color: #fff; }
+        .stat-card.highlight-card .stat-sub { color: rgba(255,255,255,0.5); }
+        .stat-card .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .stat-card .stat-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+        .stat-card .stat-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* ── Status breakdown cards ── */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .status-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .status-card .status-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .status-card .status-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .status-bar-visual {
+            display: flex;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            gap: 2px;
+            margin-bottom: 1.5rem;
+        }
+        .status-bar-visual .seg {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card-header { padding: 1.25rem 1.5rem 0; }
+        .card-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .card-content { padding: 1rem 1.5rem 1.5rem; }
+
+        /* ── Tables ── */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .report-table thead th {
+            background: var(--navy);
+            color: var(--yellow);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .report-table thead th:first-child { border-radius: 6px 0 0 0; }
+        .report-table thead th:last-child { border-radius: 0 6px 0 0; }
+        .report-table tbody td {
+            padding: 0.6rem 0.85rem;
+            border-bottom: 1px solid rgba(7,55,79,0.08);
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .report-table tbody tr:last-child td { border-bottom: none; }
+        .report-table tbody tr:nth-child(even) { background: rgba(7,55,79,0.03); }
+        .report-table td.num { text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+        /* ── Meeting Type Hero ── */
+        .traffic-hero {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .traffic-hero .traffic-hero-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow);
+            margin-bottom: 1.5rem;
+        }
+        .traffic-bars { display: flex; flex-direction: column; gap: 0.75rem; }
+        .traffic-row { display: flex; align-items: center; gap: 12px; }
+        .traffic-row .source-name {
+            width: 160px;
+            flex-shrink: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            text-align: right;
+        }
+        .traffic-row .bar-track {
+            flex: 1;
+            height: 28px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .traffic-row .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+        .traffic-row .bar-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .traffic-row .bar-pct {
+            width: 50px;
+            flex-shrink: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            text-align: right;
+        }
+
+        /* ── Charts ── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem 1rem;
+            box-shadow: var(--shadow);
+        }
+        .chart-card .chart-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--yellow);
+            margin-bottom: 0.75rem;
+        }
+        .chart-wrap { position: relative; width: 100%; height: 250px; }
+
+        /* ── Year accordion ── */
+        .month-group { margin-bottom: 0.5rem; }
+        .month-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--navy);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .month-header:hover { opacity: 0.9; }
+        .month-header .month-count {
+            background: var(--yellow);
+            color: var(--navy);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+        }
+        .month-header .chevron {
+            transition: transform 0.2s;
+            color: var(--yellow);
+        }
+        .month-header.open .chevron { transform: rotate(180deg); }
+        .month-body {
+            display: none;
+            padding: 0.5rem 0;
+        }
+        .month-body.open { display: block; }
+
+        /* ── Loading ── */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .loading-state .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid rgba(7,55,79,0.15);
+            border-top-color: var(--navy);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+            .traffic-row .source-name { width: 120px; font-size: 0.7rem; }
+        }
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            .status-grid { grid-template-columns: 1fr 1fr; }
+            .dash { padding: 1rem; }
+            .period-tabs { flex-direction: column; }
+            .period-tab { border-right: none; border-bottom: 1px solid rgba(7,55,79,0.08); }
+            .period-tab:last-child { border-bottom: none; }
+            .traffic-row { flex-wrap: wrap; }
+            .traffic-row .source-name { width: 100%; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stripe"></div>
+    <div class="back-bar">
+        <a href="index.html" class="back-link">&larr; Back to Revenue Kitchen</a>
+        <button class="btn-download" id="btn-snapshot" onclick="downloadSnapshot()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Snapshot
+        </button>
+    </div>
+
+    <div class="dash" id="snapshot-area">
+        <div class="dash-header">
+            <div>
+                <h1>BDR Outbound Tracker</h1>
+                <p>Live outbound meeting performance across all BDRs</p>
+            </div>
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                Live from Google Sheets
+            </div>
+        </div>
+
+        <!-- Period Tabs -->
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="wtd">
+                Week to Date
+                <span class="tab-range" id="wtd-range"></span>
+            </button>
+            <button class="period-tab" data-period="wow">
+                Week over Week
+                <span class="tab-range" id="wow-range"></span>
+            </button>
+            <button class="period-tab" data-period="mtd">
+                Month to Date
+                <span class="tab-range" id="mtd-range"></span>
+            </button>
+            <button class="period-tab" data-period="ytd">
+                Year to Date
+                <span class="tab-range" id="ytd-range"></span>
+            </button>
+        </div>
+
+        <div id="loading" class="loading-state">
+            <div class="spinner"></div>
+            Loading BDR data...
+        </div>
+
+        <div id="dashboard" style="display:none;"></div>
+    </div>
+
+<script>
+// ── Config ──
+const SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
+const BDR_ROLLUP_GID = '55819925';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_ROLLUP_GID}`;
+
+// Column indices for BDR Rollup tab
+const COL = {
+    REP: 0,
+    DATE_SET: 1,
+    DATE_MEETING: 2,
+    COMPANY: 3,
+    MEETING_STAGE: 4,
+    MEETING_TYPE: 5,
+    AE: 6,
+    DEAL_STAGE: 7,
+    SPIFF: 8,
+    NOTES: 9,
+};
+
+// ── Date utilities ──
+const NOW = new Date();
+
+function getMonday(d) {
+    const dt = new Date(d);
+    const day = dt.getDay();
+    const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+    dt.setDate(diff);
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+}
+
+function getMonthStart(d) { const dt = new Date(d); dt.setDate(1); dt.setHours(0,0,0,0); return dt; }
+function getYearStart(d) { return new Date(d.getFullYear(), 0, 1); }
+
+function formatShort(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+function formatFull(d) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function formatMonthYear(d) {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function parseGoogleDate(val) {
+    if (typeof val === 'string' && val.startsWith('Date(')) {
+        const parts = val.match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (parts) return new Date(parseInt(parts[1]), parseInt(parts[2]), parseInt(parts[3]));
+    }
+    return null;
+}
+
+function parseDateAny(cell) {
+    if (!cell) return null;
+    let d = parseGoogleDate(cell.v);
+    if (d) return d;
+    const f = (cell.f || '').trim();
+    if (f) {
+        const slashMatch = f.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if (slashMatch) {
+            const year = slashMatch[3] ? (slashMatch[3].length === 2 ? 2000 + parseInt(slashMatch[3]) : parseInt(slashMatch[3])) : NOW.getFullYear();
+            return new Date(year, parseInt(slashMatch[1]) - 1, parseInt(slashMatch[2]));
+        }
+    }
+    if (typeof cell.v === 'string') {
+        const d2 = new Date(cell.v);
+        if (!isNaN(d2.getTime())) return d2;
+    }
+    return null;
+}
+
+function cellVal(cells, idx) {
+    if (idx < 0 || idx >= cells.length || !cells[idx]) return '';
+    return (cells[idx].f || cells[idx].v || '').toString().trim();
+}
+
+// ── Normalize meeting stage ──
+function normalizeStage(raw) {
+    const s = (raw || '').trim().toLowerCase();
+    if (s.includes('show') && !s.includes('no')) return 'Show';
+    if (s.includes('no show') || s.includes('no-show')) return 'No Show';
+    if (s.includes('reschedule')) return 'Reschedule';
+    if (s.includes('set')) return 'Set';
+    if (s.includes('cancel')) return 'Cancelled';
+    return raw || 'Pending';
+}
+
+// ── Source color palette ──
+const TYPE_COLORS = [
+    '#eaff6a', '#3c94d1', '#22c55e', '#f59e0b', '#a78bfa',
+    '#fb923c', '#f472b6', '#2dd4bf', '#94a3b8', '#e879f9',
+];
+
+// ── State ──
+let allMeetings = [];
+let currentPeriod = 'wtd';
+let charts = {};
+
+// ── Fetch data ──
+async function fetchData() {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+
+    allMeetings = [];
+
+    for (const row of rows) {
+        const cells = row.c || [];
+        const company = cellVal(cells, COL.COMPANY);
+        if (!company) continue;
+
+        const dateSet = parseDateAny(cells[COL.DATE_SET]);
+        const dateMeeting = parseDateAny(cells[COL.DATE_MEETING]);
+
+        // Need at least one date
+        if (!dateSet && !dateMeeting) continue;
+
+        const rawStage = cellVal(cells, COL.MEETING_STAGE);
+
+        allMeetings.push({
+            rep: cellVal(cells, COL.REP),
+            dateSet,
+            dateMeeting,
+            company,
+            stage: normalizeStage(rawStage),
+            stageRaw: rawStage,
+            meetingType: cellVal(cells, COL.MEETING_TYPE),
+            ae: cellVal(cells, COL.AE),
+            dealStage: cellVal(cells, COL.DEAL_STAGE),
+            spiff: cellVal(cells, COL.SPIFF),
+            notes: cellVal(cells, COL.NOTES),
+        });
+    }
+
+    allMeetings.sort((a, b) => (b.dateSet || b.dateMeeting) - (a.dateSet || a.dateMeeting));
+}
+
+// ── Get period boundaries ──
+function getPeriodRange() {
+    const monday = getMonday(NOW);
+    const monthStart = getMonthStart(NOW);
+    const yearStart = getYearStart(NOW);
+
+    if (currentPeriod === 'wtd') return { start: monday, end: NOW };
+    if (currentPeriod === 'mtd') return { start: monthStart, end: NOW };
+    if (currentPeriod === 'wow') {
+        const start = new Date(monday);
+        start.setDate(start.getDate() - 7 * 51);
+        return { start, end: NOW };
+    }
+    return { start: yearStart, end: NOW };
+}
+
+// ── Filter meetings SET in a period (based on Date Set) ──
+function getSetsInRange(start, end) {
+    return allMeetings.filter(m => {
+        const d = m.dateSet || m.dateMeeting;
+        return d >= start && d <= end;
+    });
+}
+
+// ── Filter meetings by period for the detail table ──
+function getFilteredMeetings() {
+    const { start, end } = getPeriodRange();
+    return getSetsInRange(start, end);
+}
+
+// ── Count shows/no-shows by Date of Meeting falling in [start, end] ──
+// This looks at ALL meetings, not just those set in the period
+function getOutcomeCounts(start, end) {
+    let show = 0, noShow = 0;
+    allMeetings.forEach(m => {
+        if (!m.dateMeeting || m.dateMeeting < start || m.dateMeeting > end) return;
+        if (m.stage === 'Show') show++;
+        else if (m.stage === 'No Show') noShow++;
+    });
+    return { show, noShow };
+}
+
+// ── Get stage counts for a set of meetings (sets + reschedules from the filtered list,
+//    shows/no-shows from dateMeeting in the period) ──
+function getStageCounts(setMeetings, start, end) {
+    const outcomes = getOutcomeCounts(start, end);
+    let reschedule = 0, set = 0;
+    setMeetings.forEach(m => {
+        if (m.stage === 'Reschedule') reschedule++;
+        else if (m.stage === 'Set') set++;
+    });
+    return {
+        show: outcomes.show,
+        noShow: outcomes.noShow,
+        reschedule,
+        set,
+        total: setMeetings.length,
+    };
+}
+
+// ── Get meeting type breakdown ──
+function getTypeData(meetings) {
+    const map = {};
+    meetings.forEach(m => {
+        const t = m.meetingType || 'Unknown';
+        map[t] = (map[t] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+// ── Get rep breakdown ──
+// Sets counted by dateSet in period, shows/no-shows by dateMeeting in period
+function getRepData(setMeetings, start, end) {
+    const map = {};
+    // Count sets per rep (from the dateSet-filtered list)
+    setMeetings.forEach(m => {
+        const r = m.rep || 'Unknown';
+        if (!map[r]) map[r] = { total: 0, show: 0, noShow: 0, reschedule: 0 };
+        map[r].total++;
+        if (m.stage === 'Reschedule') map[r].reschedule++;
+    });
+    // Count shows/no-shows per rep (from dateMeeting in period, across ALL meetings)
+    allMeetings.forEach(m => {
+        if (!m.dateMeeting || m.dateMeeting < start || m.dateMeeting > end) return;
+        const r = m.rep || 'Unknown';
+        if (!map[r]) map[r] = { total: 0, show: 0, noShow: 0, reschedule: 0 };
+        if (m.stage === 'Show') map[r].show++;
+        else if (m.stage === 'No Show') map[r].noShow++;
+    });
+    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+}
+
+// ── Get deal stage breakdown ──
+function getDealStageData(meetings) {
+    const map = {};
+    meetings.forEach(m => {
+        const d = m.dealStage || 'Unknown';
+        map[d] = (map[d] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+// ── Weekly buckets for WoW ──
+function getWeeklyBuckets() {
+    const buckets = [];
+    const thisMonday = getMonday(NOW);
+
+    for (let i = 0; i < 52; i++) {
+        const weekStart = new Date(thisMonday);
+        weekStart.setDate(weekStart.getDate() - 7 * i);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        // Sets by dateSet in this week
+        const weekSets = getSetsInRange(weekStart, weekEnd);
+        // Shows/No Shows by dateMeeting in this week
+        const outcomes = getOutcomeCounts(weekStart, weekEnd);
+
+        buckets.push({
+            start: weekStart,
+            end: weekEnd,
+            isCurrent: i === 0,
+            sets: weekSets,
+            totalSets: weekSets.length,
+            show: outcomes.show,
+            noShow: outcomes.noShow,
+            reschedule: weekSets.filter(m => m.stage === 'Reschedule').length,
+        });
+    }
+    return buckets;
+}
+
+// ── Render ──
+function render() {
+    const meetings = getFilteredMeetings();
+    const dashboard = document.getElementById('dashboard');
+
+    // Update tab ranges
+    const monday = getMonday(NOW);
+    const monthStart = getMonthStart(NOW);
+    const yearStart = getYearStart(NOW);
+    const wowStart = new Date(monday);
+    wowStart.setDate(wowStart.getDate() - 7 * 51);
+
+    document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
+    document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
+    document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
+    document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
+
+    if (currentPeriod === 'wow') {
+        dashboard.innerHTML = renderWoW();
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+        return;
+    }
+
+    const { start: periodStart, end: periodEnd } = getPeriodRange();
+    const stageCounts = getStageCounts(meetings, periodStart, periodEnd);
+    const typeData = getTypeData(meetings);
+    const repData = getRepData(meetings, periodStart, periodEnd);
+
+    let html = '';
+
+    // ── Pipeline Summary ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Pipeline Summary</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Sets', stageCounts.total, '', true);
+    html += statCard('Shows', stageCounts.show, pct(stageCounts.show, stageCounts.total));
+    html += statCard('No Shows', stageCounts.noShow, pct(stageCounts.noShow, stageCounts.total));
+    html += statCard('Reschedules', stageCounts.reschedule, pct(stageCounts.reschedule, stageCounts.total));
+    html += '</div>';
+    html += '</div>';
+
+    // ── Status Breakdown (MTD & YTD) ──
+    if (currentPeriod !== 'wtd') {
+        html += '<div class="section-block">';
+        html += '<div class="section-title">Meeting Stage Breakdown</div>';
+        const total = stageCounts.total || 1;
+        html += '<div class="status-bar-visual">';
+        html += `<div class="seg" style="width:${(stageCounts.show/total*100)}%;background:var(--success)"></div>`;
+        html += `<div class="seg" style="width:${(stageCounts.noShow/total*100)}%;background:var(--destructive)"></div>`;
+        html += `<div class="seg" style="width:${(stageCounts.reschedule/total*100)}%;background:var(--warning)"></div>`;
+        html += '</div>';
+        html += '<div class="status-grid">';
+        html += statusCard(stageCounts.total, 'Total Sets');
+        html += statusCard(stageCounts.show, 'Shows');
+        html += statusCard(stageCounts.noShow, 'No Shows');
+        html += statusCard(stageCounts.reschedule, 'Reschedules');
+        html += '</div>';
+        html += '</div>';
+    }
+
+    // ── Meeting Type Breakdown ──
+    html += '<div class="section-block">';
+    html += '<div class="traffic-hero">';
+    html += '<div class="traffic-hero-title">Meeting Type Breakdown</div>';
+    if (typeData.length === 0) {
+        html += '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;text-align:center;padding:1rem;">No data for this period</div>';
+    } else {
+        const maxCount = typeData[0][1];
+        html += '<div class="traffic-bars">';
+        typeData.forEach(([type, count], i) => {
+            const pctVal = meetings.length ? Math.round(count / meetings.length * 100) : 0;
+            const barWidth = maxCount ? Math.max(count / maxCount * 100, 8) : 0;
+            const color = TYPE_COLORS[i % TYPE_COLORS.length];
+            html += '<div class="traffic-row">';
+            html += `<div class="source-name">${escapeHtml(type)}</div>`;
+            html += '<div class="bar-track">';
+            html += `<div class="bar-fill" style="width:${barWidth}%;background:${color}"><span class="bar-count">${count}</span></div>`;
+            html += '</div>';
+            html += `<div class="bar-pct">${pctVal}%</div>`;
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+
+    // ── Rep Performance Table ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Rep Performance</div>';
+    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+    html += '<table class="report-table"><thead><tr>';
+    html += '<th>Rep</th><th style="text-align:right">Sets</th><th style="text-align:right">Shows</th><th style="text-align:right">No Shows</th><th style="text-align:right">Reschedules</th><th style="text-align:right">Show %</th>';
+    html += '</tr></thead><tbody>';
+    repData.forEach(([rep, data]) => {
+        const showPct = data.show ? Math.round(data.show / (data.show + data.noShow) * 100) + '%' : '—';
+        html += '<tr>';
+        html += `<td><strong>${escapeHtml(rep)}</strong></td>`;
+        html += `<td class="num">${data.total}</td>`;
+        html += `<td class="num" style="color:var(--success)">${data.show}</td>`;
+        html += `<td class="num" style="color:var(--destructive)">${data.noShow}</td>`;
+        html += `<td class="num" style="color:var(--warning)">${data.reschedule}</td>`;
+        html += `<td class="num">${showPct}</td>`;
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div></div>';
+    html += '</div>';
+
+    // ── Charts ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Trends</div>';
+    html += '<div class="chart-grid">';
+    html += '<div class="chart-card"><div class="chart-label">Sets by Day</div><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>';
+    html += '<div class="chart-card"><div class="chart-label">Sets by Meeting Type</div><div class="chart-wrap"><canvas id="chart-type"></canvas></div></div>';
+    html += '</div>';
+    html += '</div>';
+
+    // ── Deal Stage Breakdown ──
+    const dealData = getDealStageData(meetings);
+    if (dealData.length > 0) {
+        html += '<div class="section-block">';
+        html += '<div class="section-title">Deal Stage</div>';
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr>';
+        html += '<th>Deal Stage</th><th style="text-align:right">Count</th><th style="text-align:right">% of Total</th>';
+        html += '</tr></thead><tbody>';
+        dealData.forEach(([stage, count]) => {
+            const pctVal = meetings.length ? Math.round(count / meetings.length * 100) : 0;
+            html += `<tr><td>${escapeHtml(stage)}</td><td class="num">${count}</td><td class="num">${pctVal}%</td></tr>`;
+        });
+        html += '</tbody></table></div></div></div>';
+        html += '</div>';
+    }
+
+    // ── Meeting Detail ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Meeting Detail</div>';
+
+    if (currentPeriod === 'ytd') {
+        const monthGroups = {};
+        meetings.forEach(m => {
+            const d = m.dateSet || m.dateMeeting;
+            const key = d.getFullYear() + '-' + String(d.getMonth()).padStart(2, '0');
+            if (!monthGroups[key]) monthGroups[key] = { label: formatMonthYear(d), meetings: [] };
+            monthGroups[key].meetings.push(m);
+        });
+        const sortedMonths = Object.keys(monthGroups).sort().reverse();
+        sortedMonths.forEach(key => {
+            const group = monthGroups[key];
+            html += '<div class="month-group">';
+            html += `<div class="month-header" onclick="toggleMonth(this)">`;
+            html += `<span>${escapeHtml(group.label)}</span>`;
+            html += `<span style="display:flex;align-items:center;gap:8px;"><span class="month-count">${group.meetings.length} meetings</span><span class="chevron">&#9660;</span></span>`;
+            html += '</div>';
+            html += '<div class="month-body">';
+            html += buildMeetingTable(group.meetings);
+            html += '</div></div>';
+        });
+    } else {
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += buildMeetingTable(meetings);
+        html += '</div></div></div>';
+    }
+
+    html += '</div>';
+
+    dashboard.innerHTML = html;
+    renderCharts(meetings, typeData);
+}
+
+// ── Week over Week ──
+function renderWoW() {
+    const buckets = getWeeklyBuckets();
+    const { start: periodStart, end: periodEnd } = getPeriodRange();
+
+    // Get all sets in the 52-week window for the summary
+    const allSets = getSetsInRange(periodStart, periodEnd);
+    const totalOutcomes = getOutcomeCounts(periodStart, periodEnd);
+
+    let html = '';
+
+    // Summary
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Trailing 52 Weeks</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Sets', allSets.length, '', true);
+    html += statCard('Shows', totalOutcomes.show, pct(totalOutcomes.show, allSets.length));
+    html += statCard('No Shows', totalOutcomes.noShow, pct(totalOutcomes.noShow, allSets.length));
+    html += statCard('Reschedules', allSets.filter(m => m.stage === 'Reschedule').length, '');
+    html += '</div>';
+    html += '</div>';
+
+    // Weekly table
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Week by Week</div>';
+    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+    html += '<table class="report-table"><thead><tr>';
+    html += '<th>Week</th>';
+    html += '<th style="text-align:right">Sets</th>';
+    html += '<th style="text-align:right">Shows</th>';
+    html += '<th style="text-align:right">No Shows</th>';
+    html += '<th style="text-align:right">Reschedules</th>';
+    html += '<th style="text-align:right">Show %</th>';
+    html += '</tr></thead><tbody>';
+
+    buckets.forEach(b => {
+        const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
+        const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--yellow);color:var(--navy);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
+        const showPct = b.show ? Math.round(b.show / (b.show + b.noShow) * 100) + '%' : '—';
+
+        html += '<tr>';
+        html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
+        html += `<td class="num">${b.totalSets}</td>`;
+        html += `<td class="num" style="color:var(--success)">${b.show}</td>`;
+        html += `<td class="num" style="color:var(--destructive)">${b.noShow}</td>`;
+        html += `<td class="num" style="color:var(--warning)">${b.reschedule}</td>`;
+        html += `<td class="num">${showPct}</td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div></div>';
+    html += '</div>';
+
+    return html;
+}
+
+// ── Helpers ──
+function statCard(label, value, sub, highlight) {
+    return `<div class="stat-card${highlight ? ' highlight-card' : ''}">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value">${value}</div>
+        ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+    </div>`;
+}
+
+function statusCard(count, label) {
+    return `<div class="status-card">
+        <div class="status-count">${count}</div>
+        <div class="status-label">${label}</div>
+    </div>`;
+}
+
+function pct(n, total) {
+    if (!total) return '0%';
+    return Math.round(n / total * 100) + '% of total';
+}
+
+function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+}
+
+function buildMeetingTable(meetings) {
+    if (meetings.length === 0) return '<div class="empty-state">No meetings for this period</div>';
+    let html = '<table class="report-table"><thead><tr>';
+    html += '<th>Company</th><th>Rep</th><th>AE</th><th>Date Set</th><th>Meeting Date</th><th>Stage</th><th>Type</th><th>Deal Stage</th>';
+    html += '</tr></thead><tbody>';
+    meetings.forEach(m => {
+        const stageColor = m.stage === 'Show' ? 'var(--success)' : m.stage === 'No Show' ? 'var(--destructive)' : m.stage === 'Reschedule' ? 'var(--warning)' : 'var(--text-muted)';
+        html += '<tr>';
+        html += `<td><strong>${escapeHtml(m.company)}</strong></td>`;
+        html += `<td>${escapeHtml(m.rep)}</td>`;
+        html += `<td>${escapeHtml(m.ae)}</td>`;
+        html += `<td style="white-space:nowrap">${m.dateSet ? formatShort(m.dateSet) : '—'}</td>`;
+        html += `<td style="white-space:nowrap">${m.dateMeeting ? formatShort(m.dateMeeting) : '—'}</td>`;
+        html += `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${stageColor};margin-right:6px;"></span>${escapeHtml(m.stage)}</td>`;
+        html += `<td>${escapeHtml(m.meetingType)}</td>`;
+        html += `<td>${escapeHtml(m.dealStage)}</td>`;
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    return html;
+}
+
+// ── Charts ──
+function renderCharts(meetings, typeData) {
+    Object.values(charts).forEach(c => c.destroy());
+    charts = {};
+
+    // Daily volume
+    const dailyMap = {};
+    meetings.forEach(m => {
+        const d = m.dateSet || m.dateMeeting;
+        const key = formatShort(d);
+        dailyMap[key] = (dailyMap[key] || 0) + 1;
+    });
+    const dailyLabels = Object.keys(dailyMap);
+    const dailyValues = Object.values(dailyMap);
+
+    const dailyCtx = document.getElementById('chart-daily');
+    if (dailyCtx) {
+        charts.daily = new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: dailyLabels.reverse(),
+                datasets: [{
+                    data: dailyValues.reverse(),
+                    backgroundColor: 'rgba(234,255,106,0.85)',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: 'rgba(255,255,255,0.6)', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: 'rgba(255,255,255,0.6)', font: { family: 'IBM Plex Mono', size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                }
+            }
+        });
+    }
+
+    // Type doughnut
+    const typeCtx = document.getElementById('chart-type');
+    if (typeCtx && typeData.length > 0) {
+        charts.type = new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: typeData.map(t => t[0]),
+                datasets: [{
+                    data: typeData.map(t => t[1]),
+                    backgroundColor: typeData.map((_, i) => TYPE_COLORS[i % TYPE_COLORS.length]),
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: 'rgba(255,255,255,0.8)', font: { family: 'IBM Plex Mono', size: 11 }, padding: 12 }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// ── Toggle month accordion ──
+function toggleMonth(el) {
+    el.classList.toggle('open');
+    const body = el.nextElementSibling;
+    body.classList.toggle('open');
+}
+
+// ── Download snapshot ──
+async function downloadSnapshot() {
+    const btn = document.getElementById('btn-snapshot');
+    btn.disabled = true;
+    btn.textContent = 'Capturing...';
+
+    try {
+        const area = document.getElementById('snapshot-area');
+        const canvas = await html2canvas(area, {
+            backgroundColor: '#f4f0e6',
+            scale: 2,
+            useCORS: true,
+            logging: false,
+        });
+
+        const link = document.createElement('a');
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'wow' ? 'WoW' : 'Year';
+        link.download = `BDR-Outbound-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error('Snapshot error:', err);
+        alert('Failed to capture snapshot. Try again.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Snapshot';
+}
+
+// ── Tab switching ──
+document.querySelectorAll('.period-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentPeriod = tab.dataset.period;
+        render();
+    });
+});
+
+// ── Init ──
+async function init() {
+    try {
+        await fetchData();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = '';
+        render();
+    } catch (err) {
+        console.error('Failed to load data:', err);
+        document.getElementById('loading').innerHTML = '<div style="color:var(--destructive);">Failed to load data. Please refresh.</div>';
+    }
+}
+
+init();
+</script>
+</body>
+</html>
