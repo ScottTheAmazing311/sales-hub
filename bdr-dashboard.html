@@ -681,6 +681,11 @@ function parseAE1Rows(rows, repName, layout) {
         if (!company) continue;
         if (!dateSet && !dateMeeting) continue;
 
+        // Only include Self Sourced AE1 sets in BDR totals
+        // BDR/MDR/Inbound sets already appear in the BDR rollup
+        var isSelfSourced = (setBy || '').toLowerCase().includes('self');
+        if (!isSelfSourced) continue;
+
         meetings.push({
             rep: repName,
             dateSet,
@@ -688,7 +693,7 @@ function parseAE1Rows(rows, repName, layout) {
             company,
             stage: normalizeStage(rawStage),
             stageRaw: rawStage,
-            meetingType: meetingType || 'AE1 Self-Set',
+            meetingType: 'Self Sourced',
             ae: repName,
             dealStage: '',
             spiff: '',
