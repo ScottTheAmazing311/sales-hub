@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Client Saturation Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+  :root {
+    --midnight: #0B0B2A;
+    --tuxedo: #1C1C3A;
+    --chartreuse: #D6FF3D;
+    --sky: #6BCEE8;
+    --flax: #F5D67E;
+    --pearl: #F5F5F0;
+    --pearl-dim: #E8E8E0;
+    --ink: #0B0B2A;
+    --muted: #6B6B7A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    background: var(--pearl);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    height: 100vh;
+    background: var(--pearl);
+  }
+
+  /* Map panel */
+  .map-panel {
+    position: relative;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(214,255,61,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(107,206,232,0.04) 0%, transparent 40%),
+      var(--pearl);
+    overflow: hidden;
+  }
+  .map-header {
+    position: absolute;
+    top: 24px;
+    left: 32px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 38px;
+    line-height: 0.95;
+    color: var(--midnight);
+    letter-spacing: -0.02em;
+  }
+  h1 .accent {
+    background: var(--chartreuse);
+    padding: 0 6px;
+    margin-left: -2px;
+  }
+  .map-meta {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* Legend */
+  .legend {
+    position: absolute;
+    bottom: 24px;
+    left: 32px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--pearl-dim);
+    padding: 14px 16px;
+    z-index: 5;
+    font-size: 11px;
+  }
+  .legend-title {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .legend-row:last-child { margin-bottom: 0; }
+  .legend-dot {
+    border-radius: 50%;
+    border: 1.5px solid var(--midnight);
+  }
+  .legend-label {
+    color: var(--ink);
+    font-size: 11px;
+  }
+  .legend-count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  /* SVG */
+  svg.usmap {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .state {
+    fill: #FFFFFF;
+    stroke: #C8C8C0;
+    stroke-width: 0.6;
+    transition: fill 0.15s;
+  }
+  .state.has-clients {
+    fill: #FAFAF5;
+  }
+  .state:hover {
+    fill: #F0F0E8;
+  }
+  .city-bubble {
+    cursor: pointer;
+    transition: stroke-width 0.15s, transform 0.15s;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .city-bubble:hover {
+    stroke-width: 2.5;
+  }
+  .city-bubble.selected {
+    stroke: var(--midnight);
+    stroke-width: 3;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--midnight);
+    color: var(--pearl);
+    border-left: 1px solid var(--tuxedo);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar::-webkit-scrollbar { width: 8px; }
+  .sidebar::-webkit-scrollbar-track { background: var(--midnight); }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--tuxedo); border-radius: 4px; }
+
+  .sidebar-header {
+    padding: 28px 28px 18px;
+    border-bottom: 1px solid var(--tuxedo);
+  }
+  .sidebar-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--chartreuse);
+    margin-bottom: 8px;
+  }
+  .sidebar-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--pearl);
+  }
+  .sidebar-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+  }
+  .stat {
+    flex: 1;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--chartreuse);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,245,240,0.5);
+    margin-top: 4px;
+  }
+
+  /* Toggle */
+  .view-toggle {
+    display: flex;
+    margin: 18px 28px 0;
+    border: 1px solid var(--tuxedo);
+    background: var(--tuxedo);
+    padding: 3px;
+  }
+  .view-toggle button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(245,245,240,0.6);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .view-toggle button.active {
+    background: var(--chartreuse);
+    color: var(--midnight);
+    font-weight: 500;
+  }
+
+  /* Detail panel */
+  .detail {
+    padding: 24px 28px;
+    flex: 1;
+  }
+  .detail.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .empty-msg {
+    color: rgba(245,245,240,0.4);
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 220px;
+  }
+  .detail-city {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--pearl);
+    margin-bottom: 4px;
+  }
+  .detail-state {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: rgba(245,245,240,0.5);
+    text-transform: uppercase;
+  }
+  .detail-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 14px 0;
+    border-top: 1px solid var(--tuxedo);
+    border-bottom: 1px solid var(--tuxedo);
+  }
+  .meta-item {
+    flex: 1;
+  }
+  .meta-num {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--pearl);
+    line-height: 1;
+  }
+  .meta-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,245,240,0.5);
+    margin-top: 4px;
+  }
+  .saturation-pill {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 10px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border: 1px solid currentColor;
+  }
+  .clients-header {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,245,240,0.5);
+  }
+  .client-list {
+    list-style: none;
+  }
+  .client-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(245,245,240,0.08);
+    font-size: 12px;
+    color: var(--pearl);
+    line-height: 1.4;
+  }
+  .client-list li:last-child { border-bottom: none; }
+
+  /* Top cities list */
+  .top-list {
+    padding: 0 28px 24px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .top-list::-webkit-scrollbar { width: 6px; }
+  .top-list::-webkit-scrollbar-thumb { background: var(--tuxedo); }
+
+  .top-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--tuxedo);
+    cursor: pointer;
+    transition: background 0.15s;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .top-row:hover {
+    background: var(--tuxedo);
+  }
+  .top-rank {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: rgba(245,245,240,0.4);
+  }
+  .top-city {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pearl);
+  }
+  .top-state {
+    font-size: 10px;
+    color: rgba(245,245,240,0.5);
+    margin-left: 4px;
+  }
+  .top-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--chartreuse);
+    font-weight: 500;
+  }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--midnight);
+    color: var(--pearl);
+    padding: 8px 12px;
+    font-size: 11px;
+    border: 1px solid var(--chartreuse);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.1s;
+    white-space: nowrap;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip-city {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .tooltip-meta {
+    color: rgba(245,245,240,0.6);
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  /* Loading */
+  .loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pearl);
+    z-index: 20;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .loading.hidden { display: none; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 60vh 40vh; }
+    .sidebar { border-left: none; border-top: 1px solid var(--tuxedo); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="map-panel">
+    <div class="loading" id="loading">Loading map…</div>
+    <div class="map-header">
+      <div class="eyebrow">Rankings.io · Client Distribution</div>
+      <h1>Saturation by <span class="accent">HQ City</span></h1>
+      <div class="map-meta" id="metaLine">253 clients · 168 cities · 47 states</div>
+    </div>
+    <svg class="usmap" id="usmap"></svg>
+    <div class="legend">
+      <div class="legend-title">Saturation</div>
+      <div class="legend-row">
+        <div class="legend-dot" style="width:18px;height:18px;background:#FFB3B3"></div>
+        <div class="legend-label">Very High</div><div class="legend-count">5+</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot" style="width:14px;height:14px;background:#FFD9B3"></div>
+        <div class="legend-label">High</div><div class="legend-count">3–4</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot" style="width:11px;height:11px;background:#FFF4CC"></div>
+        <div class="legend-label">Moderate</div><div class="legend-count">2</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot" style="width:8px;height:8px;background:#D6E4F5"></div>
+        <div class="legend-label">Low</div><div class="legend-count">1</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-eyebrow">Client Map</div>
+      <div class="sidebar-title">Geographic Saturation</div>
+      <div class="sidebar-stats">
+        <div class="stat"><div class="stat-num">253</div><div class="stat-label">Clients</div></div>
+        <div class="stat"><div class="stat-num">168</div><div class="stat-label">HQ Cities</div></div>
+        <div class="stat"><div class="stat-num">47</div><div class="stat-label">States</div></div>
+      </div>
+    </div>
+
+    <div class="view-toggle">
+      <button class="active" data-view="top">Top Cities</button>
+      <button data-view="detail">Selected</button>
+    </div>
+
+    <div id="topList" class="top-list"></div>
+    <div id="detail" class="detail empty" style="display:none">
+      <div class="empty-msg">Click any city dot on the map<br>to see client details.</div>
+    </div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const CITIES = [{"city":"Houston","state":"TX","key":"Houston, TX","lat":29.76328,"lng":-95.36327,"count":10,"saturation":"Very High","clients":["AP Law Group","Gonzalez & Havens Valor Law Firm","Havens & Associates, PLLC","Law Office of Nathaniel, PLLC","Lowenberg Law Firm","Suits & Boots Accident Injury Lawyers (Brar Law)","Terry Bryant Attorney","The Gross Law Firm","The NMW Law Firm","Vergara Miller Law"]},{"city":"Los Angeles","state":"CA","key":"Los Angeles, CA","lat":34.05223,"lng":-118.24368,"count":9,"saturation":"Very High","clients":["Aghnami Law Group","Barhoma Law, P.C. d/b/a Power Trial Lawyers","Best Law","Greenberg Gross","Greenslade Cronk","Kantor & Kantor, LLP","Law Office of Parag L. Amin, P.C.","M&Y Personal Injury Lawyers","The Rodriguez Law Group"]},{"city":"New York","state":"NY","key":"New York, NY","lat":40.71427,"lng":-74.00597,"count":6,"saturation":"Very High","clients":["Finz & Finz P.C.","Hach & Rose, LLC","Mizrahi Kroub, LLP","Pollack, Pollack, Isaac & DeCicco,","The Perecman Firm","Washor Kool Sosa Maiorana & Schwartz, LLP"]},{"city":"San Diego","state":"CA","key":"San Diego, CA","lat":32.71571,"lng":-117.16472,"count":6,"saturation":"Very High","clients":["Bonnici Law Group","Haeggquist & Eck","Harbor Probate Law PC","Rawlins Law, APC","Tropea McMillan LLP","elite criminal defense"]},{"city":"St. Louis","state":"MO","key":"St. Louis, MO","lat":38.62727,"lng":-90.19789,"count":6,"saturation":"Very High","clients":["Brown & Crouppen, P.C.","Gray Ritter Graham","Kayla's Survivors ","Sumner Law Group","The Bruning Law Firm","The Powell Law Firm, LLC"]},{"city":"Austin","state":"TX","key":"Austin, TX","lat":30.26715,"lng":-97.74306,"count":5,"saturation":"Very High","clients":["Lemon Lawyers, PLLC","Lorenz & Lorenz","Ramos James Law PLLC","Slingshot Law - Injury Attorneys","The Cagle Law Firm"]},{"city":"Chicago","state":"IL","key":"Chicago, IL","lat":41.85003,"lng":-87.65005,"count":4,"saturation":"High","clients":["Abels & Annes, P.C.","Kennedy Watkins","Vogelzang Law","Walner Law, Chicago Personal injury Lawyers"]},{"city":"Dallas","state":"TX","key":"Dallas, TX","lat":32.78306,"lng":-96.80667,"count":4,"saturation":"High","clients":["Crain Brogdon, LLP","DFW Injury Lawyers","Javier Perez Law Firm","Law Firm of Aaron A. Herbert"]},{"city":"Indianapolis","state":"IN","key":"Indianapolis, IN","lat":39.76838,"lng":-86.15804,"count":4,"saturation":"High","clients":["Hurst Limontes LLC","Klezmer Maudlin PC","Team Green Law","Yosha Law"]},{"city":"San Antonio","state":"TX","key":"San Antonio, TX","lat":29.42412,"lng":-98.49363,"count":4,"saturation":"High","clients":["Cowen Rodriguez Peacock, P.C.","Law Offices Of George Salinas","Ryan Orsatti Law","The Law Office of Nathaniel Gilbert, PLLC"]},{"city":"Atlanta","state":"GA","key":"Atlanta, GA","lat":33.749,"lng":-84.38798,"count":3,"saturation":"High","clients":["Calvin Smith Law","Hasner Law","Wiggam Law"]},{"city":"Denver","state":"CO","key":"Denver, CO","lat":39.73915,"lng":-104.9847,"count":3,"saturation":"High","clients":["Born and McCaffrey","Fuicelli & Lee","Price Family Law"]},{"city":"Miami","state":"FL","key":"Miami, FL","lat":25.77427,"lng":-80.19366,"count":3,"saturation":"High","clients":["Berger & Hicks, P.A.","Your Insurance Attorney","erez law"]},{"city":"Milwaukee","state":"WI","key":"Milwaukee, WI","lat":43.0389,"lng":-87.90647,"count":3,"saturation":"High","clients":["Hawks Quindel, S.C.","Lindner Law, LLC","Michael Johnson Legal"]},{"city":"Philadelphia","state":"PA","key":"Philadelphia, PA","lat":39.95238,"lng":-75.16362,"count":3,"saturation":"High","clients":["Shipon Law Associates","The Rothenberg Law Firm LLP","Wapner Newman"]},{"city":"Phoenix","state":"AZ","key":"Phoenix, AZ","lat":33.44838,"lng":-112.07404,"count":3,"saturation":"High","clients":["Law Bear","Lawton Legal Practice","Sandstone Law Group"]},{"city":"Richmond","state":"VA","key":"Richmond, VA","lat":37.55376,"lng":-77.46026,"count":3,"saturation":"High","clients":["Allen & Allen","Cody Villalon, Attorney At Law\thttp://richmond-defense.com","Emroch & Kilduff, LLP"]},{"city":"Southfield","state":"MI","key":"Southfield, MI","lat":42.47337,"lng":-83.22187,"count":3,"saturation":"High","clients":["Christensen Law Offices","Goodman Acker, P.C.","Kajy Law Firm"]},{"city":"Tampa","state":"FL","key":"Tampa, FL","lat":27.94752,"lng":-82.45843,"count":3,"saturation":"High","clients":["Anton Garcia","Mickey Keenan PA","Taracks & Associates"]},{"city":"Albuquerque","state":"NM","key":"Albuquerque, NM","lat":35.08449,"lng":-106.65114,"count":2,"saturation":"Moderate","clients":["Gauthier & Maier Law Firm","Rosales & Bush Injury Law"]},{"city":"Bakersfield","state":"CA","key":"Bakersfield, CA","lat":35.37329,"lng":-119.01871,"count":2,"saturation":"Moderate","clients":["The Law Office of Mickey Fine","The Law Offices of Mickey Fine"]},{"city":"Baltimore","state":"MD","key":"Baltimore, MD","lat":39.29038,"lng":-76.61219,"count":2,"saturation":"Moderate","clients":["Brown & Barron","The Law Offices of Steven H. Heisler"]},{"city":"Bloomfield Hills","state":"MI","key":"Bloomfield Hills, MI","lat":42.58364,"lng":-83.2455,"count":2,"saturation":"Moderate","clients":["Michigan Injury Lawyers","Reiter & Walsh, P.C."]},{"city":"Boca Raton","state":"FL","key":"Boca Raton, FL","lat":26.35869,"lng":-80.0831,"count":2,"saturation":"Moderate","clients":["Florida Probate Law Firm, PLLC","The Russo Firm"]},{"city":"Cincinnati","state":"OH","key":"Cincinnati, OH","lat":39.12711,"lng":-84.51439,"count":2,"saturation":"Moderate","clients":["O'Connor, Acciani & Levy","The Farrish Law Firm, LPA"]},{"city":"Fort Worth","state":"TX","key":"Fort Worth, TX","lat":32.72541,"lng":-97.32085,"count":2,"saturation":"Moderate","clients":["Fulgham Hampton Law Group","Sloane Law Firm"]},{"city":"Kansas City","state":"MO","key":"Kansas City, MO","lat":39.09973,"lng":-94.57857,"count":2,"saturation":"Moderate","clients":["DiPasquale & Moore Attorneys","Popham Law Firm"]},{"city":"Las Vegas","state":"NV","key":"Las Vegas, NV","lat":36.17497,"lng":-115.13722,"count":2,"saturation":"Moderate","clients":["Joel M. Mann, Chtd.","Rosenblum Allen Law Firm"]},{"city":"Orlando","state":"FL","key":"Orlando, FL","lat":28.53834,"lng":-81.37924,"count":2,"saturation":"Moderate","clients":["Bogin, Munns & Munns","Spetsas Buist PLLC"]},{"city":"Pasadena","state":"CA","key":"Pasadena, CA","lat":34.14778,"lng":-118.14452,"count":2,"saturation":"Moderate","clients":["Olen Firm Criminal Defense Lawyers","Trust Law Partners, LLP"]},{"city":"Pensacola","state":"FL","key":"Pensacola, FL","lat":30.42131,"lng":-87.21691,"count":2,"saturation":"Moderate","clients":["Cardoso Law","Emmanuel Sheppard & Condon"]},{"city":"Portland","state":"OR","key":"Portland, OR","lat":45.52345,"lng":-122.67621,"count":2,"saturation":"Moderate","clients":["Pacific Cascade Legal","Rugged Law"]},{"city":"Reno","state":"NV","key":"Reno, NV","lat":39.52963,"lng":-119.8138,"count":2,"saturation":"Moderate","clients":["Leverty Law","VILORIA, OLIPHANT, OSTER & AMAN L.L.P., a Nevada Limited-Liability Partnership"]},{"city":"Santa Barbara","state":"CA","key":"Santa Barbara, CA","lat":34.42083,"lng":-119.69819,"count":2,"saturation":"Moderate","clients":["Maho Prentice","Nye, Stirling, Hale, Miller & Sweet"]},{"city":"Spokane","state":"WA","key":"Spokane, WA","lat":47.65966,"lng":-117.42908,"count":2,"saturation":"Moderate","clients":["Crouse Erickson","Fannin Litigation Group"]},{"city":"St. Petersburg","state":"FL","key":"St. Petersburg, FL","lat":27.77086,"lng":-82.67927,"count":2,"saturation":"Moderate","clients":["Khonsari Law Group","The Lopez Law Group - Lopez Accident Injury Attorneys"]},{"city":"Tulsa","state":"OK","key":"Tulsa, OK","lat":36.15398,"lng":-95.99277,"count":2,"saturation":"Moderate","clients":["Carr & Carr","Graves McLain Attorneys"]},{"city":"West Palm Beach","state":"FL","key":"West Palm Beach, FL","lat":26.71534,"lng":-80.05337,"count":2,"saturation":"Moderate","clients":["Felice Trial Attorneys","Rosenthal Levy Simon Sosa"]},{"city":"Abilene","state":"TX","key":"Abilene, TX","lat":32.44874,"lng":-99.73314,"count":1,"saturation":"Low","clients":["Law Offices of David M. White"]},{"city":"Abington","state":"PA","key":"Abington, PA","lat":40.12067,"lng":-75.11795,"count":1,"saturation":"Low","clients":["Kaufman Workers' Compensation Law"]},{"city":"Alpharetta","state":"GA","key":"Alpharetta, GA","lat":34.07538,"lng":-84.29409,"count":1,"saturation":"Low","clients":["North Atlanta Injury Law"]},{"city":"Altadena","state":"CA","key":"Altadena, CA","lat":34.18973,"lng":-118.13118,"count":1,"saturation":"Low","clients":["The Bernheim Law Firm"]},{"city":"Altamonte Springs","state":"FL","key":"Altamonte Springs, FL","lat":28.66111,"lng":-81.36562,"count":1,"saturation":"Low","clients":["Lewis Roberts, PA"]},{"city":"Anchorage","state":"AK","key":"Anchorage, AK","lat":61.21806,"lng":-149.90028,"count":1,"saturation":"Low","clients":["Crowson Law Group"]},{"city":"Arlington","state":"TX","key":"Arlington, TX","lat":32.73569,"lng":-97.10807,"count":1,"saturation":"Low","clients":["Branch & Dhillon Law Firm"]},{"city":"Augusta","state":"GA","key":"Augusta, GA","lat":33.47097,"lng":-81.97484,"count":1,"saturation":"Low","clients":["The Hawk Firm"]},{"city":"Barrington","state":"IL","key":"Barrington, IL","lat":42.15364,"lng":-88.13674,"count":1,"saturation":"Low","clients":["Law Offices of Lawrence S. Manassa, P.C."]},{"city":"Baton Rouge","state":"LA","key":"Baton Rouge, LA","lat":30.44332,"lng":-91.18747,"count":1,"saturation":"Low","clients":["J. Price McNamara"]},{"city":"Beaufort","state":"NC","key":"Beaufort, NC","lat":34.71793,"lng":-76.66382,"count":1,"saturation":"Low","clients":["Cummings & Kennedy Law Firm"]},{"city":"Bellaire","state":"TX","key":"Bellaire, TX","lat":29.70579,"lng":-95.45883,"count":1,"saturation":"Low","clients":["The Calderon Law Firm, PLLC"]},{"city":"Bethlehem","state":"PA","key":"Bethlehem, PA","lat":40.62593,"lng":-75.37046,"count":1,"saturation":"Low","clients":["Leeson & Leeson"]},{"city":"Billings","state":"MT","key":"Billings, MT","lat":45.78329,"lng":-108.50069,"count":1,"saturation":"Low","clients":["Yellowstone Law"]},{"city":"Bloomfield","state":"MO","key":"Bloomfield, MO","lat":36.88589,"lng":-89.92843,"count":1,"saturation":"Low","clients":["Cook, Barkett, Ponder & Wolz"]},{"city":"Booneville","state":"MS","key":"Booneville, MS","lat":34.6626,"lng":-88.56671,"count":1,"saturation":"Low","clients":["Langston & Lott"]},{"city":"Boston","state":"MA","key":"Boston, MA","lat":42.35843,"lng":-71.05977,"count":1,"saturation":"Low","clients":["Altman Nussbaum Shunnarah Trial Attorneys"]},{"city":"Boynton Beach","state":"FL","key":"Boynton Beach, FL","lat":26.52535,"lng":-80.06643,"count":1,"saturation":"Low","clients":["Frankl Kominsky Injury Lawyers"]},{"city":"Brandon","state":"FL","key":"Brandon, FL","lat":27.9378,"lng":-82.28592,"count":1,"saturation":"Low","clients":["Boohoff Law"]},{"city":"Bronx","state":"NY","key":"Bronx, NY","lat":40.84985,"lng":-73.86641,"count":1,"saturation":"Low","clients":["Diamond Injury Law"]},{"city":"Buffalo","state":"NY","key":"Buffalo, NY","lat":42.88645,"lng":-78.87837,"count":1,"saturation":"Low","clients":["Lewis & Lewis, P.C."]},{"city":"Cape Girardeau","state":"MO","key":"Cape Girardeau, MO","lat":37.30588,"lng":-89.51815,"count":1,"saturation":"Low","clients":["Birk Law Firm"]},{"city":"Carlsbad","state":"CA","key":"Carlsbad, CA","lat":33.15809,"lng":-117.35059,"count":1,"saturation":"Low","clients":["Fischer & Van Thiel"]},{"city":"Charleston","state":"SC","key":"Charleston, SC","lat":32.77632,"lng":-79.93275,"count":1,"saturation":"Low","clients":["Ty Robinson Personal Injury & Car Accident Law Firm"]},{"city":"Charlotte","state":"NC","key":"Charlotte, NC","lat":35.22709,"lng":-80.84313,"count":1,"saturation":"Low","clients":["Maginnis Howard"]},{"city":"Clearwater","state":"FL","key":"Clearwater, FL","lat":27.96585,"lng":-82.8001,"count":1,"saturation":"Low","clients":["Roman Austin"]},{"city":"Clifton","state":"NJ","key":"Clifton, NJ","lat":40.85843,"lng":-74.16376,"count":1,"saturation":"Low","clients":["Cohen & Bernstein"]},{"city":"Clinton","state":"MA","key":"Clinton, MA","lat":42.41676,"lng":-71.68311,"count":1,"saturation":"Low","clients":["The Law Offices of Bailey and Burke"]},{"city":"Colorado Springs","state":"CO","key":"Colorado Springs, CO","lat":38.83388,"lng":-104.82136,"count":1,"saturation":"Low","clients":["the law office of andrew bryant"]},{"city":"Columbia","state":"SC","key":"Columbia, SC","lat":34.00071,"lng":-81.03481,"count":1,"saturation":"Low","clients":["Law Office of Kenneth E. Berger LLC"]},{"city":"Coral Gables","state":"FL","key":"Coral Gables, FL","lat":25.72149,"lng":-80.26838,"count":1,"saturation":"Low","clients":["The Estate Plan"]},{"city":"Coral Springs","state":"FL","key":"Coral Springs, FL","lat":26.27119,"lng":-80.2706,"count":1,"saturation":"Low","clients":["Law Offices of Cindy A. Goldstein"]},{"city":"Dana Point","state":"CA","key":"Dana Point, CA","lat":33.46697,"lng":-117.69811,"count":1,"saturation":"Low","clients":["Neale & Fhima APC"]},{"city":"Denton","state":"TX","key":"Denton, TX","lat":33.21484,"lng":-97.13307,"count":1,"saturation":"Low","clients":["Youngberg Law Firm"]},{"city":"Doral","state":"FL","key":"Doral, FL","lat":25.81954,"lng":-80.35533,"count":1,"saturation":"Low","clients":["Jesus R Gonzalez PA"]},{"city":"Downey","state":"CA","key":"Downey, CA","lat":33.94001,"lng":-118.13257,"count":1,"saturation":"Low","clients":["Resolve Law Firm, APC"]},{"city":"Draper","state":"UT","key":"Draper, UT","lat":40.52467,"lng":-111.86382,"count":1,"saturation":"Low","clients":["Eric Swinyard & Associates, PLLC"]},{"city":"East Lansing","state":"MI","key":"East Lansing, MI","lat":42.73698,"lng":-84.48387,"count":1,"saturation":"Low","clients":["Ben Hall Law"]},{"city":"Elmhurst","state":"NY","key":"Elmhurst, NY","lat":40.73649,"lng":-73.87791,"count":1,"saturation":"Low","clients":["Omrani & Taub, P.C"]},{"city":"Elmwood Park","state":"NJ","key":"Elmwood Park, NJ","lat":40.90399,"lng":-74.11848,"count":1,"saturation":"Low","clients":["Onal Gallant"]},{"city":"Fairlawn","state":"OH","key":"Fairlawn, OH","lat":41.13339,"lng":-81.61956,"count":1,"saturation":"Low","clients":["JP Amourgis and Associates"]},{"city":"Fargo","state":"ND","key":"Fargo, ND","lat":46.87719,"lng":-96.7898,"count":1,"saturation":"Low","clients":["Vogel Law Firm"]},{"city":"Federal Way","state":"WA","key":"Federal Way, WA","lat":47.32232,"lng":-122.31262,"count":1,"saturation":"Low","clients":["The Ye Law Firm"]},{"city":"Fishers","state":"IN","key":"Fishers, IN","lat":39.95559,"lng":-86.01387,"count":1,"saturation":"Low","clients":["Wyant Law"]},{"city":"Fort Lauderdale","state":"FL","key":"Fort Lauderdale, FL","lat":26.12231,"lng":-80.14338,"count":1,"saturation":"Low","clients":["Horowitz Law"]},{"city":"Fort Lee","state":"NJ","key":"Fort Lee, NJ","lat":40.85093,"lng":-73.97014,"count":1,"saturation":"Low","clients":["Maggiano, DiGirolamo & Lizzi, P.C."]},{"city":"Frederick","state":"MD","key":"Frederick, MD","lat":39.41427,"lng":-77.41054,"count":1,"saturation":"Low","clients":["Lusk Law, LLC"]},{"city":"Gainesville","state":"FL","key":"Gainesville, FL","lat":29.65163,"lng":-82.32483,"count":1,"saturation":"Low","clients":["Bagen Law Accident Injury Lawyers, P.A."]},{"city":"Gainesville","state":"GA","key":"Gainesville, GA","lat":34.29788,"lng":-83.82407,"count":1,"saturation":"Low","clients":["Weaver Law Injury Attorneys"]},{"city":"Greenville","state":"SC","key":"Greenville, SC","lat":34.85262,"lng":-82.39401,"count":1,"saturation":"Low","clients":["FR Law LLC"]},{"city":"Greenwood Village","state":"CO","key":"Greenwood Village, CO","lat":39.61721,"lng":-104.95081,"count":1,"saturation":"Low","clients":["Legal Help in Colorado "]},{"city":"Hackensack","state":"NJ","key":"Hackensack, NJ","lat":40.88593,"lng":-74.04347,"count":1,"saturation":"Low","clients":["Reinartz Law Firm"]},{"city":"Hamilton Township","state":"NJ","key":"Hamilton Township, NJ","lat":40.21039,"lng":-74.65237,"count":1,"saturation":"Low","clients":["STARK & STARK, A PROFESSIONAL CORPORATION"]},{"city":"Hartford","state":"CT","key":"Hartford, CT","lat":41.76371,"lng":-72.68509,"count":1,"saturation":"Low","clients":["McConnell Family Law Group"]},{"city":"Holland","state":"MI","key":"Holland, MI","lat":42.78752,"lng":-86.10893,"count":1,"saturation":"Low","clients":["Buckman, Tuinstra & Brown PC"]},{"city":"Holtsville","state":"NY","key":"Holtsville, NY","lat":40.81538,"lng":-73.04511,"count":1,"saturation":"Low","clients":["Rosenberg & Gluck, LLP"]},{"city":"Hudson","state":"WI","key":"Hudson, WI","lat":44.97468,"lng":-92.7566,"count":1,"saturation":"Low","clients":["Nicolet Law Office, S.C."]},{"city":"Hutchinson","state":"KS","key":"Hutchinson, KS","lat":38.06084,"lng":-97.92977,"count":1,"saturation":"Low","clients":["Mann Wyatt Tanksley Injury Attorneys"]},{"city":"Indiana","state":"PA","key":"Indiana, PA","lat":40.62146,"lng":-79.15281,"count":1,"saturation":"Low","clients":["Marcus & Mack"]},{"city":"Jackson","state":"MS","key":"Jackson, MS","lat":32.29876,"lng":-90.18481,"count":1,"saturation":"Low","clients":["Richard Schwartz & Associates"]},{"city":"Jefferson City","state":"MO","key":"Jefferson City, MO","lat":38.5767,"lng":-92.17352,"count":1,"saturation":"Low","clients":["Kirsch & Kirsch, LLC"]},{"city":"Jupiter","state":"FL","key":"Jupiter, FL","lat":26.93422,"lng":-80.09421,"count":1,"saturation":"Low","clients":["Brenton Legal PA"]},{"city":"Katy","state":"TX","key":"Katy, TX","lat":29.78579,"lng":-95.8244,"count":1,"saturation":"Low","clients":["The Weisblatt Law Firm, LLC"]},{"city":"Kennesaw","state":"GA","key":"Kennesaw, GA","lat":34.02343,"lng":-84.61549,"count":1,"saturation":"Low","clients":["Williams Elleby Howard & Easter"]},{"city":"Lafayette","state":"IN","key":"Lafayette, IN","lat":40.4167,"lng":-86.87529,"count":1,"saturation":"Low","clients":["Vaughan & Vaughan"]},{"city":"Lakewood Township","state":"NJ","key":"Lakewood Township, NJ","lat":40.09789,"lng":-74.21764,"count":1,"saturation":"Low","clients":["The Brown Law Firm"]},{"city":"Lexington","state":"KY","key":"Lexington, KY","lat":37.98869,"lng":-84.47772,"count":1,"saturation":"Low","clients":["Maze Law Firm"]},{"city":"Longmont","state":"CO","key":"Longmont, CO","lat":40.16721,"lng":-105.10193,"count":1,"saturation":"Low","clients":["The Law Offices of Edward Smith"]},{"city":"Los Gatos","state":"CA","key":"Los Gatos, CA","lat":37.22661,"lng":-121.97468,"count":1,"saturation":"Low","clients":["Wade Litigation"]},{"city":"Lugoff","state":"SC","key":"Lugoff, SC","lat":34.21737,"lng":-80.6915,"count":1,"saturation":"Low","clients":["Connell Law Firm"]},{"city":"Lutz","state":"FL","key":"Lutz, FL","lat":28.15112,"lng":-82.46148,"count":1,"saturation":"Low","clients":["Holliday Karatinos Law Firm, PLLC"]},{"city":"Macon","state":"GA","key":"Macon, GA","lat":32.84069,"lng":-83.6324,"count":1,"saturation":"Low","clients":["Mann Law Firm"]},{"city":"Marion","state":"IL","key":"Marion, IL","lat":37.73061,"lng":-88.93313,"count":1,"saturation":"Low","clients":["Dihle Law Firm"]},{"city":"Mclean","state":"VA","key":"Mclean, VA","lat":38.93428,"lng":-77.17748,"count":1,"saturation":"Low","clients":["Tysons Trial Law"]},{"city":"Mesa","state":"AZ","key":"Mesa, AZ","lat":33.42227,"lng":-111.82264,"count":1,"saturation":"Low","clients":["Udall Shumway"]},{"city":"Middletown","state":"CT","key":"Middletown, CT","lat":41.56232,"lng":-72.65065,"count":1,"saturation":"Low","clients":["The Flood Law Firm"]},{"city":"Mill Valley","state":"CA","key":"Mill Valley, CA","lat":37.90605,"lng":-122.54498,"count":1,"saturation":"Low","clients":["The Zinn Law Firm"]},{"city":"Nashua","state":"NH","key":"Nashua, NH","lat":42.76537,"lng":-71.46757,"count":1,"saturation":"Low","clients":["Coates Law Office"]},{"city":"New Albany","state":"IN","key":"New Albany, IN","lat":38.28562,"lng":-85.82413,"count":1,"saturation":"Low","clients":["Church Langdon Lopp Banet Law Firm"]},{"city":"New Orleans","state":"LA","key":"New Orleans, LA","lat":29.95465,"lng":-90.07507,"count":1,"saturation":"Low","clients":["MORRIS BART, L.L.C."]},{"city":"North Charleston","state":"SC","key":"North Charleston, SC","lat":32.85462,"lng":-79.97481,"count":1,"saturation":"Low","clients":["Miller Dawson Sigal & Ward Attorneys"]},{"city":"Oakdale","state":"MN","key":"Oakdale, MN","lat":44.96302,"lng":-92.96494,"count":1,"saturation":"Low","clients":["Tyroler Leonard Injury Law, PLLC"]},{"city":"Odessa","state":"TX","key":"Odessa, TX","lat":31.84568,"lng":-102.36764,"count":1,"saturation":"Low","clients":["Braker White"]},{"city":"Omaha","state":"NE","key":"Omaha, NE","lat":41.25626,"lng":-95.94043,"count":1,"saturation":"Low","clients":["Liberty Law Group"]},{"city":"Ontario","state":"CA","key":"Ontario, CA","lat":34.06334,"lng":-117.65089,"count":1,"saturation":"Low","clients":["Banderas Law"]},{"city":"Owings Mills","state":"MD","key":"Owings Mills, MD","lat":39.41955,"lng":-76.78025,"count":1,"saturation":"Low","clients":["Furman Honick Law"]},{"city":"Palos Heights","state":"IL","key":"Palos Heights, IL","lat":41.66695,"lng":-87.79616,"count":1,"saturation":"Low","clients":["Lorenz Law"]},{"city":"Pembroke Pines","state":"FL","key":"Pembroke Pines, FL","lat":26.00315,"lng":-80.22394,"count":1,"saturation":"Low","clients":["Garnes Injury Law"]},{"city":"Pikeville","state":"KY","key":"Pikeville, KY","lat":37.47929,"lng":-82.51848,"count":1,"saturation":"Low","clients":["Billy Johnson Law"]},{"city":"Pittsburgh","state":"PA","key":"Pittsburgh, PA","lat":40.44062,"lng":-79.99589,"count":1,"saturation":"Low","clients":["Pribanic & Pribanic"]},{"city":"Plantation","state":"FL","key":"Plantation, FL","lat":26.13421,"lng":-80.23184,"count":1,"saturation":"Low","clients":["Law Office of Carlos M. Amor, PA"]},{"city":"Pompano Beach","state":"FL","key":"Pompano Beach, FL","lat":26.23786,"lng":-80.12477,"count":1,"saturation":"Low","clients":["Miller & Jacobs"]},{"city":"Port Richey","state":"FL","key":"Port Richey, FL","lat":28.2717,"lng":-82.71927,"count":1,"saturation":"Low","clients":["Nicoletti Law Firm"]},{"city":"Prattville","state":"AL","key":"Prattville, AL","lat":32.46402,"lng":-86.4597,"count":1,"saturation":"Low","clients":["Grainger Hawley & Shinbaum, LLC"]},{"city":"Puyallup","state":"WA","key":"Puyallup, WA","lat":47.18538,"lng":-122.2929,"count":1,"saturation":"Low","clients":["Jacobs and Jacobs"]},{"city":"Raleigh","state":"NC","key":"Raleigh, NC","lat":35.7721,"lng":-78.63861,"count":1,"saturation":"Low","clients":["Whitley Law Firm"]},{"city":"Redding","state":"CA","key":"Redding, CA","lat":40.58654,"lng":-122.39168,"count":1,"saturation":"Low","clients":["Reiner & Frankel, LLP"]},{"city":"Reisterstown","state":"MD","key":"Reisterstown, MD","lat":39.46976,"lng":-76.8319,"count":1,"saturation":"Low","clients":["Law Offices of David Ellin"]},{"city":"Renton","state":"WA","key":"Renton, WA","lat":47.48288,"lng":-122.21707,"count":1,"saturation":"Low","clients":["Pendergast Law Firm"]},{"city":"Richardson","state":"TX","key":"Richardson, TX","lat":32.94818,"lng":-96.72972,"count":1,"saturation":"Low","clients":["Almasri & Marzwanian Law Group"]},{"city":"Rockville","state":"MD","key":"Rockville, MD","lat":39.084,"lng":-77.15276,"count":1,"saturation":"Low","clients":["Seddiq Law"]},{"city":"Salt Lake City","state":"UT","key":"Salt Lake City, UT","lat":40.76078,"lng":-111.89105,"count":1,"saturation":"Low","clients":["Parker & McConkie, Personal Injury Attorneys"]},{"city":"San Angelo","state":"TX","key":"San Angelo, TX","lat":31.46377,"lng":-100.43704,"count":1,"saturation":"Low","clients":["Templeton Law Firm"]},{"city":"San Francisco","state":"CA","key":"San Francisco, CA","lat":37.77493,"lng":-122.41942,"count":1,"saturation":"Low","clients":["The Law Offices of Alex Bonilla, P.C."]},{"city":"San Jose","state":"CA","key":"San Jose, CA","lat":37.33939,"lng":-121.89496,"count":1,"saturation":"Low","clients":["Alexander Law Group, LLP."]},{"city":"San Luis Obispo","state":"CA","key":"San Luis Obispo, CA","lat":35.28275,"lng":-120.65962,"count":1,"saturation":"Low","clients":["Harris Law Personal Injury Lawyers"]},{"city":"Santa Monica","state":"CA","key":"Santa Monica, CA","lat":34.01949,"lng":-118.49138,"count":1,"saturation":"Low","clients":["Olan Law"]},{"city":"Santa Rosa","state":"CA","key":"Santa Rosa, CA","lat":38.44047,"lng":-122.71443,"count":1,"saturation":"Low","clients":["Law Offices of Evan E. Zelig, P.C."]},{"city":"Sarasota","state":"FL","key":"Sarasota, FL","lat":27.33643,"lng":-82.53065,"count":1,"saturation":"Low","clients":["Shapiro Delgado"]},{"city":"Savannah","state":"GA","key":"Savannah, GA","lat":32.08354,"lng":-81.09983,"count":1,"saturation":"Low","clients":["The Atlantic Law Firm"]},{"city":"Schaumburg","state":"IL","key":"Schaumburg, IL","lat":42.03336,"lng":-88.08341,"count":1,"saturation":"Low","clients":["M&A Law Firm PC"]},{"city":"Scottsdale","state":"AZ","key":"Scottsdale, AZ","lat":33.50921,"lng":-111.89903,"count":1,"saturation":"Low","clients":["BTL Family Law"]},{"city":"Scranton","state":"PA","key":"Scranton, PA","lat":41.40916,"lng":-75.6649,"count":1,"saturation":"Low","clients":["The Slocum Firm"]},{"city":"Seattle","state":"WA","key":"Seattle, WA","lat":47.60621,"lng":-122.33207,"count":1,"saturation":"Low","clients":["Dickson Frohlich Phillips Burgess"]},{"city":"Sebastian","state":"FL","key":"Sebastian, FL","lat":27.81641,"lng":-80.47061,"count":1,"saturation":"Low","clients":["Lulich & Attorneys"]},{"city":"South Jordan","state":"UT","key":"South Jordan, UT","lat":40.56217,"lng":-111.92966,"count":1,"saturation":"Low","clients":["RCG Law Group"]},{"city":"Springfield","state":"MA","key":"Springfield, MA","lat":42.10148,"lng":-72.58981,"count":1,"saturation":"Low","clients":["Cava Law Firm"]},{"city":"Springfield","state":"MO","key":"Springfield, MO","lat":37.21533,"lng":-93.29824,"count":1,"saturation":"Low","clients":["Hall Ansley, P.C."]},{"city":"Springfield","state":"OR","key":"Springfield, OR","lat":44.04624,"lng":-123.02203,"count":1,"saturation":"Low","clients":["Thorp & Co Family Law"]},{"city":"Steamboat Springs","state":"CO","key":"Steamboat Springs, CO","lat":40.48498,"lng":-106.83171,"count":1,"saturation":"Low","clients":["The Brown Law Firm, LLC"]},{"city":"Stevens Point","state":"WI","key":"Stevens Point, WI","lat":44.52358,"lng":-89.57456,"count":1,"saturation":"Low","clients":["Anderson O'Brien"]},{"city":"Syosset","state":"NY","key":"Syosset, NY","lat":40.82621,"lng":-73.50207,"count":1,"saturation":"Low","clients":["Tucker Lawyers PC"]},{"city":"Tacoma","state":"WA","key":"Tacoma, WA","lat":47.25288,"lng":-122.44429,"count":1,"saturation":"Low","clients":["Bridges ADR (Dickson)"]},{"city":"Thibodaux","state":"LA","key":"Thibodaux, LA","lat":29.79552,"lng":-90.82288,"count":1,"saturation":"Low","clients":["Ory Law Group"]},{"city":"Topeka","state":"KS","key":"Topeka, KS","lat":39.04833,"lng":-95.67804,"count":1,"saturation":"Low","clients":["Palmer Law Group"]},{"city":"White Plains","state":"NY","key":"White Plains, NY","lat":41.03399,"lng":-73.76291,"count":1,"saturation":"Low","clients":["Law Offices of Jason B. Kessler, PC"]},{"city":"Williamsville","state":"NY","key":"Williamsville, NY","lat":42.96369,"lng":-78.73782,"count":1,"saturation":"Low","clients":["William Mattar Law Offices"]},{"city":"Wilmington","state":"NC","key":"Wilmington, NC","lat":34.23556,"lng":-77.94604,"count":1,"saturation":"Low","clients":["Greg Jones Law"]},{"city":"Woodridge","state":"IL","key":"Woodridge, IL","lat":41.74697,"lng":-88.05034,"count":1,"saturation":"Low","clients":["Wolfe & Stec, Ltd."]},{"city":"Yakima","state":"WA","key":"Yakima, WA","lat":46.60207,"lng":-120.5059,"count":1,"saturation":"Low","clients":["Kapuza Lighty Accident Injury Lawyers"]}]
+;
+
+// Saturation → color (matching the Excel report)
+const SAT_COLOR = {
+  'Very High': '#FFB3B3',
+  'High':      '#FFD9B3',
+  'Moderate':  '#FFF4CC',
+  'Low':       '#D6E4F5',
+};
+const SAT_BORDER = {
+  'Very High': '#C44',
+  'High':      '#C97',
+  'Moderate':  '#A95',
+  'Low':       '#578',
+};
+
+// Stats
+const totalClients = CITIES.reduce((s,c) => s + c.count, 0);
+const states = new Set(CITIES.map(c => c.state));
+document.getElementById('metaLine').textContent =
+  `${totalClients} clients · ${CITIES.length} cities · ${states.size} states`;
+document.querySelectorAll('.stat-num')[0].textContent = totalClients;
+document.querySelectorAll('.stat-num')[1].textContent = CITIES.length;
+document.querySelectorAll('.stat-num')[2].textContent = states.size;
+
+// Bubble radius scale
+const maxCount = d3.max(CITIES, c => c.count);
+const rScale = d3.scaleSqrt().domain([1, maxCount]).range([3.5, 18]);
+
+// Fetch US topojson
+const topoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
+
+async function init() {
+  const us = await fetch(topoUrl).then(r => r.json());
+  const states = topojson.feature(us, us.objects.states);
+  const stateMesh = topojson.mesh(us, us.objects.states, (a,b) => a !== b);
+
+  const svg = d3.select('#usmap');
+  const node = svg.node();
+  const { width, height } = node.getBoundingClientRect();
+
+  const projection = d3.geoAlbersUsa().fitSize([width, height], states);
+  const path = d3.geoPath(projection);
+
+  // Identify states with clients
+  const stateAbbrToName = {
+    'AL':'Alabama','AK':'Alaska','AZ':'Arizona','AR':'Arkansas','CA':'California',
+    'CO':'Colorado','CT':'Connecticut','DE':'Delaware','FL':'Florida','GA':'Georgia',
+    'HI':'Hawaii','ID':'Idaho','IL':'Illinois','IN':'Indiana','IA':'Iowa','KS':'Kansas',
+    'KY':'Kentucky','LA':'Louisiana','ME':'Maine','MD':'Maryland','MA':'Massachusetts',
+    'MI':'Michigan','MN':'Minnesota','MS':'Mississippi','MO':'Missouri','MT':'Montana',
+    'NE':'Nebraska','NV':'Nevada','NH':'New Hampshire','NJ':'New Jersey','NM':'New Mexico',
+    'NY':'New York','NC':'North Carolina','ND':'North Dakota','OH':'Ohio','OK':'Oklahoma',
+    'OR':'Oregon','PA':'Pennsylvania','RI':'Rhode Island','SC':'South Carolina',
+    'SD':'South Dakota','TN':'Tennessee','TX':'Texas','UT':'Utah','VT':'Vermont',
+    'VA':'Virginia','WA':'Washington','WV':'West Virginia','WI':'Wisconsin','WY':'Wyoming',
+    'DC':'District of Columbia'
+  };
+  const statesWithClients = new Set([...new Set(CITIES.map(c => c.state))].map(s => stateAbbrToName[s]));
+
+  // States
+  svg.append('g')
+    .selectAll('path')
+    .data(states.features)
+    .join('path')
+    .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''))
+    .attr('d', path);
+
+  // State borders mesh
+  svg.append('path')
+    .attr('d', path(stateMesh))
+    .attr('fill', 'none')
+    .attr('stroke', '#C8C8C0')
+    .attr('stroke-width', 0.6)
+    .attr('stroke-linejoin', 'round');
+
+  // Project city points
+  const points = CITIES.map(c => {
+    const p = projection([c.lng, c.lat]);
+    return p ? { ...c, x: p[0], y: p[1] } : null;
+  }).filter(Boolean);
+
+  // Draw smallest first so largest sit on top (largest are most clickable)
+  const drawn = [...points].sort((a,b) => a.count - b.count);
+
+  const tooltip = d3.select('#tooltip');
+  const bubbles = svg.append('g')
+    .selectAll('circle')
+    .data(drawn, d => d.key)
+    .join('circle')
+    .attr('class', 'city-bubble')
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y)
+    .attr('r', d => rScale(d.count))
+    .attr('fill', d => SAT_COLOR[d.saturation])
+    .attr('stroke', d => SAT_BORDER[d.saturation])
+    .attr('stroke-width', 1.5)
+    .attr('fill-opacity', 0.85)
+    .on('mouseenter', (event, d) => {
+      tooltip.classed('visible', true)
+        .html(`<div class="tooltip-city">${d.key}</div>
+               <div class="tooltip-meta">${d.count} client${d.count===1?'':'s'} · ${d.saturation}</div>`);
+    })
+    .on('mousemove', (event) => {
+      tooltip.style('left', (event.pageX + 14) + 'px')
+             .style('top', (event.pageY + 14) + 'px');
+    })
+    .on('mouseleave', () => tooltip.classed('visible', false))
+    .on('click', (event, d) => selectCity(d));
+
+  // Top cities list
+  const top = [...CITIES].sort((a,b) => b.count - a.count);
+  const topList = d3.select('#topList');
+  topList.selectAll('div.top-row')
+    .data(top)
+    .join('div')
+    .attr('class', 'top-row')
+    .html((d,i) => `
+      <div class="top-rank">${String(i+1).padStart(2,'0')}</div>
+      <div><span class="top-city">${d.city}</span><span class="top-state">, ${d.state}</span></div>
+      <div class="top-count">${d.count}</div>
+    `)
+    .on('click', (event, d) => selectCity(d));
+
+  // Selection
+  let selected = null;
+  function selectCity(d) {
+    selected = d;
+    svg.selectAll('.city-bubble').classed('selected', x => x.key === d.key);
+    // Switch to detail view
+    document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === 'detail'));
+    showView('detail');
+
+    const det = document.getElementById('detail');
+    det.classList.remove('empty');
+    const satColor = SAT_COLOR[d.saturation];
+    const satBorder = SAT_BORDER[d.saturation];
+    det.innerHTML = `
+      <div class="detail-city">${d.city}</div>
+      <div class="detail-state">${d.state}</div>
+      <span class="saturation-pill" style="color:${satColor};border-color:${satColor};background:${satColor}22">${d.saturation}</span>
+      <div class="detail-meta">
+        <div class="meta-item"><div class="meta-num">${d.count}</div><div class="meta-label">Clients</div></div>
+        <div class="meta-item"><div class="meta-num">#${top.findIndex(c=>c.key===d.key)+1}</div><div class="meta-label">Rank</div></div>
+      </div>
+      <div class="clients-header">Client Roster</div>
+      <ul class="client-list">
+        ${d.clients.map(c => `<li>${c}</li>`).join('')}
+      </ul>
+    `;
+  }
+
+  // View toggle
+  document.querySelectorAll('.view-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+      showView(btn.dataset.view);
+    });
+  });
+  function showView(v) {
+    document.getElementById('topList').style.display = v === 'top' ? 'block' : 'none';
+    document.getElementById('detail').style.display = v === 'detail' ? 'flex' : 'none';
+    if (v === 'detail') {
+      document.getElementById('detail').style.display = 'block';
+    }
+  }
+
+  document.getElementById('loading').classList.add('hidden');
+
+  // Resize
+  window.addEventListener('resize', () => {
+    const { width, height } = node.getBoundingClientRect();
+    projection.fitSize([width, height], states);
+    svg.selectAll('path.state').attr('d', path);
+    points.forEach(p => {
+      const np = projection([p.lng, p.lat]);
+      if (np) { p.x = np[0]; p.y = np[1]; }
+    });
+    svg.selectAll('.city-bubble').attr('cx', d => d.x).attr('cy', d => d.y);
+  });
+}
+
+init().catch(err => {
+  document.getElementById('loading').textContent = 'Failed to load map: ' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>
