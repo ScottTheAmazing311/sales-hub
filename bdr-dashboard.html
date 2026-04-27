@@ -521,6 +521,31 @@ const SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
 const BDR_ROLLUP_GID = '55819925';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_ROLLUP_GID}`;
 
+// AE1 rep sheets — their sets count toward BDR totals
+const AE1_SHEETS = [
+    {
+        rep: 'Brandon Steed',
+        sheetId: '1e8rv7kXGXrrlWAfaG5G3cmtVOId7v6JwTkFFJIyPiNs',
+        gid: '1412667623',
+        // Columns: A=Date Set, B=Date of Meeting, C=Company, D=Set By, E=Meeting Stage, F=Notes
+        layout: 'standard',
+    },
+    {
+        rep: 'Jacob Man',
+        sheetId: '1TF6m6jvCi6da06zjPfUIpvJRNjdCVoPkHN2qVy12aEk',
+        gid: '0',
+        // Columns: A=Date Set, B=Date of Meeting, C=Company, D=Set By, E=Deal Type, F=Meeting Stage, G=Notes
+        layout: 'jacob',
+    },
+    {
+        rep: 'Jake Wangler',
+        sheetId: '1LAqFCFrwtYyiUCqPPDg5-BZhGXYitnDA2QU8S7RlnHs',
+        gid: '0',
+        // Columns: A=Date Set, B=Date of Meeting, C=Company, D=Set By, E=Meeting Stage, F=Notes
+        layout: 'standard',
+    },
+];
+
 // Column indices for BDR Rollup tab
 const COL = {
     REP: 0,
@@ -614,16 +639,75 @@ let allMeetings = [];
 let currentPeriod = 'wtd';
 let charts = {};
 
+// ── Fetch a Google Sheet and parse rows ──
+async function fetchSheet(url) {
+    const res = await fetch(url);
+    const text = await res.text();
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1) return [];
+    const json = JSON.parse(text.substring(start, end + 1));
+    return (json.table && json.table.rows) || [];
+}
+
+// ── Parse AE1 sheet rows into meeting objects ──
+function parseAE1Rows(rows, repName, layout) {
+    const meetings = [];
+    for (const row of rows) {
+        const cells = row.c || [];
+
+        let dateSet, dateMeeting, company, setBy, rawStage, notes, meetingType;
+
+        if (layout === 'jacob') {
+            // Jacob: A=Date Set, B=Date of Meeting, C=Company, D=Set By, E=Deal Type, F=Meeting Stage, G=Notes
+            dateSet = parseDateAny(cells[0]);
+            dateMeeting = parseDateAny(cells[1]);
+            company = cellVal(cells, 2);
+            setBy = cellVal(cells, 3);
+            meetingType = cellVal(cells, 4); // Deal Type
+            rawStage = cellVal(cells, 5);
+            notes = cellVal(cells, 6);
+        } else {
+            // Standard (Brandon & Jake W): A=Date Set, B=Date of Meeting, C=Company, D=Set By, E=Meeting Stage, F=Notes
+            dateSet = parseDateAny(cells[0]);
+            dateMeeting = parseDateAny(cells[1]);
+            company = cellVal(cells, 2);
+            setBy = cellVal(cells, 3);
+            rawStage = cellVal(cells, 4);
+            notes = cellVal(cells, 5);
+            meetingType = setBy; // Use "Set By" as meeting type (Self Sourced, BDR, MDR, etc.)
+        }
+
+        if (!company) continue;
+        if (!dateSet && !dateMeeting) continue;
+
+        meetings.push({
+            rep: repName,
+            dateSet,
+            dateMeeting,
+            company,
+            stage: normalizeStage(rawStage),
+            stageRaw: rawStage,
+            meetingType: meetingType || 'AE1 Self-Set',
+            ae: repName,
+            dealStage: '',
+            spiff: '',
+            notes: notes || '',
+            isAE1: true,
+        });
+    }
+    return meetings;
+}
+
 // ── Fetch data ──
 async function fetchData() {
-    const res = await fetch(SHEET_URL);
-    const text = await res.text();
-    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-    const rows = json.table.rows;
+    // Fetch BDR rollup first (required)
+    const rollupRows = await fetchSheet(SHEET_URL);
 
     allMeetings = [];
 
-    for (const row of rows) {
+    // Parse BDR rollup
+    for (const row of rollupRows) {
         const cells = row.c || [];
         const company = cellVal(cells, COL.COMPANY);
         if (!company) continue;
@@ -651,7 +735,25 @@ async function fetchData() {
         });
     }
 
-    allMeetings.sort((a, b) => (b.dateSet || b.dateMeeting) - (a.dateSet || a.dateMeeting));
+    // Fetch AE1 sheets in parallel (non-blocking — dashboard loads even if these fail)
+    try {
+        const ae1Results = await Promise.all(
+            AE1_SHEETS.map(function(s) {
+                var url = 'https://docs.google.com/spreadsheets/d/' + s.sheetId + '/gviz/tq?tqx=out:json&gid=' + s.gid;
+                return fetchSheet(url).catch(function() { return []; });
+            })
+        );
+        for (var i = 0; i < AE1_SHEETS.length; i++) {
+            var ae1Meetings = parseAE1Rows(ae1Results[i], AE1_SHEETS[i].rep, AE1_SHEETS[i].layout);
+            allMeetings.push.apply(allMeetings, ae1Meetings);
+        }
+    } catch (e) {
+        console.warn('AE1 sheets failed to load:', e);
+    }
+
+    allMeetings.sort(function(a, b) {
+        return (b.dateSet || b.dateMeeting) - (a.dateSet || a.dateMeeting);
+    });
 }
 
 // ── Get period boundaries ──
@@ -818,9 +920,57 @@ function render() {
 
     let html = '';
 
+    // ── Weekly Goals ──
+    var WEEKLY_SETS_GOAL = 24;
+    var WEEKLY_HOLDS_GOAL = 21;
+
+    // Scale goals based on period
+    var weeksInPeriod = 1;
+    if (currentPeriod === 'mtd') {
+        weeksInPeriod = Math.max(1, Math.ceil((NOW - periodStart) / (7 * 24 * 60 * 60 * 1000)));
+    } else if (currentPeriod === 'ytd') {
+        weeksInPeriod = Math.max(1, Math.ceil((NOW - periodStart) / (7 * 24 * 60 * 60 * 1000)));
+    }
+    var setsGoal = WEEKLY_SETS_GOAL * weeksInPeriod;
+    var holdsGoal = WEEKLY_HOLDS_GOAL * weeksInPeriod;
+    var setsPct = Math.min(Math.round(stageCounts.total / setsGoal * 100), 100);
+    var holdsPct = Math.min(Math.round(stageCounts.show / holdsGoal * 100), 100);
+    var setsOver = stageCounts.total >= setsGoal;
+    var holdsOver = stageCounts.show >= holdsGoal;
+
     // ── Pipeline Summary ──
     html += '<div class="section-block">';
     html += '<div class="section-title">Pipeline Summary</div>';
+
+    // Goal progress bars
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">';
+
+    // Sets goal
+    html += '<div style="background:var(--cream);border-radius:var(--radius);padding:14px 18px;border:1px solid rgba(7,55,79,0.08);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Sets Goal</span>';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.85rem;font-weight:700;color:' + (setsOver ? 'var(--success)' : 'var(--navy)') + ';">' + stageCounts.total + ' / ' + setsGoal + '</span>';
+    html += '</div>';
+    html += '<div style="width:100%;height:8px;background:rgba(7,55,79,0.08);border-radius:4px;overflow:hidden;">';
+    html += '<div style="width:' + setsPct + '%;height:100%;background:' + (setsOver ? 'var(--success)' : 'var(--yellow)') + ';border-radius:4px;transition:width 0.6s ease;"></div>';
+    html += '</div>';
+    html += '<div style="text-align:right;font-size:0.7rem;color:var(--text-muted);margin-top:4px;">' + setsPct + '%</div>';
+    html += '</div>';
+
+    // Holds goal
+    html += '<div style="background:var(--cream);border-radius:var(--radius);padding:14px 18px;border:1px solid rgba(7,55,79,0.08);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Holds Goal</span>';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.85rem;font-weight:700;color:' + (holdsOver ? 'var(--success)' : 'var(--navy)') + ';">' + stageCounts.show + ' / ' + holdsGoal + '</span>';
+    html += '</div>';
+    html += '<div style="width:100%;height:8px;background:rgba(7,55,79,0.08);border-radius:4px;overflow:hidden;">';
+    html += '<div style="width:' + holdsPct + '%;height:100%;background:' + (holdsOver ? 'var(--success)' : '#3c94d1') + ';border-radius:4px;transition:width 0.6s ease;"></div>';
+    html += '</div>';
+    html += '<div style="text-align:right;font-size:0.7rem;color:var(--text-muted);margin-top:4px;">' + holdsPct + '%</div>';
+    html += '</div>';
+
+    html += '</div>';
+
     html += '<div class="stat-grid">';
     html += statCard('Total Sets', stageCounts.total, '', true);
     html += statCard('Shows', stageCounts.show, pct(stageCounts.show, stageCounts.total));
@@ -895,6 +1045,80 @@ function render() {
     html += '</tbody></table></div></div></div>';
     html += '</div>';
 
+    // ── AE1 Performance ──
+    var ae1Meetings = meetings.filter(function(m) { return m.isAE1; });
+    if (ae1Meetings.length > 0 || allMeetings.some(function(m) { return m.isAE1; })) {
+        var ae1AllInPeriod = allMeetings.filter(function(m) {
+            if (!m.isAE1) return false;
+            var d = m.dateMeeting || m.dateSet;
+            return d && d >= periodStart && d <= periodEnd;
+        });
+        html += '<div class="section-block">';
+        html += '<div class="section-title">AE1 Performance</div>';
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr>';
+        html += '<th>Rep</th><th style="text-align:right">Sets</th><th style="text-align:right">Shows</th><th style="text-align:right">No Shows</th><th style="text-align:right">Reschedules</th><th style="text-align:right">Show %</th>';
+        html += '</tr></thead><tbody>';
+        var ae1Reps = {};
+        ae1Meetings.forEach(function(m) {
+            if (!ae1Reps[m.rep]) ae1Reps[m.rep] = { sets: 0, show: 0, noShow: 0, reschedule: 0 };
+            ae1Reps[m.rep].sets++;
+            if (m.stage === 'Reschedule') ae1Reps[m.rep].reschedule++;
+        });
+        ae1AllInPeriod.forEach(function(m) {
+            if (!ae1Reps[m.rep]) ae1Reps[m.rep] = { sets: 0, show: 0, noShow: 0, reschedule: 0 };
+            if (m.stage === 'Show') ae1Reps[m.rep].show++;
+            else if (m.stage === 'No Show') ae1Reps[m.rep].noShow++;
+        });
+        var ae1Total = { sets: 0, show: 0, noShow: 0, reschedule: 0 };
+        Object.keys(ae1Reps).sort().forEach(function(rep) {
+            var d = ae1Reps[rep];
+            ae1Total.sets += d.sets;
+            ae1Total.show += d.show;
+            ae1Total.noShow += d.noShow;
+            ae1Total.reschedule += d.reschedule;
+            var sp = d.show ? Math.round(d.show / (d.show + d.noShow) * 100) + '%' : '—';
+            html += '<tr>';
+            html += '<td><strong>' + escapeHtml(rep) + '</strong></td>';
+            html += '<td class="num">' + d.sets + '</td>';
+            html += '<td class="num" style="color:var(--success)">' + d.show + '</td>';
+            html += '<td class="num" style="color:var(--destructive)">' + d.noShow + '</td>';
+            html += '<td class="num" style="color:var(--warning)">' + d.reschedule + '</td>';
+            html += '<td class="num">' + sp + '</td>';
+            html += '</tr>';
+        });
+        // Totals row
+        var totalSp = ae1Total.show ? Math.round(ae1Total.show / (ae1Total.show + ae1Total.noShow) * 100) + '%' : '—';
+        html += '<tr style="border-top:2px solid var(--navy);font-weight:700;">';
+        html += '<td>Total</td>';
+        html += '<td class="num">' + ae1Total.sets + '</td>';
+        html += '<td class="num" style="color:var(--success)">' + ae1Total.show + '</td>';
+        html += '<td class="num" style="color:var(--destructive)">' + ae1Total.noShow + '</td>';
+        html += '<td class="num" style="color:var(--warning)">' + ae1Total.reschedule + '</td>';
+        html += '<td class="num">' + totalSp + '</td>';
+        html += '</tr>';
+        html += '</tbody></table></div></div></div>';
+
+        // Pipeline summary from AE1 data (deal stages if available)
+        var ae1Pipeline = allMeetings.filter(function(m) { return m.isAE1 && m.dealStage; });
+        var pipelineByStage = {};
+        ae1Pipeline.forEach(function(m) {
+            var s = m.dealStage;
+            if (!pipelineByStage[s]) pipelineByStage[s] = 0;
+            pipelineByStage[s]++;
+        });
+        if (Object.keys(pipelineByStage).length > 0) {
+            html += '<div style="margin-top:0.75rem;" class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+            html += '<table class="report-table"><thead><tr><th>Deal Stage</th><th style="text-align:right">Count</th></tr></thead><tbody>';
+            Object.entries(pipelineByStage).sort(function(a,b) { return b[1] - a[1]; }).forEach(function(entry) {
+                html += '<tr><td>' + escapeHtml(entry[0]) + '</td><td class="num">' + entry[1] + '</td></tr>';
+            });
+            html += '</tbody></table></div></div></div>';
+        }
+
+        html += '</div>';
+    }
+
     // ── Charts ──
     html += '<div class="section-block">';
     html += '<div class="section-title">Trends</div>';
@@ -962,20 +1186,57 @@ function renderWoW() {
     const buckets = getWeeklyBuckets();
     const { start: periodStart, end: periodEnd } = getPeriodRange();
 
-    // Get all sets in the 52-week window for the summary
-    const allSets = getSetsInRange(periodStart, periodEnd);
-    const totalOutcomes = getOutcomeCounts(periodStart, periodEnd);
-
     let html = '';
 
-    // Summary
+    // Last week summary (default hero stats)
+    const lastMonday = new Date(getMonday(NOW));
+    lastMonday.setDate(lastMonday.getDate() - 7);
+    const lastSunday = new Date(lastMonday);
+    lastSunday.setDate(lastSunday.getDate() + 6);
+    lastSunday.setHours(23, 59, 59, 999);
+
+    const lastWeekSets = getSetsInRange(lastMonday, lastSunday);
+    const lastWeekOutcomes = getOutcomeCounts(lastMonday, lastSunday);
+    const lastWeekLabel = formatShort(lastMonday) + ' – ' + formatShort(lastSunday);
+
+    var lwSetsPct = Math.min(Math.round(lastWeekSets.length / 24 * 100), 100);
+    var lwHoldsPct = Math.min(Math.round(lastWeekOutcomes.show / 21 * 100), 100);
+    var lwSetsHit = lastWeekSets.length >= 24;
+    var lwHoldsHit = lastWeekOutcomes.show >= 21;
+
     html += '<div class="section-block">';
-    html += '<div class="section-title">Trailing 52 Weeks</div>';
+    html += '<div class="section-title">Last Week (' + lastWeekLabel + ')</div>';
+
+    // Goal bars
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">';
+    html += '<div style="background:var(--cream);border-radius:var(--radius);padding:14px 18px;border:1px solid rgba(7,55,79,0.08);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Sets Goal</span>';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.85rem;font-weight:700;color:' + (lwSetsHit ? 'var(--success)' : 'var(--navy)') + ';">' + lastWeekSets.length + ' / 24</span>';
+    html += '</div>';
+    html += '<div style="width:100%;height:8px;background:rgba(7,55,79,0.08);border-radius:4px;overflow:hidden;">';
+    html += '<div style="width:' + lwSetsPct + '%;height:100%;background:' + (lwSetsHit ? 'var(--success)' : 'var(--yellow)') + ';border-radius:4px;"></div>';
+    html += '</div>';
+    html += '<div style="text-align:right;font-size:0.7rem;color:var(--text-muted);margin-top:4px;">' + lwSetsPct + '%</div>';
+    html += '</div>';
+
+    html += '<div style="background:var(--cream);border-radius:var(--radius);padding:14px 18px;border:1px solid rgba(7,55,79,0.08);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Holds Goal</span>';
+    html += '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:0.85rem;font-weight:700;color:' + (lwHoldsHit ? 'var(--success)' : 'var(--navy)') + ';">' + lastWeekOutcomes.show + ' / 21</span>';
+    html += '</div>';
+    html += '<div style="width:100%;height:8px;background:rgba(7,55,79,0.08);border-radius:4px;overflow:hidden;">';
+    html += '<div style="width:' + lwHoldsPct + '%;height:100%;background:' + (lwHoldsHit ? 'var(--success)' : '#3c94d1') + ';border-radius:4px;"></div>';
+    html += '</div>';
+    html += '<div style="text-align:right;font-size:0.7rem;color:var(--text-muted);margin-top:4px;">' + lwHoldsPct + '%</div>';
+    html += '</div>';
+    html += '</div>';
+
     html += '<div class="stat-grid">';
-    html += statCard('Total Sets', allSets.length, '', true);
-    html += statCard('Shows', totalOutcomes.show, pct(totalOutcomes.show, allSets.length));
-    html += statCard('No Shows', totalOutcomes.noShow, pct(totalOutcomes.noShow, allSets.length));
-    html += statCard('Reschedules', allSets.filter(m => m.stage === 'Reschedule').length, '');
+    html += statCard('Total Sets', lastWeekSets.length, '', true);
+    html += statCard('Shows', lastWeekOutcomes.show, pct(lastWeekOutcomes.show, lastWeekSets.length));
+    html += statCard('No Shows', lastWeekOutcomes.noShow, pct(lastWeekOutcomes.noShow, lastWeekSets.length));
+    html += statCard('Reschedules', lastWeekSets.filter(m => m.stage === 'Reschedule').length, '');
     html += '</div>';
     html += '</div>';
 
@@ -986,7 +1247,9 @@ function renderWoW() {
     html += '<table class="report-table"><thead><tr>';
     html += '<th>Week</th>';
     html += '<th style="text-align:right">Sets</th>';
+    html += '<th style="text-align:right">Sets Goal</th>';
     html += '<th style="text-align:right">Shows</th>';
+    html += '<th style="text-align:right">Holds Goal</th>';
     html += '<th style="text-align:right">No Shows</th>';
     html += '<th style="text-align:right">Reschedules</th>';
     html += '<th style="text-align:right">Show %</th>';
@@ -996,11 +1259,15 @@ function renderWoW() {
         const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
         const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--yellow);color:var(--navy);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
         const showPct = b.show ? Math.round(b.show / (b.show + b.noShow) * 100) + '%' : '—';
+        const setsColor = b.totalSets >= 24 ? 'var(--success)' : 'var(--destructive)';
+        const holdsColor = b.show >= 21 ? 'var(--success)' : 'var(--destructive)';
 
         html += '<tr>';
         html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
         html += `<td class="num">${b.totalSets}</td>`;
+        html += `<td class="num" style="color:${setsColor};font-weight:600;">${b.totalSets >= 24 ? '✓' : b.totalSets + '/24'}</td>`;
         html += `<td class="num" style="color:var(--success)">${b.show}</td>`;
+        html += `<td class="num" style="color:${holdsColor};font-weight:600;">${b.show >= 21 ? '✓' : b.show + '/21'}</td>`;
         html += `<td class="num" style="color:var(--destructive)">${b.noShow}</td>`;
         html += `<td class="num" style="color:var(--warning)">${b.reschedule}</td>`;
         html += `<td class="num">${showPct}</td>`;
@@ -1184,7 +1451,7 @@ async function init() {
         render();
     } catch (err) {
         console.error('Failed to load data:', err);
-        document.getElementById('loading').innerHTML = '<div style="color:var(--destructive);">Failed to load data. Please refresh.</div>';
+        document.getElementById('loading').innerHTML = '<div style="color:var(--destructive);">Failed to load data. Please refresh.<br><small>' + (err.message || err) + '</small></div>';
     }
 }
 
