@@ -410,7 +410,7 @@
             if (!email) return;
 
             var sb = window.rkSupabase;
-            sb.from('allowed_emails').insert({ email: email }).then(function(res) {
+            sb.from('allowed_emails').upsert({ email: email }, { onConflict: 'email' }).then(function(res) {
                 if (res.error) {
                     alert('Error: ' + res.error.message);
                     return;
