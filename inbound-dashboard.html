@@ -156,6 +156,39 @@
             opacity: 0.7;
         }
 
+        /* ── Month Navigator ── */
+        .month-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        .month-nav-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--navy);
+            min-width: 160px;
+            text-align: center;
+        }
+        .month-nav-btn {
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+        .month-nav-btn:hover { opacity: 0.8; }
+        .month-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
         /* ── Section titles ── */
         .section-title {
             font-family: 'IBM Plex Mono', monospace;
@@ -564,7 +597,7 @@
                 <span class="tab-range" id="mtd-range"></span>
             </button>
             <button class="period-tab" data-period="prev-month">
-                Previous Month
+                Previous Months
                 <span class="tab-range" id="prev-month-range"></span>
             </button>
             <button class="period-tab" data-period="ytd">
@@ -620,9 +653,10 @@ function getMonday(d) {
 }
 
 function getMonthStart(d) { const dt = new Date(d); dt.setDate(1); dt.setHours(0,0,0,0); return dt; }
-function getPrevMonthRange() {
-    const s = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1, 0, 0, 0, 0);
-    const e = new Date(NOW.getFullYear(), NOW.getMonth(), 0, 23, 59, 59, 999);
+function getPrevMonthRange(offset) {
+    offset = offset || prevMonthOffset;
+    const s = new Date(NOW.getFullYear(), NOW.getMonth() - offset, 1, 0, 0, 0, 0);
+    const e = new Date(NOW.getFullYear(), NOW.getMonth() - offset + 1, 0, 23, 59, 59, 999);
     return { start: s, end: e };
 }
 function getYearStart(d) { return new Date(d.getFullYear(), 0, 1); }
@@ -697,6 +731,7 @@ let allLeads = [];
 let allMdrSets = [];
 let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0 };
 let currentPeriod = 'wtd';
+let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
 let charts = {};
 
 // ── Categorize a traffic source into goal buckets ──
@@ -923,6 +958,18 @@ function render() {
 
     let html = '';
 
+    // ── Month Navigator (prev-month only) ──
+    if (currentPeriod === 'prev-month') {
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const pmr = getPrevMonthRange();
+        const monthLabel = months[pmr.start.getMonth()] + ' ' + pmr.start.getFullYear();
+        html += '<div class="month-nav">';
+        html += '<button class="month-nav-btn" id="prev-month-back" title="Older month">&#8592;</button>';
+        html += '<span class="month-nav-label">' + monthLabel + '</span>';
+        html += '<button class="month-nav-btn" id="prev-month-fwd" title="Newer month"' + (prevMonthOffset <= 1 ? ' disabled' : '') + '>&#8594;</button>';
+        html += '</div>';
+    }
+
     // ── Key Metrics ──
     const mdrCount = getMdrSetsForPeriod();
     html += '<div class="section-block">';
@@ -1063,6 +1110,14 @@ function render() {
     html += '</div>';
 
     dashboard.innerHTML = html;
+
+    // Wire month nav buttons
+    if (currentPeriod === 'prev-month') {
+        const backBtn = document.getElementById('prev-month-back');
+        const fwdBtn = document.getElementById('prev-month-fwd');
+        if (backBtn) backBtn.addEventListener('click', () => { prevMonthOffset++; render(); });
+        if (fwdBtn) fwdBtn.addEventListener('click', () => { if (prevMonthOffset > 1) { prevMonthOffset--; render(); } });
+    }
 
     // Render charts
     renderCharts(leads, trafficData);
@@ -1326,6 +1381,7 @@ document.querySelectorAll('.period-tab').forEach(tab => {
         document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentPeriod = tab.dataset.period;
+        if (currentPeriod === 'prev-month') prevMonthOffset = 1;
         render();
     });
 });
