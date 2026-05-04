@@ -563,6 +563,10 @@
                 Month to Date
                 <span class="tab-range" id="mtd-range"></span>
             </button>
+            <button class="period-tab" data-period="prev-month">
+                Previous Month
+                <span class="tab-range" id="prev-month-range"></span>
+            </button>
             <button class="period-tab" data-period="ytd">
                 Year to Date
                 <span class="tab-range" id="ytd-range"></span>
@@ -616,6 +620,11 @@ function getMonday(d) {
 }
 
 function getMonthStart(d) { const dt = new Date(d); dt.setDate(1); dt.setHours(0,0,0,0); return dt; }
+function getPrevMonthRange() {
+    const s = new Date(NOW.getFullYear(), NOW.getMonth() - 1, 1, 0, 0, 0, 0);
+    const e = new Date(NOW.getFullYear(), NOW.getMonth(), 0, 23, 59, 59, 999);
+    return { start: s, end: e };
+}
 function getYearStart(d) { return new Date(d.getFullYear(), 0, 1); }
 
 function formatShort(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
@@ -794,6 +803,7 @@ function getMdrSetsForPeriod() {
     const yearStart = getYearStart(NOW);
     if (currentPeriod === 'wtd') return countMdrSetsInRange(monday, NOW);
     if (currentPeriod === 'mtd') return countMdrSetsInRange(monthStart, NOW);
+    if (currentPeriod === 'prev-month') { const pm = getPrevMonthRange(); return countMdrSetsInRange(pm.start, pm.end); }
     if (currentPeriod === 'ytd') return countMdrSetsInRange(yearStart, NOW);
     if (currentPeriod === 'wow') {
         const start = new Date(monday);
@@ -813,6 +823,9 @@ function getFilteredLeads() {
         return allLeads.filter(l => l.dateInbound >= monday && l.dateInbound <= NOW);
     } else if (currentPeriod === 'mtd') {
         return allLeads.filter(l => l.dateInbound >= monthStart && l.dateInbound <= NOW);
+    } else if (currentPeriod === 'prev-month') {
+        const pm = getPrevMonthRange();
+        return allLeads.filter(l => l.dateInbound >= pm.start && l.dateInbound <= pm.end);
     } else if (currentPeriod === 'wow') {
         // WoW shows trailing 52 weeks; use all leads within that window
         const start = getMonday(NOW);
@@ -889,11 +902,14 @@ function render() {
     let periodStart, periodEnd = NOW;
     if (currentPeriod === 'wtd') periodStart = monday;
     else if (currentPeriod === 'mtd') periodStart = monthStart;
+    else if (currentPeriod === 'prev-month') { const pm = getPrevMonthRange(); periodStart = pm.start; periodEnd = pm.end; }
     else if (currentPeriod === 'wow') periodStart = wowStart;
     else periodStart = yearStart;
     const statusCounts = getStatusCounts(leads, periodStart, periodEnd);
     document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
     document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
+    const pm = getPrevMonthRange();
+    document.getElementById('prev-month-range').textContent = formatShort(pm.start) + ' – ' + formatShort(pm.end);
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
     document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
 
@@ -1291,7 +1307,7 @@ async function downloadSnapshot() {
         });
 
         const link = document.createElement('a');
-        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'wow' ? 'WoW' : 'Year';
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'prev-month' ? 'PrevMonth' : currentPeriod === 'wow' ? 'WoW' : 'Year';
         link.download = `Inbound-Leads-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
