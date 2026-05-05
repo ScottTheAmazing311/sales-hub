@@ -638,6 +638,7 @@ const COL = {
     GOAL_ORGANIC: 23,  // Column X
     GOAL_GADS: 24,     // Column Y
     GOAL_MDR: 25,      // Column Z
+    GOAL_REFERRAL: 26, // Column AA
 };
 
 // ── Date utilities ──
@@ -729,7 +730,7 @@ const SOURCE_COLORS = [
 // ── State ──
 let allLeads = [];
 let allMdrSets = [];
-let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0 };
+let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3 };
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
 let charts = {};
@@ -740,6 +741,7 @@ function sourceCategory(source) {
     if (s.startsWith('direct')) return 'direct';
     if (s.includes('organic')) return 'organic';
     if (s.startsWith('ga ') || s.startsWith('google ads')) return 'gads';
+    if (s.includes('referral')) return 'referral';
     return null;
 }
 
@@ -767,6 +769,7 @@ async function fetchData() {
             organic: num(COL.GOAL_ORGANIC),
             gads: num(COL.GOAL_GADS),
             mdr: num(COL.GOAL_MDR),
+            referral: num(COL.GOAL_REFERRAL) || 3,
         };
         // If total isn't explicitly set, derive it from the inbound source goals
         if (!weeklyGoals.total) {
@@ -823,7 +826,7 @@ function countMdrSetsInRange(start, end) {
 
 // ── Count leads in each goal-category bucket ──
 function getCategoryCounts(leads) {
-    const out = { direct: 0, organic: 0, gads: 0, other: 0 };
+    const out = { direct: 0, organic: 0, gads: 0, referral: 0, other: 0 };
     leads.forEach(l => {
         const cat = sourceCategory(l.source);
         if (cat) out[cat]++;
@@ -991,6 +994,7 @@ function render() {
             'Direct': [cats.direct, weeklyGoals.direct],
             'Organic': [cats.organic, weeklyGoals.organic],
             'Google Ads': [cats.gads, weeklyGoals.gads],
+            'Referrals': [cats.referral, weeklyGoals.referral],
             'MDR Sets': [mdrCount, weeklyGoals.mdr],
         });
     }
