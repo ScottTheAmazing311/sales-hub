@@ -516,6 +516,124 @@
         }
         .month-body.open { display: block; }
 
+        /* ── Week accordion (WoW) ── */
+        .week-group { margin-bottom: 0.5rem; }
+        .week-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1.25rem;
+            background: var(--navy);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .week-header:hover { opacity: 0.9; }
+        .week-header .week-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+        }
+        .week-header .week-badge {
+            background: var(--yellow);
+            color: var(--navy);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        .week-header .week-meta {
+            color: rgba(255,255,255,0.5);
+        }
+        .week-header .current-tag {
+            background: var(--yellow);
+            color: var(--navy);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        .week-header .chevron {
+            transition: transform 0.2s;
+            color: var(--yellow);
+        }
+        .week-header.open .chevron { transform: rotate(180deg); }
+        .week-body {
+            display: none;
+            padding: 0.75rem 0;
+        }
+        .week-body.open { display: block; }
+        .week-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .week-source-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow);
+        }
+        .week-source-card .wsc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .week-source-card .wsc-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--navy);
+        }
+        .week-source-card .wsc-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .week-source-card .wsc-bar {
+            height: 6px;
+            background: rgba(7,55,79,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.4rem;
+        }
+        .week-source-card .wsc-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        .week-source-card .wsc-detail {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+        .week-source-card .wsc-detail .wsc-pct {
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .week-source-card.highlight-source {
+            background: var(--navy);
+        }
+        .week-source-card.highlight-source .wsc-name { color: var(--yellow); }
+        .week-source-card.highlight-source .wsc-count { color: #fff; }
+        .week-source-card.highlight-source .wsc-detail { color: rgba(255,255,255,0.5); }
+        .week-source-card.highlight-source .wsc-detail .wsc-pct { color: var(--yellow); }
+        .week-source-card.highlight-source .wsc-bar { background: rgba(255,255,255,0.12); }
+        .week-source-card.goal-met { border-color: rgba(34,197,94,0.4); }
+        .week-source-card.goal-met .wsc-bar-fill { background: var(--success) !important; }
+        .week-source-card.goal-met .wsc-detail .wsc-pct { color: var(--success); }
+
         /* ── Loading ── */
         .loading-state {
             text-align: center;
@@ -1130,6 +1248,7 @@ function render() {
 // ── Week over Week render ──
 function renderWoW(leads) {
     const buckets = getWeeklyBuckets(leads);
+    const g = weeklyGoals;
 
     let html = '';
 
@@ -1149,57 +1268,112 @@ function renderWoW(leads) {
     html += '</div>';
     html += '</div>';
 
-    // Weekly table
+    // Weekly accordion
     html += '<div class="section-block">';
     html += '<div class="section-title">Week by Week</div>';
-    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
-    html += '<table class="report-table"><thead><tr>';
-    const g = weeklyGoals;
-    const goalHdr = (val) => val ? `<div style="font-size:0.6rem;font-weight:400;opacity:0.7;text-transform:none;letter-spacing:0;">goal ${val}</div>` : '';
-    const goalCell = (actual, goal) => {
-        if (!goal) return `<td class="num">${actual}</td>`;
-        const met = actual >= goal;
-        const color = met ? 'var(--success)' : 'var(--text-muted)';
-        const weight = met ? '700' : '400';
-        return `<td class="num" style="color:${color};font-weight:${weight}">${actual}</td>`;
-    };
 
-    html += '<th>Week</th>';
-    html += `<th style="text-align:right">Total${goalHdr(g.total)}</th>`;
-    html += `<th style="text-align:right">Direct${goalHdr(g.direct)}</th>`;
-    html += `<th style="text-align:right">Organic${goalHdr(g.organic)}</th>`;
-    html += `<th style="text-align:right">Google Ads${goalHdr(g.gads)}</th>`;
-    html += `<th style="text-align:right">MDR Sets${goalHdr(g.mdr)}</th>`;
-    html += '<th style="text-align:right">Held</th>';
-    html += '<th style="text-align:right">No Show</th>';
-    html += '<th style="text-align:right">Held %</th>';
-    html += '</tr></thead><tbody>';
-
-    buckets.forEach(b => {
+    buckets.forEach((b, idx) => {
         const counts = getStatusCounts(b.leads, b.start, b.end);
         const cats = getCategoryCounts(b.leads);
         const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
-        const currentBadge = b.isCurrent ? ' <span style="display:inline-block;padding:1px 6px;font-size:0.65rem;background:var(--primary);color:var(--dark);border-radius:3px;margin-left:4px;font-weight:700;">CURRENT</span>' : '';
         const heldPct = counts.held ? Math.round(counts.held / (counts.held + counts.noShow) * 100) + '%' : '—';
         const mdrWeek = countMdrSetsInRange(b.start, b.end);
+        const currentTag = b.isCurrent ? '<span class="current-tag">CURRENT</span>' : '';
 
-        html += '<tr>';
-        html += `<td style="white-space:nowrap"><strong>${weekLabel}</strong>${currentBadge}</td>`;
-        html += goalCell(counts.total, g.total);
-        html += goalCell(cats.direct, g.direct);
-        html += goalCell(cats.organic, g.organic);
-        html += goalCell(cats.gads, g.gads);
-        html += goalCell(mdrWeek, g.mdr);
-        html += `<td class="num" style="color:var(--success)">${counts.held}</td>`;
-        html += `<td class="num" style="color:var(--destructive)">${counts.noShow}</td>`;
-        html += `<td class="num">${heldPct}</td>`;
-        html += '</tr>';
+        html += '<div class="week-group">';
+        html += `<div class="week-header${b.isCurrent ? ' open' : ''}" onclick="toggleWeek(this)">`;
+        html += `<span>${weekLabel}${currentTag}</span>`;
+        html += '<span class="week-stats">';
+        html += `<span class="week-meta">Held ${heldPct}</span>`;
+        html += `<span class="week-badge">${counts.total} leads</span>`;
+        html += '<span class="chevron">&#9660;</span>';
+        html += '</span>';
+        html += '</div>';
+        html += `<div class="week-body${b.isCurrent ? ' open' : ''}">`;
+
+        // Source breakdown cards (like MTD Traffic Source Breakdown)
+        const trafficData = getTrafficData(b.leads);
+        const total = b.leads.length || 1;
+
+        html += '<div class="week-breakdown">';
+
+        // Total card (highlighted)
+        const totalGoalMet = g.total && counts.total >= g.total;
+        html += `<div class="week-source-card highlight-source${totalGoalMet ? ' goal-met' : ''}">`;
+        html += '<div class="wsc-header"><span class="wsc-name">Total Inbound</span></div>';
+        html += `<div class="wsc-count">${counts.total}</div>`;
+        if (g.total) {
+            const pctVal = Math.min(Math.round(counts.total / g.total * 100), 100);
+            html += `<div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pctVal}%;background:${totalGoalMet ? 'var(--success)' : 'var(--yellow)'}"></div></div>`;
+            html += `<div class="wsc-detail"><span class="wsc-pct">${Math.round(counts.total / g.total * 100)}%</span> of goal (${g.total})</div>`;
+        }
+        html += '</div>';
+
+        // Individual source cards
+        const sourceCards = [
+            { name: 'Direct', count: cats.direct, goal: g.direct, color: SOURCE_COLORS[0] },
+            { name: 'Organic', count: cats.organic, goal: g.organic, color: SOURCE_COLORS[1] },
+            { name: 'Google Ads', count: cats.gads, goal: g.gads, color: SOURCE_COLORS[2] },
+            { name: 'Referrals', count: cats.referral, goal: g.referral, color: SOURCE_COLORS[3] },
+            { name: 'MDR Sets', count: mdrWeek, goal: g.mdr, color: SOURCE_COLORS[4] },
+        ];
+
+        sourceCards.forEach(sc => {
+            const met = sc.goal && sc.count >= sc.goal;
+            html += `<div class="week-source-card${met ? ' goal-met' : ''}">`;
+            html += `<div class="wsc-header"><span class="wsc-name">${sc.name}</span></div>`;
+            html += `<div class="wsc-count">${sc.count}</div>`;
+            if (sc.goal) {
+                const pctVal = Math.min(Math.round(sc.count / sc.goal * 100), 100);
+                html += `<div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pctVal}%;background:${met ? 'var(--success)' : sc.color}"></div></div>`;
+                html += `<div class="wsc-detail"><span class="wsc-pct">${Math.round(sc.count / sc.goal * 100)}%</span> of goal (${sc.goal})</div>`;
+            } else {
+                const pctOfTotal = total > 0 ? Math.round(sc.count / total * 100) : 0;
+                html += `<div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pctOfTotal}%;background:${sc.color}"></div></div>`;
+                html += `<div class="wsc-detail"><span class="wsc-pct">${pctOfTotal}%</span> of total</div>`;
+            }
+            html += '</div>';
+        });
+
+        // "Other" sources not covered by the main categories
+        const otherSources = trafficData.filter(([source]) => {
+            const cat = sourceCategory(source);
+            return cat === null;
+        });
+        if (otherSources.length > 0) {
+            otherSources.forEach(([source, count]) => {
+                const pctOfTotal = total > 0 ? Math.round(count / total * 100) : 0;
+                html += '<div class="week-source-card">';
+                html += `<div class="wsc-header"><span class="wsc-name">${escapeHtml(source)}</span></div>`;
+                html += `<div class="wsc-count">${count}</div>`;
+                html += `<div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pctOfTotal}%;background:${SOURCE_COLORS[5]}"></div></div>`;
+                html += `<div class="wsc-detail"><span class="wsc-pct">${pctOfTotal}%</span> of total</div>`;
+                html += '</div>';
+            });
+        }
+
+        html += '</div>'; // .week-breakdown
+
+        // Status row
+        html += '<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-top:0.25rem;">';
+        html += statCard('Held', counts.held, pct(counts.held, counts.total));
+        html += statCard('No Show', counts.noShow, pct(counts.noShow, counts.total));
+        html += statCard('Pending', counts.pending, 'Awaiting FTA');
+        html += '</div>';
+
+        html += '</div>'; // .week-body
+        html += '</div>'; // .week-group
     });
 
-    html += '</tbody></table></div></div></div>';
     html += '</div>';
 
     return html;
+}
+
+function toggleWeek(el) {
+    el.classList.toggle('open');
+    const body = el.nextElementSibling;
+    body.classList.toggle('open');
 }
 
 function renderWeeklyGoals(items) {
