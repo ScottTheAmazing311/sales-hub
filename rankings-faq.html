@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rankings FAQ — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --sky: #3c94d1;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .stripe { height: 5px; background: var(--yellow-warm); }
+
+        .header {
+            background: var(--navy);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--yellow-warm);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover { color: var(--yellow); }
+
+        .header-sep {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .header-content .kicker {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--yellow-warm);
+        }
+
+        .header-content h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.25px;
+        }
+
+        .breadcrumb {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { margin: 0 0.4rem; opacity: 0.5; }
+
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        .hero {
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--navy-light);
+            margin-bottom: 0.35rem;
+        }
+
+        .hero-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            border-left: 3px solid var(--yellow-warm);
+            padding-left: 1rem;
+            max-width: 600px;
+        }
+
+        /* FAQ Accordion */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .faq-item {
+            background: var(--cream);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: background 0.15s;
+        }
+
+        .faq-item:hover {
+            background: #fff;
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--navy);
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            line-height: 1.4;
+        }
+
+        .faq-question:focus {
+            outline: 2px solid var(--sky);
+            outline-offset: -2px;
+        }
+
+        .faq-chevron {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            transition: transform 0.25s ease;
+            color: var(--text-muted);
+        }
+
+        .faq-item.open .faq-chevron {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.25s ease;
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 600px;
+        }
+
+        .faq-answer-inner {
+            padding: 0 1.5rem 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .faq-answer-inner p {
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer-inner p:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-answer-inner strong {
+            color: var(--navy);
+        }
+
+        .faq-answer-inner ul {
+            margin: 0.5rem 0 0.75rem 1.25rem;
+        }
+
+        .faq-answer-inner ul li {
+            margin-bottom: 0.4rem;
+        }
+
+        .faq-answer-inner .highlight {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--navy);
+            background: var(--yellow-warm);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .footer {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 3rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .hero-title { font-size: 2rem; }
+            .faq-question { font-size: 0.95rem; padding: 1rem 1.25rem; }
+            .faq-answer-inner { padding: 0 1.25rem 1.25rem; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stripe"></div>
+
+    <div class="header">
+        <a href="index.html" class="back-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Kitchen
+        </a>
+        <div class="header-sep"></div>
+        <div class="header-content">
+            <div class="kicker">Sales Resource</div>
+            <h1>Rankings FAQ</h1>
+        </div>
+    </div>
+
+    <div class="breadcrumb">
+        <a href="index.html">Revenue Kitchen</a>
+        <span class="sep">/</span>
+        Rankings FAQ
+    </div>
+
+    <div class="main">
+        <div class="hero">
+            <div class="hero-eyebrow">Frequently Asked Questions</div>
+            <div class="hero-title">Rankings FAQ</div>
+            <div class="hero-desc">Common questions prospects ask and the answers that set Rankings.io apart. Use these in calls, emails, and proposals.</div>
+        </div>
+
+        <div class="faq-list">
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Do you provide geographic exclusivity?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>No. We don't restrict our client's ability to grow and expand. If you open a new office, push into a new county, or add a practice area, exclusivity becomes a cage. Instead we do two things:</p>
+                        <ul>
+                            <li><strong>Market saturation check.</strong> Before we sign you, we audit the market to confirm we can realistically win the rankings, traffic, and case volume you're paying for. If we can't compete on your behalf, we don't take the engagement.</li>
+                            <li><strong>Named competitor exclusions at our top tier.</strong> You can name specific firms we agree not to work with in your market. Your archenemies, not the whole zip code.</li>
+                        </ul>
+                        <p>You stay free to grow. We stay accountable to win.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Why are you PI-focused?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Because the economics of personal injury demand specialization. Case values, marketing math, intake speed, and competitive dynamics in PI are nothing like a generalist legal market. Our team, tech stack, partnerships, and playbook are built around how PI firms actually win cases, not just traffic.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How long until we see results?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>SEO and content compound. Expect early movement in 90 days, meaningful lead lift around 6 months, market-shifting results in 12 to 18. Paid channels (LSA, PPC, Paid Social) move faster, often inside 30 to 60 days. We build for durability, not short-term spikes that disappear when the spend stops.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    What's the contract term?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Month-to-month. No handcuffs. We have to earn our keep every month. That structure keeps us accountable and keeps you in control. Most clients stay for years, but they stay because of performance, not paperwork.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Who owns the website, content, links, and data?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>You do. Every asset we produce is yours: domain, code, content, backlinks, creative, analytics, CRM data. No hostage situations, no clawbacks, no proprietary platforms you can't leave with.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Who actually does the work?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>No white label. 99% of our work is done in-house. We currently have 160+ full-time employees across strategy, SEO, content, link building, paid media, design, development, and account management. The small percentage that isn't in-house is used strictly to supplement utilization during peak load. No bait-and-switch, no offshore content farms, no agency-of-record passing your account to a freelancer. The team you meet is the team that does the work.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How do you report and communicate?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Every client gets a dedicated account manager. They're the quarterback of your engagement: proactively guiding strategy, coordinating the specialists behind the scenes, and keeping you ahead of the next move instead of reacting to the last one.</p>
+                        <p>You also get monthly performance reviews and quarterly business reviews. We lead with proof over promises. Reporting is tied to the metrics that actually matter &mdash; revenue and signed cases &mdash; not vanity numbers designed to make the agency look good.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    What happens if something isn't working?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>We tell you first, and we move. Rankings.io is channel agnostic. Our historical strength is search (SEO, content, authority, technical), but we run GEO, AI Optimization, LSA, PPC, and Paid Social with the same rigor. If a channel underperforms or the market shifts, we reallocate spend and strategy toward whatever produces signed cases. The goal is your growth, not defending a single playbook.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    What makes Rankings.io different?
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">
+                        <p>Three things:</p>
+                        <ul>
+                            <li><strong>PI specialization at scale.</strong> We're not a generalist agency that takes PI clients. PI is the hero vertical we've built the entire firm around: the strategists, the content team, the link building, the paid media playbooks, the benchmarks. You get pattern recognition from hundreds of PI engagements, not theory borrowed from other industries.</li>
+                            <li><strong>Founder-led, not private equity owned.</strong> Rankings.io is run by its founder, not a PE roll-up optimizing for quarterly margin and EBITDA exit. You're a client, not inventory. Decisions get made around what's right for your firm and the long-term health of the relationship, not what's right for an investor deck.</li>
+                            <li><strong>Proof over promises.</strong> Eight consecutive years on the Inc. 5000, top PI firms in the country on the roster, case studies tied to real signed cases and revenue. We have the receipts before we ask for the engagement.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-text">Rankings.io Revenue Kitchen — Internal Use Only</div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.closest('.faq-item');
+                const wasOpen = item.classList.contains('open');
+                // Close all
+                document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+                // Toggle clicked
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
+    </script>
+
+</body>
+</html>
