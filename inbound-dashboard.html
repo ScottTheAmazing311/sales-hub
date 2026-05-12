@@ -1137,10 +1137,20 @@ async function fetchBdrCompanies() {
     }
 }
 
+// Hardcoded outbound deals not tracked in BDR sheet
+const KNOWN_OUTBOUND = ['legler murphy battaglia', 'glotzer & leib', 'connell law firm', 'mcv law'];
+
 function isOutbound(dealName) {
     const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const dn = normalize(dealName);
+    const dl = dealName.toLowerCase();
 
+    // Check hardcoded list
+    for (const ko of KNOWN_OUTBOUND) {
+        if (dl.includes(ko)) return true;
+    }
+
+    // Check BDR meetings
     for (const ob of outboundCompanies) {
         if (dn.includes(ob) || ob.includes(dn)) return true;
     }
