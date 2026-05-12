@@ -297,6 +297,38 @@
             background: var(--navy);
             color: var(--yellow);
         }
+        .direction-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .direction-badge.inbound { background: rgba(34,197,94,0.15); color: #16a34a; }
+        .direction-badge.outbound { background: rgba(60,148,209,0.15); color: #2563eb; }
+        .direction-summary {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .direction-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .direction-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .direction-dot.inbound { background: #22c55e; }
+        .direction-dot.outbound { background: #3c94d1; }
         .quarter-title-row {
             display: flex;
             align-items: center;
@@ -887,6 +919,8 @@ const LEAD_LOG_GID = '298242111';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LEAD_LOG_GID}`;
 const CLOSED_WON_GID = '880949557';
 const CLOSED_WON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${CLOSED_WON_GID}`;
+const BDR_MEETINGS_GID = '55819925';
+const BDR_MEETINGS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_MEETINGS_GID}`;
 
 const COL = {
     NUM: 0,
@@ -999,6 +1033,7 @@ const SOURCE_COLORS = [
 let allLeads = [];
 let allMdrSets = [];
 let allClosedDeals = [];
+let outboundCompanies = new Set();
 let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3 };
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
@@ -1087,6 +1122,39 @@ async function fetchData() {
     allLeads.sort((a, b) => b.dateInbound - a.dateInbound);
 }
 
+// ── Fetch BDR meeting companies (for outbound detection) ──
+async function fetchBdrCompanies() {
+    const res = await fetch(BDR_MEETINGS_URL);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+
+    outboundCompanies = new Set();
+    for (const row of rows) {
+        const cells = row.c || [];
+        const company = cellVal(cells, 3); // Column D = Company Name
+        if (company) outboundCompanies.add(company.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    }
+}
+
+function isOutbound(dealName) {
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const dn = normalize(dealName);
+
+    for (const ob of outboundCompanies) {
+        if (dn.includes(ob) || ob.includes(dn)) return true;
+    }
+
+    // Fuzzy: match significant words
+    const dealWords = dealName.toLowerCase().replace(/[-–—]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !['law','firm','the','new','deal','llc','llp','pllc','offices','office','group','attorneys','attorney','legal','associates','pa'].includes(w));
+    for (const ob of outboundCompanies) {
+        const matchCount = dealWords.filter(dw => ob.includes(dw)).length;
+        if (matchCount >= 2 || (matchCount === 1 && dealWords.length <= 2)) return true;
+    }
+
+    return false;
+}
+
 // ── Fetch closed deals ──
 async function fetchClosedDeals() {
     const res = await fetch(CLOSED_WON_URL);
@@ -1107,13 +1175,16 @@ async function fetchClosedDeals() {
         const dateClosed = parseDateAny(cells[5]);
         if (!dateClosed) continue;
 
+        const outbound = isOutbound(dealName);
+
         allClosedDeals.push({
             dealName,
             mrr,
             package: pkg,
             owner: ownerFirst,
             dateClosed,
-            leadSource: matchLeadSource(dealName),
+            leadSource: outbound ? 'Outbound' : matchLeadSource(dealName),
+            direction: outbound ? 'Outbound' : 'Inbound',
         });
     }
 
@@ -1387,6 +1458,12 @@ function renderClosedWon() {
 
     let html = '';
 
+    // Direction counts
+    const inboundDeals = deals.filter(d => d.direction === 'Inbound');
+    const outboundDeals = deals.filter(d => d.direction === 'Outbound');
+    const inboundMRR = inboundDeals.reduce((s, d) => s + d.mrr, 0);
+    const outboundMRR = outboundDeals.reduce((s, d) => s + d.mrr, 0);
+
     // ── YTD Summary ──
     const totalMRR = deals.reduce((s, d) => s + d.mrr, 0);
     html += '<div class="section-block">';
@@ -1394,8 +1471,8 @@ function renderClosedWon() {
     html += '<div class="stat-grid">';
     html += statCard('Total Deals', deals.length, '', true);
     html += statCard('Total MRR', '$' + totalMRR.toLocaleString(), '');
-    html += statCard('Avg Deal Size', '$' + (deals.length ? Math.round(totalMRR / deals.length).toLocaleString() : '0'), '');
-    html += statCard('Sources Matched', deals.filter(d => d.leadSource !== 'Unknown').length + ' / ' + deals.length, pct(deals.filter(d => d.leadSource !== 'Unknown').length, deals.length));
+    html += statCard('Inbound Deals', inboundDeals.length, '$' + inboundMRR.toLocaleString() + ' MRR');
+    html += statCard('Outbound Deals', outboundDeals.length, '$' + outboundMRR.toLocaleString() + ' MRR');
     html += '</div>';
     html += '</div>';
 
@@ -1407,6 +1484,10 @@ function renderClosedWon() {
     quarters.forEach(q => {
         const qDeals = deals.filter(d => q.months.includes(d.dateClosed.getMonth()));
         const qMRR = qDeals.reduce((s, d) => s + d.mrr, 0);
+        const qInbound = qDeals.filter(d => d.direction === 'Inbound');
+        const qOutbound = qDeals.filter(d => d.direction === 'Outbound');
+        const qInMRR = qInbound.reduce((s, d) => s + d.mrr, 0);
+        const qOutMRR = qOutbound.reduce((s, d) => s + d.mrr, 0);
         const sourceMap = {};
         const sourceMRR = {};
         qDeals.forEach(d => {
@@ -1421,13 +1502,22 @@ function renderClosedWon() {
         html += `<div class="quarter-header"><span>${q.label} ${year}</span><span class="q-total">${qDeals.length} deals · $${qMRR.toLocaleString()}</span></div>`;
         html += '<div class="quarter-body">';
 
+        if (qDeals.length > 0) {
+            html += '<div class="direction-summary">';
+            html += `<div class="direction-stat"><span class="direction-dot inbound"></span>Inbound: ${qInbound.length} · $${qInMRR.toLocaleString()}</div>`;
+            html += `<div class="direction-stat"><span class="direction-dot outbound"></span>Outbound: ${qOutbound.length} · $${qOutMRR.toLocaleString()}</div>`;
+            html += '</div>';
+            html += '<div style="margin-top:0.75rem;">';
+        }
+
         if (sorted.length === 0) {
             html += '<div class="quarter-empty">No closed deals this quarter</div>';
         } else {
             sorted.forEach(([source, count], i) => {
                 const pctVal = qDeals.length ? Math.round(count / qDeals.length * 100) : 0;
                 const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
-                const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+                const isOB = source === 'Outbound';
+                const color = isOB ? '#3c94d1' : SOURCE_COLORS[i % SOURCE_COLORS.length];
                 const mrrVal = sourceMRR[source] || 0;
                 html += '<div class="quarter-source-row">';
                 html += `<div class="qs-name">${escapeHtml(source)}</div>`;
@@ -1436,6 +1526,7 @@ function renderClosedWon() {
                 html += `<div class="qs-pct">$${mrrVal.toLocaleString()}</div>`;
                 html += '</div>';
             });
+            html += '</div>';
         }
 
         html += '</div></div>';
@@ -1455,6 +1546,8 @@ function renderClosedWon() {
         mDeals.forEach(d => { sourceMap[d.leadSource] = (sourceMap[d.leadSource] || 0) + 1; });
         const sorted = Object.entries(sourceMap).sort((a, b) => b[1] - a[1]);
         const maxCount = sorted.length > 0 ? sorted[0][1] : 0;
+        const mIn = mDeals.filter(d => d.direction === 'Inbound');
+        const mOut = mDeals.filter(d => d.direction === 'Outbound');
 
         html += '<div class="month-group">';
         html += `<div class="month-header" onclick="toggleMonth(this)">`;
@@ -1463,12 +1556,19 @@ function renderClosedWon() {
         html += '</div>';
         html += '<div class="month-body">';
 
+        // Direction summary
+        html += '<div class="direction-summary" style="margin-bottom:0.75rem;">';
+        html += `<div class="direction-stat"><span class="direction-dot inbound"></span>Inbound: ${mIn.length} · $${mIn.reduce((s,d)=>s+d.mrr,0).toLocaleString()}</div>`;
+        html += `<div class="direction-stat"><span class="direction-dot outbound"></span>Outbound: ${mOut.length} · $${mOut.reduce((s,d)=>s+d.mrr,0).toLocaleString()}</div>`;
+        html += '</div>';
+
         // Source breakdown bars
         html += '<div style="margin-bottom:1rem;">';
         sorted.forEach(([source, count], i) => {
             const pctVal = mDeals.length ? Math.round(count / mDeals.length * 100) : 0;
             const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
-            const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+            const isOB = source === 'Outbound';
+            const color = isOB ? '#3c94d1' : SOURCE_COLORS[i % SOURCE_COLORS.length];
             html += '<div class="quarter-source-row">';
             html += `<div class="qs-name">${escapeHtml(source)}</div>`;
             html += `<div class="qs-bar-track"><div class="qs-bar-fill" style="width:${barWidth}%;background:${color}"></div></div>`;
@@ -1480,12 +1580,14 @@ function renderClosedWon() {
 
         // Deal table
         html += '<table class="report-table"><thead><tr>';
-        html += '<th>Deal</th><th>Owner</th><th style="text-align:right">MRR</th><th>Package</th><th>Lead Source</th><th>Date Closed</th>';
+        html += '<th>Deal</th><th>Direction</th><th>Owner</th><th style="text-align:right">MRR</th><th>Package</th><th>Lead Source</th><th>Date Closed</th>';
         html += '</tr></thead><tbody>';
         mDeals.sort((a, b) => b.dateClosed - a.dateClosed).forEach(d => {
-            const srcColor = d.leadSource === 'Unknown' ? 'var(--warning)' : 'var(--success)';
+            const srcColor = d.leadSource === 'Unknown' ? 'var(--warning)' : d.direction === 'Outbound' ? '#3c94d1' : 'var(--success)';
+            const dirClass = d.direction === 'Outbound' ? 'outbound' : 'inbound';
             html += '<tr>';
             html += `<td><strong>${escapeHtml(d.dealName)}</strong></td>`;
+            html += `<td><span class="direction-badge ${dirClass}">${d.direction}</span></td>`;
             html += `<td>${escapeHtml(d.owner)}</td>`;
             html += `<td class="num">$${d.mrr.toLocaleString()}</td>`;
             html += `<td>${escapeHtml(d.package || '—')}</td>`;
@@ -2042,6 +2144,7 @@ document.querySelectorAll('.period-tab').forEach(tab => {
 async function init() {
     try {
         await fetchData();
+        await fetchBdrCompanies();
         await fetchClosedDeals();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard').style.display = '';
