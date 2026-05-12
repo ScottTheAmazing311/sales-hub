@@ -1175,10 +1175,7 @@ async function fetchClosedDeals() {
         const dateClosed = parseDateAny(cells[5]);
         if (!dateClosed) continue;
 
-        const bdrOutbound = isOutbound(dealName);
-        const inboundSource = bdrOutbound ? null : matchLeadSource(dealName);
-        // If it's in BDR tab OR can't be matched to any inbound lead, it's outbound
-        const outbound = bdrOutbound || inboundSource === 'Unknown';
+        const outbound = isOutbound(dealName);
 
         allClosedDeals.push({
             dealName,
@@ -1186,7 +1183,7 @@ async function fetchClosedDeals() {
             package: pkg,
             owner: ownerFirst,
             dateClosed,
-            leadSource: outbound ? 'Outbound' : inboundSource,
+            leadSource: outbound ? 'Outbound' : matchLeadSource(dealName),
             direction: outbound ? 'Outbound' : 'Inbound',
         });
     }
