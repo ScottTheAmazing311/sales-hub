@@ -942,7 +942,7 @@ function formatMonthYear(d) {
 
 function parseGoogleDate(val) {
     if (typeof val === 'string' && val.startsWith('Date(')) {
-        const parts = val.match(/Date\((\d+),(\d+),(\d+)\)/);
+        const parts = val.match(/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);
         if (parts) return new Date(parseInt(parts[1]), parseInt(parts[2]), parseInt(parts[3]));
     }
     return null;
