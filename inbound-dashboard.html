@@ -189,6 +189,88 @@
         .month-nav-btn:hover { opacity: 0.8; }
         .month-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* ── Quarter Breakdown ── */
+        .quarter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 900px) { .quarter-grid { grid-template-columns: 1fr; } }
+        .quarter-card {
+            background: #fff;
+            border: 1px solid rgba(7,55,79,0.08);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .quarter-header {
+            background: var(--navy);
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quarter-header .q-total {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--yellow);
+        }
+        .quarter-body { padding: 1rem 1.25rem; }
+        .quarter-source-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .quarter-source-row:last-child { margin-bottom: 0; }
+        .qs-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text);
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+        .qs-bar-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(7,55,79,0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .qs-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .qs-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--navy);
+            min-width: 28px;
+            text-align: right;
+        }
+        .qs-pct {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            min-width: 36px;
+            text-align: right;
+        }
+        .quarter-empty {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+
         /* ── Section titles ── */
         .section-title {
             font-family: 'IBM Plex Mono', monospace;
@@ -1041,6 +1123,52 @@ function getStatusCounts(leads, start, end) {
     return { held, noShow, pending, total: leads.length };
 }
 
+// ── Quarterly Source Breakdown ──
+function renderQuarterlyBreakdown(leads) {
+    const year = NOW.getFullYear();
+    const quarters = [
+        { label: 'Q1', start: new Date(year, 0, 1), end: new Date(year, 2, 31, 23, 59, 59, 999) },
+        { label: 'Q2', start: new Date(year, 3, 1), end: new Date(year, 5, 30, 23, 59, 59, 999) },
+        { label: 'Q3', start: new Date(year, 6, 1), end: new Date(year, 8, 30, 23, 59, 59, 999) },
+        { label: 'Q4', start: new Date(year, 9, 1), end: new Date(year, 11, 31, 23, 59, 59, 999) },
+    ];
+
+    let html = '<div class="section-block">';
+    html += '<div class="section-title">Quarterly Source Breakdown</div>';
+    html += '<div class="quarter-grid">';
+
+    quarters.forEach(q => {
+        const qLeads = leads.filter(l => l.dateInbound >= q.start && l.dateInbound <= q.end);
+        const traffic = getTrafficData(qLeads);
+        const maxCount = traffic.length > 0 ? traffic[0][1] : 0;
+
+        html += '<div class="quarter-card">';
+        html += `<div class="quarter-header"><span>${q.label} ${year}</span><span class="q-total">${qLeads.length} leads</span></div>`;
+        html += '<div class="quarter-body">';
+
+        if (traffic.length === 0) {
+            html += '<div class="quarter-empty">No leads this quarter</div>';
+        } else {
+            traffic.forEach(([source, count], i) => {
+                const pctVal = qLeads.length ? Math.round(count / qLeads.length * 100) : 0;
+                const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
+                const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+                html += '<div class="quarter-source-row">';
+                html += `<div class="qs-name">${escapeHtml(source)}</div>`;
+                html += `<div class="qs-bar-track"><div class="qs-bar-fill" style="width:${barWidth}%;background:${color}"></div></div>`;
+                html += `<div class="qs-count">${count}</div>`;
+                html += `<div class="qs-pct">${pctVal}%</div>`;
+                html += '</div>';
+            });
+        }
+
+        html += '</div></div>';
+    });
+
+    html += '</div></div>';
+    return html;
+}
+
 // ── Render ──
 function render() {
     const leads = getFilteredLeads();
@@ -1198,6 +1326,11 @@ function render() {
     html += '<div class="chart-card"><div class="chart-label">Leads by Source</div><div class="chart-wrap"><canvas id="chart-source"></canvas></div></div>';
     html += '</div>';
     html += '</div>';
+
+    // ── Quarterly Source Breakdown (YTD only) ──
+    if (currentPeriod === 'ytd') {
+        html += renderQuarterlyBreakdown(leads);
+    }
 
     // ── Lead Detail ──
     html += '<div class="section-block">';
