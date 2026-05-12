@@ -866,6 +866,10 @@
                 Year to Date
                 <span class="tab-range" id="ytd-range"></span>
             </button>
+            <button class="period-tab" data-period="closed-won">
+                Closed Won
+                <span class="tab-range" id="closed-won-range"></span>
+            </button>
         </div>
 
         <div id="loading" class="loading-state">
@@ -881,6 +885,8 @@
 const SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
 const LEAD_LOG_GID = '298242111';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LEAD_LOG_GID}`;
+const CLOSED_WON_GID = '880949557';
+const CLOSED_WON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${CLOSED_WON_GID}`;
 
 const COL = {
     NUM: 0,
@@ -992,6 +998,7 @@ const SOURCE_COLORS = [
 // ── State ──
 let allLeads = [];
 let allMdrSets = [];
+let allClosedDeals = [];
 let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3 };
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
@@ -1078,6 +1085,65 @@ async function fetchData() {
     }
 
     allLeads.sort((a, b) => b.dateInbound - a.dateInbound);
+}
+
+// ── Fetch closed deals ──
+async function fetchClosedDeals() {
+    const res = await fetch(CLOSED_WON_URL);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+
+    allClosedDeals = [];
+    for (const row of rows) {
+        const cells = row.c || [];
+        const dealName = cellVal(cells, 0);
+        if (!dealName) continue;
+
+        const mrrRaw = cells[1] ? parseFloat(cells[1].v) : 0;
+        const mrr = isNaN(mrrRaw) ? 0 : mrrRaw;
+        const pkg = cellVal(cells, 2);
+        const ownerFirst = cellVal(cells, 3);
+        const dateClosed = parseDateAny(cells[5]);
+        if (!dateClosed) continue;
+
+        allClosedDeals.push({
+            dealName,
+            mrr,
+            package: pkg,
+            owner: ownerFirst,
+            dateClosed,
+            leadSource: matchLeadSource(dealName),
+        });
+    }
+
+    allClosedDeals.sort((a, b) => b.dateClosed - a.dateClosed);
+}
+
+// ── Match a deal name to a lead source from the lead log ──
+function matchLeadSource(dealName) {
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const dn = normalize(dealName);
+
+    // Try exact-ish match first, then fuzzy
+    for (const lead of allLeads) {
+        const ln = normalize(lead.name);
+        if (dn.includes(ln) || ln.includes(dn)) {
+            return lead.source;
+        }
+    }
+
+    // Try matching on first significant word (firm name)
+    const dealWords = dealName.toLowerCase().replace(/[-–—]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !['law','firm','the','new','deal','llc','llp','pllc','offices','office','group','attorneys','attorney','legal','associates','pa'].includes(w));
+    for (const lead of allLeads) {
+        const leadWords = lead.name.toLowerCase().replace(/[-–—]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+        const matched = dealWords.filter(dw => leadWords.some(lw => lw === dw));
+        if (matched.length >= 2 || (matched.length === 1 && dealWords.length <= 2)) {
+            return lead.source;
+        }
+    }
+
+    return 'Unknown';
 }
 
 // ── Count MDR Sets whose set-date falls within [start, end] ──
@@ -1296,6 +1362,147 @@ function renderQuarterlyBreakdown(leads) {
     return html;
 }
 
+// ── Render Closed Won ──
+function renderClosedWon() {
+    const year = NOW.getFullYear();
+    const deals = allClosedDeals.filter(d => d.dateClosed.getFullYear() === year);
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthsShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Group by month
+    const byMonth = {};
+    deals.forEach(d => {
+        const key = d.dateClosed.getMonth();
+        if (!byMonth[key]) byMonth[key] = [];
+        byMonth[key].push(d);
+    });
+
+    // Quarter definitions
+    const quarters = [
+        { label: 'Q1', months: [0,1,2] },
+        { label: 'Q2', months: [3,4,5] },
+        { label: 'Q3', months: [6,7,8] },
+        { label: 'Q4', months: [9,10,11] },
+    ];
+
+    let html = '';
+
+    // ── YTD Summary ──
+    const totalMRR = deals.reduce((s, d) => s + d.mrr, 0);
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Closed Won Summary — ' + year + '</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Deals', deals.length, '', true);
+    html += statCard('Total MRR', '$' + totalMRR.toLocaleString(), '');
+    html += statCard('Avg Deal Size', '$' + (deals.length ? Math.round(totalMRR / deals.length).toLocaleString() : '0'), '');
+    html += statCard('Sources Matched', deals.filter(d => d.leadSource !== 'Unknown').length + ' / ' + deals.length, pct(deals.filter(d => d.leadSource !== 'Unknown').length, deals.length));
+    html += '</div>';
+    html += '</div>';
+
+    // ── Quarterly Breakdown ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Quarterly Source Breakdown</div>';
+    html += '<div class="quarter-grid">';
+
+    quarters.forEach(q => {
+        const qDeals = deals.filter(d => q.months.includes(d.dateClosed.getMonth()));
+        const qMRR = qDeals.reduce((s, d) => s + d.mrr, 0);
+        const sourceMap = {};
+        const sourceMRR = {};
+        qDeals.forEach(d => {
+            const src = d.leadSource;
+            sourceMap[src] = (sourceMap[src] || 0) + 1;
+            sourceMRR[src] = (sourceMRR[src] || 0) + d.mrr;
+        });
+        const sorted = Object.entries(sourceMap).sort((a, b) => b[1] - a[1]);
+        const maxCount = sorted.length > 0 ? sorted[0][1] : 0;
+
+        html += '<div class="quarter-card">';
+        html += `<div class="quarter-header"><span>${q.label} ${year}</span><span class="q-total">${qDeals.length} deals · $${qMRR.toLocaleString()}</span></div>`;
+        html += '<div class="quarter-body">';
+
+        if (sorted.length === 0) {
+            html += '<div class="quarter-empty">No closed deals this quarter</div>';
+        } else {
+            sorted.forEach(([source, count], i) => {
+                const pctVal = qDeals.length ? Math.round(count / qDeals.length * 100) : 0;
+                const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
+                const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+                const mrrVal = sourceMRR[source] || 0;
+                html += '<div class="quarter-source-row">';
+                html += `<div class="qs-name">${escapeHtml(source)}</div>`;
+                html += `<div class="qs-bar-track"><div class="qs-bar-fill" style="width:${barWidth}%;background:${color}"></div></div>`;
+                html += `<div class="qs-count">${count}</div>`;
+                html += `<div class="qs-pct">$${mrrVal.toLocaleString()}</div>`;
+                html += '</div>';
+            });
+        }
+
+        html += '</div></div>';
+    });
+
+    html += '</div></div>';
+
+    // ── Monthly Breakdown ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Monthly Breakdown</div>';
+
+    const activeMonths = Object.keys(byMonth).map(Number).sort((a, b) => b - a);
+    activeMonths.forEach(m => {
+        const mDeals = byMonth[m];
+        const mMRR = mDeals.reduce((s, d) => s + d.mrr, 0);
+        const sourceMap = {};
+        mDeals.forEach(d => { sourceMap[d.leadSource] = (sourceMap[d.leadSource] || 0) + 1; });
+        const sorted = Object.entries(sourceMap).sort((a, b) => b[1] - a[1]);
+        const maxCount = sorted.length > 0 ? sorted[0][1] : 0;
+
+        html += '<div class="month-group">';
+        html += `<div class="month-header" onclick="toggleMonth(this)">`;
+        html += `<span>${months[m]} ${year}</span>`;
+        html += `<span style="display:flex;align-items:center;gap:8px;"><span class="month-count">${mDeals.length} deals · $${mMRR.toLocaleString()}</span><span class="chevron">&#9660;</span></span>`;
+        html += '</div>';
+        html += '<div class="month-body">';
+
+        // Source breakdown bars
+        html += '<div style="margin-bottom:1rem;">';
+        sorted.forEach(([source, count], i) => {
+            const pctVal = mDeals.length ? Math.round(count / mDeals.length * 100) : 0;
+            const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
+            const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+            html += '<div class="quarter-source-row">';
+            html += `<div class="qs-name">${escapeHtml(source)}</div>`;
+            html += `<div class="qs-bar-track"><div class="qs-bar-fill" style="width:${barWidth}%;background:${color}"></div></div>`;
+            html += `<div class="qs-count">${count}</div>`;
+            html += `<div class="qs-pct">${pctVal}%</div>`;
+            html += '</div>';
+        });
+        html += '</div>';
+
+        // Deal table
+        html += '<table class="report-table"><thead><tr>';
+        html += '<th>Deal</th><th>Owner</th><th style="text-align:right">MRR</th><th>Package</th><th>Lead Source</th><th>Date Closed</th>';
+        html += '</tr></thead><tbody>';
+        mDeals.sort((a, b) => b.dateClosed - a.dateClosed).forEach(d => {
+            const srcColor = d.leadSource === 'Unknown' ? 'var(--warning)' : 'var(--success)';
+            html += '<tr>';
+            html += `<td><strong>${escapeHtml(d.dealName)}</strong></td>`;
+            html += `<td>${escapeHtml(d.owner)}</td>`;
+            html += `<td class="num">$${d.mrr.toLocaleString()}</td>`;
+            html += `<td>${escapeHtml(d.package || '—')}</td>`;
+            html += `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${srcColor};margin-right:6px;"></span>${escapeHtml(d.leadSource)}</td>`;
+            html += `<td style="white-space:nowrap">${formatShort(d.dateClosed)}</td>`;
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+
+        html += '</div></div>';
+    });
+
+    html += '</div>';
+
+    return html;
+}
+
 // ── Render ──
 function render() {
     const leads = getFilteredLeads();
@@ -1323,10 +1530,17 @@ function render() {
     document.getElementById('prev-month-range').textContent = formatShort(pm.start) + ' – ' + formatShort(pm.end);
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
     document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
+    document.getElementById('closed-won-range').textContent = NOW.getFullYear().toString();
 
     if (currentPeriod === 'wow') {
         dashboard.innerHTML = renderWoW(leads);
-        // Destroy any existing charts from previous view
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+        return;
+    }
+
+    if (currentPeriod === 'closed-won') {
+        dashboard.innerHTML = renderClosedWon();
         Object.values(charts).forEach(c => c.destroy());
         charts = {};
         return;
@@ -1800,7 +2014,7 @@ async function downloadSnapshot() {
         });
 
         const link = document.createElement('a');
-        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'prev-month' ? 'PrevMonth' : currentPeriod === 'wow' ? 'WoW' : 'Year';
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'prev-month' ? 'PrevMonth' : currentPeriod === 'wow' ? 'WoW' : currentPeriod === 'closed-won' ? 'ClosedWon' : 'Year';
         link.download = `Inbound-Leads-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
@@ -1828,6 +2042,7 @@ document.querySelectorAll('.period-tab').forEach(tab => {
 async function init() {
     try {
         await fetchData();
+        await fetchClosedDeals();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard').style.display = '';
         render();
