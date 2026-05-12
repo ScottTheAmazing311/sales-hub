@@ -270,6 +270,46 @@
             text-align: center;
             padding: 0.5rem 0;
         }
+        .quarter-view-toggle {
+            display: flex;
+            gap: 0;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid rgba(7,55,79,0.12);
+            overflow: hidden;
+            margin-left: auto;
+        }
+        .quarter-view-btn {
+            padding: 0.4rem 0.85rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-right: 1px solid rgba(7,55,79,0.08);
+        }
+        .quarter-view-btn:last-child { border-right: none; }
+        .quarter-view-btn:hover { background: rgba(7,55,79,0.03); }
+        .quarter-view-btn.active {
+            background: var(--navy);
+            color: var(--yellow);
+        }
+        .quarter-title-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--yellow);
+        }
+        .quarter-title-row .section-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
         .qoq-badge {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.65rem;
@@ -956,6 +996,7 @@ let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
 let charts = {};
+let quarterViewMode = 'detailed'; // 'detailed' or 'condensed'
 
 // ── Categorize a traffic source into goal buckets ──
 function sourceCategory(source) {
@@ -1145,6 +1186,31 @@ function getStatusCounts(leads, start, end) {
     return { held, noShow, pending, total: leads.length };
 }
 
+// ── Grouped traffic data (condensed view) ──
+const SOURCE_GROUP_LABELS = { direct: 'Direct', organic: 'Organic', gads: 'Google Ads', referral: 'Referrals' };
+const SOURCE_GROUP_COLORS = { direct: SOURCE_COLORS[0], organic: SOURCE_COLORS[1], gads: SOURCE_COLORS[2], referral: SOURCE_COLORS[3], other: SOURCE_COLORS[4] };
+
+function getGroupedTrafficData(leads) {
+    const groups = { direct: 0, organic: 0, gads: 0, referral: 0, other: 0 };
+    leads.forEach(l => {
+        const cat = sourceCategory(l.source);
+        if (cat) groups[cat]++;
+        else groups.other++;
+    });
+    // Return sorted descending, filter out zeros
+    return Object.entries(groups)
+        .filter(([, count]) => count > 0)
+        .map(([key, count]) => [SOURCE_GROUP_LABELS[key] || 'Other', count, SOURCE_GROUP_COLORS[key]])
+        .sort((a, b) => b[1] - a[1]);
+}
+
+function getGroupedSourceMap(leads) {
+    const map = {};
+    const grouped = getGroupedTrafficData(leads);
+    grouped.forEach(([label, count]) => { map[label] = count; });
+    return map;
+}
+
 // ── Quarterly Source Breakdown ──
 function renderQuarterlyBreakdown(leads) {
     const year = NOW.getFullYear();
@@ -1155,16 +1221,23 @@ function renderQuarterlyBreakdown(leads) {
         { label: 'Q4', start: new Date(year, 9, 1), end: new Date(year, 11, 31, 23, 59, 59, 999) },
     ];
 
+    const condensed = quarterViewMode === 'condensed';
+
     let html = '<div class="section-block">';
+    html += '<div class="quarter-title-row">';
     html += '<div class="section-title">Quarterly Source Breakdown</div>';
+    html += '<div class="quarter-view-toggle">';
+    html += `<button class="quarter-view-btn${!condensed ? ' active' : ''}" onclick="quarterViewMode=\'detailed\';render()">Detailed</button>`;
+    html += `<button class="quarter-view-btn${condensed ? ' active' : ''}" onclick="quarterViewMode=\'condensed\';render()">Condensed</button>`;
+    html += '</div></div>';
     html += '<div class="quarter-grid">';
 
     // Pre-compute leads and source maps per quarter for QoQ comparison
     const quarterData = quarters.map(q => {
         const qLeads = leads.filter(l => l.dateInbound >= q.start && l.dateInbound <= q.end);
-        const traffic = getTrafficData(qLeads);
-        const sourceMap = {};
-        traffic.forEach(([source, count]) => { sourceMap[source] = count; });
+        const traffic = condensed ? getGroupedTrafficData(qLeads) : getTrafficData(qLeads);
+        const sourceMap = condensed ? getGroupedSourceMap(qLeads) : {};
+        if (!condensed) traffic.forEach(([source, count]) => { sourceMap[source] = count; });
         return { ...q, leads: qLeads, traffic, sourceMap };
     });
 
@@ -1196,10 +1269,10 @@ function renderQuarterlyBreakdown(leads) {
         if (traffic.length === 0) {
             html += '<div class="quarter-empty">No leads this quarter</div>';
         } else {
-            traffic.forEach(([source, count], i) => {
+            traffic.forEach(([source, count, groupColor], i) => {
                 const pctVal = qd.leads.length ? Math.round(count / qd.leads.length * 100) : 0;
                 const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
-                const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+                const color = groupColor || SOURCE_COLORS[i % SOURCE_COLORS.length];
                 // Per-source QoQ change
                 let sourceBadge = '';
                 if (prevQd) {
