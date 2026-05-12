@@ -270,6 +270,28 @@
             text-align: center;
             padding: 0.5rem 0;
         }
+        .qoq-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+        .qoq-badge.up { background: rgba(34,197,94,0.2); color: #16a34a; }
+        .qoq-badge.down { background: rgba(239,68,68,0.2); color: #dc2626; }
+        .qoq-badge.flat { background: rgba(107,107,107,0.15); color: var(--text-muted); }
+        .qoq-header-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        .qoq-header-badge.up { background: rgba(34,197,94,0.25); color: #4ade80; }
+        .qoq-header-badge.down { background: rgba(239,68,68,0.25); color: #fca5a5; }
+        .qoq-header-badge.flat { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
 
         /* ── Section titles ── */
         .section-title {
@@ -1137,27 +1159,59 @@ function renderQuarterlyBreakdown(leads) {
     html += '<div class="section-title">Quarterly Source Breakdown</div>';
     html += '<div class="quarter-grid">';
 
-    quarters.forEach(q => {
+    // Pre-compute leads and source maps per quarter for QoQ comparison
+    const quarterData = quarters.map(q => {
         const qLeads = leads.filter(l => l.dateInbound >= q.start && l.dateInbound <= q.end);
         const traffic = getTrafficData(qLeads);
+        const sourceMap = {};
+        traffic.forEach(([source, count]) => { sourceMap[source] = count; });
+        return { ...q, leads: qLeads, traffic, sourceMap };
+    });
+
+    function qoqBadge(current, previous, cssClass) {
+        if (previous === 0 && current === 0) return `<span class="${cssClass} flat">—</span>`;
+        if (previous === 0) return `<span class="${cssClass} up">NEW</span>`;
+        const change = Math.round((current - previous) / previous * 100);
+        if (change === 0) return `<span class="${cssClass} flat">0%</span>`;
+        const arrow = change > 0 ? '&#9650;' : '&#9660;';
+        const dir = change > 0 ? 'up' : 'down';
+        return `<span class="${cssClass} ${dir}">${arrow} ${Math.abs(change)}%</span>`;
+    }
+
+    quarterData.forEach((qd, idx) => {
+        const prevQd = idx > 0 ? quarterData[idx - 1] : null;
+        const traffic = qd.traffic;
         const maxCount = traffic.length > 0 ? traffic[0][1] : 0;
 
+        // Header with QoQ total change
+        let headerExtra = '';
+        if (prevQd && (qd.leads.length > 0 || prevQd.leads.length > 0)) {
+            headerExtra = qoqBadge(qd.leads.length, prevQd.leads.length, 'qoq-header-badge');
+        }
+
         html += '<div class="quarter-card">';
-        html += `<div class="quarter-header"><span>${q.label} ${year}</span><span class="q-total">${qLeads.length} leads</span></div>`;
+        html += `<div class="quarter-header"><span>${qd.label} ${year}</span><span class="q-total">${qd.leads.length} leads${headerExtra}</span></div>`;
         html += '<div class="quarter-body">';
 
         if (traffic.length === 0) {
             html += '<div class="quarter-empty">No leads this quarter</div>';
         } else {
             traffic.forEach(([source, count], i) => {
-                const pctVal = qLeads.length ? Math.round(count / qLeads.length * 100) : 0;
+                const pctVal = qd.leads.length ? Math.round(count / qd.leads.length * 100) : 0;
                 const barWidth = maxCount ? Math.max(count / maxCount * 100, 6) : 0;
                 const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+                // Per-source QoQ change
+                let sourceBadge = '';
+                if (prevQd) {
+                    const prevCount = prevQd.sourceMap[source] || 0;
+                    sourceBadge = qoqBadge(count, prevCount, 'qoq-badge');
+                }
                 html += '<div class="quarter-source-row">';
                 html += `<div class="qs-name">${escapeHtml(source)}</div>`;
                 html += `<div class="qs-bar-track"><div class="qs-bar-fill" style="width:${barWidth}%;background:${color}"></div></div>`;
                 html += `<div class="qs-count">${count}</div>`;
                 html += `<div class="qs-pct">${pctVal}%</div>`;
+                html += sourceBadge;
                 html += '</div>';
             });
         }
