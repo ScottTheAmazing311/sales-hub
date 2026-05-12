@@ -1211,7 +1211,7 @@ function matchLeadSource(dealName) {
         }
     }
 
-    return 'Unknown';
+    return 'Inbound';
 }
 
 // ── Count MDR Sets whose set-date falls within [start, end] ──
@@ -1580,7 +1580,7 @@ function renderClosedWon() {
         html += '<th>Deal</th><th>Direction</th><th>Owner</th><th style="text-align:right">MRR</th><th>Package</th><th>Lead Source</th><th>Date Closed</th>';
         html += '</tr></thead><tbody>';
         mDeals.sort((a, b) => b.dateClosed - a.dateClosed).forEach(d => {
-            const srcColor = d.leadSource === 'Unknown' ? 'var(--warning)' : d.direction === 'Outbound' ? '#3c94d1' : 'var(--success)';
+            const srcColor = d.direction === 'Outbound' ? '#3c94d1' : 'var(--success)';
             const dirClass = d.direction === 'Outbound' ? 'outbound' : 'inbound';
             html += '<tr>';
             html += `<td><strong>${escapeHtml(d.dealName)}</strong></td>`;
