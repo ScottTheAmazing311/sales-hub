@@ -919,8 +919,6 @@ const LEAD_LOG_GID = '298242111';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LEAD_LOG_GID}`;
 const CLOSED_WON_GID = '880949557';
 const CLOSED_WON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${CLOSED_WON_GID}`;
-const BDR_MEETINGS_GID = '55819925';
-const BDR_MEETINGS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_MEETINGS_GID}`;
 
 const COL = {
     NUM: 0,
@@ -1033,7 +1031,6 @@ const SOURCE_COLORS = [
 let allLeads = [];
 let allMdrSets = [];
 let allClosedDeals = [];
-let outboundCompanies = new Set();
 let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3 };
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
@@ -1122,47 +1119,36 @@ async function fetchData() {
     allLeads.sort((a, b) => b.dateInbound - a.dateInbound);
 }
 
-// ── Fetch BDR meeting companies (for outbound detection) ──
-async function fetchBdrCompanies() {
-    const res = await fetch(BDR_MEETINGS_URL);
-    const text = await res.text();
-    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-    const rows = json.table.rows;
+// Fallback direction map from HubSpot export (until column K is populated via Coefficient)
+const DIRECTION_MAP = {
+    'whitley law firm': 'Outbound',
+    'wiggam law': 'Outbound',
+    'bush injury law': 'Outbound',
+    'rosenblum allen law firm': 'Outbound',
+    'brown & barron': 'Outbound',
+    'mcv law': 'Outbound',
+    'legler murphy battaglia': 'Outbound',
+    'felice trial attorneys': 'Outbound',
+    'christensen law offices': 'Outbound',
+    'ty robinson': 'Outbound',
+    'bogin munns & munns': 'Outbound',
+    'glotzer & leib': 'Outbound',
+    'connell law firm': 'Outbound',
+};
 
-    outboundCompanies = new Set();
-    for (const row of rows) {
-        const cells = row.c || [];
-        const company = cellVal(cells, 3); // Column D = Company Name
-        if (company) outboundCompanies.add(company.toLowerCase().replace(/[^a-z0-9]/g, ''));
-    }
-}
+function getDirection(dealName, sheetDirection) {
+    // Prefer column K from sheet if populated
+    const dir = (sheetDirection || '').trim();
+    if (dir.toLowerCase() === 'outbound') return 'Outbound';
+    if (dir.toLowerCase() === 'inbound') return 'Inbound';
 
-// Hardcoded outbound deals not tracked in BDR sheet
-const KNOWN_OUTBOUND = ['legler murphy battaglia', 'glotzer & leib', 'connell law firm', 'mcv law'];
-
-function isOutbound(dealName) {
-    const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const dn = normalize(dealName);
+    // Fallback to known direction map
     const dl = dealName.toLowerCase();
-
-    // Check hardcoded list
-    for (const ko of KNOWN_OUTBOUND) {
-        if (dl.includes(ko)) return true;
+    for (const [key, val] of Object.entries(DIRECTION_MAP)) {
+        if (dl.includes(key)) return val;
     }
 
-    // Check BDR meetings
-    for (const ob of outboundCompanies) {
-        if (dn.includes(ob) || ob.includes(dn)) return true;
-    }
-
-    // Fuzzy: match significant words
-    const dealWords = dealName.toLowerCase().replace(/[-–—]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !['law','firm','the','new','deal','llc','llp','pllc','offices','office','group','attorneys','attorney','legal','associates','pa'].includes(w));
-    for (const ob of outboundCompanies) {
-        const matchCount = dealWords.filter(dw => ob.includes(dw)).length;
-        if (matchCount >= 2 || (matchCount === 1 && dealWords.length <= 2)) return true;
-    }
-
-    return false;
+    return 'Inbound';
 }
 
 // ── Fetch closed deals ──
@@ -1185,7 +1171,8 @@ async function fetchClosedDeals() {
         const dateClosed = parseDateAny(cells[5]);
         if (!dateClosed) continue;
 
-        const outbound = isOutbound(dealName);
+        const sheetDirection = cellVal(cells, 10); // Column K = Pipeline Direction
+        const direction = getDirection(dealName, sheetDirection);
 
         allClosedDeals.push({
             dealName,
@@ -1193,8 +1180,8 @@ async function fetchClosedDeals() {
             package: pkg,
             owner: ownerFirst,
             dateClosed,
-            leadSource: outbound ? 'Outbound' : matchLeadSource(dealName),
-            direction: outbound ? 'Outbound' : 'Inbound',
+            leadSource: direction === 'Outbound' ? 'Outbound' : matchLeadSource(dealName),
+            direction,
         });
     }
 
@@ -2154,7 +2141,6 @@ document.querySelectorAll('.period-tab').forEach(tab => {
 async function init() {
     try {
         await fetchData();
-        await fetchBdrCompanies();
         await fetchClosedDeals();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard').style.display = '';
