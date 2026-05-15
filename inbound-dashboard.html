@@ -1031,7 +1031,7 @@ const SOURCE_COLORS = [
 let allLeads = [];
 let allMdrSets = [];
 let allClosedDeals = [];
-let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3 };
+let weeklyGoals = { total: 0, direct: 0, organic: 0, gads: 0, mdr: 0, referral: 3, event: 2 };
 let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
 let charts = {};
@@ -1044,6 +1044,7 @@ function sourceCategory(source) {
     if (s.includes('organic')) return 'organic';
     if (s.startsWith('ga ') || s.startsWith('google ads')) return 'gads';
     if (s.includes('referral')) return 'referral';
+    if (s.includes('event')) return 'event';
     return null;
 }
 
@@ -1223,7 +1224,7 @@ function countMdrSetsInRange(start, end) {
 
 // ── Count leads in each goal-category bucket ──
 function getCategoryCounts(leads) {
-    const out = { direct: 0, organic: 0, gads: 0, referral: 0, other: 0 };
+    const out = { direct: 0, organic: 0, gads: 0, referral: 0, event: 0, other: 0 };
     leads.forEach(l => {
         const cat = sourceCategory(l.source);
         if (cat) out[cat]++;
@@ -1321,11 +1322,11 @@ function getStatusCounts(leads, start, end) {
 }
 
 // ── Grouped traffic data (condensed view) ──
-const SOURCE_GROUP_LABELS = { direct: 'Direct', organic: 'Organic', gads: 'Google Ads', referral: 'Referrals' };
-const SOURCE_GROUP_COLORS = { direct: SOURCE_COLORS[0], organic: SOURCE_COLORS[1], gads: SOURCE_COLORS[2], referral: SOURCE_COLORS[3], other: SOURCE_COLORS[4] };
+const SOURCE_GROUP_LABELS = { direct: 'Direct', organic: 'Organic', gads: 'Google Ads', referral: 'Referrals', event: 'Events' };
+const SOURCE_GROUP_COLORS = { direct: SOURCE_COLORS[0], organic: SOURCE_COLORS[1], gads: SOURCE_COLORS[2], referral: SOURCE_COLORS[3], event: SOURCE_COLORS[5], other: SOURCE_COLORS[4] };
 
 function getGroupedTrafficData(leads) {
-    const groups = { direct: 0, organic: 0, gads: 0, referral: 0, other: 0 };
+    const groups = { direct: 0, organic: 0, gads: 0, referral: 0, event: 0, other: 0 };
     leads.forEach(l => {
         const cat = sourceCategory(l.source);
         if (cat) groups[cat]++;
@@ -1681,6 +1682,7 @@ function render() {
             'Organic': [cats.organic, weeklyGoals.organic],
             'Google Ads': [cats.gads, weeklyGoals.gads],
             'Referrals': [cats.referral, weeklyGoals.referral],
+            'Events': [cats.event, weeklyGoals.event],
             'MDR Sets': [mdrCount, weeklyGoals.mdr],
         });
     }
@@ -1888,6 +1890,7 @@ function renderWoW(leads) {
             { name: 'Organic', count: cats.organic, goal: g.organic, color: SOURCE_COLORS[1] },
             { name: 'Google Ads', count: cats.gads, goal: g.gads, color: SOURCE_COLORS[2] },
             { name: 'Referrals', count: cats.referral, goal: g.referral, color: SOURCE_COLORS[3] },
+            { name: 'Events', count: cats.event, goal: g.event, color: SOURCE_COLORS[5] },
             { name: 'MDR Sets', count: mdrWeek, goal: g.mdr, color: SOURCE_COLORS[4] },
         ];
 
