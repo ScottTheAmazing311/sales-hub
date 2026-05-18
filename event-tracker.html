@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event ROI Tracker — Revenue Kitchen</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --radius: 12px;
+            --success: #22c55e;
+            --destructive: #c0392b;
+            --warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 16px rgba(7,55,79,0.10);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+        /* ── Screens ── */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* ══════════════════════════════════════════
+           SCREEN 1: Org Picker
+           ══════════════════════════════════════════ */
+        .org-picker {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--navy);
+            gap: 3rem;
+            padding: 2rem;
+        }
+        .org-picker-header {
+            text-align: center;
+        }
+        .org-picker-header .rk-mark {
+            width: 56px; height: 56px;
+            background: var(--yellow);
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--navy);
+            margin-bottom: 1.25rem;
+        }
+        .org-picker-header h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+        .org-picker-header p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+        .org-cards {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .org-card {
+            width: 280px;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+        .org-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--yellow);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .org-card-icon {
+            width: 64px; height: 64px;
+            background: var(--yellow);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+        .org-card-icon svg { width: 32px; height: 32px; fill: var(--navy); }
+        .org-card h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .org-card p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.82rem;
+        }
+        .org-card.coming-soon {
+            opacity: 0.45;
+            cursor: default;
+        }
+        .org-card.coming-soon:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.1);
+            transform: none;
+            box-shadow: none;
+        }
+        .org-picker-back {
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            transition: color 0.2s;
+        }
+        .org-picker-back:hover { color: rgba(255,255,255,0.7); }
+
+        /* ══════════════════════════════════════════
+           SCREEN 2: Events by Month
+           ══════════════════════════════════════════ */
+        .stripe { height: 5px; background: var(--yellow-warm); }
+        .top-bar {
+            background: var(--navy);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .back-btn {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: #fff; }
+        .top-bar-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .btn-dashboard {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.55rem 1.1rem;
+            background: var(--yellow);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .btn-dashboard:hover { opacity: 0.85; }
+        .btn-dashboard svg { width: 16px; height: 16px; fill: var(--navy); }
+        .user-label {
+            color: rgba(255,255,255,0.4);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .page-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        /* ── Summary Bar ── */
+        .summary-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .summary-pill {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(7,55,79,0.06);
+        }
+        .summary-pill .s-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-pill .s-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-top: 2px;
+        }
+
+        /* ── Filters ── */
+        .filters-row {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-sel {
+            padding: 0.45rem 0.7rem;
+            border: 1px solid rgba(7,55,79,0.15);
+            border-radius: 8px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.8rem;
+            background: #fff;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .filter-sel:focus { outline: none; border-color: var(--navy); }
+
+        /* ── Month Sections ── */
+        .month-section {
+            margin-bottom: 2.5rem;
+        }
+        .month-header {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--yellow);
+        }
+        .month-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: uppercase;
+        }
+        .month-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .month-spend {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-left: auto;
+        }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1rem;
+        }
+
+        /* ── Event Card ── */
+        .ev-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(7,55,79,0.06);
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .ev-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(7,55,79,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Card Image Header */
+        .ev-card-img {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .ev-card-img-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(7,55,79,0.1) 0%, rgba(7,55,79,0.65) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1rem 1.25rem;
+        }
+        .ev-card-img-overlay .ev-card-name {
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .ev-card-img .status-float {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+        }
+
+        .ev-card-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: uppercase;
+            line-height: 1.15;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
+            backdrop-filter: blur(4px);
+        }
+        .status-attended { background: rgba(34,197,94,0.2); color: #16a34a; }
+        .status-attending { background: rgba(59,130,246,0.2); color: #2563eb; }
+        .status-planned { background: rgba(245,158,11,0.2); color: #d97706; }
+
+        .ev-card-body {
+            padding: 0.85rem 1.25rem;
+            flex: 1;
+        }
+        .ev-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .ev-card-meta .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ev-card-meta svg {
+            width: 15px; height: 15px;
+            fill: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .ev-card-attendees {
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--navy);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+        }
+        .ev-card-attendees svg { width: 14px; height: 14px; fill: var(--navy); }
+        .ev-card-notes {
+            margin-top: 0.5rem;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Card Stats Footer — 4 columns */
+        .ev-card-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid rgba(7,55,79,0.06);
+            background: rgba(7,55,79,0.025);
+        }
+        .ev-stat {
+            text-align: center;
+            padding: 0.7rem 0.25rem;
+            border-right: 1px solid rgba(7,55,79,0.06);
+        }
+        .ev-stat:last-child { border-right: none; }
+        .ev-stat .stat-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.58rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+        .ev-stat .stat-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.1;
+        }
+        .ev-stat .stat-val.muted { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+
+        /* ══════════════════════════════════════════
+           SCREEN 3: Event Detail
+           ══════════════════════════════════════════ */
+        .detail-hero {
+            background: var(--navy);
+            color: #fff;
+            padding: 2rem 2rem 1.75rem;
+        }
+        .detail-hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .detail-hero h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+        }
+        .detail-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.88rem;
+            opacity: 0.75;
+        }
+        .detail-meta-row span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .detail-meta-row svg {
+            width: 15px; height: 15px;
+            fill: rgba(255,255,255,0.7);
+        }
+
+        .detail-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .d-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(7,55,79,0.06);
+        }
+        .d-card.full { grid-column: 1 / -1; }
+        .d-card h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--yellow);
+        }
+        .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+        .cost-item .c-label { font-size: 0.72rem; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; }
+        .cost-item .c-val { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+        .cost-item.total-item {
+            grid-column: 1 / -1;
+            padding-top: 0.75rem;
+            margin-top: 0.25rem;
+            border-top: 2px solid var(--yellow);
+        }
+        .cost-item.total-item .c-val { font-size: 1.5rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; }
+
+        .roi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .roi-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+        .roi-positive { background: rgba(34,197,94,0.12); color: #16a34a; }
+        .roi-negative { background: rgba(192,57,43,0.12); color: #c0392b; }
+        .roi-neutral { background: rgba(107,107,107,0.12); color: #6b6b6b; }
+
+        .mini-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
+        .mini-table th { text-align: left; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0.5rem 0.5rem; border-bottom: 1px solid rgba(7,55,79,0.1); }
+        .mini-table td { padding: 0.5rem; border-bottom: 1px solid rgba(7,55,79,0.05); }
+        .mini-table tr:last-child td { border-bottom: none; }
+        .empty-state { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem; }
+
+        /* ── Forms ── */
+        .add-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 0.5rem 1rem;
+            background: var(--navy); color: var(--yellow);
+            border: none; border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .add-btn:hover { background: var(--navy-light); }
+        .inline-form { display: none; background: var(--cream); border-radius: 10px; padding: 1rem; margin: 0.75rem 0; border: 1px solid rgba(7,55,79,0.1); }
+        .inline-form.open { display: block; }
+        .inline-form .form-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .inline-form input, .inline-form select, .inline-form textarea {
+            padding: 0.5rem 0.75rem; border: 1px solid rgba(7,55,79,0.15); border-radius: 8px;
+            font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; background: #fff; flex: 1; min-width: 120px;
+        }
+        .inline-form textarea { width: 100%; min-height: 60px; resize: vertical; }
+        .inline-form input:focus, .inline-form select:focus, .inline-form textarea:focus { outline: none; border-color: var(--navy); }
+        .form-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .btn-submit {
+            padding: 0.5rem 1.25rem; background: var(--navy); color: var(--yellow);
+            border: none; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-submit:hover { background: var(--navy-light); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-cancel {
+            padding: 0.5rem 1rem; background: transparent; color: var(--text-muted);
+            border: 1px solid rgba(7,55,79,0.15); border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; cursor: pointer;
+        }
+        .star-rating { display: inline-flex; gap: 4px; direction: rtl; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 1.5rem; color: #ddd; cursor: pointer; transition: color 0.15s; }
+        .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: var(--yellow-warm); }
+
+        /* ══════════════════════════════════════════
+           SCREEN 4: Dashboard
+           ══════════════════════════════════════════ */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .chart-card {
+            background: #fff; border-radius: var(--radius); padding: 1.25rem;
+            box-shadow: var(--shadow); border: 1px solid rgba(7,55,79,0.06);
+        }
+        .chart-card.full { grid-column: 1 / -1; }
+        .chart-card h3 {
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-weight: 600;
+            color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem;
+        }
+        .chart-wrap { position: relative; height: 280px; }
+        .leaderboard-list { list-style: none; }
+        .leaderboard-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(7,55,79,0.06); font-size: 0.85rem; }
+        .leaderboard-list li:last-child { border-bottom: none; }
+        .lb-rank { font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--navy); min-width: 2rem; }
+        .lb-name { flex: 1; }
+        .lb-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--navy); }
+
+        /* ── Countdown Badge ── */
+        .countdown-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .countdown-badge.past { background: rgba(34,197,94,0.7); }
+        .countdown-badge.soon { background: rgba(245,158,11,0.8); }
+        .countdown-badge.today { background: rgba(234,255,106,0.9); color: var(--navy); }
+
+        /* ── Image Update ── */
+        .img-update-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .img-update-row input {
+            flex: 1;
+            padding: 0.45rem 0.75rem;
+            border: 1px solid rgba(7,55,79,0.15);
+            border-radius: 8px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.8rem;
+            background: #fff;
+        }
+        .img-update-row input:focus { outline: none; border-color: var(--navy); }
+        .btn-sm {
+            padding: 0.45rem 0.9rem;
+            background: var(--navy);
+            color: var(--yellow);
+            border: none;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-sm:hover { background: var(--navy-light); }
+        .btn-sm.outline {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(7,55,79,0.15);
+        }
+        .detail-hero-img {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .detail-hero-img .img-edit-btn {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .detail-hero-img .img-edit-btn:hover { background: rgba(0,0,0,0.7); }
+
+        /* ── Add Event Form ── */
+        .add-event-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+        .add-event-form {
+            display: none;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(7,55,79,0.06);
+        }
+        .add-event-form.open { display: block; }
+        .add-event-form h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--yellow);
+        }
+        .add-event-form .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        .add-event-form .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+        .add-event-form input, .add-event-form select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(7,55,79,0.15);
+            border-radius: 8px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.82rem;
+            background: #fff;
+        }
+        .add-event-form input:focus, .add-event-form select:focus { outline: none; border-color: var(--navy); }
+        .add-event-form .full-span { grid-column: 1 / -1; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .org-cards { flex-direction: column; align-items: center; }
+            .page-wrap, .detail-content { padding: 1rem; }
+            .month-grid { grid-template-columns: 1fr; }
+            .detail-grid, .chart-grid { grid-template-columns: 1fr; }
+            .cost-grid { grid-template-columns: 1fr 1fr; }
+            .summary-bar { grid-template-columns: repeat(2, 1fr); }
+            .detail-hero h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 1 — Org Picker
+     ══════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-org">
+    <div class="org-picker">
+        <div class="org-picker-header">
+            <div class="rk-mark">RK</div>
+            <h1>Event ROI Tracker</h1>
+            <p>Track conference spend, deals, and team feedback</p>
+        </div>
+        <div class="org-cards">
+            <div class="org-card" onclick="openOrg('rankings')">
+                <div class="org-card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <h2>Rankings.io</h2>
+                <p>29 events in 2026</p>
+            </div>
+            <div class="org-card coming-soon">
+                <div class="org-card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </div>
+                <h2>PIMCon</h2>
+                <p>Coming soon</p>
+            </div>
+        </div>
+        <a href="index.html" class="org-picker-back">&larr; Back to Revenue Kitchen</a>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 2 — Events by Month
+     ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-events">
+    <div class="stripe"></div>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="back-btn" onclick="goTo('screen-org')">&#8592; Back</button>
+            <span class="top-bar-title" id="events-org-label">Rankings.io Events</span>
+        </div>
+        <div class="top-bar-right">
+            <button class="btn-dashboard" onclick="goTo('screen-dashboard')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                Analytics
+            </button>
+            <span class="user-label" id="user-label"></span>
+        </div>
+    </div>
+
+    <div class="page-wrap">
+        <div class="summary-bar" id="summary-bar">
+            <div class="summary-pill"><div class="s-label">Events</div><div class="s-val" id="s-events">—</div></div>
+            <div class="summary-pill"><div class="s-label">Total Spend</div><div class="s-val" id="s-spend">—</div></div>
+            <div class="summary-pill"><div class="s-label">Pipeline MRR</div><div class="s-val" id="s-pipeline">—</div></div>
+            <div class="summary-pill"><div class="s-label">Closed Won MRR</div><div class="s-val" id="s-closed">—</div></div>
+            <div class="summary-pill"><div class="s-label">Avg / Event</div><div class="s-val" id="s-avg">—</div></div>
+        </div>
+
+        <div class="filters-row">
+            <select class="filter-sel" id="filter-status" onchange="renderEvents()">
+                <option value="">All Statuses</option>
+                <option value="attended">Attended</option>
+                <option value="attending">Attending</option>
+                <option value="planned">Planned</option>
+            </select>
+            <select class="filter-sel" id="filter-attendee" onchange="renderEvents()">
+                <option value="">All Attendees</option>
+            </select>
+            <div style="margin-left:auto;">
+                <button class="add-btn" onclick="toggleAddEvent()">+ Add Event</button>
+            </div>
+        </div>
+
+        <div class="add-event-form" id="add-event-form">
+            <h3>Add New Event</h3>
+            <div class="form-grid" style="margin-bottom:0.5rem;">
+                <input type="text" id="new-ev-name" placeholder="Event name *">
+                <input type="text" id="new-ev-location" placeholder="Location (e.g. Chicago, IL)">
+            </div>
+            <div class="form-grid three" style="margin-bottom:0.5rem;">
+                <input type="date" id="new-ev-start" title="Start date">
+                <input type="date" id="new-ev-end" title="End date">
+                <select id="new-ev-status">
+                    <option value="planned">Planned</option>
+                    <option value="attending">Attending</option>
+                    <option value="attended">Attended</option>
+                </select>
+            </div>
+            <div class="form-grid three" style="margin-bottom:0.5rem;">
+                <input type="text" id="new-ev-attendees" placeholder="Attendees (comma-separated)">
+                <input type="number" id="new-ev-reg" placeholder="Registration cost ($)" step="100">
+                <input type="number" id="new-ev-hotel" placeholder="Hotel cost ($)" step="100">
+            </div>
+            <div class="form-grid" style="margin-bottom:0.5rem;">
+                <input type="text" id="new-ev-hotelname" placeholder="Hotel name">
+                <input type="number" id="new-ev-sponsor" placeholder="Sponsorship cost ($)" step="100">
+            </div>
+            <div style="margin-bottom:0.75rem;">
+                <input type="text" id="new-ev-notes" placeholder="Notes (optional)" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;">
+            </div>
+            <div class="form-actions">
+                <button class="btn-submit" onclick="submitNewEvent()">Add Event</button>
+                <button class="btn-cancel" onclick="toggleAddEvent()">Cancel</button>
+            </div>
+        </div>
+
+        <div id="events-months"></div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 3 — Event Detail
+     ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-detail">
+    <div class="stripe"></div>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="back-btn" onclick="goTo('screen-events')">&#8592; Back to Events</button>
+        </div>
+    </div>
+    <div class="detail-hero-img" id="detail-hero-img">
+        <button class="img-edit-btn" onclick="toggleImageEdit()">Update Image</button>
+    </div>
+    <div class="detail-hero">
+        <div class="detail-hero-inner">
+            <div style="margin-bottom:0.5rem;" id="detail-status"></div>
+            <h2 id="detail-name"></h2>
+            <div class="detail-meta-row" id="detail-meta"></div>
+            <div class="img-update-row" id="img-update-row" style="display:none;">
+                <input type="url" id="img-url-input" placeholder="Paste new image URL...">
+                <button class="btn-sm" onclick="saveImageUrl()">Save</button>
+                <button class="btn-sm outline" onclick="toggleImageEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class="detail-content">
+        <div class="detail-grid">
+            <div class="d-card">
+                <h3>Cost Breakdown</h3>
+                <div class="cost-grid" id="cost-grid"></div>
+            </div>
+            <div class="d-card">
+                <h3>ROI Summary</h3>
+                <div class="roi-grid" id="roi-grid"></div>
+            </div>
+            <!-- Deals -->
+            <div class="d-card full">
+                <h3>Deals Sourced</h3>
+                <button class="add-btn" onclick="toggleForm('deal-form')">+ Add Deal</button>
+                <div class="inline-form" id="deal-form">
+                    <div class="form-row">
+                        <select id="deal-stage">
+                            <option value="Pipeline">Pipeline</option>
+                            <option value="Closed Won">Closed Won</option>
+                        </select>
+                        <input type="text" id="deal-name" placeholder="Deal / firm name">
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="deal-mrr" placeholder="MRR ($)" step="100">
+                        <input type="url" id="deal-hubspot" placeholder="HubSpot link (optional)">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-submit" onclick="submitDeal()">Save Deal</button>
+                        <button class="btn-cancel" onclick="toggleForm('deal-form')">Cancel</button>
+                    </div>
+                </div>
+                <div id="deals-wrap"></div>
+            </div>
+            <!-- Conversations -->
+            <div class="d-card full">
+                <h3>Critical Connections</h3>
+                <button class="add-btn" onclick="toggleForm('convo-form')">+ Add Connection</button>
+                <div class="inline-form" id="convo-form">
+                    <div class="form-row">
+                        <select id="convo-type">
+                            <option value="New Prospect">New Prospect</option>
+                            <option value="New Vendor">New Vendor</option>
+                            <option value="New Referral Partner">New Referral Partner</option>
+                            <option value="Progressed Deal">Progressed Deal</option>
+                            <option value="Client Save">Client Save</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="convo-contact" placeholder="Contact name">
+                        <input type="text" id="convo-firm" placeholder="Firm name">
+                    </div>
+                    <div class="form-row"><textarea id="convo-notes" placeholder="Notes"></textarea></div>
+                    <div class="form-row">
+                        <select id="convo-followup">
+                            <option value="Pending">Pending follow-up</option>
+                            <option value="Scheduled">Follow-up scheduled</option>
+                            <option value="Completed">Follow-up completed</option>
+                            <option value="No follow-up">No follow-up needed</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-submit" onclick="submitConversation()">Save</button>
+                        <button class="btn-cancel" onclick="toggleForm('convo-form')">Cancel</button>
+                    </div>
+                </div>
+                <div id="convos-wrap"></div>
+            </div>
+            <!-- Feedback -->
+            <div class="d-card full">
+                <h3>Team Feedback</h3>
+                <button class="add-btn" onclick="toggleForm('feedback-form')">+ Add Feedback</button>
+                <div class="inline-form" id="feedback-form">
+                    <div class="form-row">
+                        <select id="feedback-member">
+                            <option value="">Select team member</option>
+                            <option>Danny Define</option>
+                            <option>Tyler Farr</option>
+                            <option>Brandon Steed</option>
+                            <option>Simon Golding</option>
+                            <option>Austin Miller</option>
+                            <option>Elise Fitzsimmons</option>
+                            <option>Megan</option>
+                            <option>Sarah</option>
+                            <option>Sonya Palmer</option>
+                            <option>Britt Wilson</option>
+                        </select>
+                    </div>
+                    <div class="form-row" style="align-items:center;gap:1rem;">
+                        <span style="font-size:0.8rem;color:var(--text-muted);">Rating:</span>
+                        <div class="star-rating">
+                            <input type="radio" name="rating" id="star5" value="5"><label for="star5">&#9733;</label>
+                            <input type="radio" name="rating" id="star4" value="4"><label for="star4">&#9733;</label>
+                            <input type="radio" name="rating" id="star3" value="3"><label for="star3">&#9733;</label>
+                            <input type="radio" name="rating" id="star2" value="2"><label for="star2">&#9733;</label>
+                            <input type="radio" name="rating" id="star1" value="1"><label for="star1">&#9733;</label>
+                        </div>
+                    </div>
+                    <div class="form-row"><textarea id="feedback-notes" placeholder="Notes / takeaways from the event"></textarea></div>
+                    <div class="form-actions">
+                        <button class="btn-submit" onclick="submitFeedback()">Save Feedback</button>
+                        <button class="btn-cancel" onclick="toggleForm('feedback-form')">Cancel</button>
+                    </div>
+                </div>
+                <div id="feedback-wrap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN 4 — Analytics Dashboard
+     ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-dashboard">
+    <div class="stripe"></div>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="back-btn" onclick="goTo('screen-events')">&#8592; Back to Events</button>
+            <span class="top-bar-title">Event Analytics</span>
+        </div>
+    </div>
+    <div class="page-wrap">
+        <div class="summary-bar" id="dash-summary">
+            <div class="summary-pill"><div class="s-label">Total Spend YTD</div><div class="s-val" id="d-spend">—</div></div>
+            <div class="summary-pill"><div class="s-label">Events</div><div class="s-val" id="d-events">—</div></div>
+            <div class="summary-pill"><div class="s-label">Pipeline MRR</div><div class="s-val" id="d-pipeline">—</div></div>
+            <div class="summary-pill"><div class="s-label">Closed Won MRR</div><div class="s-val" id="d-closed">—</div></div>
+            <div class="summary-pill"><div class="s-label">Avg / Event</div><div class="s-val" id="d-avg">—</div></div>
+        </div>
+        <div class="chart-grid">
+            <div class="chart-card full">
+                <h3>Spend by Event</h3>
+                <div class="chart-wrap"><canvas id="chart-spend"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>Cost Breakdown</h3>
+                <div class="chart-wrap"><canvas id="chart-breakdown"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>Quarterly Spend</h3>
+                <div class="chart-wrap"><canvas id="chart-quarterly"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>Top Events by Spend</h3>
+                <ol class="leaderboard-list" id="lb-spend"></ol>
+            </div>
+            <div class="chart-card">
+                <h3>Monthly Spend Trend</h3>
+                <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// Config
+// ═══════════════════════════════════════
+const APPS_SCRIPT_URL = '';
+const EVENTS_SHEET_ID = '';
+const EVENTS_GVIZ_BASE = EVENTS_SHEET_ID ? `https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/gviz/tq` : '';
+
+// ═══════════════════════════════════════
+// State
+// ═══════════════════════════════════════
+let allEvents = [];
+let deals = [];
+let feedback = [];
+let conversations = [];
+let currentEvent = null;
+let chartInstances = {};
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// ═══════════════════════════════════════
+// Navigation
+// ═══════════════════════════════════════
+function goTo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    window.scrollTo(0, 0);
+    if (screenId === 'screen-dashboard') renderDashboard();
+}
+
+function openOrg(org) {
+    if (org === 'rankings') {
+        goTo('screen-events');
+    }
+}
+
+// ═══════════════════════════════════════
+// Auth
+// ═══════════════════════════════════════
+window.addEventListener('rk-auth-ready', function(e) {
+    const u = e.detail;
+    const label = document.getElementById('user-label');
+    if (label && u.user_metadata) {
+        label.textContent = (u.user_metadata.first_name || u.email || '').split('@')[0];
+    }
+    loadData();
+});
+
+// ═══════════════════════════════════════
+// Event Images — conference banners + city photos
+// ═══════════════════════════════════════
+const EVENT_IMAGES = {
+    '868jdam79': 'https://images.unsplash.com/photo-1575089976121-8ed7b2a54265?w=680&h=320&fit=crop', // Orlando
+    '868jc8v5t': 'https://ntlsummit.com/wp-content/uploads/2024/04/It-starts-with-us_image.png', // NTL Miami
+    '868jdamf4': 'https://ntlsummit.com/wp-content/uploads/2024/04/It-starts-with-us_image.png', // NTL Miami
+    '868jen2gb': 'https://images.unsplash.com/photo-1538097304804-2a1b932c284e?w=680&h=320&fit=crop', // San Diego
+    '868jen3aj': 'https://assets.swoogo.com/uploads/full/6341793-69783dc39d155.png', // Legalweek NYC
+    '868jdam7e': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=680&h=320&fit=crop', // Delray Beach
+    '868jen3gf': 'https://abatechshow.wpenginepowered.com/wp-content/uploads/2025/10/ts26-1.png', // ABA Tech Show
+    '868jdam7h': 'https://images.unsplash.com/photo-1538097304804-2a1b932c284e?w=680&h=320&fit=crop', // San Diego
+    '868jdam7r': 'https://images.unsplash.com/photo-1545194445-dddb8f4487c6?w=680&h=320&fit=crop', // Dallas
+    '868jdam7w': 'https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=680&h=320&fit=crop', // Las Vegas
+    '868jbg6ut': 'https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=680&h=320&fit=crop', // Mexico
+    '868jha2hy': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=680&h=320&fit=crop', // NYC
+    '868jaww1p': 'https://www.eventmarketer.com/wp-content/uploads/2025/12/ems26-stack-black-wdate.png', // EMS Vegas
+    '868jen64m': 'https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=680&h=320&fit=crop', // San Antonio
+    '868jazan8': 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=680&h=320&fit=crop', // Huntington Beach
+    '868jha2np': 'https://images.unsplash.com/photo-1575917649834-ebfdd6d1e18e?w=680&h=320&fit=crop', // Atlanta
+    '868jm1wbc': 'https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=680&h=320&fit=crop', // Las Vegas
+    '868jm1vry': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=680&h=320&fit=crop', // NYC
+    '868jha31x': 'https://images.unsplash.com/photo-1530089711124-9ca31fb9e863?w=680&h=320&fit=crop', // Houston
+    '868jen6zh': 'https://images.unsplash.com/photo-1530089711124-9ca31fb9e863?w=680&h=320&fit=crop', // Houston
+    '868jha36v': 'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=680&h=320&fit=crop', // LA
+    '868jen82k': 'https://www.bigrigbootcamp.com/hubfs/BRBC/BigRig2025-Whole%20Conference%20Darken%201.jpg', // BRBC
+    '868jdannn': 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?w=680&h=320&fit=crop', // Chicago
+    '868jdanqy': 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?w=680&h=320&fit=crop', // Chicago
+    '868jfru3q': 'https://images.unsplash.com/photo-1568402102990-bc541580b59f?w=680&h=320&fit=crop', // New Orleans
+    '868jdkpdg': 'https://images.unsplash.com/photo-1605148693535-e3d3460a8121?w=680&h=320&fit=crop', // Charlotte
+    '868jdanrn': 'https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=680&h=320&fit=crop', // Las Vegas
+    '868jhwqh5': 'https://images.unsplash.com/photo-1501979376754-2ff867a4f659?w=680&h=320&fit=crop', // Boston
+    '868jktdp2': 'https://images.unsplash.com/photo-1538097304804-2a1b932c284e?w=680&h=320&fit=crop', // San Diego
+};
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=680&h=320&fit=crop'; // generic conference
+
+// ═══════════════════════════════════════
+// Data
+// ═══════════════════════════════════════
+const CSV_DATA = `Task ID,Task Name,Location,Start Date,End Date,Status,Attendees,Registration Cost,Hotel Cost,Hotel Name,Sponsorship,Sponsorship Cost,Notes
+868jdam79,AI for PI - PILMMA Orlando,"Orlando, FL","Thursday, January 15th 2026","Saturday, January 17th 2026",attended,Danny Define,3500,778,JW Marriott Orlando,,,
+868jc8v5t,NTL Miami,"Miami, FL","Sunday, January 25th 2026","Wednesday, January 28th 2026",attended,Austin Miller,3775,1625,Moxi Miami South Beach,,,
+868jdamf4,NTL Miami,"Miami, FL","Sunday, January 25th 2026","Wednesday, January 28th 2026",attended,Danny Define,3500,1583.46,Loews Miami,true,2500,Sponsored TMT Event
+868jen2gb,AAJ Winter,"San Diego, CA","Friday, February 20th 2026","Wednesday, December 24th 2025",planned,Danny Define,,2104,Hotel Del Coronado,,,
+868jen3aj,Legal Week,"New York, NY","Monday, March 9th 2026","Thursday, March 12th 2026",planned,Danny Define,4995,1017,NY Mariott Marquis,,,
+868jdam7e,Ten Golden Rules,"Delray Beach, FL","Monday, March 16th 2026","Tuesday, March 17th 2026",attended,Danny Define,497,,,,,,
+868jen3gf,ABA Tech Show,"Chicago, IL","Wednesday, March 25th 2026","Saturday, March 28th 2026",planned,Danny Define,1100,,,,,,
+868jdam7h,TBI Med Legal,"San Diego, CA","Thursday, March 26th 2026","Sunday, March 29th 2026",attended,Danny Define,3500,1065,Marriott Marquis,true,2500,
+868jdam7r,Texas Lawyer Rumble,"Dallas, TX","Thursday, April 9th 2026","Friday, April 10th 2026",attended,Danny Define,3500,830,Marriott Dallas Uptown,,,
+868jdam7w,MTMP Spring,"Las Vegas, NV","Wednesday, April 15th 2026","Friday, April 17th 2026",attended,Danny Define,1795,927,Wynn,,,
+868jbg6ut,Women In Trial Travel Summit,"Mexico","Wednesday, April 29th 2026","Saturday, May 2nd 2026",attended,"Elise, Megan",2137.14,2529.12,The Conrad,,,Tickets are $695 each
+868jha2hy,EvenUp Road Tour NYC,"New York, NY","Thursday, May 14th 2026","Thursday, May 14th 2026",attending,Simon Golding,,3842.08,The Westin Grand Central,true,0,Comped Sponsorship
+868jaww1p,Experiential Marketing Summit,"Las Vegas, NV","Monday, May 18th 2026","Wednesday, May 20th 2026",attending,Austin Miller,1600,274.38,MGM Grand,,,
+868jen64m,PILMMA Super Summit,"San Antonio, TX","Thursday, May 21st 2026","Saturday, May 23rd 2026",attending,"Tyler Farr, Brandon Steed",5000,1798,Grand Hyatt Riverwalk,,,Combined Registration/Hotel Costs
+868jazan8,TLU,"Huntington Beach, CA","Wednesday, June 3rd 2026","Saturday, June 6th 2026",planned,"Tyler Farr, Brandon Steed",7000,1895,Pasea Hotel & Spa,,,Sponsorship opportunity available
+868jha2np,EvenUp Road Tour Atlanta,"Atlanta, GA","Thursday, June 4th 2026","Thursday, June 4th 2026",planned,Simon Golding,,,,,0,Comped Sponsorship
+868jm1wbc,John Morgan Grow or Die Conference,"Las Vegas, NV","Tuesday, June 9th 2026","Wednesday, June 10th 2026",planned,,,,,,,,
+868jm1vry,WILBETTY NYC SUMMIT,"NYC, NY","Friday, June 12th 2026","Friday, June 12th 2026",planned,,,,,,,,
+868jha31x,EvenUp Road Tour Houston,"Houston, TX","Wednesday, June 17th 2026","Wednesday, June 17th 2026",planned,"Brandon Steed, Tyler Farr",,,,,5000,
+868jen6zh,Lanier Trial Academy,"Houston, TX","Monday, June 22nd 2026","Friday, June 26th 2026",planned,Brandon Steed,3500,974,Marriott Marquis,,,
+868jha36v,EvenUp Road Tour LA,"LA, CA","Friday, June 26th 2026","Friday, June 26th 2026",planned,"Simon Golding, Brandon Steed",,,,,5000,
+868jen82k,BRBC,"San Antonio, TX","Wednesday, July 8th 2026","Thursday, July 9th 2026",attending,"Tyler Farr, Brandon Steed",,,,,9000,Main Sponsor
+868jdannn,AAJ Summer Annual,"Chicago, IL","Friday, July 24th 2026","Tuesday, July 28th 2026",attending,"Danny Define, Tyler Farr, Brandon Steed",,2280,Hyatt Regency Chicago,,,4 nights 2 people
+868jdanqy,Big Truck & Auto,"Chicago, IL","Sunday, August 9th 2026","Wednesday, August 12th 2026",attending,"Danny Define, Tyler Farr, Brandon Steed",,,,,,
+868jfru3q,WIL By Betty,"New Orleans, LA","Tuesday, September 15th 2026","Friday, September 18th 2026",planned,"Elise, Megan",695,279,The Roosevelt New Orleans,true,,Want sponsorship
+868jdkpdg,CX Client Experience Summit,"Charlotte, NC","Wednesday, September 16th 2026","Friday, September 18th 2026",planned,Tyler Farr,1185,,,,,,LOCAL FOR TYLER
+868jdanrn,MTMP Fall,"Las Vegas, NV","Tuesday, October 13th 2026","Friday, October 16th 2026",planned,"Danny Define, Tyler Farr, Brandon Steed",,,,,,
+868jhwqh5,ClioCon,"Boston, MA","Monday, October 26th 2026","Tuesday, October 27th 2026",planned,"Sonya Palmer, Britt Wilson",1300,,,,,,
+868jktdp2,LEX Summit,"San Diego CA","Monday, October 26th 2026","Thursday, October 29th 2026",planned,Tyler Farr,,,,,,`;
+
+function parseCSV(csv) {
+    const lines = csv.trim().split('\n');
+    const headers = parseCSVLine(lines[0]);
+    return lines.slice(1).map(line => {
+        const vals = parseCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+        return obj;
+    });
+}
+function parseCSVLine(line) {
+    const result = []; let current = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { if (inQ && line[i+1] === '"') { current += '"'; i++; } else inQ = !inQ; }
+        else if (ch === ',' && !inQ) { result.push(current); current = ''; }
+        else current += ch;
+    }
+    result.push(current); return result;
+}
+function parseEventDate(s) {
+    if (!s) return null;
+    const d = new Date(s.replace(/(st|nd|rd|th)/g, '').trim());
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function loadData() {
+    if (EVENTS_GVIZ_BASE) { loadFromSheets(); } else { loadFromCSV(); }
+}
+function loadFromSheets() {
+    const cb = 'handleEvt';
+    window[cb] = function(r) {
+        if (r.status === 'error') { loadFromCSV(); return; }
+        allEvents = r.table.rows.map(row => {
+            const obj = {}; r.table.cols.forEach((c, i) => { const v = row.c[i]; obj[c.label || c.id] = v ? (v.v != null ? String(v.v) : '') : ''; });
+            return normalizeEvent(obj);
+        });
+        postLoad(); delete window[cb];
+    };
+    const s = document.createElement('script');
+    s.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=Events&tqx=responseHandler:' + cb;
+    s.onerror = () => loadFromCSV();
+    document.head.appendChild(s);
+    ['Deals','Feedback','Conversations'].forEach(tab => {
+        const n = 'handle' + tab;
+        window[n] = function(r) {
+            if (r.status !== 'ok') { delete window[n]; return; }
+            const arr = r.table.rows.map(row => { const o = {}; r.table.cols.forEach((c, i) => { const v = row.c[i]; o[c.label || c.id] = v ? (v.v != null ? String(v.v) : '') : ''; }); return o; });
+            if (tab === 'Deals') deals = arr;
+            if (tab === 'Feedback') feedback = arr;
+            if (tab === 'Conversations') conversations = arr;
+            delete window[n];
+        };
+        const sc = document.createElement('script');
+        sc.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=' + encodeURIComponent(tab) + '&tqx=responseHandler:' + n;
+        document.head.appendChild(sc);
+    });
+}
+function loadFromCSV() {
+    allEvents = parseCSV(CSV_DATA).map(r => normalizeEvent({
+        'Task ID': r['Task ID'], 'Task Name': r['Task Name'], 'Location': r['Location'],
+        'Start Date': r['Start Date'], 'End Date': r['End Date'], 'Status': r['Status'],
+        'Attendees': r['Attendees'], 'Registration Cost': r['Registration Cost'],
+        'Hotel Cost': r['Hotel Cost'], 'Hotel Name': r['Hotel Name'],
+        'Sponsorship': r['Sponsorship'], 'Sponsorship Cost': r['Sponsorship Cost'], 'Notes': r['Notes']
+    }));
+    postLoad();
+}
+function normalizeEvent(r) {
+    const name = r['Task Name'] || r['task_name'] || r['Name'] || '';
+    const reg = parseFloat(r['Registration Cost'] || r['Total Registration Cost (currency)'] || 0) || 0;
+    const hot = parseFloat(r['Hotel Cost'] || r['Total Hotel Cost (currency)'] || 0) || 0;
+    const spo = parseFloat(r['Sponsorship Cost'] || r['Total Sponsorship Cost (currency)'] || 0) || 0;
+    return {
+        id: r['Task ID'] || r['task_id'] || name.replace(/\s+/g, '-').toLowerCase(),
+        name, location: r['Location'] || r['Location (short text)'] || '',
+        startDate: r['Start Date'] || '', endDate: r['End Date'] || r['End Date (date)'] || '',
+        status: (r['Status'] || 'planned').toLowerCase(),
+        attendees: r['Attendees'] || r["Who's Attending? (short text)"] || '',
+        registrationCost: reg, hotelCost: hot, sponsorshipCost: spo,
+        hotelName: r['Hotel Name'] || r['Hotel Name (short text)'] || '',
+        hasSponsor: (r['Sponsorship'] || '').toLowerCase() === 'true',
+        notes: r['Notes'] || r['Notes (short text)'] || '',
+        totalCost: reg + hot + spo,
+        parsedStart: parseEventDate(r['Start Date'] || ''),
+        parsedEnd: parseEventDate(r['End Date'] || r['End Date (date)'] || '')
+    };
+}
+
+function postLoad() {
+    loadCustomEvents();
+    // Build attendee filter
+    const set = new Set();
+    allEvents.forEach(ev => (ev.attendees || '').split(/,|&/).forEach(a => { a = a.trim(); if (a) set.add(a); }));
+    const sel = document.getElementById('filter-attendee');
+    sel.innerHTML = '<option value="">All Attendees</option>';
+    Array.from(set).sort().forEach(a => sel.innerHTML += `<option value="${esc(a)}">${esc(a)}</option>`);
+    renderEvents();
+}
+
+// ═══════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════
+function fmt(n) { return n ? '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—'; }
+function fmtShort(n) { return n ? '$' + (n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'k' : n.toLocaleString()) : '—'; }
+function fmtDate(s) { const d = parseEventDate(s); return d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : s || '—'; }
+function fmtDateRange(s, e) {
+    const ds = parseEventDate(s), de = parseEventDate(e);
+    if (!ds) return '—';
+    const start = ds.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (!de || ds.getTime() === de.getTime()) return start;
+    if (ds.getMonth() === de.getMonth()) return start + '–' + de.getDate();
+    return start + ' – ' + de.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function statusClass(s) { return 'status-' + (s || 'planned'); }
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function daysUntil(ev) {
+    if (!ev.parsedStart) return null;
+    const now = new Date(); now.setHours(0,0,0,0);
+    const start = new Date(ev.parsedStart); start.setHours(0,0,0,0);
+    return Math.round((start - now) / 86400000);
+}
+function countdownText(days) {
+    if (days === null) return null;
+    if (days === 0) return { text: 'Today', cls: 'today' };
+    if (days === 1) return { text: 'Tomorrow', cls: 'soon' };
+    if (days < 0) return { text: Math.abs(days) + 'd ago', cls: 'past' };
+    if (days <= 14) return { text: days + ' days away', cls: 'soon' };
+    return { text: days + ' days away', cls: '' };
+}
+function getEventImage(id) {
+    const custom = localStorage.getItem('ev-img-' + id);
+    return custom || EVENT_IMAGES[id] || FALLBACK_IMG;
+}
+function getDeals(id) { return deals.filter(d => (d['Event ID'] || d['eventId']) === id); }
+function getDealStage(d) { return (d['Stage'] || d['stage'] || 'Pipeline'); }
+function getPipeline(id) { return getDeals(id).filter(d => getDealStage(d) === 'Pipeline'); }
+function getClosed(id) { return getDeals(id).filter(d => getDealStage(d) === 'Closed Won'); }
+function sumMRR(arr) { return arr.reduce((s, d) => s + (parseFloat(d['MRR'] || d['mrr'] || 0) || 0), 0); }
+function getFeedback(id) { return feedback.filter(f => (f['Event ID'] || f['eventId']) === id); }
+function getConvos(id) { return conversations.filter(c => (c['Event ID'] || c['eventId']) === id); }
+
+// ═══════════════════════════════════════
+// Render Events by Month
+// ═══════════════════════════════════════
+function renderEvents() {
+    const statusF = document.getElementById('filter-status').value;
+    const attendeeF = document.getElementById('filter-attendee').value;
+
+    let filtered = allEvents.filter(ev => {
+        if (statusF && ev.status !== statusF) return false;
+        if (attendeeF && !(ev.attendees || '').toLowerCase().includes(attendeeF.toLowerCase())) return false;
+        return true;
+    });
+
+    // Sort by date
+    filtered.sort((a, b) => (a.parsedStart || new Date(0)) - (b.parsedStart || new Date(0)));
+
+    // Group by month
+    const groups = {};
+    filtered.forEach(ev => {
+        const d = ev.parsedStart;
+        const key = d ? MONTHS[d.getMonth()] : 'TBD';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(ev);
+    });
+
+    // Summary
+    const totalSpend = filtered.reduce((s, e) => s + e.totalCost, 0);
+    const withCost = filtered.filter(e => e.totalCost > 0);
+    const pipelineDeals = deals.filter(d => getDealStage(d) === 'Pipeline');
+    const closedDeals = deals.filter(d => getDealStage(d) === 'Closed Won');
+    document.getElementById('s-events').textContent = filtered.length;
+    document.getElementById('s-spend').textContent = fmt(totalSpend);
+    document.getElementById('s-pipeline').textContent = fmt(sumMRR(pipelineDeals));
+    document.getElementById('s-closed').textContent = fmt(sumMRR(closedDeals));
+    document.getElementById('s-avg').textContent = withCost.length ? fmt(totalSpend / withCost.length) : '—';
+
+    // Render months
+    const container = document.getElementById('events-months');
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state">No events match your filters.</div>';
+        return;
+    }
+
+    let html = '';
+    // Order months properly
+    const monthOrder = ['January','February','March','April','May','June','July','August','September','October','November','December','TBD'];
+    monthOrder.forEach(month => {
+        const evts = groups[month];
+        if (!evts) return;
+        const monthSpend = evts.reduce((s, e) => s + e.totalCost, 0);
+        html += `<div class="month-section">
+            <div class="month-header">
+                <span class="month-name">${month}</span>
+                <span class="month-count">${evts.length} event${evts.length > 1 ? 's' : ''}</span>
+                <span class="month-spend">${fmt(monthSpend)}</span>
+            </div>
+            <div class="month-grid">`;
+        evts.forEach(ev => {
+            const evPipeline = getPipeline(ev.id);
+            const evClosed = getClosed(ev.id);
+            const evConvos = getConvos(ev.id);
+            const pipelineMRR = sumMRR(evPipeline);
+            const closedMRR = sumMRR(evClosed);
+            const imgUrl = getEventImage(ev.id);
+            const days = daysUntil(ev);
+            const cd = countdownText(days);
+            html += `<div class="ev-card" onclick="openDetail('${ev.id}')">
+                <div class="ev-card-img" style="background-image:url('${imgUrl}')" onerror="this.style.background='var(--navy)'">
+                    ${cd ? `<span class="countdown-badge ${cd.cls}">${cd.text}</span>` : ''}
+                    <span class="status-badge ${statusClass(ev.status)} status-float">${ev.status}</span>
+                    <div class="ev-card-img-overlay">
+                        <div class="ev-card-name">${esc(ev.name)}</div>
+                    </div>
+                </div>
+                <div class="ev-card-body">
+                    <div class="ev-card-meta">
+                        <div class="meta-row">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            ${esc(ev.location || 'TBD')}
+                        </div>
+                        <div class="meta-row">
+                            <svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                            ${fmtDateRange(ev.startDate, ev.endDate)}
+                        </div>
+                        ${ev.hotelName ? `<div class="meta-row"><svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>${esc(ev.hotelName)}</div>` : ''}
+                    </div>
+                    ${ev.attendees ? `<div class="ev-card-attendees"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>${esc(ev.attendees)}</div>` : ''}
+                    ${ev.notes ? `<div class="ev-card-notes">${esc(ev.notes)}</div>` : ''}
+                </div>
+                <div class="ev-card-stats">
+                    <div class="ev-stat">
+                        <div class="stat-label">Cost</div>
+                        <div class="stat-val${ev.totalCost ? '' : ' muted'}">${ev.totalCost ? fmt(ev.totalCost) : '—'}</div>
+                    </div>
+                    <div class="ev-stat">
+                        <div class="stat-label">Pipeline</div>
+                        <div class="stat-val${pipelineMRR ? '' : ' muted'}">${pipelineMRR ? fmt(pipelineMRR) + '/mo' : '—'}</div>
+                    </div>
+                    <div class="ev-stat">
+                        <div class="stat-label">Closed</div>
+                        <div class="stat-val${closedMRR ? '' : ' muted'}">${closedMRR ? fmt(closedMRR) + '/mo' : '—'}</div>
+                    </div>
+                    <div class="ev-stat">
+                        <div class="stat-label">CC</div>
+                        <div class="stat-val${evConvos.length ? '' : ' muted'}">${evConvos.length || '—'}</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += `</div></div>`;
+    });
+    container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// Detail View
+// ═══════════════════════════════════════
+function openDetail(id) {
+    currentEvent = allEvents.find(e => e.id === id);
+    if (!currentEvent) return;
+    goTo('screen-detail');
+
+    const ev = currentEvent;
+    const heroImg = getEventImage(ev.id);
+    document.getElementById('detail-hero-img').style.backgroundImage = `url('${heroImg}')`;
+    document.getElementById('img-update-row').style.display = 'none';
+    document.getElementById('img-url-input').value = '';
+    document.getElementById('detail-status').innerHTML = `<span class="status-badge ${statusClass(ev.status)}">${ev.status}</span>`;
+    document.getElementById('detail-name').textContent = ev.name;
+    document.getElementById('detail-meta').innerHTML = `
+        <span><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>${esc(ev.location)}</span>
+        <span><svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>${fmtDateRange(ev.startDate, ev.endDate)}</span>
+        ${ev.attendees ? `<span><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>${esc(ev.attendees)}</span>` : ''}
+        ${ev.hotelName ? `<span><svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>${esc(ev.hotelName)}</span>` : ''}
+    `;
+
+    // Costs
+    document.getElementById('cost-grid').innerHTML = `
+        <div class="cost-item"><div class="c-label">Registration</div><div class="c-val">${fmt(ev.registrationCost)}</div></div>
+        <div class="cost-item"><div class="c-label">Hotel</div><div class="c-val">${fmt(ev.hotelCost)}</div></div>
+        <div class="cost-item"><div class="c-label">Sponsorship</div><div class="c-val">${fmt(ev.sponsorshipCost)}</div></div>
+        <div class="cost-item total-item"><div class="c-label">Total</div><div class="c-val">${fmt(ev.totalCost)}</div></div>
+    `;
+
+    // ROI
+    const evDeals = getDeals(ev.id);
+    const evPipeline = getPipeline(ev.id);
+    const evClosed = getClosed(ev.id);
+    const evConvos = getConvos(ev.id);
+    const pipelineMRR = sumMRR(evPipeline);
+    const closedMRR = sumMRR(evClosed);
+    const closedAnnual = closedMRR * 12;
+    const roi = ev.totalCost > 0 && closedMRR ? ((closedAnnual - ev.totalCost) / ev.totalCost * 100) : 0;
+    const roiCls = roi > 0 ? 'roi-positive' : roi < 0 ? 'roi-negative' : 'roi-neutral';
+    document.getElementById('roi-grid').innerHTML = `
+        <div class="cost-item"><div class="c-label">Pipeline MRR</div><div class="c-val">${pipelineMRR ? fmt(pipelineMRR) + '/mo' : '—'}</div></div>
+        <div class="cost-item"><div class="c-label">Pipeline Deals</div><div class="c-val">${evPipeline.length || '—'}</div></div>
+        <div class="cost-item"><div class="c-label">Closed Won MRR</div><div class="c-val">${closedMRR ? fmt(closedMRR) + '/mo' : '—'}</div></div>
+        <div class="cost-item"><div class="c-label">Closed Won Annual</div><div class="c-val">${closedAnnual ? fmt(closedAnnual) : '—'}</div></div>
+        <div class="cost-item"><div class="c-label">ROI (Closed)</div><div class="c-val"><span class="roi-badge ${roiCls}">${evClosed.length ? roi.toFixed(0) + '%' : 'N/A'}</span></div></div>
+        <div class="cost-item"><div class="c-label">Critical Connections</div><div class="c-val">${evConvos.length}</div></div>
+        <div class="cost-item"><div class="c-label">Conversations</div><div class="c-val">${evConvos.length}</div></div>
+    `;
+
+    renderDetailDeals(evDeals);
+    renderDetailConvos(evConvos);
+    renderDetailFeedback(getFeedback(ev.id));
+    document.querySelectorAll('.inline-form').forEach(f => f.classList.remove('open'));
+}
+
+function renderDetailDeals(arr) {
+    const w = document.getElementById('deals-wrap');
+    if (!arr.length) { w.innerHTML = '<div class="empty-state">No deals attributed yet.</div>'; return; }
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Deal</th><th>Stage</th><th>MRR</th><th>HubSpot</th><th>Date</th></tr></thead><tbody>${arr.map(d => {
+        const stage = getDealStage(d);
+        const stageCls = stage === 'Closed Won' ? 'status-attended' : 'status-attending';
+        return `<tr><td>${esc(d['Deal Name']||d['dealName']||'')}</td><td><span class="status-badge ${stageCls}">${stage}</span></td><td>${fmt(parseFloat(d['MRR']||d['mrr']||0))}</td><td>${(d['HubSpot Link']||d['hubspotLink'])?'<a href="'+esc(d['HubSpot Link']||d['hubspotLink'])+'" target="_blank" style="color:var(--navy);">Link</a>':'—'}</td><td>${d['Date Added']||d['date']||'—'}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+function renderDetailConvos(arr) {
+    const w = document.getElementById('convos-wrap');
+    if (!arr.length) { w.innerHTML = '<div class="empty-state">No critical connections logged yet.</div>'; return; }
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Type</th><th>Contact</th><th>Firm</th><th>Notes</th><th>Follow-up</th></tr></thead><tbody>${arr.map(c => {
+        const type = c['Type'] || c['type'] || 'New Prospect';
+        return `<tr><td><span class="status-badge status-attending" style="font-size:0.6rem;">${esc(type)}</span></td><td>${esc(c['Contact Name']||c['contactName']||'')}</td><td>${esc(c['Firm Name']||c['firmName']||'')}</td><td style="white-space:normal;max-width:200px;">${esc(c['Notes']||c['notes']||'')}</td><td>${esc(c['Follow-up Status']||c['followUp']||'')}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+function renderDetailFeedback(arr) {
+    const w = document.getElementById('feedback-wrap');
+    if (!arr.length) { w.innerHTML = '<div class="empty-state">No feedback yet.</div>'; return; }
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th></tr></thead><tbody>${arr.map(f => `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${esc(f['Notes']||f['notes']||'')}</td><td>${f['Date']||f['date']||'—'}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════
+// Form Submissions
+// ═══════════════════════════════════════
+function toggleForm(id) { document.getElementById(id).classList.toggle('open'); }
+
+async function postToScript(payload) {
+    if (!APPS_SCRIPT_URL) return;
+    try { await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain' } }); }
+    catch(e) { console.warn('Apps Script error:', e); }
+}
+
+async function submitDeal() {
+    if (!currentEvent) return;
+    const stage = document.getElementById('deal-stage').value;
+    const name = document.getElementById('deal-name').value.trim();
+    const mrr = document.getElementById('deal-mrr').value;
+    const hs = document.getElementById('deal-hubspot').value.trim();
+    if (!name) return alert('Enter a deal name.');
+    if (!mrr) return alert('Enter MRR amount.');
+    await postToScript({ action: 'addDeal', eventId: currentEvent.id, dealName: name, mrr: parseFloat(mrr), hubspotLink: hs, stage });
+    deals.push({ 'Event ID': currentEvent.id, 'Deal Name': name, 'MRR': mrr, 'HubSpot Link': hs, 'Stage': stage, 'Date Added': new Date().toISOString().split('T')[0] });
+    document.getElementById('deal-stage').value = 'Pipeline'; document.getElementById('deal-name').value = ''; document.getElementById('deal-mrr').value = ''; document.getElementById('deal-hubspot').value = '';
+    toggleForm('deal-form'); openDetail(currentEvent.id);
+}
+async function submitConversation() {
+    if (!currentEvent) return;
+    const type = document.getElementById('convo-type').value;
+    const contact = document.getElementById('convo-contact').value.trim();
+    const firm = document.getElementById('convo-firm').value.trim();
+    const notes = document.getElementById('convo-notes').value.trim();
+    const fu = document.getElementById('convo-followup').value;
+    if (!contact) return alert('Enter a contact name.');
+    await postToScript({ action: 'addConversation', eventId: currentEvent.id, type, contactName: contact, firmName: firm, notes, followUp: fu });
+    conversations.push({ 'Event ID': currentEvent.id, 'Type': type, 'Contact Name': contact, 'Firm Name': firm, 'Notes': notes, 'Follow-up Status': fu, 'Date': new Date().toISOString().split('T')[0] });
+    document.getElementById('convo-type').value = 'New Prospect'; document.getElementById('convo-contact').value = ''; document.getElementById('convo-firm').value = ''; document.getElementById('convo-notes').value = '';
+    toggleForm('convo-form'); openDetail(currentEvent.id);
+}
+async function submitFeedback() {
+    if (!currentEvent) return;
+    const member = document.getElementById('feedback-member').value;
+    const rEl = document.querySelector('input[name="rating"]:checked');
+    const notes = document.getElementById('feedback-notes').value.trim();
+    if (!member) return alert('Select a team member.');
+    if (!rEl) return alert('Select a rating.');
+    await postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, rating: parseInt(rEl.value), notes });
+    feedback.push({ 'Event ID': currentEvent.id, 'Team Member': member, 'Rating': rEl.value, 'Notes': notes, 'Date': new Date().toISOString().split('T')[0] });
+    document.getElementById('feedback-member').value = ''; document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false); document.getElementById('feedback-notes').value = '';
+    toggleForm('feedback-form'); openDetail(currentEvent.id);
+}
+
+// ═══════════════════════════════════════
+// Dashboard
+// ═══════════════════════════════════════
+function renderDashboard() {
+    const totalSpend = allEvents.reduce((s, e) => s + e.totalCost, 0);
+    const withCost = allEvents.filter(e => e.totalCost > 0);
+    const pipelineDeals = deals.filter(d => getDealStage(d) === 'Pipeline');
+    const closedDeals = deals.filter(d => getDealStage(d) === 'Closed Won');
+    document.getElementById('d-spend').textContent = fmt(totalSpend);
+    document.getElementById('d-events').textContent = allEvents.length;
+    document.getElementById('d-pipeline').textContent = fmt(sumMRR(pipelineDeals));
+    document.getElementById('d-closed').textContent = fmt(sumMRR(closedDeals));
+    document.getElementById('d-avg').textContent = withCost.length ? fmt(totalSpend / withCost.length) : '—';
+
+    renderChartSpend();
+    renderChartBreakdown();
+    renderChartQuarterly();
+    renderChartMonthly();
+    renderLeaderboard();
+}
+
+function renderChartSpend() {
+    const sorted = [...allEvents].filter(e => e.totalCost > 0).sort((a, b) => (a.parsedStart || new Date(0)) - (b.parsedStart || new Date(0)));
+    const ctx = document.getElementById('chart-spend').getContext('2d');
+    if (chartInstances.spend) chartInstances.spend.destroy();
+    chartInstances.spend = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: sorted.map(e => e.name.length > 18 ? e.name.substring(0, 16) + '...' : e.name), datasets: [{ label: 'Total Cost', data: sorted.map(e => e.totalCost), backgroundColor: '#07374F', borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, font: { size: 10, family: 'IBM Plex Mono' } } }, y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
+    });
+}
+function renderChartBreakdown() {
+    const r = allEvents.reduce((s, e) => s + e.registrationCost, 0);
+    const h = allEvents.reduce((s, e) => s + e.hotelCost, 0);
+    const sp = allEvents.reduce((s, e) => s + e.sponsorshipCost, 0);
+    const ctx = document.getElementById('chart-breakdown').getContext('2d');
+    if (chartInstances.bd) chartInstances.bd.destroy();
+    chartInstances.bd = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: ['Registration', 'Hotel', 'Sponsorship'], datasets: [{ data: [r, h, sp], backgroundColor: ['#07374F', '#0e5f87', '#eedc82'], borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'IBM Plex Sans', size: 12 } } } } }
+    });
+}
+function renderChartQuarterly() {
+    const q = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+    allEvents.forEach(e => { if (!e.parsedStart) return; const m = e.parsedStart.getMonth(); if (m < 3) q.Q1 += e.totalCost; else if (m < 6) q.Q2 += e.totalCost; else if (m < 9) q.Q3 += e.totalCost; else q.Q4 += e.totalCost; });
+    const ctx = document.getElementById('chart-quarterly').getContext('2d');
+    if (chartInstances.q) chartInstances.q.destroy();
+    chartInstances.q = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ label: 'Spend', data: [q.Q1, q.Q2, q.Q3, q.Q4], backgroundColor: ['#07374F', '#0e5f87', '#eedc82', '#eaff6a'], borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
+    });
+}
+function renderChartMonthly() {
+    const monthly = new Array(12).fill(0);
+    allEvents.forEach(e => { if (e.parsedStart) monthly[e.parsedStart.getMonth()] += e.totalCost; });
+    const ctx = document.getElementById('chart-monthly').getContext('2d');
+    if (chartInstances.mo) chartInstances.mo.destroy();
+    chartInstances.mo = new Chart(ctx, {
+        type: 'line',
+        data: { labels: MONTHS.map(m => m.substring(0, 3)), datasets: [{ label: 'Monthly Spend', data: monthly, borderColor: '#07374F', backgroundColor: 'rgba(7,55,79,0.08)', fill: true, tension: 0.3, pointBackgroundColor: '#07374F' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
+    });
+}
+function renderLeaderboard() {
+    const sorted = [...allEvents].filter(e => e.totalCost > 0).sort((a, b) => b.totalCost - a.totalCost).slice(0, 8);
+    document.getElementById('lb-spend').innerHTML = sorted.map((e, i) => `<li><span class="lb-rank">${i + 1}.</span><span class="lb-name">${esc(e.name)}</span><span class="lb-val">${fmt(e.totalCost)}</span></li>`).join('');
+}
+
+// ═══════════════════════════════════════
+// Image Management (localStorage)
+// ═══════════════════════════════════════
+function toggleImageEdit() {
+    const row = document.getElementById('img-update-row');
+    row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+    if (row.style.display === 'flex') document.getElementById('img-url-input').focus();
+}
+function saveImageUrl() {
+    if (!currentEvent) return;
+    const url = document.getElementById('img-url-input').value.trim();
+    if (!url) return alert('Paste an image URL.');
+    localStorage.setItem('ev-img-' + currentEvent.id, url);
+    document.getElementById('detail-hero-img').style.backgroundImage = `url('${url}')`;
+    document.getElementById('img-update-row').style.display = 'none';
+    document.getElementById('img-url-input').value = '';
+    renderEvents(); // refresh cards with new image
+}
+
+// ═══════════════════════════════════════
+// Add Event
+// ═══════════════════════════════════════
+function toggleAddEvent() {
+    document.getElementById('add-event-form').classList.toggle('open');
+}
+function submitNewEvent() {
+    const name = document.getElementById('new-ev-name').value.trim();
+    if (!name) return alert('Enter an event name.');
+    const startRaw = document.getElementById('new-ev-start').value;
+    const endRaw = document.getElementById('new-ev-end').value;
+    const reg = parseFloat(document.getElementById('new-ev-reg').value) || 0;
+    const hot = parseFloat(document.getElementById('new-ev-hotel').value) || 0;
+    const spo = parseFloat(document.getElementById('new-ev-sponsor').value) || 0;
+    const ev = {
+        id: 'custom-' + Date.now(),
+        name,
+        location: document.getElementById('new-ev-location').value.trim(),
+        startDate: startRaw,
+        endDate: endRaw || startRaw,
+        status: document.getElementById('new-ev-status').value,
+        attendees: document.getElementById('new-ev-attendees').value.trim(),
+        registrationCost: reg,
+        hotelCost: hot,
+        sponsorshipCost: spo,
+        hotelName: document.getElementById('new-ev-hotelname').value.trim(),
+        hasSponsor: spo > 0,
+        notes: document.getElementById('new-ev-notes').value.trim(),
+        totalCost: reg + hot + spo,
+        parsedStart: startRaw ? new Date(startRaw + 'T00:00:00') : null,
+        parsedEnd: endRaw ? new Date(endRaw + 'T00:00:00') : (startRaw ? new Date(startRaw + 'T00:00:00') : null)
+    };
+    allEvents.push(ev);
+    // Save custom events to localStorage
+    const custom = JSON.parse(localStorage.getItem('ev-custom-events') || '[]');
+    custom.push(ev);
+    localStorage.setItem('ev-custom-events', JSON.stringify(custom));
+    // Reset form
+    ['new-ev-name','new-ev-location','new-ev-start','new-ev-end','new-ev-attendees','new-ev-reg','new-ev-hotel','new-ev-hotelname','new-ev-sponsor','new-ev-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('new-ev-status').value = 'planned';
+    toggleAddEvent();
+    postLoad(); // re-render with new event
+}
+
+// Load custom events from localStorage on startup
+function loadCustomEvents() {
+    const custom = JSON.parse(localStorage.getItem('ev-custom-events') || '[]');
+    custom.forEach(ev => {
+        ev.parsedStart = ev.startDate ? new Date(ev.startDate + (ev.startDate.includes('T') ? '' : 'T00:00:00')) : null;
+        ev.parsedEnd = ev.endDate ? new Date(ev.endDate + (ev.endDate.includes('T') ? '' : 'T00:00:00')) : null;
+        if (!allEvents.find(e => e.id === ev.id)) allEvents.push(ev);
+    });
+}
+</script>
+
+</body>
+</html>
