@@ -1239,6 +1239,7 @@ function normalizeEvent(r) {
 
 function postLoad() {
     loadCustomEvents();
+    loadLocalData();
     // Build attendee filter
     const set = new Set();
     allEvents.forEach(ev => (ev.attendees || '').split(/,|&/).forEach(a => { a = a.trim(); if (a) set.add(a); }));
@@ -1488,6 +1489,20 @@ function renderDetailFeedback(arr) {
 // ═══════════════════════════════════════
 function toggleForm(id) { document.getElementById(id).classList.toggle('open'); }
 
+function saveLocalData() {
+    localStorage.setItem('ev-deals', JSON.stringify(deals));
+    localStorage.setItem('ev-feedback', JSON.stringify(feedback));
+    localStorage.setItem('ev-conversations', JSON.stringify(conversations));
+}
+function loadLocalData() {
+    const d = localStorage.getItem('ev-deals');
+    const f = localStorage.getItem('ev-feedback');
+    const c = localStorage.getItem('ev-conversations');
+    if (d) deals = JSON.parse(d);
+    if (f) feedback = JSON.parse(f);
+    if (c) conversations = JSON.parse(c);
+}
+
 async function postToScript(payload) {
     if (!APPS_SCRIPT_URL) return;
     try { await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain' } }); }
@@ -1504,6 +1519,7 @@ async function submitDeal() {
     if (!mrr) return alert('Enter MRR amount.');
     await postToScript({ action: 'addDeal', eventId: currentEvent.id, dealName: name, mrr: parseFloat(mrr), hubspotLink: hs, stage });
     deals.push({ 'Event ID': currentEvent.id, 'Deal Name': name, 'MRR': mrr, 'HubSpot Link': hs, 'Stage': stage, 'Date Added': new Date().toISOString().split('T')[0] });
+    saveLocalData();
     document.getElementById('deal-stage').value = 'Pipeline'; document.getElementById('deal-name').value = ''; document.getElementById('deal-mrr').value = ''; document.getElementById('deal-hubspot').value = '';
     toggleForm('deal-form'); openDetail(currentEvent.id);
 }
@@ -1517,6 +1533,7 @@ async function submitConversation() {
     if (!contact) return alert('Enter a contact name.');
     await postToScript({ action: 'addConversation', eventId: currentEvent.id, type, contactName: contact, firmName: firm, notes, followUp: fu });
     conversations.push({ 'Event ID': currentEvent.id, 'Type': type, 'Contact Name': contact, 'Firm Name': firm, 'Notes': notes, 'Follow-up Status': fu, 'Date': new Date().toISOString().split('T')[0] });
+    saveLocalData();
     document.getElementById('convo-type').value = 'New Prospect'; document.getElementById('convo-contact').value = ''; document.getElementById('convo-firm').value = ''; document.getElementById('convo-notes').value = '';
     toggleForm('convo-form'); openDetail(currentEvent.id);
 }
@@ -1529,6 +1546,7 @@ async function submitFeedback() {
     if (!rEl) return alert('Select a rating.');
     await postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, rating: parseInt(rEl.value), notes });
     feedback.push({ 'Event ID': currentEvent.id, 'Team Member': member, 'Rating': rEl.value, 'Notes': notes, 'Date': new Date().toISOString().split('T')[0] });
+    saveLocalData();
     document.getElementById('feedback-member').value = ''; document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false); document.getElementById('feedback-notes').value = '';
     toggleForm('feedback-form'); openDetail(currentEvent.id);
 }
