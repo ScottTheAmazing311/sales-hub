@@ -545,6 +545,19 @@
         .mini-table td { padding: 0.5rem; border-bottom: 1px solid rgba(7,55,79,0.05); }
         .mini-table tr:last-child td { border-bottom: none; }
         .empty-state { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem; }
+        .row-actions { white-space: nowrap; }
+        .row-btn {
+            background: none; border: none; cursor: pointer; padding: 0.2rem 0.35rem; border-radius: 4px;
+            font-size: 0.72rem; font-family: 'IBM Plex Mono', monospace; transition: background 0.15s;
+        }
+        .row-btn:hover { background: rgba(7,55,79,0.08); }
+        .row-btn.edit { color: var(--navy); }
+        .row-btn.del { color: var(--destructive); }
+        .editing-row input, .editing-row select {
+            padding: 0.3rem 0.5rem; border: 1px solid rgba(7,55,79,0.2); border-radius: 6px;
+            font-family: 'IBM Plex Sans', sans-serif; font-size: 0.78rem; background: #fff; width: 100%; min-width: 70px;
+        }
+        .editing-row input:focus, .editing-row select:focus { outline: none; border-color: var(--navy); }
 
         /* ── Forms ── */
         .add-btn {
@@ -1461,27 +1474,37 @@ function openDetail(id) {
     document.querySelectorAll('.inline-form').forEach(f => f.classList.remove('open'));
 }
 
+function dealIdx(d) { return deals.indexOf(d); }
+function convoIdx(c) { return conversations.indexOf(c); }
+function fbIdx(f) { return feedback.indexOf(f); }
+
 function renderDetailDeals(arr) {
     const w = document.getElementById('deals-wrap');
     if (!arr.length) { w.innerHTML = '<div class="empty-state">No deals attributed yet.</div>'; return; }
-    w.innerHTML = `<table class="mini-table"><thead><tr><th>Deal</th><th>Stage</th><th>MRR</th><th>HubSpot</th><th>Date</th></tr></thead><tbody>${arr.map(d => {
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Deal</th><th>Stage</th><th>MRR</th><th>HubSpot</th><th>Date</th><th></th></tr></thead><tbody>${arr.map(d => {
+        const i = dealIdx(d);
         const stage = getDealStage(d);
         const stageCls = stage === 'Closed Won' ? 'status-attended' : 'status-attending';
-        return `<tr><td>${esc(d['Deal Name']||d['dealName']||'')}</td><td><span class="status-badge ${stageCls}">${stage}</span></td><td>${fmt(parseFloat(d['MRR']||d['mrr']||0))}</td><td>${(d['HubSpot Link']||d['hubspotLink'])?'<a href="'+esc(d['HubSpot Link']||d['hubspotLink'])+'" target="_blank" style="color:var(--navy);">Link</a>':'—'}</td><td>${d['Date Added']||d['date']||'—'}</td></tr>`;
+        return `<tr><td>${esc(d['Deal Name']||d['dealName']||'')}</td><td><span class="status-badge ${stageCls}">${stage}</span></td><td>${fmt(parseFloat(d['MRR']||d['mrr']||0))}</td><td>${(d['HubSpot Link']||d['hubspotLink'])?'<a href="'+esc(d['HubSpot Link']||d['hubspotLink'])+'" target="_blank" style="color:var(--navy);">Link</a>':'—'}</td><td>${d['Date Added']||d['date']||'—'}</td><td class="row-actions"><button class="row-btn edit" onclick="editDeal(${i})">edit</button><button class="row-btn del" onclick="deleteDeal(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 function renderDetailConvos(arr) {
     const w = document.getElementById('convos-wrap');
     if (!arr.length) { w.innerHTML = '<div class="empty-state">No critical connections logged yet.</div>'; return; }
-    w.innerHTML = `<table class="mini-table"><thead><tr><th>Type</th><th>Contact</th><th>Firm</th><th>Notes</th><th>Follow-up</th></tr></thead><tbody>${arr.map(c => {
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Type</th><th>Contact</th><th>Firm</th><th>Notes</th><th>Follow-up</th><th></th></tr></thead><tbody>${arr.map(c => {
+        const i = convoIdx(c);
         const type = c['Type'] || c['type'] || 'New Prospect';
-        return `<tr><td><span class="status-badge status-attending" style="font-size:0.6rem;">${esc(type)}</span></td><td>${esc(c['Contact Name']||c['contactName']||'')}</td><td>${esc(c['Firm Name']||c['firmName']||'')}</td><td style="white-space:normal;max-width:200px;">${esc(c['Notes']||c['notes']||'')}</td><td>${esc(c['Follow-up Status']||c['followUp']||'')}</td></tr>`;
+        const fu = c['Follow-up Status'] || c['followUp'] || '';
+        return `<tr><td><span class="status-badge status-attending" style="font-size:0.6rem;">${esc(type)}</span></td><td>${esc(c['Contact Name']||c['contactName']||'')}</td><td>${esc(c['Firm Name']||c['firmName']||'')}</td><td style="white-space:normal;max-width:200px;">${esc(c['Notes']||c['notes']||'')}</td><td>${esc(fu)}</td><td class="row-actions"><button class="row-btn edit" onclick="editConvo(${i})">edit</button><button class="row-btn del" onclick="deleteConvo(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 function renderDetailFeedback(arr) {
     const w = document.getElementById('feedback-wrap');
     if (!arr.length) { w.innerHTML = '<div class="empty-state">No feedback yet.</div>'; return; }
-    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th></tr></thead><tbody>${arr.map(f => `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${esc(f['Notes']||f['notes']||'')}</td><td>${f['Date']||f['date']||'—'}</td></tr>`).join('')}</tbody></table>`;
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th><th></th></tr></thead><tbody>${arr.map(f => {
+        const i = fbIdx(f);
+        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${esc(f['Notes']||f['notes']||'')}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 // ═══════════════════════════════════════
@@ -1509,46 +1532,165 @@ async function postToScript(payload) {
     catch(e) { console.warn('Apps Script error:', e); }
 }
 
-async function submitDeal() {
+function submitDeal() {
     if (!currentEvent) return;
+    const btn = document.querySelector('#deal-form .btn-submit');
     const stage = document.getElementById('deal-stage').value;
     const name = document.getElementById('deal-name').value.trim();
     const mrr = document.getElementById('deal-mrr').value;
     const hs = document.getElementById('deal-hubspot').value.trim();
     if (!name) return alert('Enter a deal name.');
     if (!mrr) return alert('Enter MRR amount.');
-    await postToScript({ action: 'addDeal', eventId: currentEvent.id, dealName: name, mrr: parseFloat(mrr), hubspotLink: hs, stage });
+    btn.disabled = true;
     deals.push({ 'Event ID': currentEvent.id, 'Deal Name': name, 'MRR': mrr, 'HubSpot Link': hs, 'Stage': stage, 'Date Added': new Date().toISOString().split('T')[0] });
     saveLocalData();
     document.getElementById('deal-stage').value = 'Pipeline'; document.getElementById('deal-name').value = ''; document.getElementById('deal-mrr').value = ''; document.getElementById('deal-hubspot').value = '';
     toggleForm('deal-form'); openDetail(currentEvent.id);
+    btn.disabled = false;
+    postToScript({ action: 'addDeal', eventId: currentEvent.id, dealName: name, mrr: parseFloat(mrr), hubspotLink: hs, stage });
 }
-async function submitConversation() {
+function submitConversation() {
     if (!currentEvent) return;
+    const btn = document.querySelector('#convo-form .btn-submit');
     const type = document.getElementById('convo-type').value;
     const contact = document.getElementById('convo-contact').value.trim();
     const firm = document.getElementById('convo-firm').value.trim();
     const notes = document.getElementById('convo-notes').value.trim();
     const fu = document.getElementById('convo-followup').value;
     if (!contact) return alert('Enter a contact name.');
-    await postToScript({ action: 'addConversation', eventId: currentEvent.id, type, contactName: contact, firmName: firm, notes, followUp: fu });
+    btn.disabled = true;
     conversations.push({ 'Event ID': currentEvent.id, 'Type': type, 'Contact Name': contact, 'Firm Name': firm, 'Notes': notes, 'Follow-up Status': fu, 'Date': new Date().toISOString().split('T')[0] });
     saveLocalData();
     document.getElementById('convo-type').value = 'New Prospect'; document.getElementById('convo-contact').value = ''; document.getElementById('convo-firm').value = ''; document.getElementById('convo-notes').value = '';
     toggleForm('convo-form'); openDetail(currentEvent.id);
+    btn.disabled = false;
+    postToScript({ action: 'addConversation', eventId: currentEvent.id, type, contactName: contact, firmName: firm, notes, followUp: fu });
 }
-async function submitFeedback() {
+function submitFeedback() {
     if (!currentEvent) return;
+    const btn = document.querySelector('#feedback-form .btn-submit');
     const member = document.getElementById('feedback-member').value;
     const rEl = document.querySelector('input[name="rating"]:checked');
     const notes = document.getElementById('feedback-notes').value.trim();
     if (!member) return alert('Select a team member.');
     if (!rEl) return alert('Select a rating.');
-    await postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, rating: parseInt(rEl.value), notes });
+    btn.disabled = true;
     feedback.push({ 'Event ID': currentEvent.id, 'Team Member': member, 'Rating': rEl.value, 'Notes': notes, 'Date': new Date().toISOString().split('T')[0] });
     saveLocalData();
     document.getElementById('feedback-member').value = ''; document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false); document.getElementById('feedback-notes').value = '';
     toggleForm('feedback-form'); openDetail(currentEvent.id);
+    btn.disabled = false;
+    postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, rating: parseInt(rEl.value), notes });
+}
+
+// ═══════════════════════════════════════
+// Delete / Edit
+// ═══════════════════════════════════════
+function deleteDeal(i) {
+    if (!confirm('Delete this deal?')) return;
+    deals.splice(i, 1);
+    saveLocalData();
+    openDetail(currentEvent.id);
+}
+function deleteConvo(i) {
+    if (!confirm('Delete this connection?')) return;
+    conversations.splice(i, 1);
+    saveLocalData();
+    openDetail(currentEvent.id);
+}
+function deleteFeedback(i) {
+    if (!confirm('Delete this feedback?')) return;
+    feedback.splice(i, 1);
+    saveLocalData();
+    openDetail(currentEvent.id);
+}
+
+function editDeal(i) {
+    const d = deals[i];
+    if (!d) return;
+    const stage = d['Stage'] || d['stage'] || 'Pipeline';
+    const mrr = d['MRR'] || d['mrr'] || '';
+    const name = d['Deal Name'] || d['dealName'] || '';
+    const hs = d['HubSpot Link'] || d['hubspotLink'] || '';
+    const rows = document.querySelectorAll('#deals-wrap tbody tr');
+    const row = rows[getDeals(currentEvent.id).indexOf(d)];
+    if (!row) return;
+    row.classList.add('editing-row');
+    row.innerHTML = `
+        <td><input type="text" value="${esc(name)}" id="edit-deal-name-${i}"></td>
+        <td><select id="edit-deal-stage-${i}"><option value="Pipeline"${stage==='Pipeline'?' selected':''}>Pipeline</option><option value="Closed Won"${stage==='Closed Won'?' selected':''}>Closed Won</option></select></td>
+        <td><input type="number" value="${mrr}" id="edit-deal-mrr-${i}" step="100" style="width:80px;"></td>
+        <td><input type="url" value="${esc(hs)}" id="edit-deal-hs-${i}" placeholder="HubSpot link"></td>
+        <td colspan="2" class="row-actions">
+            <button class="row-btn edit" onclick="saveDealEdit(${i})">save</button>
+            <button class="row-btn del" onclick="openDetail(currentEvent.id)">cancel</button>
+        </td>`;
+}
+function saveDealEdit(i) {
+    const d = deals[i];
+    if (!d) return;
+    d['Deal Name'] = document.getElementById('edit-deal-name-' + i).value.trim();
+    d['dealName'] = d['Deal Name'];
+    d['Stage'] = document.getElementById('edit-deal-stage-' + i).value;
+    d['stage'] = d['Stage'];
+    d['MRR'] = document.getElementById('edit-deal-mrr-' + i).value;
+    d['mrr'] = d['MRR'];
+    d['HubSpot Link'] = document.getElementById('edit-deal-hs-' + i).value.trim();
+    d['hubspotLink'] = d['HubSpot Link'];
+    saveLocalData();
+    openDetail(currentEvent.id);
+}
+
+function editConvo(i) {
+    const c = conversations[i];
+    if (!c) return;
+    const type = c['Type'] || c['type'] || 'New Prospect';
+    const contact = c['Contact Name'] || c['contactName'] || '';
+    const firm = c['Firm Name'] || c['firmName'] || '';
+    const notes = c['Notes'] || c['notes'] || '';
+    const fu = c['Follow-up Status'] || c['followUp'] || 'Pending';
+    const rows = document.querySelectorAll('#convos-wrap tbody tr');
+    const row = rows[getConvos(currentEvent.id).indexOf(c)];
+    if (!row) return;
+    row.classList.add('editing-row');
+    row.innerHTML = `
+        <td><select id="edit-convo-type-${i}">
+            <option value="New Prospect"${type==='New Prospect'?' selected':''}>New Prospect</option>
+            <option value="New Vendor"${type==='New Vendor'?' selected':''}>New Vendor</option>
+            <option value="New Referral Partner"${type==='New Referral Partner'?' selected':''}>New Referral Partner</option>
+            <option value="Progressed Deal"${type==='Progressed Deal'?' selected':''}>Progressed Deal</option>
+            <option value="Client Save"${type==='Client Save'?' selected':''}>Client Save</option>
+            <option value="Other"${type==='Other'?' selected':''}>Other</option>
+        </select></td>
+        <td><input type="text" value="${esc(contact)}" id="edit-convo-contact-${i}"></td>
+        <td><input type="text" value="${esc(firm)}" id="edit-convo-firm-${i}"></td>
+        <td><input type="text" value="${esc(notes)}" id="edit-convo-notes-${i}"></td>
+        <td><select id="edit-convo-fu-${i}">
+            <option value="Pending"${fu==='Pending'?' selected':''}>Pending</option>
+            <option value="Scheduled"${fu==='Scheduled'?' selected':''}>Scheduled</option>
+            <option value="Completed"${fu==='Completed'?' selected':''}>Completed</option>
+            <option value="No follow-up"${fu==='No follow-up'?' selected':''}>No follow-up</option>
+        </select></td>
+        <td class="row-actions">
+            <button class="row-btn edit" onclick="saveConvoEdit(${i})">save</button>
+            <button class="row-btn del" onclick="openDetail(currentEvent.id)">cancel</button>
+        </td>`;
+}
+function saveConvoEdit(i) {
+    const c = conversations[i];
+    if (!c) return;
+    c['Type'] = document.getElementById('edit-convo-type-' + i).value;
+    c['type'] = c['Type'];
+    c['Contact Name'] = document.getElementById('edit-convo-contact-' + i).value.trim();
+    c['contactName'] = c['Contact Name'];
+    c['Firm Name'] = document.getElementById('edit-convo-firm-' + i).value.trim();
+    c['firmName'] = c['Firm Name'];
+    c['Notes'] = document.getElementById('edit-convo-notes-' + i).value.trim();
+    c['notes'] = c['Notes'];
+    c['Follow-up Status'] = document.getElementById('edit-convo-fu-' + i).value;
+    c['followUp'] = c['Follow-up Status'];
+    saveLocalData();
+    openDetail(currentEvent.id);
 }
 
 // ═══════════════════════════════════════
