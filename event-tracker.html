@@ -372,6 +372,7 @@
         .status-attended { background: rgba(34,197,94,0.2); color: #16a34a; }
         .status-attending { background: rgba(59,130,246,0.2); color: #2563eb; }
         .status-planned { background: rgba(245,158,11,0.2); color: #d97706; }
+        .status-watching { background: rgba(147,51,234,0.2); color: #7c3aed; }
 
         .ev-card-body {
             padding: 0.85rem 1.25rem;
@@ -553,6 +554,17 @@
         .row-btn:hover { background: rgba(7,55,79,0.08); }
         .row-btn.edit { color: var(--navy); }
         .row-btn.del { color: var(--destructive); }
+        .attendee-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--navy); color: var(--yellow);
+            padding: 0.25rem 0.6rem; border-radius: 20px;
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600;
+        }
+        .attendee-chip .chip-x {
+            cursor: pointer; background: none; border: none; color: rgba(234,255,106,0.6);
+            font-size: 0.8rem; padding: 0; line-height: 1; font-family: inherit;
+        }
+        .attendee-chip .chip-x:hover { color: #fff; }
         .editing-row input, .editing-row select {
             padding: 0.3rem 0.5rem; border: 1px solid rgba(7,55,79,0.2); border-radius: 6px;
             font-family: 'IBM Plex Sans', sans-serif; font-size: 0.78rem; background: #fff; width: 100%; min-width: 70px;
@@ -619,6 +631,123 @@
         .lb-rank { font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--navy); min-width: 2rem; }
         .lb-name { flex: 1; }
         .lb-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--navy); }
+
+        /* ── This Week's Events ── */
+        .this-week-section {
+            margin-bottom: 2rem;
+        }
+        .this-week-section .section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .this-week-section .section-label .pulse {
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .tw-card {
+            background: #fff;
+            border: 2px solid var(--yellow);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .tw-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(7,55,79,0.15);
+        }
+        .tw-card-left {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            align-items: center;
+        }
+        .tw-card-img {
+            width: 80px; height: 80px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+        .tw-card-info { flex: 1; }
+        .tw-card-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: uppercase;
+            line-height: 1.15;
+        }
+        .tw-card-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .tw-card-attendees {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--navy);
+            margin-top: 0.3rem;
+        }
+        .tw-card-right {
+            width: 260px;
+            flex-shrink: 0;
+            background: rgba(7,55,79,0.03);
+            border-left: 1px solid rgba(7,55,79,0.08);
+            padding: 0.75rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+        .tw-card-right .todo-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            margin-bottom: 0.15rem;
+        }
+        .tw-todo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        .tw-todo .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .tw-todo.missing .dot { background: var(--warning); }
+        .tw-todo.missing { color: var(--text); }
+        .tw-todo.done .dot { background: var(--success); }
+        .tw-todo.done { color: var(--text-muted); text-decoration: line-through; }
+        @media (max-width: 768px) {
+            .tw-card { flex-direction: column; }
+            .tw-card-right { width: auto; border-left: none; border-top: 1px solid rgba(7,55,79,0.08); }
+            .tw-card-img { width: 60px; height: 60px; }
+        }
 
         /* ── Countdown Badge ── */
         .countdown-badge {
@@ -760,42 +889,16 @@
 <!-- ══════════════════════════════════════════════════════
      SCREEN 1 — Org Picker
      ══════════════════════════════════════════════════════ -->
-<div class="screen active" id="screen-org">
-    <div class="org-picker">
-        <div class="org-picker-header">
-            <div class="rk-mark">RK</div>
-            <h1>Event ROI Tracker</h1>
-            <p>Track conference spend, deals, and team feedback</p>
-        </div>
-        <div class="org-cards">
-            <div class="org-card" onclick="openOrg('rankings')">
-                <div class="org-card-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                </div>
-                <h2>Rankings.io</h2>
-                <p>29 events in 2026</p>
-            </div>
-            <div class="org-card coming-soon">
-                <div class="org-card-icon">
-                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                </div>
-                <h2>PIMCon</h2>
-                <p>Coming soon</p>
-            </div>
-        </div>
-        <a href="index.html" class="org-picker-back">&larr; Back to Revenue Kitchen</a>
-    </div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      SCREEN 2 — Events by Month
      ══════════════════════════════════════════════════════ -->
-<div class="screen" id="screen-events">
+<div class="screen active" id="screen-events">
     <div class="stripe"></div>
     <div class="top-bar">
         <div class="top-bar-left">
-            <button class="back-btn" onclick="goTo('screen-org')">&#8592; Back</button>
-            <span class="top-bar-title" id="events-org-label">Rankings.io Events</span>
+            <a class="back-btn" href="index.html">&#8592; Revenue Kitchen</a>
+            <span class="top-bar-title" id="events-org-label">Event ROI Tracker</span>
         </div>
         <div class="top-bar-right">
             <button class="btn-dashboard" onclick="goTo('screen-dashboard')">
@@ -815,12 +918,15 @@
             <div class="summary-pill"><div class="s-label">Avg / Event</div><div class="s-val" id="s-avg">—</div></div>
         </div>
 
+        <div id="this-week-wrap"></div>
+
         <div class="filters-row">
             <select class="filter-sel" id="filter-status" onchange="renderEvents()">
                 <option value="">All Statuses</option>
                 <option value="attended">Attended</option>
                 <option value="attending">Attending</option>
                 <option value="planned">Planned</option>
+                <option value="watching">Watching</option>
             </select>
             <select class="filter-sel" id="filter-attendee" onchange="renderEvents()">
                 <option value="">All Attendees</option>
@@ -841,12 +947,30 @@
                 <input type="date" id="new-ev-end" title="End date">
                 <select id="new-ev-status">
                     <option value="planned">Planned</option>
+                    <option value="watching">Watching</option>
                     <option value="attending">Attending</option>
                     <option value="attended">Attended</option>
                 </select>
             </div>
             <div class="form-grid three" style="margin-bottom:0.5rem;">
-                <input type="text" id="new-ev-attendees" placeholder="Attendees (comma-separated)">
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <select id="new-ev-attendee-sel" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;">
+                        <option value="">Add attendee...</option>
+                        <option>Danny Define</option>
+                        <option>Tyler Farr</option>
+                        <option>Brandon Steed</option>
+                        <option>Simon Golding</option>
+                        <option>Austin Miller</option>
+                        <option>Elise Fitzsimmons</option>
+                        <option>Megan</option>
+                        <option>Sarah</option>
+                        <option>Sonya Palmer</option>
+                        <option>Britt Wilson</option>
+                    </select>
+                    <button type="button" class="btn-sm" onclick="addAttendee()" style="padding:0.35rem 0.7rem;">+ Add</button>
+                </div>
+                <div id="new-ev-attendees-chips" style="display:flex;gap:0.4rem;flex-wrap:wrap;min-height:1.5rem;"></div>
+                <input type="hidden" id="new-ev-attendees">
                 <input type="number" id="new-ev-reg" placeholder="Registration cost ($)" step="100">
                 <input type="number" id="new-ev-hotel" placeholder="Hotel cost ($)" step="100">
             </div>
@@ -1307,6 +1431,89 @@ function getConvos(id) { return conversations.filter(c => (c['Event ID'] || c['e
 // ═══════════════════════════════════════
 // Render Events by Month
 // ═══════════════════════════════════════
+function renderThisWeek() {
+    const wrap = document.getElementById('this-week-wrap');
+    const now = new Date(); now.setHours(0,0,0,0);
+    const weekFromNow = new Date(now); weekFromNow.setDate(weekFromNow.getDate() + 7);
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+
+    // Events that: start within this week OR ended within the past 7 days
+    const thisWeek = allEvents.filter(ev => {
+        if (!ev.parsedStart) return false;
+        const start = new Date(ev.parsedStart); start.setHours(0,0,0,0);
+        const end = ev.parsedEnd ? new Date(ev.parsedEnd) : start; end.setHours(0,0,0,0);
+        // Starting within next 7 days, or ended within past 7 days
+        return (start >= now && start <= weekFromNow) || (end >= weekAgo && end < now);
+    }).sort((a, b) => (a.parsedStart || 0) - (b.parsedStart || 0));
+
+    if (!thisWeek.length) { wrap.innerHTML = ''; return; }
+
+    let html = `<div class="this-week-section">
+        <div class="section-label"><span class="pulse"></span> This Week's Events</div>`;
+
+    thisWeek.forEach(ev => {
+        const imgUrl = getEventImage(ev.id);
+        const evEnd = ev.parsedEnd ? new Date(ev.parsedEnd) : (ev.parsedStart ? new Date(ev.parsedStart) : null);
+        const isPast = evEnd && evEnd < now;
+        const attendeeList = (ev.attendees || '').split(/,|&/).map(a => a.trim()).filter(Boolean);
+        const evFeedback = getFeedback(ev.id);
+        const evConvos = getConvos(ev.id);
+        const evDeals = getDeals(ev.id);
+
+        // Build todo items for past events
+        let todos = '';
+        if (isPast || ev.status === 'attended') {
+            const feedbackMembers = evFeedback.map(f => (f['Team Member'] || f['teamMember'] || '').toLowerCase());
+            const missingFeedback = attendeeList.filter(a => !feedbackMembers.includes(a.toLowerCase()));
+            const hasCCs = evConvos.length > 0;
+            const hasDeals = evDeals.length > 0;
+
+            todos = `<div class="todo-label">Post-Event Checklist</div>`;
+            // Feedback per attendee
+            if (missingFeedback.length > 0) {
+                missingFeedback.forEach(name => {
+                    todos += `<div class="tw-todo missing"><span class="dot"></span>${esc(name)} — needs feedback</div>`;
+                });
+            }
+            attendeeList.filter(a => feedbackMembers.includes(a.toLowerCase())).forEach(name => {
+                todos += `<div class="tw-todo done"><span class="dot"></span>${esc(name)} — feedback added</div>`;
+            });
+            // CCs
+            todos += hasCCs
+                ? `<div class="tw-todo done"><span class="dot"></span>Critical Connections (${evConvos.length})</div>`
+                : `<div class="tw-todo missing"><span class="dot"></span>No Critical Connections added</div>`;
+            // Deals
+            todos += hasDeals
+                ? `<div class="tw-todo done"><span class="dot"></span>Deals logged (${evDeals.length})</div>`
+                : `<div class="tw-todo missing"><span class="dot"></span>No deals logged yet</div>`;
+        } else {
+            // Upcoming this week
+            const days = daysUntil(ev);
+            const cd = countdownText(days);
+            todos = `<div class="todo-label">Coming Up</div>`;
+            todos += `<div class="tw-todo missing"><span class="dot" style="background:var(--navy);"></span>${cd ? cd.text : 'This week'}</div>`;
+            if (attendeeList.length) {
+                todos += `<div class="tw-todo" style="color:var(--text-muted);"><span class="dot" style="background:var(--navy);"></span>${attendeeList.length} attendee${attendeeList.length > 1 ? 's' : ''} registered</div>`;
+            }
+        }
+
+        html += `<div class="tw-card" onclick="openDetail('${ev.id}')">
+            <div class="tw-card-left">
+                <div class="tw-card-img" style="background-image:url('${imgUrl}')"></div>
+                <div class="tw-card-info">
+                    <div class="tw-card-name">${esc(ev.name)}</div>
+                    <div class="tw-card-meta">${esc(ev.location)} &middot; ${fmtDateRange(ev.startDate, ev.endDate)}</div>
+                    ${ev.attendees ? `<div class="tw-card-attendees">${esc(ev.attendees)}</div>` : ''}
+                </div>
+            </div>
+            <div class="tw-card-right">${todos}</div>
+        </div>`;
+    });
+
+    html += '</div>';
+    wrap.innerHTML = html;
+}
+
 function renderEvents() {
     const statusF = document.getElementById('filter-status').value;
     const attendeeF = document.getElementById('filter-attendee').value;
@@ -1416,6 +1623,7 @@ function renderEvents() {
         html += `</div></div>`;
     });
     container.innerHTML = html;
+    renderThisWeek();
 }
 
 // ═══════════════════════════════════════
@@ -1785,6 +1993,24 @@ function saveImageUrl() {
 // ═══════════════════════════════════════
 // Add Event
 // ═══════════════════════════════════════
+let selectedAttendees = [];
+function addAttendee() {
+    const sel = document.getElementById('new-ev-attendee-sel');
+    const name = sel.value;
+    if (!name || selectedAttendees.includes(name)) { sel.value = ''; return; }
+    selectedAttendees.push(name);
+    sel.value = '';
+    renderAttendeeChips();
+}
+function removeAttendee(name) {
+    selectedAttendees = selectedAttendees.filter(a => a !== name);
+    renderAttendeeChips();
+}
+function renderAttendeeChips() {
+    const wrap = document.getElementById('new-ev-attendees-chips');
+    wrap.innerHTML = selectedAttendees.map(a => `<span class="attendee-chip">${esc(a)}<button class="chip-x" onclick="removeAttendee('${esc(a)}')">&times;</button></span>`).join('');
+    document.getElementById('new-ev-attendees').value = selectedAttendees.join(', ');
+}
 function toggleAddEvent() {
     document.getElementById('add-event-form').classList.toggle('open');
 }
@@ -1821,6 +2047,7 @@ function submitNewEvent() {
     localStorage.setItem('ev-custom-events', JSON.stringify(custom));
     // Reset form
     ['new-ev-name','new-ev-location','new-ev-start','new-ev-end','new-ev-attendees','new-ev-reg','new-ev-hotel','new-ev-hotelname','new-ev-sponsor','new-ev-notes'].forEach(id => document.getElementById(id).value = '');
+    selectedAttendees = []; renderAttendeeChips();
     document.getElementById('new-ev-status').value = 'planned';
     toggleAddEvent();
     postLoad(); // re-render with new event
