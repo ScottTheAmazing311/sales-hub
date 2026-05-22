@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --navy: #07374F;
@@ -1171,6 +1173,10 @@
                 <h3>Monthly Spend Trend</h3>
                 <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
             </div>
+            <div class="chart-card full">
+                <h3>Event Locations</h3>
+                <div id="event-map" style="height:400px;border-radius:8px;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -1945,6 +1951,7 @@ function renderDashboard() {
     renderChartQuarterly(evts);
     renderChartMonthly(evts);
     renderLeaderboard(evts);
+    setTimeout(() => renderEventMap(evts), 100);
 }
 
 function renderChartSpend(evts) {
@@ -1994,6 +2001,79 @@ function renderChartMonthly(evts) {
 function renderLeaderboard(evts) {
     const sorted = [...evts].filter(e => e.totalCost > 0).sort((a, b) => b.totalCost - a.totalCost).slice(0, 8);
     document.getElementById('lb-spend').innerHTML = sorted.map((e, i) => `<li><span class="lb-rank">${i + 1}.</span><span class="lb-name">${esc(e.name)}</span><span class="lb-val">${fmt(e.totalCost)}</span></li>`).join('');
+}
+
+// ═══════════════════════════════════════
+// Event Map
+// ═══════════════════════════════════════
+const CITY_COORDS = {
+    'orlando, fl': [28.5383, -81.3792],
+    'miami, fl': [25.7617, -80.1918],
+    'san diego, ca': [32.7157, -117.1611],
+    'san diego ca': [32.7157, -117.1611],
+    'new york, ny': [40.7128, -74.0060],
+    'nyc, ny': [40.7128, -74.0060],
+    'delray beach, fl': [26.4615, -80.0728],
+    'chicago, il': [41.8781, -87.6298],
+    'dallas, tx': [32.7767, -96.7970],
+    'las vegas, nv': [36.1699, -115.1398],
+    'mexico': [20.6296, -87.0739],
+    'san antonio, tx': [29.4241, -98.4936],
+    'huntington beach, ca': [33.6595, -117.9988],
+    'atlanta, ga': [33.7490, -84.3880],
+    'houston, tx': [29.7604, -95.3698],
+    'la, ca': [34.0522, -118.2437],
+    'new orleans, la': [29.9511, -90.0715],
+    'charlotte, nc': [35.2271, -80.8431],
+    'boston, ma': [42.3601, -71.0589],
+};
+
+let mapInstance = null;
+function renderEventMap(evts) {
+    const container = document.getElementById('event-map');
+    if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+    mapInstance = L.map(container).setView([37.5, -96], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 18
+    }).addTo(mapInstance);
+
+    // Group events by location for heat dots
+    const locGroups = {};
+    evts.forEach(ev => {
+        const loc = (ev.location || '').toLowerCase().trim();
+        if (!loc || !CITY_COORDS[loc]) return;
+        if (!locGroups[loc]) locGroups[loc] = { coords: CITY_COORDS[loc], events: [] };
+        locGroups[loc].events.push(ev);
+    });
+
+    Object.values(locGroups).forEach(g => {
+        const count = g.events.length;
+        const radius = Math.min(8 + count * 4, 24);
+        const totalSpend = g.events.reduce((s, e) => s + e.totalCost, 0);
+        const names = g.events.map(e => e.name).join('<br>');
+        L.circleMarker(g.coords, {
+            radius,
+            fillColor: '#07374F',
+            color: '#eaff6a',
+            weight: 2,
+            fillOpacity: 0.7
+        }).addTo(mapInstance).bindPopup(
+            `<div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;">
+                <strong>${g.events[0].location}</strong><br>
+                <span style="color:#666;">${count} event${count > 1 ? 's' : ''} &middot; ${fmt(totalSpend)}</span>
+                <hr style="margin:0.4rem 0;border:none;border-top:1px solid #ddd;">
+                ${names}
+            </div>`
+        );
+    });
+
+    // Fit bounds if we have markers
+    const allCoords = Object.values(locGroups).map(g => g.coords);
+    if (allCoords.length > 1) {
+        mapInstance.fitBounds(allCoords, { padding: [30, 30] });
+    }
 }
 
 // ═══════════════════════════════════════
