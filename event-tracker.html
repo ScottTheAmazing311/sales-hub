@@ -1138,6 +1138,11 @@
         </div>
     </div>
     <div class="page-wrap">
+        <div class="filters-row" style="margin-bottom:1rem;">
+            <select class="filter-sel" id="dash-filter-attendee" onchange="renderDashboard()">
+                <option value="">All Attendees</option>
+            </select>
+        </div>
         <div class="summary-bar" id="dash-summary">
             <div class="summary-pill"><div class="s-label">Total Spend YTD</div><div class="s-val" id="d-spend">—</div></div>
             <div class="summary-pill"><div class="s-label">Events</div><div class="s-val" id="d-events">—</div></div>
@@ -1904,26 +1909,46 @@ function saveConvoEdit(i) {
 // ═══════════════════════════════════════
 // Dashboard
 // ═══════════════════════════════════════
+function getDashEvents() {
+    const af = document.getElementById('dash-filter-attendee').value;
+    if (!af) return allEvents;
+    return allEvents.filter(e => (e.attendees || '').toLowerCase().includes(af.toLowerCase()));
+}
+function getDashDeals(evts) {
+    const ids = new Set(evts.map(e => e.id));
+    return deals.filter(d => ids.has(d['Event ID'] || d['eventId']));
+}
+
 function renderDashboard() {
-    const totalSpend = allEvents.reduce((s, e) => s + e.totalCost, 0);
-    const withCost = allEvents.filter(e => e.totalCost > 0);
-    const pipelineDeals = deals.filter(d => getDealStage(d) === 'Pipeline');
-    const closedDeals = deals.filter(d => getDealStage(d) === 'Closed Won');
+    // Populate attendee filter if empty
+    const sel = document.getElementById('dash-filter-attendee');
+    if (sel.options.length <= 1) {
+        const set = new Set();
+        allEvents.forEach(ev => (ev.attendees || '').split(/,|&/).forEach(a => { a = a.trim(); if (a) set.add(a); }));
+        Array.from(set).sort().forEach(a => sel.innerHTML += `<option value="${esc(a)}">${esc(a)}</option>`);
+    }
+
+    const evts = getDashEvents();
+    const evtDeals = getDashDeals(evts);
+    const totalSpend = evts.reduce((s, e) => s + e.totalCost, 0);
+    const withCost = evts.filter(e => e.totalCost > 0);
+    const pipelineDeals = evtDeals.filter(d => getDealStage(d) === 'Pipeline');
+    const closedDeals = evtDeals.filter(d => getDealStage(d) === 'Closed Won');
     document.getElementById('d-spend').textContent = fmt(totalSpend);
-    document.getElementById('d-events').textContent = allEvents.length;
+    document.getElementById('d-events').textContent = evts.length;
     document.getElementById('d-pipeline').textContent = fmt(sumMRR(pipelineDeals));
     document.getElementById('d-closed').textContent = fmt(sumMRR(closedDeals));
     document.getElementById('d-avg').textContent = withCost.length ? fmt(totalSpend / withCost.length) : '—';
 
-    renderChartSpend();
-    renderChartBreakdown();
-    renderChartQuarterly();
-    renderChartMonthly();
-    renderLeaderboard();
+    renderChartSpend(evts);
+    renderChartBreakdown(evts);
+    renderChartQuarterly(evts);
+    renderChartMonthly(evts);
+    renderLeaderboard(evts);
 }
 
-function renderChartSpend() {
-    const sorted = [...allEvents].filter(e => e.totalCost > 0).sort((a, b) => (a.parsedStart || new Date(0)) - (b.parsedStart || new Date(0)));
+function renderChartSpend(evts) {
+    const sorted = [...evts].filter(e => e.totalCost > 0).sort((a, b) => (a.parsedStart || new Date(0)) - (b.parsedStart || new Date(0)));
     const ctx = document.getElementById('chart-spend').getContext('2d');
     if (chartInstances.spend) chartInstances.spend.destroy();
     chartInstances.spend = new Chart(ctx, {
@@ -1932,10 +1957,10 @@ function renderChartSpend() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, font: { size: 10, family: 'IBM Plex Mono' } } }, y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
     });
 }
-function renderChartBreakdown() {
-    const r = allEvents.reduce((s, e) => s + e.registrationCost, 0);
-    const h = allEvents.reduce((s, e) => s + e.hotelCost, 0);
-    const sp = allEvents.reduce((s, e) => s + e.sponsorshipCost, 0);
+function renderChartBreakdown(evts) {
+    const r = evts.reduce((s, e) => s + e.registrationCost, 0);
+    const h = evts.reduce((s, e) => s + e.hotelCost, 0);
+    const sp = evts.reduce((s, e) => s + e.sponsorshipCost, 0);
     const ctx = document.getElementById('chart-breakdown').getContext('2d');
     if (chartInstances.bd) chartInstances.bd.destroy();
     chartInstances.bd = new Chart(ctx, {
@@ -1944,9 +1969,9 @@ function renderChartBreakdown() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'IBM Plex Sans', size: 12 } } } } }
     });
 }
-function renderChartQuarterly() {
+function renderChartQuarterly(evts) {
     const q = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
-    allEvents.forEach(e => { if (!e.parsedStart) return; const m = e.parsedStart.getMonth(); if (m < 3) q.Q1 += e.totalCost; else if (m < 6) q.Q2 += e.totalCost; else if (m < 9) q.Q3 += e.totalCost; else q.Q4 += e.totalCost; });
+    evts.forEach(e => { if (!e.parsedStart) return; const m = e.parsedStart.getMonth(); if (m < 3) q.Q1 += e.totalCost; else if (m < 6) q.Q2 += e.totalCost; else if (m < 9) q.Q3 += e.totalCost; else q.Q4 += e.totalCost; });
     const ctx = document.getElementById('chart-quarterly').getContext('2d');
     if (chartInstances.q) chartInstances.q.destroy();
     chartInstances.q = new Chart(ctx, {
@@ -1955,9 +1980,9 @@ function renderChartQuarterly() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
     });
 }
-function renderChartMonthly() {
+function renderChartMonthly(evts) {
     const monthly = new Array(12).fill(0);
-    allEvents.forEach(e => { if (e.parsedStart) monthly[e.parsedStart.getMonth()] += e.totalCost; });
+    evts.forEach(e => { if (e.parsedStart) monthly[e.parsedStart.getMonth()] += e.totalCost; });
     const ctx = document.getElementById('chart-monthly').getContext('2d');
     if (chartInstances.mo) chartInstances.mo.destroy();
     chartInstances.mo = new Chart(ctx, {
@@ -1966,8 +1991,8 @@ function renderChartMonthly() {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v.toLocaleString(), font: { family: 'IBM Plex Mono' } } } } }
     });
 }
-function renderLeaderboard() {
-    const sorted = [...allEvents].filter(e => e.totalCost > 0).sort((a, b) => b.totalCost - a.totalCost).slice(0, 8);
+function renderLeaderboard(evts) {
+    const sorted = [...evts].filter(e => e.totalCost > 0).sort((a, b) => b.totalCost - a.totalCost).slice(0, 8);
     document.getElementById('lb-spend').innerHTML = sorted.map((e, i) => `<li><span class="lb-rank">${i + 1}.</span><span class="lb-name">${esc(e.name)}</span><span class="lb-val">${fmt(e.totalCost)}</span></li>`).join('');
 }
 
