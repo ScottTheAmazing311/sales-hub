@@ -1011,11 +1011,65 @@
             <div style="margin-bottom:0.5rem;" id="detail-status"></div>
             <h2 id="detail-name"></h2>
             <div class="detail-meta-row" id="detail-meta"></div>
+            <div style="margin-top:0.75rem;">
+                <button class="btn-sm" onclick="toggleEditEvent()" id="edit-event-btn" style="background:var(--navy);color:#fff;border:none;padding:0.4rem 1rem;border-radius:8px;cursor:pointer;font-size:0.8rem;">Edit Event</button>
+            </div>
             <div class="img-update-row" id="img-update-row" style="display:none;">
                 <input type="url" id="img-url-input" placeholder="Paste new image URL...">
                 <button class="btn-sm" onclick="saveImageUrl()">Save</button>
                 <button class="btn-sm outline" onclick="toggleImageEdit()">Cancel</button>
             </div>
+        </div>
+    </div>
+    <!-- Edit Event Form -->
+    <div class="add-event-form" id="edit-event-form" style="max-width:900px;margin:0 auto 1rem;padding:1.25rem 1.5rem;">
+        <h3 style="margin-bottom:0.75rem;">Edit Event</h3>
+        <div class="form-grid" style="margin-bottom:0.5rem;">
+            <input type="text" id="edit-ev-name" placeholder="Event name *">
+            <input type="text" id="edit-ev-location" placeholder="Location (e.g. Chicago, IL)">
+        </div>
+        <div class="form-grid three" style="margin-bottom:0.5rem;">
+            <input type="date" id="edit-ev-start" title="Start date">
+            <input type="date" id="edit-ev-end" title="End date">
+            <select id="edit-ev-status">
+                <option value="planned">Planned</option>
+                <option value="watching">Watching</option>
+                <option value="attending">Attending</option>
+                <option value="attended">Attended</option>
+            </select>
+        </div>
+        <div class="form-grid three" style="margin-bottom:0.5rem;">
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                <select id="edit-ev-attendee-sel" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;">
+                    <option value="">Add attendee...</option>
+                    <option>Danny Define</option>
+                    <option>Tyler Farr</option>
+                    <option>Brandon Steed</option>
+                    <option>Simon Golding</option>
+                    <option>Austin Miller</option>
+                    <option>Elise Fitzsimmons</option>
+                    <option>Megan</option>
+                    <option>Sarah</option>
+                    <option>Sonya Palmer</option>
+                    <option>Britt Wilson</option>
+                </select>
+                <button type="button" class="btn-sm" onclick="addEditAttendee()" style="padding:0.35rem 0.7rem;">+ Add</button>
+            </div>
+            <div id="edit-ev-attendees-chips" style="display:flex;gap:0.4rem;flex-wrap:wrap;min-height:1.5rem;grid-column:span 2;"></div>
+            <input type="hidden" id="edit-ev-attendees">
+        </div>
+        <div class="form-grid three" style="margin-bottom:0.5rem;">
+            <input type="number" id="edit-ev-reg" placeholder="Registration cost ($)" step="100">
+            <input type="number" id="edit-ev-hotel" placeholder="Hotel cost ($)" step="100">
+            <input type="number" id="edit-ev-sponsor" placeholder="Sponsorship cost ($)" step="100">
+        </div>
+        <div class="form-grid" style="margin-bottom:0.5rem;">
+            <input type="text" id="edit-ev-hotelname" placeholder="Hotel name">
+            <input type="text" id="edit-ev-notes" placeholder="Notes (optional)">
+        </div>
+        <div class="form-actions">
+            <button class="btn-submit" onclick="saveEventEdit()">Save Changes</button>
+            <button class="btn-cancel" onclick="toggleEditEvent()">Cancel</button>
         </div>
     </div>
     <div class="detail-content">
@@ -1387,6 +1441,7 @@ function normalizeEvent(r) {
 
 function postLoad() {
     loadCustomEvents();
+    applyEventEdits();
     loadLocalData();
     // Build attendee filter
     const set = new Set();
@@ -1644,6 +1699,7 @@ function openDetail(id) {
     currentEvent = allEvents.find(e => e.id === id);
     if (!currentEvent) return;
     goTo('screen-detail');
+    document.getElementById('edit-event-form').classList.remove('open');
 
     const ev = currentEvent;
     const heroImg = getEventImage(ev.id);
@@ -2093,6 +2149,142 @@ function saveImageUrl() {
     document.getElementById('img-update-row').style.display = 'none';
     document.getElementById('img-url-input').value = '';
     renderEvents(); // refresh cards with new image
+}
+
+// ═══════════════════════════════════════
+// Edit Event
+// ═══════════════════════════════════════
+let editAttendees = [];
+
+function toggleEditEvent() {
+    const form = document.getElementById('edit-event-form');
+    const isOpen = form.classList.contains('open');
+    if (!isOpen && currentEvent) populateEditForm(currentEvent);
+    form.classList.toggle('open');
+}
+
+function populateEditForm(ev) {
+    document.getElementById('edit-ev-name').value = ev.name || '';
+    document.getElementById('edit-ev-location').value = ev.location || '';
+    // Parse dates to YYYY-MM-DD for date inputs
+    document.getElementById('edit-ev-start').value = toDateInput(ev.startDate);
+    document.getElementById('edit-ev-end').value = toDateInput(ev.endDate);
+    document.getElementById('edit-ev-status').value = ev.status || 'planned';
+    document.getElementById('edit-ev-reg').value = ev.registrationCost || '';
+    document.getElementById('edit-ev-hotel').value = ev.hotelCost || '';
+    document.getElementById('edit-ev-sponsor').value = ev.sponsorshipCost || '';
+    document.getElementById('edit-ev-hotelname').value = ev.hotelName || '';
+    document.getElementById('edit-ev-notes').value = ev.notes || '';
+    // Parse attendees into chips
+    editAttendees = (ev.attendees || '').split(',').map(a => a.trim()).filter(Boolean);
+    renderEditAttendeeChips();
+}
+
+function toDateInput(raw) {
+    if (!raw) return '';
+    // Already YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.substring(0, 10);
+    // Try parsing textual dates like "Thursday, January 15th 2026"
+    const d = new Date(raw.replace(/(st|nd|rd|th)/g, ''));
+    if (isNaN(d)) return '';
+    return d.toISOString().substring(0, 10);
+}
+
+function addEditAttendee() {
+    const sel = document.getElementById('edit-ev-attendee-sel');
+    const name = sel.value;
+    if (!name || editAttendees.includes(name)) { sel.value = ''; return; }
+    editAttendees.push(name);
+    sel.value = '';
+    renderEditAttendeeChips();
+}
+
+function removeEditAttendee(name) {
+    editAttendees = editAttendees.filter(a => a !== name);
+    renderEditAttendeeChips();
+}
+
+function renderEditAttendeeChips() {
+    const wrap = document.getElementById('edit-ev-attendees-chips');
+    wrap.innerHTML = editAttendees.map(a => `<span class="attendee-chip">${esc(a)}<button class="chip-x" onclick="removeEditAttendee('${esc(a)}')">&times;</button></span>`).join('');
+    document.getElementById('edit-ev-attendees').value = editAttendees.join(', ');
+}
+
+function saveEventEdit() {
+    if (!currentEvent) return;
+    const name = document.getElementById('edit-ev-name').value.trim();
+    if (!name) return alert('Enter an event name.');
+
+    const startRaw = document.getElementById('edit-ev-start').value;
+    const endRaw = document.getElementById('edit-ev-end').value;
+    const reg = parseFloat(document.getElementById('edit-ev-reg').value) || 0;
+    const hot = parseFloat(document.getElementById('edit-ev-hotel').value) || 0;
+    const spo = parseFloat(document.getElementById('edit-ev-sponsor').value) || 0;
+
+    // Update the event object in memory
+    currentEvent.name = name;
+    currentEvent.location = document.getElementById('edit-ev-location').value.trim();
+    currentEvent.startDate = startRaw;
+    currentEvent.endDate = endRaw || startRaw;
+    currentEvent.status = document.getElementById('edit-ev-status').value;
+    currentEvent.attendees = document.getElementById('edit-ev-attendees').value.trim();
+    currentEvent.registrationCost = reg;
+    currentEvent.hotelCost = hot;
+    currentEvent.sponsorshipCost = spo;
+    currentEvent.hotelName = document.getElementById('edit-ev-hotelname').value.trim();
+    currentEvent.hasSponsor = spo > 0;
+    currentEvent.notes = document.getElementById('edit-ev-notes').value.trim();
+    currentEvent.totalCost = reg + hot + spo;
+    currentEvent.parsedStart = startRaw ? new Date(startRaw + 'T00:00:00') : null;
+    currentEvent.parsedEnd = endRaw ? new Date(endRaw + 'T00:00:00') : (startRaw ? new Date(startRaw + 'T00:00:00') : null);
+
+    // Persist edits to localStorage
+    saveEventEdits();
+
+    // Close form and re-render detail
+    document.getElementById('edit-event-form').classList.remove('open');
+    openDetail(currentEvent.id);
+}
+
+function saveEventEdits() {
+    // For custom events, update ev-custom-events
+    if (currentEvent.id.startsWith('custom-')) {
+        const custom = JSON.parse(localStorage.getItem('ev-custom-events') || '[]');
+        const idx = custom.findIndex(e => e.id === currentEvent.id);
+        if (idx >= 0) custom[idx] = {...currentEvent};
+        else custom.push({...currentEvent});
+        localStorage.setItem('ev-custom-events', JSON.stringify(custom));
+    } else {
+        // For sheet-sourced events, store overrides
+        const edits = JSON.parse(localStorage.getItem('ev-event-edits') || '{}');
+        edits[currentEvent.id] = {
+            name: currentEvent.name,
+            location: currentEvent.location,
+            startDate: currentEvent.startDate,
+            endDate: currentEvent.endDate,
+            status: currentEvent.status,
+            attendees: currentEvent.attendees,
+            registrationCost: currentEvent.registrationCost,
+            hotelCost: currentEvent.hotelCost,
+            sponsorshipCost: currentEvent.sponsorshipCost,
+            hotelName: currentEvent.hotelName,
+            notes: currentEvent.notes,
+            totalCost: currentEvent.totalCost
+        };
+        localStorage.setItem('ev-event-edits', JSON.stringify(edits));
+    }
+}
+
+function applyEventEdits() {
+    const edits = JSON.parse(localStorage.getItem('ev-event-edits') || '{}');
+    allEvents.forEach(ev => {
+        if (edits[ev.id]) {
+            const e = edits[ev.id];
+            Object.assign(ev, e);
+            ev.parsedStart = ev.startDate ? new Date(ev.startDate + (ev.startDate.includes('T') ? '' : 'T00:00:00')) : null;
+            ev.parsedEnd = ev.endDate ? new Date(ev.endDate + (ev.endDate.includes('T') ? '' : 'T00:00:00')) : null;
+        }
+    });
 }
 
 // ═══════════════════════════════════════
