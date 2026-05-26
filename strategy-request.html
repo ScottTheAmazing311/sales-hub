@@ -474,6 +474,16 @@
 //     data.context,
 //     'New'
 //   ]);
+//   if (data.rushRequest) {
+//     var subject = 'Rush Strategy Request: ' + data.company;
+//     var body = data.name + ' submitted a strategy request for ' + data.company
+//       + ' with a call date of ' + data.callDate + ' (less than 3 business days out).'
+//       + '\n\nUrgency: ' + data.urgency
+//       + '\nDepth: ' + data.depth
+//       + '\nURL: ' + (data.url || 'N/A')
+//       + '\nContext: ' + data.context;
+//     GmailApp.sendEmail('simon@rankings.io,cole@rankings.io', subject, body);
+//   }
 //   return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
 //     .setMimeType(ContentService.MimeType.JSON);
 // }
@@ -498,7 +508,7 @@
 //     .setMimeType(ContentService.MimeType.JSON);
 // }
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQdNR3EWkDDvPoge7AgDarRoVtx8JU8FpctEv5Fxp1IXBCLnT-QgstgEM85XKr9BjoBg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTbqgVnjc6GB1RiHRTkSDdvpqB7pgYVbYoG-xF0OWykt02B49XUojoUJMFm76ygC8E/exec';
 
 // ── Option card selection ──
 document.querySelectorAll('.option-grid').forEach(grid => {
@@ -512,7 +522,18 @@ document.querySelectorAll('.option-grid').forEach(grid => {
     });
 });
 
-// ── Set default date to 3 business days from now ──
+// ── Business day helpers ──
+function countBusinessDays(start, end) {
+    let count = 0;
+    const cur = new Date(start);
+    while (cur < end) {
+        cur.setDate(cur.getDate() + 1);
+        const dow = cur.getDay();
+        if (dow !== 0 && dow !== 6) count++;
+    }
+    return count;
+}
+
 function addBusinessDays(date, days) {
     const result = new Date(date);
     let added = 0;
@@ -548,15 +569,23 @@ document.getElementById('strategy-form').addEventListener('submit', async functi
     msg.className = 'form-message';
     msg.style.display = 'none';
 
+    const callDate = document.getElementById('field-date').value;
+    const selectedDate = new Date(callDate + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const bizDaysOut = countBusinessDays(today, selectedDate);
+    const rushRequest = bizDaysOut < 3;
+
     const payload = {
         name: document.getElementById('field-name').value.trim(),
         company: document.getElementById('field-company').value.trim(),
-        callDate: document.getElementById('field-date').value,
+        callDate: callDate,
         urgency: document.querySelector('input[name="urgency"]:checked').value,
         depth: document.querySelector('input[name="depth"]:checked').value,
         recording: document.getElementById('field-recording').value.trim(),
         context: document.getElementById('field-context').value.trim(),
         url: document.getElementById('field-url').value.trim(),
+        rushRequest: rushRequest,
     };
 
     if (!APPS_SCRIPT_URL) {
