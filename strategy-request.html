@@ -512,8 +512,18 @@ document.querySelectorAll('.option-grid').forEach(grid => {
     });
 });
 
-// ── Set default date to today ──
-document.getElementById('field-date').valueAsDate = new Date();
+// ── Set default date to 3 business days from now ──
+function addBusinessDays(date, days) {
+    const result = new Date(date);
+    let added = 0;
+    while (added < days) {
+        result.setDate(result.getDate() + 1);
+        const dow = result.getDay();
+        if (dow !== 0 && dow !== 6) added++;
+    }
+    return result;
+}
+document.getElementById('field-date').valueAsDate = addBusinessDays(new Date(), 3);
 
 // ── Auto-fill name from auth ──
 document.addEventListener('rk-auth-ready', function() {
