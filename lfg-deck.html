@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LFG Initiative — Rankings.io</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #07374F;
+    --navy-dark: #052a3d;
+    --yellow: #eaff6a;
+    --yellow-warm: #eedc82;
+    --cream: #fefaed;
+    --bg: #f4f0e6;
+    --text: #2c2c2c;
+    --text-muted: #6b6b6b;
+    --sky: #3c94d1;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #1a1a1a;
+    color: var(--text);
+  }
+
+  /* ── Slide Container ── */
+  .slide {
+    width: 1120px;
+    min-height: 630px;
+    margin: 40px auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* ── Slide: Title ── */
+  .slide-title {
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px;
+  }
+  .slide-title .phase-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 24px;
+  }
+  .slide-title h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide-title h1 span {
+    color: var(--yellow);
+  }
+  .slide-title .subtitle {
+    font-size: 1.15rem;
+    color: rgba(255,255,255,0.5);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+  .slide-title .logo-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+  .slide-title .logo-bar img {
+    height: 28px;
+    opacity: 0.4;
+  }
+  .yellow-stripe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--yellow);
+  }
+
+  /* ── Slide: Section Header (dark) ── */
+  .slide-section {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    padding: 80px;
+  }
+  .slide-section .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8rem;
+    font-weight: 700;
+    color: rgba(234,255,106,0.12);
+    line-height: 1;
+    margin-right: 60px;
+    flex-shrink: 0;
+  }
+  .slide-section .section-content {
+    flex: 1;
+  }
+  .slide-section .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 16px;
+  }
+  .slide-section h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .slide-section .section-desc {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* ── Slide: Content (light) ── */
+  .slide-content {
+    background: var(--cream);
+    padding: 60px 80px;
+  }
+  .slide-content .slide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(7,55,79,0.08);
+  }
+  .slide-content .slide-header .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--yellow);
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+  .slide-content .slide-header h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ── Slide: Dark Content ── */
+  .slide-dark {
+    background: var(--navy);
+    padding: 60px 80px;
+  }
+  .slide-dark .slide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .slide-dark .slide-header .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--yellow);
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+  .slide-dark .slide-header h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ── Three-Column Cards (What slide) ── */
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .value-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .value-card .vc-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--yellow);
+    margin-bottom: 12px;
+  }
+  .value-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+  }
+
+  /* ── Why List ── */
+  .why-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .why-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .why-item .why-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+  .why-item span {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+  }
+
+  /* ── How / Incentives Grid ── */
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .how-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 28px;
+  }
+  .how-card.full { grid-column: 1 / -1; }
+  .how-card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 14px;
+  }
+  .how-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .how-card li {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.65);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+  }
+  .how-card li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--sky);
+    flex-shrink: 0;
+  }
+
+  /* ── Goal Cards ── */
+  .goal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .goal-card {
+    background: #fff;
+    border: 1px solid rgba(7,55,79,0.08);
+    padding: 24px;
+    border-radius: 2px;
+  }
+  .goal-card.full { grid-column: 1 / -1; }
+  .goal-card .goal-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--sky);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .goal-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .goal-card p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── Verbiage Table ── */
+  .verbiage-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .verbiage-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--navy);
+    text-align: left;
+    padding: 10px 16px;
+    background: rgba(7,55,79,0.04);
+  }
+  .verbiage-table td {
+    font-size: 0.85rem;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(7,55,79,0.06);
+  }
+  .verbiage-table .old {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(192,57,43,0.3);
+  }
+  .verbiage-table .new {
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .verbiage-table .arrow {
+    color: var(--sky);
+    font-size: 1rem;
+    text-align: center;
+    width: 40px;
+  }
+
+  /* ── Behavioral Reframes ── */
+  .reframe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .reframe-item {
+    background: #fff;
+    border-left: 3px solid var(--yellow);
+    padding: 20px 24px;
+    font-size: 0.9rem;
+    color: var(--navy);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .reframe-item strong {
+    color: var(--sky);
+  }
+
+  /* ── Action Lists ── */
+  .action-section {
+    margin-bottom: 28px;
+  }
+  .action-section:last-child { margin-bottom: 0; }
+  .action-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 12px;
+  }
+  .action-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .action-list li {
+    font-size: 0.85rem;
+    color: var(--text);
+    padding: 10px 16px;
+    background: #fff;
+    border: 1px solid rgba(7,55,79,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+  }
+  .action-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* ── Success Metrics ── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .metric-card {
+    background: #fff;
+    border: 1px solid rgba(7,55,79,0.08);
+    padding: 24px;
+    text-align: center;
+  }
+  .metric-card .metric-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--yellow);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+  .metric-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.3;
+  }
+
+  /* ── Timeline ── */
+  .slide-timeline {
+    background: var(--navy);
+    padding: 60px 80px;
+  }
+  .slide-timeline .slide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 50px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .slide-timeline .slide-header .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--yellow);
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+  .slide-timeline .slide-header h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .timeline {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 44px;
+    left: 40px;
+    right: 40px;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+  .timeline-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding: 0 12px;
+  }
+  .timeline-item .tl-month {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 16px;
+  }
+  .timeline-item .tl-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--yellow);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .timeline-item .tl-phase {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .timeline-item .tl-details {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .timeline-item .tl-details li {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.4;
+  }
+
+  /* ── Closing Slide ── */
+  .slide-closing {
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px;
+  }
+  .slide-closing .closing-quote {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: #fff;
+    line-height: 1.6;
+    max-width: 700px;
+    margin-bottom: 40px;
+    font-style: italic;
+  }
+  .slide-closing .closing-quote strong {
+    color: var(--yellow);
+    font-weight: 600;
+    font-style: normal;
+  }
+  .slide-closing .closing-tagline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* ── Nav ── */
+  .slide-nav {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+  }
+  .slide-nav a {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: block;
+    transition: all 0.2s;
+  }
+  .slide-nav a:hover {
+    background: var(--yellow);
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; }
+    .slide {
+      margin: 0;
+      box-shadow: none;
+      page-break-after: always;
+      width: 100%;
+    }
+    .slide-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ SLIDE 1: TITLE ════════════ -->
+<div class="slide slide-title" id="s1">
+  <div class="yellow-stripe"></div>
+  <div class="phase-tag">BDR &rarr; LFG</div>
+  <h1>A New Revenue<br><span>Culture.</span></h1>
+  <div class="subtitle">Law Firm Growth Specialist — Not appointment setters. Not script readers. Not traditional BDRs. A new standard for how we grow.</div>
+  <div class="logo-bar">
+    <img src="https://rankings.io/wp-content/uploads/logo-11-20-25.png" alt="Rankings.io">
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 2: WHAT ════════════ -->
+<div class="slide slide-dark" id="s2">
+  <div class="slide-header">
+    <span class="num">WHAT</span>
+    <h3>What's Happening</h3>
+  </div>
+  <p style="font-size:1.05rem;color:rgba(255,255,255,0.55);margin-bottom:40px;max-width:700px;line-height:1.7;">A title change and a culture change. The BDR role becomes the <strong style="color:#fff;">Law Firm Growth Specialist (LFG)</strong> — built around three core values.</p>
+  <div class="three-col">
+    <div class="value-card">
+      <div class="vc-num">01</div>
+      <h4>Identify gaps in performance marketing for law firms</h4>
+    </div>
+    <div class="value-card">
+      <div class="vc-num">02</div>
+      <h4>Manage the prospect pipeline</h4>
+    </div>
+    <div class="value-card">
+      <div class="vc-num">03</div>
+      <h4>Deliver targeted value</h4>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 3: WHY ════════════ -->
+<div class="slide slide-dark" id="s3">
+  <div class="slide-header">
+    <span class="num">WHY</span>
+    <h3>Why We're Making This Change</h3>
+  </div>
+  <div class="why-list">
+    <div class="why-item">
+      <div class="why-dot"></div>
+      <span><strong style="color:#fff;">Talent in chair in relation to the title</strong> — the role has outgrown the old name</span>
+    </div>
+    <div class="why-item">
+      <div class="why-dot"></div>
+      <span><strong style="color:#fff;">Title Impact</strong> — how we name ourselves shapes how we show up</span>
+    </div>
+    <div class="why-item">
+      <div class="why-dot"></div>
+      <span><strong style="color:#fff;">Market around us</strong> — Hennessey "publicly" entering outbound. We stay ahead.</span>
+    </div>
+    <div class="why-item">
+      <div class="why-dot"></div>
+      <span><strong style="color:#fff;">Best equipped to grow in chair</strong> — this role is a launchpad, not a ceiling</span>
+    </div>
+    <div class="why-item">
+      <div class="why-dot"></div>
+      <span><strong style="color:#fff;">You deserve your own brand</strong> — here and beyond Rankings</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 4: HOW ════════════ -->
+<div class="slide slide-dark" id="s4">
+  <div class="slide-header">
+    <span class="num">HOW</span>
+    <h3>How We Plan to Enable This</h3>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-card-title">Better Incentives</div>
+      <ul>
+        <li>Standing spiffs: Quota by 15th</li>
+        <li>15 holds / 12 holds bonus</li>
+        <li>Revenue contribution scale (quarterly)</li>
+        <li>Whale incentives</li>
+      </ul>
+    </div>
+    <div class="how-card">
+      <div class="how-card-title">New Compensation Channel</div>
+      <ul>
+        <li>LinkedIn as a revenue channel</li>
+        <li>New comp structure around social selling</li>
+      </ul>
+    </div>
+    <div class="how-card">
+      <div class="how-card-title">Training</div>
+      <ul>
+        <li>Gap training program</li>
+        <li>5-phase rollout (July &ndash; October)</li>
+      </ul>
+    </div>
+    <div class="how-card">
+      <div class="how-card-title">Resources</div>
+      <ul>
+        <li>LinkedIn Premium</li>
+        <li>RevKitchen tools</li>
+        <li>Premium swag</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 5: PHASE 1 HEADER ════════════ -->
+<div class="slide slide-section" id="s5">
+  <div class="section-num">01</div>
+  <div class="section-content">
+    <div class="section-label">Phase 1: Identify</div>
+    <h2>How We Define Ourselves</h2>
+    <div class="section-desc">The role exists to elevate the prospect experience and position Rankings as the highest-level growth partner in the legal industry.</div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 6: GOALS ════════════ -->
+<div class="slide slide-content" id="s6">
+  <div class="slide-header">
+    <span class="num">GOALS</span>
+    <h3>What We Are Trying to Do</h3>
+  </div>
+  <div class="goal-grid">
+    <div class="goal-card">
+      <div class="goal-num">GOAL 01</div>
+      <h4>Create a Differentiated Outbound Experience</h4>
+      <p>Move away from generic legal marketing outreach and create interactions that feel informed, strategic, and valuable from the first touch.</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-num">GOAL 02</div>
+      <h4>Improve Pipeline Quality</h4>
+      <p>Focus on qualified opportunities, stronger show rates, better handoffs, and higher-converting conversations instead of pure activity volume.</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-num">GOAL 03</div>
+      <h4>Build Trust Through Insight</h4>
+      <p>Lead with diagnosis, observations, competitive intelligence, and tailored value instead of scripts and templates.</p>
+    </div>
+    <div class="goal-card">
+      <div class="goal-num">GOAL 04</div>
+      <h4>Develop High-Level Talent Internally</h4>
+      <p>Build future AEs, strategists, enablement leaders, and operators through skill development and industry expertise.</p>
+    </div>
+    <div class="goal-card full">
+      <div class="goal-num">GOAL 05</div>
+      <h4>Strengthen the Rankings Brand</h4>
+      <p>Ensure every touchpoint reflects the standard, professionalism, and authority Rankings wants associated with its name.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 7: VERBIAGE ════════════ -->
+<div class="slide slide-content" id="s7">
+  <div class="slide-header">
+    <span class="num">WORDS</span>
+    <h3>Verbiage — Reframe Our Words and Actions</h3>
+  </div>
+  <table class="verbiage-table">
+    <thead>
+      <tr><th>Old BDR Language</th><th class="arrow"></th><th>New LFG Language</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="old">Prospecting</td><td class="arrow">&rarr;</td><td class="new">Diagnosing</td></tr>
+      <tr><td class="old">Leads</td><td class="arrow">&rarr;</td><td class="new">Firms</td></tr>
+      <tr><td class="old">Booking meetings</td><td class="arrow">&rarr;</td><td class="new">Creating opportunities</td></tr>
+      <tr><td class="old">Activity</td><td class="arrow">&rarr;</td><td class="new">Impact</td></tr>
+      <tr><td class="old">Sequences</td><td class="arrow">&rarr;</td><td class="new">Engagement strategy</td></tr>
+      <tr><td class="old">Pitching</td><td class="arrow">&rarr;</td><td class="new">Delivering insight</td></tr>
+      <tr><td class="old">Follow-up</td><td class="arrow">&rarr;</td><td class="new">Pipeline management</td></tr>
+      <tr><td class="old">SDR / BDR</td><td class="arrow">&rarr;</td><td class="new">Law Firm Growth Specialist</td></tr>
+      <tr><td class="old">Templates</td><td class="arrow">&rarr;</td><td class="new">Tailored assets</td></tr>
+      <tr><td class="old">Cold outreach</td><td class="arrow">&rarr;</td><td class="new">Strategic outreach</td></tr>
+      <tr><td class="old">Handoff</td><td class="arrow">&rarr;</td><td class="new">Transition with context</td></tr>
+      <tr><td class="old">Dials</td><td class="arrow">&rarr;</td><td class="new">Conversations</td></tr>
+      <tr><td class="old">Volume</td><td class="arrow">&rarr;</td><td class="new">Precision</td></tr>
+      <tr><td class="old">Appointment setter</td><td class="arrow">&rarr;</td><td class="new">Growth partner</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════ SLIDE 8: BEHAVIORAL REFRAMES ════════════ -->
+<div class="slide slide-content" id="s8">
+  <div class="slide-header">
+    <span class="num">MINDSET</span>
+    <h3>Behavioral Reframes</h3>
+  </div>
+  <div class="reframe-list">
+    <div class="reframe-item">We do not <strong>"smile and dial."</strong> We research and engage.</div>
+    <div class="reframe-item">We do not <strong>chase calendar invites.</strong> We create momentum.</div>
+    <div class="reframe-item">We do not <strong>send generic follow-ups.</strong> We continue the conversation with value.</div>
+    <div class="reframe-item">We do not <strong>own one touchpoint.</strong> We own the experience.</div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 9: ACTIONS ════════════ -->
+<div class="slide slide-content" id="s9">
+  <div class="slide-header">
+    <span class="num">ACTIONS</span>
+    <h3>What Changes Now</h3>
+  </div>
+  <div class="action-section">
+    <div class="action-section-title">Immediate Changes</div>
+    <ul class="action-list">
+      <li>Rename BDR team to LFG Team across internal communication</li>
+      <li>Update Slack channels, org charts, titles, scoreboards, and signatures</li>
+      <li>Shift meeting conversations from activity metrics to pipeline quality metrics</li>
+      <li>Begin training around diagnosis-first outreach</li>
+      <li>Continue to push personalized Looms and audit-based outreach as standard practice</li>
+      <li>Build market intelligence and competitive analysis workflows</li>
+    </ul>
+  </div>
+  <div class="action-section">
+    <div class="action-section-title">Outreach Changes</div>
+    <ul class="action-list">
+      <li>Less templated outreach, more market-specific observations</li>
+      <li>More tailored assets and stronger LinkedIn engagement</li>
+      <li>More value before ask</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 10: TEAM DEV + SUCCESS ════════════ -->
+<div class="slide slide-content" id="s10">
+  <div class="slide-header">
+    <span class="num">GROWTH</span>
+    <h3>Team Development + Success Metrics</h3>
+  </div>
+  <div class="action-section">
+    <div class="action-section-title">Team Development Changes</div>
+    <ul class="action-list">
+      <li>Industry education becomes mandatory</li>
+      <li>Competitive analysis training becomes part of onboarding</li>
+      <li>Asset creation becomes part of performance expectations</li>
+      <li>Coaching shifts from "more activity" to "better execution"</li>
+    </ul>
+  </div>
+  <div style="margin-top: 32px;">
+    <div class="action-section-title">Success Looks Like</div>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Higher-Quality Conversations</h4></div>
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Better Prepared Prospects</h4></div>
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Increased Show Rates</h4></div>
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Stronger AE Trust in Outbound</h4></div>
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Improved Conversion Rates</h4></div>
+      <div class="metric-card"><div class="metric-icon">&uarr;</div><h4>Stronger Talent Retention</h4></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 11: TIMELINE ════════════ -->
+<div class="slide slide-timeline" id="s11">
+  <div class="slide-header">
+    <span class="num">SCOPE</span>
+    <h3>Implementation Timeline</h3>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="tl-month">June</div>
+      <div class="tl-dot"></div>
+      <div class="tl-phase">Phase 1: Identify</div>
+      <ul class="tl-details">
+        <li>Define LFG role</li>
+        <li>Reframe language</li>
+        <li>Set behavioral standards</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-month">July</div>
+      <div class="tl-dot"></div>
+      <div class="tl-phase">Phase 2: Connection</div>
+      <ul class="tl-details">
+        <li>LinkedIn strategy</li>
+        <li>Relationship building</li>
+        <li>Account prioritization</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-month">August</div>
+      <div class="tl-dot"></div>
+      <div class="tl-phase">Phase 3: Personalization</div>
+      <ul class="tl-details">
+        <li>Improved outreach</li>
+        <li>Improved gifting</li>
+        <li>Improved assets</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-month">September</div>
+      <div class="tl-dot"></div>
+      <div class="tl-phase">Phase 4: Diagnosing</div>
+      <ul class="tl-details">
+        <li>Improved rep audits</li>
+        <li>Improved automated audits</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-month">October</div>
+      <div class="tl-dot"></div>
+      <div class="tl-phase">Phase 5: Accountability</div>
+      <ul class="tl-details">
+        <li>Swag delivered at P-Club</li>
+        <li>Reps held to new metrics</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SLIDE 12: CLOSING ════════════ -->
+<div class="slide slide-closing" id="s12">
+  <div class="yellow-stripe"></div>
+  <div class="closing-quote">
+    "A team viewed internally as <strong>strategic contributors</strong>, not appointment setters."
+  </div>
+  <div class="closing-tagline">LFG — Law Firm Growth Specialist</div>
+  <div class="logo-bar" style="position:absolute;bottom:40px;">
+    <img src="https://rankings.io/wp-content/uploads/logo-11-20-25.png" alt="Rankings.io" style="height:28px;opacity:0.4;">
+  </div>
+</div>
+
+<!-- ── Nav Dots ── -->
+<nav class="slide-nav">
+  <a href="#s1"></a><a href="#s2"></a><a href="#s3"></a><a href="#s4"></a><a href="#s5"></a><a href="#s6"></a><a href="#s7"></a><a href="#s8"></a><a href="#s9"></a><a href="#s10"></a><a href="#s11"></a><a href="#s12"></a>
+</nav>
+
+</body>
+</html>
