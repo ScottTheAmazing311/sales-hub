@@ -1780,9 +1780,16 @@ function renderDetailConvos(arr) {
 function renderDetailFeedback(arr) {
     const w = document.getElementById('feedback-wrap');
     if (!arr.length) { w.innerHTML = '<div class="empty-state">No feedback yet.</div>'; return; }
-    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th><th></th></tr></thead><tbody>${arr.map(f => {
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th><th></th></tr></thead><tbody>${arr.map((f, idx) => {
         const i = fbIdx(f);
-        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${esc(f['Notes']||f['notes']||'')}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
+        const notes = esc(f['Notes']||f['notes']||'');
+        const truncLen = 80;
+        const needsTrunc = notes.length > truncLen;
+        const truncId = 'fb-notes-' + idx;
+        const notesHtml = needsTrunc
+            ? `<span id="${truncId}-short">${notes.substring(0, truncLen)}… <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-short').style.display='none';document.getElementById('${truncId}-full').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">more</a></span><span id="${truncId}-full" style="display:none;">${notes} <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-full').style.display='none';document.getElementById('${truncId}-short').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">less</a></span>`
+            : notes;
+        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${notesHtml}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
