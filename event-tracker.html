@@ -1398,9 +1398,13 @@ function loadFromSheets() {
         window[n] = function(r) {
             if (r.status !== 'ok') { delete window[n]; return; }
             const arr = r.table.rows.map(row => { const o = {}; r.table.cols.forEach((c, i) => { const v = row.c[i]; o[c.label || c.id] = v ? (v.v != null ? String(v.v) : '') : ''; }); return o; });
-            if (tab === 'Deals') deals = arr;
-            if (tab === 'Feedback') feedback = arr;
-            if (tab === 'Conversations') conversations = arr;
+            if (tab === 'Deals') deals = mergeSheetAndLocal(arr, deals, 'Deal Name');
+            if (tab === 'Feedback') feedback = mergeSheetAndLocal(arr, feedback, '_fb_key');
+            if (tab === 'Conversations') conversations = mergeSheetAndLocal(arr, conversations, 'Contact Name');
+            saveLocalData();
+            // Re-render if we're on events or detail screen
+            if (document.getElementById('screen-events').classList.contains('active')) renderEvents();
+            if (document.getElementById('screen-detail').classList.contains('active') && currentEvent) openDetail(currentEvent.id);
             delete window[n];
         };
         const sc = document.createElement('script');
@@ -1799,6 +1803,31 @@ function loadLocalData() {
     if (d) deals = JSON.parse(d);
     if (f) feedback = JSON.parse(f);
     if (c) conversations = JSON.parse(c);
+}
+
+// Merge sheet rows with locally-stored rows, avoiding duplicates
+function mergeSheetAndLocal(sheetArr, localArr, keyField) {
+    if (!localArr.length) return sheetArr;
+    if (!sheetArr.length) return localArr;
+    // Build a set of signatures from sheet data to detect duplicates
+    const sheetSigs = new Set(sheetArr.map(r => itemSig(r, keyField)));
+    // Add local items that don't already exist in sheet data
+    const merged = [...sheetArr];
+    localArr.forEach(r => {
+        if (!sheetSigs.has(itemSig(r, keyField))) merged.push(r);
+    });
+    return merged;
+}
+
+function itemSig(r, keyField) {
+    if (keyField === '_fb_key') {
+        // Feedback: match on event + member + rating + date
+        return [r['Event ID']||r['eventId']||'', r['Team Member']||r['teamMember']||'', r['Rating']||r['rating']||'', (r['Date']||r['date']||'').substring(0,10)].join('|').toLowerCase();
+    }
+    // Deals/Conversations: match on event + key field value
+    const eid = r['Event ID'] || r['eventId'] || '';
+    const name = r[keyField] || r[keyField.charAt(0).toLowerCase() + keyField.slice(1)] || '';
+    return (eid + '|' + name).toLowerCase();
 }
 
 async function postToScript(payload) {
