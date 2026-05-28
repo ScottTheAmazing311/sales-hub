@@ -1380,6 +1380,8 @@ function loadData() {
     if (EVENTS_GVIZ_BASE) { loadFromSheets(); } else { loadFromCSV(); }
 }
 function loadFromSheets() {
+    // Load localStorage FIRST so in-memory arrays are populated before any sheet callback fires
+    loadLocalData();
     const cb = 'handleEvt';
     window[cb] = function(r) {
         if (r.status === 'error') { loadFromCSV(); return; }
@@ -1839,7 +1841,7 @@ function itemSig(r, keyField) {
 
 async function postToScript(payload) {
     if (!APPS_SCRIPT_URL) return;
-    try { await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain' } }); }
+    try { await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', redirect: 'follow', body: JSON.stringify(payload) }); }
     catch(e) { console.warn('Apps Script error:', e); }
 }
 
