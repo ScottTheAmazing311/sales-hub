@@ -1807,9 +1807,9 @@ function loadLocalData() {
     const d = localStorage.getItem('ev-deals');
     const f = localStorage.getItem('ev-feedback');
     const c = localStorage.getItem('ev-conversations');
-    if (d) deals = JSON.parse(d);
-    if (f) feedback = JSON.parse(f);
-    if (c) conversations = JSON.parse(c);
+    if (d) deals = mergeSheetAndLocal(deals, JSON.parse(d), 'Deal Name');
+    if (f) feedback = mergeSheetAndLocal(feedback, JSON.parse(f), '_fb_key');
+    if (c) conversations = mergeSheetAndLocal(conversations, JSON.parse(c), 'Contact Name');
 }
 
 // Merge sheet rows with locally-stored rows, avoiding duplicates
