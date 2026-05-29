@@ -1172,7 +1172,7 @@ async function fetchClosedDeals() {
         const dateClosed = parseDateAny(cells[5]);
         if (!dateClosed) continue;
 
-        const sheetDirection = cellVal(cells, 10); // Column K = Pipeline Direction
+        const sheetDirection = cellVal(cells, 6); // Column G = Pipeline Direction
         const direction = getDirection(dealName, sheetDirection);
 
         allClosedDeals.push({
