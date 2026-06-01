@@ -421,6 +421,45 @@
         }
         .month-body.open { display: block; }
 
+        /* ── Month Navigator ── */
+        .month-nav {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid rgba(7,55,79,0.08);
+            padding: 0.75rem 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .month-nav.visible { display: flex; }
+        .month-nav-btn {
+            background: var(--navy);
+            color: var(--yellow);
+            border: none;
+            border-radius: 6px;
+            width: 34px;
+            height: 34px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+        .month-nav-btn:hover { opacity: 0.85; }
+        .month-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .month-nav-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--navy);
+            min-width: 160px;
+            text-align: center;
+        }
+
         /* ── Loading ── */
         .loading-state {
             text-align: center;
@@ -505,6 +544,13 @@
                 Year to Date
                 <span class="tab-range" id="ytd-range"></span>
             </button>
+        </div>
+
+        <!-- Month Navigator (visible only in MTD mode) -->
+        <div class="month-nav" id="month-nav">
+            <button class="month-nav-btn" id="month-prev" onclick="changeMonth(-1)">&#8592;</button>
+            <span class="month-nav-label" id="month-nav-label"></span>
+            <button class="month-nav-btn" id="month-next" onclick="changeMonth(1)">&#8594;</button>
         </div>
 
         <div id="loading" class="loading-state">
@@ -638,6 +684,40 @@ const TYPE_COLORS = [
 let allMeetings = [];
 let currentPeriod = 'wtd';
 let charts = {};
+let mtdMonthOffset = 0; // 0 = current month, -1 = last month, etc.
+
+function getMtdMonth() {
+    const d = new Date(NOW.getFullYear(), NOW.getMonth() + mtdMonthOffset, 1);
+    return d;
+}
+
+function changeMonth(dir) {
+    const next = mtdMonthOffset + dir;
+    // Don't go into the future
+    if (next > 0) return;
+    // Don't go before the earliest data (Jan of current year)
+    const earliest = new Date(NOW.getFullYear(), 0, 1);
+    const target = new Date(NOW.getFullYear(), NOW.getMonth() + next, 1);
+    if (target < earliest) return;
+    mtdMonthOffset = next;
+    render();
+}
+
+function updateMonthNav() {
+    const nav = document.getElementById('month-nav');
+    if (currentPeriod !== 'mtd') {
+        nav.classList.remove('visible');
+        return;
+    }
+    nav.classList.add('visible');
+    const m = getMtdMonth();
+    const label = document.getElementById('month-nav-label');
+    label.textContent = formatMonthYear(m);
+    document.getElementById('month-next').disabled = (mtdMonthOffset >= 0);
+    // Disable prev if we'd go before earliest data year
+    const prevMonth = new Date(NOW.getFullYear(), NOW.getMonth() + mtdMonthOffset - 1, 1);
+    document.getElementById('month-prev').disabled = (prevMonth.getFullYear() < NOW.getFullYear() - 1);
+}
 
 // ── Fetch a Google Sheet and parse rows ──
 async function fetchSheet(url) {
@@ -768,7 +848,13 @@ function getPeriodRange() {
     const yearStart = getYearStart(NOW);
 
     if (currentPeriod === 'wtd') return { start: monday, end: NOW };
-    if (currentPeriod === 'mtd') return { start: monthStart, end: NOW };
+    if (currentPeriod === 'mtd') {
+        const m = getMtdMonth();
+        const mStart = new Date(m.getFullYear(), m.getMonth(), 1);
+        // If viewing current month, end is NOW; if past month, end is last day of that month
+        const mEnd = (mtdMonthOffset === 0) ? NOW : new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59, 999);
+        return { start: mStart, end: mEnd };
+    }
     if (currentPeriod === 'wow') {
         const start = new Date(monday);
         start.setDate(start.getDate() - 7 * 51);
@@ -907,9 +993,19 @@ function render() {
     wowStart.setDate(wowStart.getDate() - 7 * 51);
 
     document.getElementById('wtd-range').textContent = formatShort(monday) + ' – ' + formatShort(NOW);
-    document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
+    // MTD range reflects selected month
+    const mtdRange = getPeriodRange();
+    if (currentPeriod === 'mtd') {
+        const m = getMtdMonth();
+        const mEnd = (mtdMonthOffset === 0) ? NOW : new Date(m.getFullYear(), m.getMonth() + 1, 0);
+        document.getElementById('mtd-range').textContent = formatShort(new Date(m.getFullYear(), m.getMonth(), 1)) + ' – ' + formatShort(mEnd);
+    } else {
+        document.getElementById('mtd-range').textContent = formatShort(monthStart) + ' – ' + formatShort(NOW);
+    }
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
     document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
+
+    updateMonthNav();
 
     if (currentPeriod === 'wow') {
         dashboard.innerHTML = renderWoW();
@@ -1443,6 +1539,7 @@ document.querySelectorAll('.period-tab').forEach(tab => {
         document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentPeriod = tab.dataset.period;
+        if (currentPeriod !== 'mtd') mtdMonthOffset = 0;
         render();
     });
 });
