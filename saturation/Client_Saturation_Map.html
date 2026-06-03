@@ -578,42 +578,43 @@ function fetchSheetData() {
     window.handleSheetData = function(response) {
       try {
         const table = response.table;
-        const headers = table.cols.map(c => c.label);
+        // Columns by index: 0=City, 1=State, 2=Total Clients, 3=PI-MVA Count,
+        // 4=PI-Other Count, 5=Non-PI Count, 6=Saturation Level, 7=PI-MVA MRR,
+        // 8=PI-MVA Competitors, 9=Under 10k
         const cities = table.rows.map(row => {
-          const get = (name) => {
-            const idx = headers.indexOf(name);
-            if (idx === -1) return '';
-            const cell = row.c[idx];
-            return cell ? (cell.v != null ? String(cell.v) : '') : '';
+          const cell = (idx) => {
+            const c = row.c && row.c[idx];
+            return c && c.v != null ? c.v : '';
           };
 
-          const city = get('City');
-          const state = get('State');
+          const city = String(cell(0));
+          const state = String(cell(1));
+          if (!city) return null;
           const key = `${city}, ${state}`;
           const geo = GEO[key];
-          const satLevel = parseInt(get('Saturation Level')) || 1;
-          const piMvaRaw = get('PI-MVA Competitors');
+          const satLevel = parseInt(cell(6)) || 1;
+          const piMvaRaw = String(cell(8) || '');
           const piMvaCompetitors = piMvaRaw ? piMvaRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-          const under10kRaw = get('Under 10k');
+          const under10kRaw = String(cell(9) || '');
           const under10kList = under10kRaw ? under10kRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
           const under10kSet = new Set(under10kList.map(s => s.toLowerCase()));
-          const mrrRaw = get('PI-MVA MRR');
-          const mrr = mrrRaw || '';
+          const mrrVal = cell(7);
+          const mrr = mrrVal ? '$' + Number(mrrVal).toLocaleString() : '';
 
           return {
             city, state, key,
             lat: geo ? geo[0] : null,
             lng: geo ? geo[1] : null,
-            count: parseInt(get('Total Clients')) || 0,
-            piMva: parseInt(get('PI-MVA Count')) || 0,
-            piOther: parseInt(get('PI-Other Count')) || 0,
-            nonPi: parseInt(get('Non-PI Count')) || 0,
+            count: parseInt(cell(2)) || 0,
+            piMva: parseInt(cell(3)) || 0,
+            piOther: parseInt(cell(4)) || 0,
+            nonPi: parseInt(cell(5)) || 0,
             saturation: SAT_LEVELS[satLevel] || 'Low',
             clients: piMvaCompetitors,
             under10k: under10kSet,
             mrr: mrr,
           };
-        }).filter(c => c.lat !== null && c.count > 0);
+        }).filter(c => c && c.lat !== null && c.count > 0);
         resolve(cities);
       } catch(e) { reject(e); }
     };
