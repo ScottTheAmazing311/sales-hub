@@ -33,6 +33,15 @@ function doPost(e) {
       case 'addConversation':
         result = addConversation(ss, data);
         break;
+      case 'deleteDeal':
+        result = deleteRow(ss, 'Deals', data.eventId, 'Deal Name', data.dealName);
+        break;
+      case 'deleteFeedback':
+        result = deleteRow(ss, 'Feedback', data.eventId, 'Team Member', data.teamMember);
+        break;
+      case 'deleteConversation':
+        result = deleteRow(ss, 'Conversations', data.eventId, 'Contact Name', data.contactName);
+        break;
       default:
         return buildResponse(400, { error: 'Unknown action: ' + data.action });
     }
@@ -43,6 +52,29 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function deleteRow(ss, sheetName, eventId, nameCol, nameVal) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return { success: false, error: 'Sheet not found: ' + sheetName };
+
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var eidIdx = headers.indexOf('Event ID');
+  var nameIdx = headers.indexOf(nameCol);
+
+  if (eidIdx === -1 || nameIdx === -1) return { success: false, error: 'Column not found' };
+
+  // Search from bottom to top so row indices stay valid
+  for (var i = data.length - 1; i >= 1; i--) {
+    if (String(data[i][eidIdx]).toLowerCase() === String(eventId).toLowerCase() &&
+        String(data[i][nameIdx]).toLowerCase() === String(nameVal).toLowerCase()) {
+      sheet.deleteRow(i + 1); // sheets are 1-indexed
+      return { success: true, type: 'delete', sheet: sheetName };
+    }
+  }
+
+  return { success: false, error: 'Row not found' };
 }
 
 function addEvent(ss, data) {

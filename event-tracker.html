@@ -1239,7 +1239,7 @@
 // ═══════════════════════════════════════
 // Config
 // ═══════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLO7rZjaqLtjHJ6vU-rPBOFtkHHPuPQSihhB64fHZFuQKSIeCw6humf9S9lFk5Xz1uTw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxt4suYQaHCRSgizMWL6GfUHWbXCviNRmIrs3l_qp_SYBstz84v16sZy6p01JM0_U3m/exec';
 const EVENTS_SHEET_ID = '1PqbcVAfi2bs7fLUb4cJW5pRLxauU1cI5SeVzJn5Vn50';
 const EVENTS_GVIZ_BASE = EVENTS_SHEET_ID ? `https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/gviz/tq` : '';
 
@@ -1901,18 +1901,30 @@ function submitFeedback() {
 // ═══════════════════════════════════════
 function deleteDeal(i) {
     if (!confirm('Delete this deal?')) return;
+    const d = deals[i];
+    if (d && currentEvent) {
+        postToScript({ action: 'deleteDeal', eventId: currentEvent.id, dealName: d['Deal Name'] || d['dealName'] || '' });
+    }
     deals.splice(i, 1);
     saveLocalData();
     openDetail(currentEvent.id);
 }
 function deleteConvo(i) {
     if (!confirm('Delete this connection?')) return;
+    const c = conversations[i];
+    if (c && currentEvent) {
+        postToScript({ action: 'deleteConversation', eventId: currentEvent.id, contactName: c['Contact Name'] || c['contactName'] || '' });
+    }
     conversations.splice(i, 1);
     saveLocalData();
     openDetail(currentEvent.id);
 }
 function deleteFeedback(i) {
     if (!confirm('Delete this feedback?')) return;
+    const f = feedback[i];
+    if (f && currentEvent) {
+        postToScript({ action: 'deleteFeedback', eventId: currentEvent.id, teamMember: f['Team Member'] || f['teamMember'] || '' });
+    }
     feedback.splice(i, 1);
     saveLocalData();
     openDetail(currentEvent.id);
