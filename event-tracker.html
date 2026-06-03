@@ -957,7 +957,7 @@
             <div class="form-grid three" style="margin-bottom:0.5rem;">
                 <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
                     <select id="new-ev-attendee-sel" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;">
-                        <option value="">Add attendee...</option>
+                        <option value="">Select team member...</option>
                         <option>Danny Define</option>
                         <option>Tyler Farr</option>
                         <option>Brandon Steed</option>
@@ -969,6 +969,8 @@
                         <option>Sonya Palmer</option>
                         <option>Britt Wilson</option>
                     </select>
+                    <span style="font-size:0.75rem;color:var(--text-muted);">or</span>
+                    <input type="text" id="new-ev-attendee-custom" placeholder="Type a name..." style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;width:140px;">
                     <button type="button" class="btn-sm" onclick="addAttendee()" style="padding:0.35rem 0.7rem;">+ Add</button>
                 </div>
                 <div id="new-ev-attendees-chips" style="display:flex;gap:0.4rem;flex-wrap:wrap;min-height:1.5rem;"></div>
@@ -1041,7 +1043,7 @@
         <div class="form-grid three" style="margin-bottom:0.5rem;">
             <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
                 <select id="edit-ev-attendee-sel" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;">
-                    <option value="">Add attendee...</option>
+                    <option value="">Select team member...</option>
                     <option>Danny Define</option>
                     <option>Tyler Farr</option>
                     <option>Brandon Steed</option>
@@ -1053,6 +1055,8 @@
                     <option>Sonya Palmer</option>
                     <option>Britt Wilson</option>
                 </select>
+                <span style="font-size:0.75rem;color:var(--text-muted);">or</span>
+                <input type="text" id="edit-ev-attendee-custom" placeholder="Type a name..." style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;width:140px;">
                 <button type="button" class="btn-sm" onclick="addEditAttendee()" style="padding:0.35rem 0.7rem;">+ Add</button>
             </div>
             <div id="edit-ev-attendees-chips" style="display:flex;gap:0.4rem;flex-wrap:wrap;min-height:1.5rem;grid-column:span 2;"></div>
@@ -2242,10 +2246,12 @@ function toDateInput(raw) {
 
 function addEditAttendee() {
     const sel = document.getElementById('edit-ev-attendee-sel');
-    const name = sel.value;
-    if (!name || editAttendees.includes(name)) { sel.value = ''; return; }
+    const custom = document.getElementById('edit-ev-attendee-custom');
+    const name = (sel.value || custom.value.trim());
+    if (!name || editAttendees.includes(name)) { sel.value = ''; custom.value = ''; return; }
     editAttendees.push(name);
     sel.value = '';
+    custom.value = '';
     renderEditAttendeeChips();
 }
 
@@ -2343,10 +2349,12 @@ function applyEventEdits() {
 let selectedAttendees = [];
 function addAttendee() {
     const sel = document.getElementById('new-ev-attendee-sel');
-    const name = sel.value;
-    if (!name || selectedAttendees.includes(name)) { sel.value = ''; return; }
+    const custom = document.getElementById('new-ev-attendee-custom');
+    const name = (sel.value || custom.value.trim());
+    if (!name || selectedAttendees.includes(name)) { sel.value = ''; custom.value = ''; return; }
     selectedAttendees.push(name);
     sel.value = '';
+    custom.value = '';
     renderAttendeeChips();
 }
 function removeAttendee(name) {
