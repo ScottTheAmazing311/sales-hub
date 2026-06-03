@@ -1862,7 +1862,7 @@ function renderDetailFeedback(arr) {
         const notesHtml = needsTrunc
             ? `<span id="${truncId}-short">${notes.substring(0, truncLen)}… <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-short').style.display='none';document.getElementById('${truncId}-full').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">more</a></span><span id="${truncId}-full" style="display:none;">${notes} <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-full').style.display='none';document.getElementById('${truncId}-short').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">less</a></span>`
             : notes;
-        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${tierBadge(conn)}</td><td>${tierBadge(exp)}</td><td>${tierBadge(imp)}</td><td style="white-space:normal;max-width:200px;">${notesHtml}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
+        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${tierBadge(conn)}</td><td>${tierBadge(exp)}</td><td>${tierBadge(imp)}</td><td style="white-space:normal;max-width:200px;">${notesHtml}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn edit" onclick="editFeedback(${i})">edit</button><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
@@ -2003,6 +2003,44 @@ function deleteFeedback(i) {
         postToScript({ action: 'deleteFeedback', eventId: currentEvent.id, teamMember: f['Team Member'] || f['teamMember'] || '' });
     }
     feedback.splice(i, 1);
+    saveLocalData();
+    openDetail(currentEvent.id);
+}
+
+function editFeedback(i) {
+    const f = feedback[i];
+    if (!f) return;
+    const conn = f['Connections']||f['connections']||f['Rating']||f['rating']||'';
+    const exp = f['Experience']||f['experience']||'';
+    const imp = f['Impact']||f['impact']||'';
+    const notes = f['Notes']||f['notes']||'';
+    const rows = document.querySelectorAll('#feedback-wrap tbody tr');
+    const row = rows[getFeedback(currentEvent.id).indexOf(f)];
+    if (!row) return;
+    row.classList.add('editing-row');
+    const tierOpts = (sel) => ['S','A','B','C','D'].map(t => `<option value="${t}"${t===sel.toUpperCase()?' selected':''}>${t}-Tier</option>`).join('');
+    row.innerHTML = `
+        <td>${esc(f['Team Member']||f['teamMember']||'')}</td>
+        <td><select id="edit-fb-conn-${i}" class="tier-select">${tierOpts(conn)}</select></td>
+        <td><select id="edit-fb-exp-${i}" class="tier-select">${tierOpts(exp)}</select></td>
+        <td><select id="edit-fb-imp-${i}" class="tier-select">${tierOpts(imp)}</select></td>
+        <td><textarea id="edit-fb-notes-${i}" style="width:100%;min-height:40px;font-size:0.8rem;font-family:inherit;padding:0.3rem;border:1px solid rgba(7,55,79,0.15);border-radius:4px;">${esc(notes)}</textarea></td>
+        <td colspan="2" class="row-actions">
+            <button class="row-btn edit" onclick="saveFeedbackEdit(${i})">save</button>
+            <button class="row-btn del" onclick="openDetail(currentEvent.id)">cancel</button>
+        </td>`;
+}
+function saveFeedbackEdit(i) {
+    const f = feedback[i];
+    if (!f) return;
+    f['Connections'] = document.getElementById('edit-fb-conn-' + i).value;
+    f['connections'] = f['Connections'];
+    f['Experience'] = document.getElementById('edit-fb-exp-' + i).value;
+    f['experience'] = f['Experience'];
+    f['Impact'] = document.getElementById('edit-fb-imp-' + i).value;
+    f['impact'] = f['Impact'];
+    f['Notes'] = document.getElementById('edit-fb-notes-' + i).value.trim();
+    f['notes'] = f['Notes'];
     saveLocalData();
     openDetail(currentEvent.id);
 }
