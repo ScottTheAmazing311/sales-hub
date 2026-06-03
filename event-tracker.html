@@ -273,6 +273,20 @@
         .month-section {
             margin-bottom: 2.5rem;
         }
+        .month-section.collapsed .month-grid {
+            display: none;
+        }
+        .month-section.collapsed .month-header {
+            opacity: 0.6;
+            border-bottom-color: rgba(7,55,79,0.12);
+            margin-bottom: 0;
+        }
+        .month-toggle {
+            background: none; border: none; cursor: pointer; padding: 0.2rem;
+            display: flex; align-items: center; color: var(--navy); transition: transform 0.2s;
+        }
+        .month-toggle svg { width: 18px; height: 18px; fill: currentColor; }
+        .month-section.collapsed .month-toggle { transform: rotate(-90deg); }
         .month-header {
             display: flex;
             align-items: baseline;
@@ -280,6 +294,8 @@
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 3px solid var(--yellow);
+            cursor: pointer;
+            user-select: none;
         }
         .month-name {
             font-family: 'Barlow Condensed', sans-serif;
@@ -1633,12 +1649,16 @@ function renderEvents() {
     let html = '';
     // Order months properly
     const monthOrder = ['January','February','March','April','May','June','July','August','September','October','November','December','TBD'];
+    const currentMonthIdx = new Date().getMonth(); // 0-based
     monthOrder.forEach(month => {
         const evts = groups[month];
         if (!evts) return;
         const monthSpend = evts.reduce((s, e) => s + e.totalCost, 0);
-        html += `<div class="month-section">
-            <div class="month-header">
+        const monthIdx = monthOrder.indexOf(month);
+        const isPast = month !== 'TBD' && monthIdx < currentMonthIdx;
+        html += `<div class="month-section${isPast ? ' collapsed' : ''}" id="month-${month}">
+            <div class="month-header" onclick="toggleMonth('${month}')">
+                <button class="month-toggle"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></button>
                 <span class="month-name">${month}</span>
                 <span class="month-count">${evts.length} event${evts.length > 1 ? 's' : ''}</span>
                 <span class="month-spend">${fmt(monthSpend)}</span>
@@ -1700,6 +1720,11 @@ function renderEvents() {
     });
     container.innerHTML = html;
     renderThisWeek();
+}
+
+function toggleMonth(month) {
+    const el = document.getElementById('month-' + month);
+    if (el) el.classList.toggle('collapsed');
 }
 
 // ═══════════════════════════════════════
