@@ -619,10 +619,17 @@
             padding: 0.5rem 1rem; background: transparent; color: var(--text-muted);
             border: 1px solid rgba(7,55,79,0.15); border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; cursor: pointer;
         }
-        .star-rating { display: inline-flex; gap: 4px; direction: rtl; }
-        .star-rating input { display: none; }
-        .star-rating label { font-size: 1.5rem; color: #ddd; cursor: pointer; transition: color 0.15s; }
-        .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: var(--yellow-warm); }
+        .tier-select { padding: 0.4rem 0.5rem; border: 1px solid rgba(7,55,79,0.15); border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.8rem; background: #fff; min-width: 80px; }
+        .tier-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; }
+        .tier-S { background: #eaff6a; color: var(--navy); }
+        .tier-A { background: #22c55e; color: #fff; }
+        .tier-B { background: #3b82f6; color: #fff; }
+        .tier-C { background: #f59e0b; color: #fff; }
+        .tier-D { background: #ef4444; color: #fff; }
+        .tier- { background: #e5e5e5; color: #999; }
+        .rating-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .rating-row { display: flex; align-items: center; gap: 0.75rem; }
+        .rating-label { font-size: 0.78rem; color: var(--text-muted); min-width: 90px; font-weight: 600; }
 
         /* ══════════════════════════════════════════
            SCREEN 4: Dashboard
@@ -1180,14 +1187,41 @@
                             <option>Britt Wilson</option>
                         </select>
                     </div>
-                    <div class="form-row" style="align-items:center;gap:1rem;">
-                        <span style="font-size:0.8rem;color:var(--text-muted);">Rating:</span>
-                        <div class="star-rating">
-                            <input type="radio" name="rating" id="star5" value="5"><label for="star5">&#9733;</label>
-                            <input type="radio" name="rating" id="star4" value="4"><label for="star4">&#9733;</label>
-                            <input type="radio" name="rating" id="star3" value="3"><label for="star3">&#9733;</label>
-                            <input type="radio" name="rating" id="star2" value="2"><label for="star2">&#9733;</label>
-                            <input type="radio" name="rating" id="star1" value="1"><label for="star1">&#9733;</label>
+                    <div class="form-row">
+                        <div class="rating-group">
+                            <div class="rating-row">
+                                <span class="rating-label">Connections</span>
+                                <select id="feedback-connections" class="tier-select">
+                                    <option value="">Select tier...</option>
+                                    <option value="S">S-Tier</option>
+                                    <option value="A">A-Tier</option>
+                                    <option value="B">B-Tier</option>
+                                    <option value="C">C-Tier</option>
+                                    <option value="D">D-Tier</option>
+                                </select>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">Experience</span>
+                                <select id="feedback-experience" class="tier-select">
+                                    <option value="">Select tier...</option>
+                                    <option value="S">S-Tier</option>
+                                    <option value="A">A-Tier</option>
+                                    <option value="B">B-Tier</option>
+                                    <option value="C">C-Tier</option>
+                                    <option value="D">D-Tier</option>
+                                </select>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">Impact</span>
+                                <select id="feedback-impact" class="tier-select">
+                                    <option value="">Select tier...</option>
+                                    <option value="S">S-Tier</option>
+                                    <option value="A">A-Tier</option>
+                                    <option value="B">B-Tier</option>
+                                    <option value="C">C-Tier</option>
+                                    <option value="D">D-Tier</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="form-row"><textarea id="feedback-notes" placeholder="Notes / takeaways from the event"></textarea></div>
@@ -1808,11 +1842,19 @@ function renderDetailConvos(arr) {
         return `<tr><td><span class="status-badge status-attending" style="font-size:0.6rem;">${esc(type)}</span></td><td>${esc(c['Contact Name']||c['contactName']||'')}</td><td>${esc(c['Firm Name']||c['firmName']||'')}</td><td style="white-space:normal;max-width:200px;">${esc(c['Notes']||c['notes']||'')}</td><td>${esc(fu)}</td><td class="row-actions"><button class="row-btn edit" onclick="editConvo(${i})">edit</button><button class="row-btn del" onclick="deleteConvo(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
+function tierBadge(val) {
+    const v = (val || '').toUpperCase();
+    if (!v) return '—';
+    return `<span class="tier-badge tier-${v}">${v}</span>`;
+}
 function renderDetailFeedback(arr) {
     const w = document.getElementById('feedback-wrap');
     if (!arr.length) { w.innerHTML = '<div class="empty-state">No feedback yet.</div>'; return; }
-    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Rating</th><th>Notes</th><th>Date</th><th></th></tr></thead><tbody>${arr.map((f, idx) => {
+    w.innerHTML = `<table class="mini-table"><thead><tr><th>Member</th><th>Connections</th><th>Experience</th><th>Impact</th><th>Notes</th><th>Date</th><th></th></tr></thead><tbody>${arr.map((f, idx) => {
         const i = fbIdx(f);
+        const conn = f['Connections']||f['connections']||f['Rating']||f['rating']||'';
+        const exp = f['Experience']||f['experience']||'';
+        const imp = f['Impact']||f['impact']||'';
         const notes = esc(f['Notes']||f['notes']||'');
         const truncLen = 80;
         const needsTrunc = notes.length > truncLen;
@@ -1820,7 +1862,7 @@ function renderDetailFeedback(arr) {
         const notesHtml = needsTrunc
             ? `<span id="${truncId}-short">${notes.substring(0, truncLen)}… <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-short').style.display='none';document.getElementById('${truncId}-full').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">more</a></span><span id="${truncId}-full" style="display:none;">${notes} <a href="#" onclick="event.preventDefault();document.getElementById('${truncId}-full').style.display='none';document.getElementById('${truncId}-short').style.display='inline';" style="color:var(--navy);font-weight:600;font-size:0.75rem;">less</a></span>`
             : notes;
-        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${'&#9733;'.repeat(parseInt(f['Rating']||f['rating']||0))}</td><td style="white-space:normal;max-width:250px;">${notesHtml}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
+        return `<tr><td>${esc(f['Team Member']||f['teamMember']||'')}</td><td>${tierBadge(conn)}</td><td>${tierBadge(exp)}</td><td>${tierBadge(imp)}</td><td style="white-space:normal;max-width:200px;">${notesHtml}</td><td>${f['Date']||f['date']||'—'}</td><td class="row-actions"><button class="row-btn del" onclick="deleteFeedback(${i})">x</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
@@ -1859,8 +1901,8 @@ function mergeSheetAndLocal(sheetArr, localArr, keyField) {
 
 function itemSig(r, keyField) {
     if (keyField === '_fb_key') {
-        // Feedback: match on event + member + rating + date
-        return [r['Event ID']||r['eventId']||'', r['Team Member']||r['teamMember']||'', r['Rating']||r['rating']||'', (r['Date']||r['date']||'').substring(0,10)].join('|').toLowerCase();
+        // Feedback: match on event + member + date
+        return [r['Event ID']||r['eventId']||'', r['Team Member']||r['teamMember']||'', (r['Date']||r['date']||'').substring(0,10)].join('|').toLowerCase();
     }
     // Deals/Conversations: match on event + key field value
     const eid = r['Event ID'] || r['eventId'] || '';
@@ -1912,17 +1954,23 @@ function submitFeedback() {
     if (!currentEvent) return;
     const btn = document.querySelector('#feedback-form .btn-submit');
     const member = document.getElementById('feedback-member').value;
-    const rEl = document.querySelector('input[name="rating"]:checked');
+    const connections = document.getElementById('feedback-connections').value;
+    const experience = document.getElementById('feedback-experience').value;
+    const impact = document.getElementById('feedback-impact').value;
     const notes = document.getElementById('feedback-notes').value.trim();
     if (!member) return alert('Select a team member.');
-    if (!rEl) return alert('Select a rating.');
+    if (!connections || !experience || !impact) return alert('Select a tier for all three ratings.');
     btn.disabled = true;
-    feedback.push({ 'Event ID': currentEvent.id, 'Team Member': member, 'Rating': rEl.value, 'Notes': notes, 'Date': new Date().toISOString().split('T')[0] });
+    feedback.push({ 'Event ID': currentEvent.id, 'Team Member': member, 'Connections': connections, 'Experience': experience, 'Impact': impact, 'Notes': notes, 'Date': new Date().toISOString().split('T')[0] });
     saveLocalData();
-    document.getElementById('feedback-member').value = ''; document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false); document.getElementById('feedback-notes').value = '';
+    document.getElementById('feedback-member').value = '';
+    document.getElementById('feedback-connections').value = '';
+    document.getElementById('feedback-experience').value = '';
+    document.getElementById('feedback-impact').value = '';
+    document.getElementById('feedback-notes').value = '';
     toggleForm('feedback-form'); openDetail(currentEvent.id);
     btn.disabled = false;
-    postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, rating: parseInt(rEl.value), notes });
+    postToScript({ action: 'addFeedback', eventId: currentEvent.id, teamMember: member, connections, experience, impact, notes });
 }
 
 // ═══════════════════════════════════════

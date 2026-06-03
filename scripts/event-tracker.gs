@@ -119,12 +119,14 @@ function addDeal(ss, data) {
 function addFeedback(ss, data) {
   var sheet = ss.getSheetByName('Feedback') || ss.insertSheet('Feedback');
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['Event ID', 'Team Member', 'Rating', 'Notes', 'Date']);
+    sheet.appendRow(['Event ID', 'Team Member', 'Connections', 'Experience', 'Impact', 'Notes', 'Date']);
   }
   sheet.appendRow([
     data.eventId,
     data.teamMember,
-    data.rating,
+    data.connections || '',
+    data.experience || '',
+    data.impact || '',
     data.notes || '',
     new Date().toISOString()
   ]);
