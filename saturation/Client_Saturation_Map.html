@@ -798,12 +798,23 @@ async function init() {
     const otherW = total ? (d.piOther / total * 100) : 0;
     const nonW = total ? (d.nonPi / total * 100) : 0;
 
-    const clientListHtml = d.clients.length
-      ? d.clients.map(c => {
-          const isSmall = d.under10k.has(c.toLowerCase());
-          return `<li><span class="client-name-mva">${c}</span>${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}</li>`;
-        }).join('')
-      : '<li style="color:rgba(245,245,240,0.4)">No client names available</li>';
+    // Build full client list: PI-MVA (named), PI-Other (unnamed), Non-PI (unnamed)
+    let clientListHtml = '';
+    if (d.clients.length) {
+      clientListHtml += d.clients.map(c => {
+        const isSmall = d.under10k.has(c.toLowerCase());
+        return `<li><span class="client-name-mva">${c}</span>${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}</li>`;
+      }).join('');
+    }
+    for (let i = 0; i < d.piOther; i++) {
+      clientListHtml += `<li><span class="client-name-other">PI-Other Client ${d.piOther > 1 ? (i+1) : ''}</span></li>`;
+    }
+    for (let i = 0; i < d.nonPi; i++) {
+      clientListHtml += `<li><span class="client-name-nonpi">Non-PI Client ${d.nonPi > 1 ? (i+1) : ''}</span></li>`;
+    }
+    if (!clientListHtml) {
+      clientListHtml = '<li style="color:rgba(245,245,240,0.4)">No client names available</li>';
+    }
 
     det.innerHTML = `
       <div class="detail-city">${d.city}</div>
@@ -827,7 +838,7 @@ async function init() {
           ${d.nonPi ? `<div class="pa-bar-item"><div class="pa-bar-dot" style="background:var(--non-pi)"></div>${d.nonPi} Non-PI</div>` : ''}
         </div>
       </div>
-      <div class="clients-header">PI-MVA Clients</div>
+      <div class="clients-header">All Clients (${d.count})</div>
       <ul class="client-list">${clientListHtml}</ul>
     `;
   }
