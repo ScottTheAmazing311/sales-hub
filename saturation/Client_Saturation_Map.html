@@ -362,6 +362,18 @@
     gap: 6px;
   }
   .client-list li:last-child { border-bottom: none; }
+  .client-name-mva {
+    border-bottom: 2px solid var(--pi-mva);
+    padding-bottom: 1px;
+  }
+  .client-name-other {
+    border-bottom: 2px solid var(--pi-other);
+    padding-bottom: 1px;
+  }
+  .client-name-nonpi {
+    border-bottom: 2px solid var(--non-pi);
+    padding-bottom: 1px;
+  }
   .small-badge {
     display: inline-flex;
     align-items: center;
@@ -789,7 +801,7 @@ async function init() {
     const clientListHtml = d.clients.length
       ? d.clients.map(c => {
           const isSmall = d.under10k.has(c.toLowerCase());
-          return `<li><span>${c}</span>${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}</li>`;
+          return `<li><span class="client-name-mva">${c}</span>${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}</li>`;
         }).join('')
       : '<li style="color:rgba(245,245,240,0.4)">No client names available</li>';
 
