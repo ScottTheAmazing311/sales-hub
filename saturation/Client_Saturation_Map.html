@@ -565,6 +565,7 @@
 // Google Sheet data source
 const SHEET_ID = '1dwjEJGbWBhynFmMdBHh8Ohj5-oDeU6ibQE-7Sf_diOE';
 const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetData`;
+const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=284342695&tqx=responseHandler:handleClientData`;
 
 // Saturation level mapping
 const SAT_LEVELS = { 4: 'Very High', 3: 'High', 2: 'Moderate', 1: 'Low' };
@@ -584,58 +585,89 @@ const SAT_BORDER = {
 // City geocoding lookup (US cities -> lat/lng)
 const GEO = {"Houston, TX":[29.76328,-95.36327],"Los Angeles, CA":[34.05223,-118.24368],"New York, NY":[40.71427,-74.00597],"San Diego, CA":[32.71571,-117.16472],"St. Louis, MO":[38.62727,-90.19789],"Austin, TX":[30.26715,-97.74306],"Chicago, IL":[41.85003,-87.65005],"Dallas, TX":[32.78306,-96.80667],"Indianapolis, IN":[39.76838,-86.15804],"San Antonio, TX":[29.42412,-98.49363],"Atlanta, GA":[33.749,-84.38798],"Denver, CO":[39.73915,-104.9847],"Miami, FL":[25.77427,-80.19366],"Milwaukee, WI":[43.0389,-87.90647],"Philadelphia, PA":[39.95238,-75.16362],"Phoenix, AZ":[33.44838,-112.07404],"Richmond, VA":[37.55376,-77.46026],"Southfield, MI":[42.47337,-83.22187],"Tampa, FL":[27.94752,-82.45843],"Albuquerque, NM":[35.08449,-106.65114],"Bakersfield, CA":[35.37329,-119.01871],"Baltimore, MD":[39.29038,-76.61219],"Bloomfield Hills, MI":[42.58364,-83.2455],"Boca Raton, FL":[26.35869,-80.0831],"Cincinnati, OH":[39.12711,-84.51439],"Fort Worth, TX":[32.72541,-97.32085],"Kansas City, MO":[39.09973,-94.57857],"Las Vegas, NV":[36.17497,-115.13722],"Orlando, FL":[28.53834,-81.37924],"Pasadena, CA":[34.14778,-118.14452],"Pensacola, FL":[30.42131,-87.21691],"Portland, OR":[45.52345,-122.67621],"Reno, NV":[39.52963,-119.8138],"Santa Barbara, CA":[34.42083,-119.69819],"Spokane, WA":[47.65966,-117.42908],"St. Petersburg, FL":[27.77086,-82.67927],"Tulsa, OK":[36.15398,-95.99277],"West Palm Beach, FL":[26.71534,-80.05337],"Abilene, TX":[32.44874,-99.73314],"Abington, PA":[40.12067,-75.11795],"Alpharetta, GA":[34.07538,-84.29409],"Altadena, CA":[34.18973,-118.13118],"Altamonte Springs, FL":[28.66111,-81.36562],"Anchorage, AK":[61.21806,-149.90028],"Arlington, TX":[32.73569,-97.10807],"Augusta, GA":[33.47097,-81.97484],"Barrington, IL":[42.15364,-88.13674],"Baton Rouge, LA":[30.44332,-91.18747],"Beaufort, NC":[34.71793,-76.66382],"Bellaire, TX":[29.70579,-95.45883],"Bethlehem, PA":[40.62593,-75.37046],"Billings, MT":[45.78329,-108.50069],"Bloomfield, MO":[36.88589,-89.92843],"Booneville, MS":[34.6626,-88.56671],"Boston, MA":[42.35843,-71.05977],"Boynton Beach, FL":[26.52535,-80.06643],"Brandon, FL":[27.9378,-82.28592],"Bronx, NY":[40.84985,-73.86641],"Buffalo, NY":[42.88645,-78.87837],"Cape Girardeau, MO":[37.30588,-89.51815],"Carlsbad, CA":[33.15809,-117.35059],"Charleston, SC":[32.77632,-79.93275],"Charlotte, NC":[35.22709,-80.84313],"Clearwater, FL":[27.96585,-82.8001],"Clifton, NJ":[40.85843,-74.16376],"Clinton, MA":[42.41676,-71.68311],"Colorado Springs, CO":[38.83388,-104.82136],"Columbia, SC":[34.00071,-81.03481],"Coral Gables, FL":[25.72149,-80.26838],"Coral Springs, FL":[26.27119,-80.2706],"Dana Point, CA":[33.46697,-117.69811],"Denton, TX":[33.21484,-97.13307],"Doral, FL":[25.81954,-80.35533],"Downey, CA":[33.94001,-118.13257],"Draper, UT":[40.52467,-111.86382],"East Lansing, MI":[42.73698,-84.48387],"Elmhurst, NY":[40.73649,-73.87791],"Elmwood Park, NJ":[40.90399,-74.11848],"Fairlawn, OH":[41.13339,-81.61956],"Fargo, ND":[46.87719,-96.7898],"Federal Way, WA":[47.32232,-122.31262],"Fishers, IN":[39.95559,-86.01387],"Fort Lauderdale, FL":[26.12231,-80.14338],"Fort Lee, NJ":[40.85093,-73.97014],"Frederick, MD":[39.41427,-77.41054],"Gainesville, FL":[29.65163,-82.32483],"Gainesville, GA":[34.29788,-83.82407],"Greenville, SC":[34.85262,-82.39401],"Greenwood Village, CO":[39.61721,-104.95081],"Hackensack, NJ":[40.88593,-74.04347],"Hamilton Township, NJ":[40.21039,-74.65237],"Hartford, CT":[41.76371,-72.68509],"Holland, MI":[42.78752,-86.10893],"Holtsville, NY":[40.81538,-73.04511],"Hudson, WI":[44.97468,-92.7566],"Hutchinson, KS":[38.06084,-97.92977],"Indiana, PA":[40.62146,-79.15281],"Jackson, MS":[32.29876,-90.18481],"Jefferson City, MO":[38.5767,-92.17352],"Jupiter, FL":[26.93422,-80.09421],"Katy, TX":[29.78579,-95.8244],"Kennesaw, GA":[34.02343,-84.61549],"Lafayette, IN":[40.4167,-86.87529],"Lakewood Township, NJ":[40.09789,-74.21764],"Lexington, KY":[37.98869,-84.47772],"Longmont, CO":[40.16721,-105.10193],"Los Gatos, CA":[37.22661,-121.97468],"Lugoff, SC":[34.21737,-80.6915],"Lutz, FL":[28.15112,-82.46148],"Macon, GA":[32.84069,-83.6324],"Marion, IL":[37.73061,-88.93313],"Mclean, VA":[38.93428,-77.17748],"Mesa, AZ":[33.42227,-111.82264],"Middletown, CT":[41.56232,-72.65065],"Mill Valley, CA":[37.90605,-122.54498],"Nashua, NH":[42.76537,-71.46757],"New Albany, IN":[38.28562,-85.82413],"New Orleans, LA":[29.95465,-90.07507],"North Charleston, SC":[32.85462,-79.97481],"Oakdale, MN":[44.96302,-92.96494],"Odessa, TX":[31.84568,-102.36764],"Omaha, NE":[41.25626,-95.94043],"Ontario, CA":[34.06334,-117.65089],"Owings Mills, MD":[39.41955,-76.78025],"Palos Heights, IL":[41.66695,-87.79616],"Pembroke Pines, FL":[26.00315,-80.22394],"Pikeville, KY":[37.47929,-82.51848],"Pittsburgh, PA":[40.44062,-79.99589],"Plantation, FL":[26.13421,-80.23184],"Pompano Beach, FL":[26.23786,-80.12477],"Port Richey, FL":[28.2717,-82.71927],"Prattville, AL":[32.46402,-86.4597],"Puyallup, WA":[47.18538,-122.2929],"Raleigh, NC":[35.7721,-78.63861],"Redding, CA":[40.58654,-122.39168],"Reisterstown, MD":[39.46976,-76.8319],"Renton, WA":[47.48288,-122.21707],"Richardson, TX":[32.94818,-96.72972],"Rockville, MD":[39.084,-77.15276],"Salt Lake City, UT":[40.76078,-111.89105],"San Angelo, TX":[31.46377,-100.43704],"San Francisco, CA":[37.77493,-122.41942],"San Jose, CA":[37.33939,-121.89496],"San Luis Obispo, CA":[35.28275,-120.65962],"Santa Monica, CA":[34.01949,-118.49138],"Santa Rosa, CA":[38.44047,-122.71443],"Sarasota, FL":[27.33643,-82.53065],"Savannah, GA":[32.08354,-81.09983],"Schaumburg, IL":[42.03336,-88.08341],"Scottsdale, AZ":[33.50921,-111.89903],"Scranton, PA":[41.40916,-75.6649],"Seattle, WA":[47.60621,-122.33207],"Sebastian, FL":[27.81641,-80.47061],"South Jordan, UT":[40.56217,-111.92966],"Springfield, MA":[42.10148,-72.58981],"Springfield, MO":[37.21533,-93.29824],"Springfield, OR":[44.04624,-123.02203],"Steamboat Springs, CO":[40.48498,-106.83171],"Stevens Point, WI":[44.52358,-89.57456],"Syosset, NY":[40.82621,-73.50207],"Tacoma, WA":[47.25288,-122.44429],"Thibodaux, LA":[29.79552,-90.82288],"Topeka, KS":[39.04833,-95.67804],"White Plains, NY":[41.03399,-73.76291],"Williamsville, NY":[42.96369,-78.73782],"Wilmington, NC":[34.23556,-77.94604],"Woodridge, IL":[41.74697,-88.05034],"Yakima, WA":[46.60207,-120.5059],"Minneapolis, MN":[44.97775,-93.26501],"Nashville, TN":[36.16589,-86.78444],"Sacramento, CA":[38.58157,-121.4944],"San Bernardino, CA":[34.10834,-117.28977],"Tucson, AZ":[32.22174,-110.92648],"Virginia Beach, VA":[36.85293,-75.97799],"Wichita, KS":[37.69224,-97.33754],"Newark, NJ":[40.73566,-74.17237],"Louisville, KY":[38.25424,-85.75941],"Memphis, TN":[35.14953,-90.04898],"Oklahoma City, OK":[35.46756,-97.51643],"Fresno, CA":[36.74773,-119.77237],"Honolulu, HI":[21.30694,-157.85833],"Birmingham, AL":[33.52066,-86.80249],"Little Rock, AR":[34.74648,-92.28959],"Boise, ID":[43.6135,-116.20345],"Des Moines, IA":[41.60054,-93.60911],"Providence, RI":[41.82399,-71.41283],"Knoxville, TN":[35.96064,-83.92074],"El Paso, TX":[31.75872,-106.48693],"Riverside, CA":[33.95335,-117.39616],"Chattanooga, TN":[35.04563,-85.30968],"Dayton, OH":[39.75895,-84.19161],"Cleveland, OH":[41.4995,-81.69541],"Columbus, OH":[39.96118,-82.99879],"Detroit, MI":[42.33143,-83.04575],"Jacksonville, FL":[30.33218,-81.65565],"Roanoke, VA":[37.27097,-79.94143],"Norfolk, VA":[36.84681,-76.28522],"Greensboro, NC":[36.07264,-79.79198],"Trenton, NJ":[40.21705,-74.74294],"Stamford, CT":[41.05343,-73.53873],"New Haven, CT":[41.30815,-72.92816],"Bridgeport, CT":[41.17923,-73.18945],"Syracuse, NY":[43.04812,-76.14742],"Rochester, NY":[43.15478,-77.61556],"Albany, NY":[42.65258,-73.75623]};
 
-// Load sheet data via JSONP (avoids CORS)
-function fetchSheetData() {
+// Load a gviz JSONP sheet
+function loadSheet(url, callbackName) {
   return new Promise((resolve, reject) => {
-    window.handleSheetData = function(response) {
-      try {
-        const table = response.table;
-        // Columns by index: 0=City, 1=State, 2=Total Clients, 3=PI-MVA Count,
-        // 4=PI-Other Count, 5=Non-PI Count, 6=Saturation Level, 7=PI-MVA MRR,
-        // 8=PI-MVA Competitors, 9=Under 10k
-        const cities = table.rows.map(row => {
-          const cell = (idx) => {
-            const c = row.c && row.c[idx];
-            return c && c.v != null ? c.v : '';
-          };
-
-          const city = String(cell(0));
-          const state = String(cell(1));
-          if (!city) return null;
-          const key = `${city}, ${state}`;
-          const geo = GEO[key];
-          const satLevel = parseInt(cell(6)) || 1;
-          const piMvaRaw = String(cell(8) || '');
-          const piMvaCompetitors = piMvaRaw ? piMvaRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-          const under10kRaw = String(cell(9) || '');
-          const under10kList = under10kRaw ? under10kRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-          const under10kSet = new Set(under10kList.map(s => s.toLowerCase()));
-          const mrrVal = cell(7);
-          const mrr = mrrVal ? '$' + Number(mrrVal).toLocaleString() : '';
-
-          return {
-            city, state, key,
-            lat: geo ? geo[0] : null,
-            lng: geo ? geo[1] : null,
-            count: parseInt(cell(2)) || 0,
-            piMva: parseInt(cell(3)) || 0,
-            piOther: parseInt(cell(4)) || 0,
-            nonPi: parseInt(cell(5)) || 0,
-            saturation: SAT_LEVELS[satLevel] || 'Low',
-            clients: piMvaCompetitors,
-            under10k: under10kSet,
-            mrr: mrr,
-          };
-        }).filter(c => c && c.lat !== null && c.count > 0);
-        resolve(cities);
-      } catch(e) { reject(e); }
+    window[callbackName] = function(response) {
+      try { resolve(response.table); }
+      catch(e) { reject(e); }
     };
-
     const script = document.createElement('script');
-    script.src = GVIZ_URL;
-    script.onerror = () => reject(new Error('Failed to load sheet data. Make sure the sheet is shared publicly.'));
+    script.src = url;
+    script.onerror = () => reject(new Error('Failed to load sheet data.'));
     document.head.appendChild(script);
   });
+}
+
+// Fetch both sheets and merge
+async function fetchSheetData() {
+  const [cityTable, clientTable] = await Promise.all([
+    loadSheet(GVIZ_URL, 'handleSheetData'),
+    loadSheet(CLIENTS_URL, 'handleClientData'),
+  ]);
+
+  // Parse master client list (gid=284342695)
+  // Cols: 0=URL, 1=Alt URL, 2=Company Name, 3=Owner, 4=Practice Area,
+  //        5=Total MRR, 6=City, 7=State, 8=Metro/DMA, 9=PI Classification
+  const firmsByCity = {}; // key "City, ST" -> [{name, classification, mrr, practiceArea}]
+  clientTable.rows.forEach(row => {
+    const cell = (idx) => {
+      const c = row.c && row.c[idx];
+      return c && c.v != null ? c.v : '';
+    };
+    const name = String(cell(2)).trim();
+    const city = String(cell(6)).trim();
+    const state = String(cell(7)).trim();
+    const classification = String(cell(9)).trim(); // PI-MVA, PI-Other, Non-PI
+    const practiceArea = String(cell(4)).trim();
+    const mrrRaw = cell(5);
+    const mrr = typeof mrrRaw === 'number' ? mrrRaw : parseFloat(String(mrrRaw).replace(/[$,]/g, '')) || 0;
+    if (!name || !city) return;
+    const key = `${city}, ${state}`;
+    if (!firmsByCity[key]) firmsByCity[key] = [];
+    firmsByCity[key].push({ name, classification, practiceArea, mrr });
+  });
+
+  // Parse city saturation tab
+  // Cols: 0=City, 1=State, 2=Total Clients, 3=PI-MVA Count,
+  //        4=PI-Other Count, 5=Non-PI Count, 6=Saturation Level, 7=PI-MVA MRR,
+  //        8=PI-MVA Competitors, 9=Under 10k
+  const cities = cityTable.rows.map(row => {
+    const cell = (idx) => {
+      const c = row.c && row.c[idx];
+      return c && c.v != null ? c.v : '';
+    };
+
+    const city = String(cell(0));
+    const state = String(cell(1));
+    if (!city) return null;
+    const key = `${city}, ${state}`;
+    const geo = GEO[key];
+    const satLevel = parseInt(cell(6)) || 1;
+    const under10kRaw = String(cell(9) || '');
+    const under10kList = under10kRaw ? under10kRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const under10kSet = new Set(under10kList.map(s => s.toLowerCase()));
+    const mrrVal = cell(7);
+    const mrr = mrrVal ? '$' + Number(mrrVal).toLocaleString() : '';
+
+    // Get all firms from master list for this city
+    const allFirms = firmsByCity[key] || [];
+
+    return {
+      city, state, key,
+      lat: geo ? geo[0] : null,
+      lng: geo ? geo[1] : null,
+      count: parseInt(cell(2)) || 0,
+      piMva: parseInt(cell(3)) || 0,
+      piOther: parseInt(cell(4)) || 0,
+      nonPi: parseInt(cell(5)) || 0,
+      saturation: SAT_LEVELS[satLevel] || 'Low',
+      firms: allFirms,
+      under10k: under10kSet,
+      mrr: mrr,
+    };
+  }).filter(c => c && c.lat !== null && c.count > 0);
+  return cities;
 }
 
 // Tooltip URL
@@ -798,23 +830,23 @@ async function init() {
     const otherW = total ? (d.piOther / total * 100) : 0;
     const nonW = total ? (d.nonPi / total * 100) : 0;
 
-    // Build full client list: PI-MVA (named), PI-Other (unnamed), Non-PI (unnamed)
-    let clientListHtml = '';
-    if (d.clients.length) {
-      clientListHtml += d.clients.map(c => {
-        const isSmall = d.under10k.has(c.toLowerCase());
-        return `<li><span class="client-name-mva">${c}</span>${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}</li>`;
-      }).join('');
-    }
-    for (let i = 0; i < d.piOther; i++) {
-      clientListHtml += `<li><span class="client-name-other">PI-Other Client ${d.piOther > 1 ? (i+1) : ''}</span></li>`;
-    }
-    for (let i = 0; i < d.nonPi; i++) {
-      clientListHtml += `<li><span class="client-name-nonpi">Non-PI Client ${d.nonPi > 1 ? (i+1) : ''}</span></li>`;
-    }
-    if (!clientListHtml) {
-      clientListHtml = '<li style="color:rgba(245,245,240,0.4)">No client names available</li>';
-    }
+    // Build full client list from master sheet, color-coded by classification
+    const classMap = { 'PI-MVA': 'mva', 'PI-Other': 'other', 'Non-PI': 'nonpi' };
+    // Sort: PI-MVA first, then PI-Other, then Non-PI
+    const sortOrder = { 'PI-MVA': 0, 'PI-Other': 1, 'Non-PI': 2 };
+    const sorted = [...d.firms].sort((a,b) => (sortOrder[a.classification] || 9) - (sortOrder[b.classification] || 9));
+    let clientListHtml = sorted.length
+      ? sorted.map(f => {
+          const cls = classMap[f.classification] || 'nonpi';
+          const isSmall = f.mrr > 0 && f.mrr < 10000;
+          const mrrStr = f.mrr ? '$' + f.mrr.toLocaleString() : '';
+          return `<li>
+            <span class="client-name-${cls}">${f.name}</span>
+            ${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}
+            ${mrrStr ? `<span style="margin-left:auto;font-size:10px;color:rgba(245,245,240,0.4)">${mrrStr}</span>` : ''}
+          </li>`;
+        }).join('')
+      : '<li style="color:rgba(245,245,240,0.4)">No client data available</li>';
 
     det.innerHTML = `
       <div class="detail-city">${d.city}</div>
