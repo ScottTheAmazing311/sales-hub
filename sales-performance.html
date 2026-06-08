@@ -175,7 +175,10 @@
         });
     });
 
-    var SHEET_ID = '18WMXkoKVY-JiWvPMt6e06fljsufO4YziLropqidkYek';
+    var SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
+    // TODO: After first run of buildSalesSummary(), replace this GID with the actual
+    // "Sales Summary" tab GID from the master sheet URL (?gid=XXXXXXXXX)
+    var SALES_SUMMARY_GID = '1676865996';
     var COLORS = {
         primary: '#07374F',
         primaryLight: 'rgba(7,55,79,0.7)',
@@ -275,12 +278,12 @@
     // Fetch the full sales sheet + a second range fetch for Pipeline (col B is number-typed
     // globally, so string values like "$145k / $1.74M" get dropped in the full fetch).
     function fetchPipelineRange() {
-        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=0&range=A20:C40';
+        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + SALES_SUMMARY_GID + '&range=A20:C40';
         return fetch(url).then(function(r) { return r.text(); }).then(function(text) {
             return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table;
         });
     }
-    Promise.all([fetchSheet('0'), fetchPipelineRange()]).then(function(results) {
+    Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchPipelineRange()]).then(function(results) {
         renderSales(results[0], results[1]);
     }).catch(function(err) {
         document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';

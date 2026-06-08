@@ -565,7 +565,7 @@
 // ── Config ──
 const SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
 const BDR_ROLLUP_GID = '55819925';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_ROLLUP_GID}`;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${BDR_ROLLUP_GID}`; // tqx replaced by fetchSheet
 
 // AE1 rep sheets — their sets count toward BDR totals
 const AE1_SHEETS = [
@@ -719,15 +719,30 @@ function updateMonthNav() {
     document.getElementById('month-prev').disabled = (prevMonth.getFullYear() < NOW.getFullYear() - 1);
 }
 
-// ── Fetch a Google Sheet and parse rows ──
-async function fetchSheet(url) {
-    const res = await fetch(url);
-    const text = await res.text();
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start === -1 || end === -1) return [];
-    const json = JSON.parse(text.substring(start, end + 1));
-    return (json.table && json.table.rows) || [];
+// ── Fetch a Google Sheet via JSONP to avoid CORS ──
+function fetchSheet(url) {
+    return new Promise(function(resolve, reject) {
+        var callbackName = '__bdrData_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        var jsonpUrl = url.replace(/tqx=out:json/, 'tqx=responseHandler:' + callbackName);
+        // If url didn't have tqx=out:json, append the handler
+        if (jsonpUrl === url) {
+            jsonpUrl += (url.indexOf('?') !== -1 ? '&' : '?') + 'tqx=responseHandler:' + callbackName;
+        }
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            var rows = (response && response.table && response.table.rows) || [];
+            resolve(rows);
+        };
+        var script = document.createElement('script');
+        script.src = jsonpUrl;
+        script.onerror = function() {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            reject(new Error('Failed to load sheet'));
+        };
+        document.head.appendChild(script);
+    });
 }
 
 // ── Parse AE1 sheet rows into meeting objects ──

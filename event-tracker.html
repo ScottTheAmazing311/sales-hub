@@ -437,6 +437,26 @@
         }
 
         /* Card Stats Footer — 4 columns */
+        .ev-card-list-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.65rem;
+            margin: 0.5rem 0.75rem 0;
+            background: rgba(60,148,209,0.08);
+            border: 1px solid rgba(60,148,209,0.15);
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--sky);
+            letter-spacing: 0.3px;
+        }
+        .ev-card-list-badge svg { width: 12px; height: 12px; fill: var(--sky); }
+        .ev-card-list-badge .list-count {
+            color: var(--navy);
+            font-weight: 700;
+        }
         .ev-card-stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1001,9 +1021,17 @@
                 <input type="number" id="new-ev-reg" placeholder="Registration cost ($)" step="100">
                 <input type="number" id="new-ev-hotel" placeholder="Hotel cost ($)" step="100">
             </div>
-            <div class="form-grid" style="margin-bottom:0.5rem;">
+            <div class="form-grid three" style="margin-bottom:0.5rem;">
                 <input type="text" id="new-ev-hotelname" placeholder="Hotel name">
                 <input type="number" id="new-ev-sponsor" placeholder="Sponsorship cost ($)" step="100">
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <select id="new-ev-listtype" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;flex:1;">
+                        <option value="">No list</option>
+                        <option value="Buyer List">Buyer List</option>
+                        <option value="Attendee List">Attendee List</option>
+                    </select>
+                    <input type="number" id="new-ev-listcount" placeholder="#" step="1" style="width:70px;padding:0.5rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;">
+                </div>
             </div>
             <div style="margin-bottom:0.75rem;">
                 <input type="text" id="new-ev-notes" placeholder="Notes (optional)" style="width:100%;padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;">
@@ -1090,9 +1118,17 @@
             <input type="number" id="edit-ev-hotel" placeholder="Hotel cost ($)" step="100">
             <input type="number" id="edit-ev-sponsor" placeholder="Sponsorship cost ($)" step="100">
         </div>
-        <div class="form-grid" style="margin-bottom:0.5rem;">
+        <div class="form-grid three" style="margin-bottom:0.5rem;">
             <input type="text" id="edit-ev-hotelname" placeholder="Hotel name">
             <input type="text" id="edit-ev-notes" placeholder="Notes (optional)">
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+                <select id="edit-ev-listtype" style="padding:0.5rem 0.75rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;background:#fff;flex:1;">
+                    <option value="">No list</option>
+                    <option value="Buyer List">Buyer List</option>
+                    <option value="Attendee List">Attendee List</option>
+                </select>
+                <input type="number" id="edit-ev-listcount" placeholder="#" step="1" style="width:70px;padding:0.5rem;border:1px solid rgba(7,55,79,0.15);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;">
+            </div>
         </div>
         <div class="form-actions">
             <button class="btn-submit" onclick="saveEventEdit()">Save Changes</button>
@@ -1175,16 +1211,6 @@
                     <div class="form-row">
                         <select id="feedback-member">
                             <option value="">Select team member</option>
-                            <option>Danny Define</option>
-                            <option>Tyler Farr</option>
-                            <option>Brandon Steed</option>
-                            <option>Simon Golding</option>
-                            <option>Austin Miller</option>
-                            <option>Elise Fitzsimmons</option>
-                            <option>Megan</option>
-                            <option>Sarah</option>
-                            <option>Sonya Palmer</option>
-                            <option>Britt Wilson</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -1446,17 +1472,34 @@ function loadFromSheets() {
         postLoad(); delete window[cb];
     };
     const s = document.createElement('script');
-    s.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=Events&tqx=responseHandler:' + cb;
+    s.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=Events&headers=1&tqx=responseHandler:' + cb;
     s.onerror = () => loadFromCSV();
     document.head.appendChild(s);
+    const COL_MAPS = {
+        Deals:         ['Event ID','Deal Name','MRR','HubSpot Link','Stage','Date Added'],
+        Feedback:      ['Event ID','Team Member','Connections','Experience','Impact','Notes','Date'],
+        Conversations: ['Event ID','Type','Contact Name','Firm Name','Notes','Follow-up Status','Date']
+    };
     ['Deals','Feedback','Conversations'].forEach(tab => {
         const n = 'handle' + tab;
         window[n] = function(r) {
             if (r.status !== 'ok') { delete window[n]; return; }
-            const arr = r.table.rows.map(row => { const o = {}; r.table.cols.forEach((c, i) => { const v = row.c[i]; o[c.label || c.id] = v ? (v.v != null ? String(v.v) : '') : ''; }); return o; });
-            if (tab === 'Deals') deals = mergeSheetAndLocal(arr, deals, 'Deal Name');
-            if (tab === 'Feedback') feedback = mergeSheetAndLocal(arr, feedback, '_fb_key');
-            if (tab === 'Conversations') conversations = mergeSheetAndLocal(arr, conversations, 'Contact Name');
+            const colNames = COL_MAPS[tab] || [];
+            const arr = r.table.rows.map(row => {
+                const o = {};
+                r.table.cols.forEach((c, i) => {
+                    const key = colNames[i] || c.label || c.id;
+                    const v = row.c[i];
+                    o[key] = v ? (v.v != null ? String(v.v) : '') : '';
+                });
+                return o;
+            });
+            // Re-read localStorage before merging so we never lose data added since page load
+            const freshLocal = JSON.parse(localStorage.getItem(tab === 'Deals' ? 'ev-deals' : tab === 'Feedback' ? 'ev-feedback' : 'ev-conversations') || '[]');
+            const merged = mergeSheetAndLocal(arr, freshLocal, tab === 'Deals' ? 'Deal Name' : tab === 'Feedback' ? '_fb_key' : 'Contact Name');
+            if (tab === 'Deals') deals = merged;
+            if (tab === 'Feedback') feedback = merged;
+            if (tab === 'Conversations') conversations = merged;
             saveLocalData();
             // Re-render if we're on events or detail screen
             if (document.getElementById('screen-events').classList.contains('active')) renderEvents();
@@ -1464,7 +1507,7 @@ function loadFromSheets() {
             delete window[n];
         };
         const sc = document.createElement('script');
-        sc.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=' + encodeURIComponent(tab) + '&tqx=responseHandler:' + n;
+        sc.src = EVENTS_GVIZ_BASE + '?tq=' + encodeURIComponent('SELECT *') + '&sheet=' + encodeURIComponent(tab) + '&headers=1&tqx=responseHandler:' + n;
         document.head.appendChild(sc);
     });
 }
@@ -1494,6 +1537,8 @@ function normalizeEvent(r) {
         hasSponsor: (r['Sponsorship'] || '').toLowerCase() === 'true',
         notes: r['Notes'] || r['Notes (short text)'] || '',
         totalCost: reg + hot + spo,
+        listType: r['List Type'] || r['listType'] || '',
+        listCount: parseInt(r['List Count'] || r['listCount'] || 0) || 0,
         parsedStart: parseEventDate(r['Start Date'] || ''),
         parsedEnd: parseEventDate(r['End Date'] || r['End Date (date)'] || '')
     };
@@ -1729,6 +1774,7 @@ function renderEvents() {
                     </div>
                     ${ev.attendees ? `<div class="ev-card-attendees"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>${esc(ev.attendees)}</div>` : ''}
                     ${ev.notes ? `<div class="ev-card-notes">${esc(ev.notes)}</div>` : ''}
+                    ${ev.listType ? `<div class="ev-card-list-badge"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>${esc(ev.listType)}${ev.listCount ? ': <span class="list-count">' + ev.listCount.toLocaleString() + '</span>' : ''}</div>` : ''}
                 </div>
                 <div class="ev-card-stats">
                     <div class="ev-stat">
@@ -1764,6 +1810,29 @@ function toggleMonth(month) {
 // ═══════════════════════════════════════
 // Detail View
 // ═══════════════════════════════════════
+function populateTeamDropdown(ev) {
+    const sel = document.getElementById('feedback-member');
+    const attendees = (ev.attendees || '').split(/,|&/).map(a => a.trim()).filter(Boolean);
+    // Build unique set: event attendees + all known team members from all events
+    const allNames = new Set();
+    attendees.forEach(a => allNames.add(a));
+    allEvents.forEach(e => (e.attendees || '').split(/,|&/).forEach(a => { a = a.trim(); if (a) allNames.add(a); }));
+    const sorted = Array.from(allNames).sort();
+    // Separate: event attendees first, then others
+    const onEvent = sorted.filter(n => attendees.map(a => a.toLowerCase()).includes(n.toLowerCase()));
+    const offEvent = sorted.filter(n => !attendees.map(a => a.toLowerCase()).includes(n.toLowerCase()));
+    let html = '<option value="">Select team member</option>';
+    if (onEvent.length) {
+        onEvent.forEach(n => { html += `<option value="${esc(n)}">${esc(n)}</option>`; });
+    }
+    if (offEvent.length) {
+        html += '<optgroup label="Other team members">';
+        offEvent.forEach(n => { html += `<option value="${esc(n)}">${esc(n)}</option>`; });
+        html += '</optgroup>';
+    }
+    sel.innerHTML = html;
+}
+
 function openDetail(id) {
     currentEvent = allEvents.find(e => e.id === id);
     if (!currentEvent) return;
@@ -1782,6 +1851,7 @@ function openDetail(id) {
         <span><svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>${fmtDateRange(ev.startDate, ev.endDate)}</span>
         ${ev.attendees ? `<span><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>${esc(ev.attendees)}</span>` : ''}
         ${ev.hotelName ? `<span><svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>${esc(ev.hotelName)}</span>` : ''}
+        ${ev.listType ? `<span><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>${esc(ev.listType)}${ev.listCount ? ': ' + ev.listCount.toLocaleString() : ''}</span>` : ''}
     `;
 
     // Costs
@@ -1815,6 +1885,7 @@ function openDetail(id) {
     renderDetailDeals(evDeals);
     renderDetailConvos(evConvos);
     renderDetailFeedback(getFeedback(ev.id));
+    populateTeamDropdown(ev);
     document.querySelectorAll('.inline-form').forEach(f => f.classList.remove('open'));
 }
 
@@ -1876,13 +1947,48 @@ function saveLocalData() {
     localStorage.setItem('ev-feedback', JSON.stringify(feedback));
     localStorage.setItem('ev-conversations', JSON.stringify(conversations));
 }
+function fixCorruptedKeys(arr, expectedKeys) {
+    // Fix localStorage entries that were saved with corrupted GVIZ labels
+    // e.g. key "Event ID 868jha2hy 868jen64m..." should be "Event ID"
+    return arr.map(row => {
+        const fixed = {};
+        const rowKeys = Object.keys(row);
+        expectedKeys.forEach(ek => {
+            // If the exact key exists, use it
+            if (row[ek] !== undefined) { fixed[ek] = row[ek]; return; }
+            // Otherwise find a key that starts with the expected key
+            const match = rowKeys.find(k => k.startsWith(ek + ' ') || k.startsWith(ek));
+            if (match) fixed[ek] = row[match];
+        });
+        return fixed;
+    }).filter(row => Object.keys(row).length > 0);
+}
+
 function loadLocalData() {
     const d = localStorage.getItem('ev-deals');
     const f = localStorage.getItem('ev-feedback');
     const c = localStorage.getItem('ev-conversations');
-    if (d) deals = mergeSheetAndLocal(deals, JSON.parse(d), 'Deal Name');
-    if (f) feedback = mergeSheetAndLocal(feedback, JSON.parse(f), '_fb_key');
-    if (c) conversations = mergeSheetAndLocal(conversations, JSON.parse(c), 'Contact Name');
+    let needsResave = false;
+    if (d) {
+        let parsed = JSON.parse(d);
+        const fixed = fixCorruptedKeys(parsed, ['Event ID','Deal Name','MRR','HubSpot Link','Stage','Date Added']);
+        if (JSON.stringify(fixed) !== JSON.stringify(parsed)) needsResave = true;
+        deals = mergeSheetAndLocal(deals, fixed, 'Deal Name');
+    }
+    if (f) {
+        let parsed = JSON.parse(f);
+        const fixed = fixCorruptedKeys(parsed, ['Event ID','Team Member','Connections','Experience','Impact','Notes','Date']);
+        if (JSON.stringify(fixed) !== JSON.stringify(parsed)) needsResave = true;
+        feedback = mergeSheetAndLocal(feedback, fixed, '_fb_key');
+    }
+    if (c) {
+        let parsed = JSON.parse(c);
+        const fixed = fixCorruptedKeys(parsed, ['Event ID','Type','Contact Name','Firm Name','Notes','Follow-up Status','Date']);
+        if (JSON.stringify(fixed) !== JSON.stringify(parsed)) needsResave = true;
+        conversations = mergeSheetAndLocal(conversations, fixed, 'Contact Name');
+    }
+    // Write back cleaned data so future reads (sheet callbacks) get clean keys
+    if (needsResave) saveLocalData();
 }
 
 // Merge sheet rows with locally-stored rows, avoiding duplicates
@@ -1910,10 +2016,16 @@ function itemSig(r, keyField) {
     return (eid + '|' + name).toLowerCase();
 }
 
-async function postToScript(payload) {
+function postToScript(payload) {
     if (!APPS_SCRIPT_URL) return;
-    try { await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', redirect: 'follow', body: JSON.stringify(payload) }); }
-    catch(e) { console.warn('Apps Script error:', e); }
+    try {
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+    } catch(e) { console.warn('Apps Script error:', e); }
 }
 
 function submitDeal() {
@@ -2340,6 +2452,8 @@ function populateEditForm(ev) {
     document.getElementById('edit-ev-sponsor').value = ev.sponsorshipCost || '';
     document.getElementById('edit-ev-hotelname').value = ev.hotelName || '';
     document.getElementById('edit-ev-notes').value = ev.notes || '';
+    document.getElementById('edit-ev-listtype').value = ev.listType || '';
+    document.getElementById('edit-ev-listcount').value = ev.listCount || '';
     // Parse attendees into chips
     editAttendees = (ev.attendees || '').split(',').map(a => a.trim()).filter(Boolean);
     renderEditAttendeeChips();
@@ -2401,6 +2515,8 @@ function saveEventEdit() {
     currentEvent.hotelName = document.getElementById('edit-ev-hotelname').value.trim();
     currentEvent.hasSponsor = spo > 0;
     currentEvent.notes = document.getElementById('edit-ev-notes').value.trim();
+    currentEvent.listType = document.getElementById('edit-ev-listtype').value;
+    currentEvent.listCount = parseInt(document.getElementById('edit-ev-listcount').value) || 0;
     currentEvent.totalCost = reg + hot + spo;
     currentEvent.parsedStart = startRaw ? new Date(startRaw + 'T00:00:00') : null;
     currentEvent.parsedEnd = endRaw ? new Date(endRaw + 'T00:00:00') : (startRaw ? new Date(startRaw + 'T00:00:00') : null);
@@ -2436,6 +2552,8 @@ function saveEventEdits() {
             sponsorshipCost: currentEvent.sponsorshipCost,
             hotelName: currentEvent.hotelName,
             notes: currentEvent.notes,
+            listType: currentEvent.listType,
+            listCount: currentEvent.listCount,
             totalCost: currentEvent.totalCost
         };
         localStorage.setItem('ev-event-edits', JSON.stringify(edits));
@@ -2502,6 +2620,8 @@ function submitNewEvent() {
         hotelName: document.getElementById('new-ev-hotelname').value.trim(),
         hasSponsor: spo > 0,
         notes: document.getElementById('new-ev-notes').value.trim(),
+        listType: document.getElementById('new-ev-listtype').value,
+        listCount: parseInt(document.getElementById('new-ev-listcount').value) || 0,
         totalCost: reg + hot + spo,
         parsedStart: startRaw ? new Date(startRaw + 'T00:00:00') : null,
         parsedEnd: endRaw ? new Date(endRaw + 'T00:00:00') : (startRaw ? new Date(startRaw + 'T00:00:00') : null)
@@ -2512,7 +2632,8 @@ function submitNewEvent() {
     custom.push(ev);
     localStorage.setItem('ev-custom-events', JSON.stringify(custom));
     // Reset form
-    ['new-ev-name','new-ev-location','new-ev-start','new-ev-end','new-ev-attendees','new-ev-reg','new-ev-hotel','new-ev-hotelname','new-ev-sponsor','new-ev-notes'].forEach(id => document.getElementById(id).value = '');
+    ['new-ev-name','new-ev-location','new-ev-start','new-ev-end','new-ev-attendees','new-ev-reg','new-ev-hotel','new-ev-hotelname','new-ev-sponsor','new-ev-notes','new-ev-listcount'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('new-ev-listtype').value = '';
     selectedAttendees = []; renderAttendeeChips();
     document.getElementById('new-ev-status').value = 'planned';
     toggleAddEvent();

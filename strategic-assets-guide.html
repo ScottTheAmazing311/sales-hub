@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategic Assets Framework — Rankings.io</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #07374F;
+    --navy-dark: #052a3d;
+    --yellow: #eaff6a;
+    --yellow-warm: #eedc82;
+    --cream: #fefaed;
+    --bg: #f4f0e6;
+    --text: #2c2c2c;
+    --text-muted: #6b6b6b;
+    --sky: #3c94d1;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #1a1a1a;
+    color: var(--text);
+  }
+
+  /* ── Slide Container ── */
+  .slide {
+    width: 1120px;
+    min-height: 630px;
+    margin: 40px auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* ── Title Slide ── */
+  .slide-title {
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px;
+    position: relative;
+  }
+  .yellow-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--yellow);
+  }
+  .slide-title .phase-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 24px;
+  }
+  .slide-title h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 3.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide-title h1 span { color: var(--yellow); }
+  .slide-title .subtitle {
+    font-size: 1.15rem;
+    color: rgba(255,255,255,0.5);
+    max-width: 640px;
+    line-height: 1.6;
+  }
+  .slide-title .logo-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 0; right: 0;
+    text-align: center;
+  }
+  .slide-title .logo-bar img {
+    height: 28px;
+    opacity: 0.4;
+  }
+
+  /* ── Section Header (dark) ── */
+  .slide-section {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    padding: 80px;
+    position: relative;
+  }
+  .slide-section .yellow-stripe { position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--yellow); }
+  .slide-section .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8rem;
+    font-weight: 700;
+    color: rgba(234,255,106,0.12);
+    line-height: 1;
+    margin-right: 60px;
+    flex-shrink: 0;
+  }
+  .slide-section .section-content { flex: 1; }
+  .slide-section .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 16px;
+  }
+  .slide-section h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .slide-section .section-desc {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* ── Content Slide (light) ── */
+  .slide-content {
+    background: var(--cream);
+    padding: 60px 80px;
+  }
+  .slide-content .slide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(7,55,79,0.08);
+  }
+  .slide-content .slide-header .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--yellow);
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+  .slide-content .slide-header h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ── Dark Content Slide ── */
+  .slide-dark {
+    background: var(--navy);
+    padding: 60px 80px;
+  }
+  .slide-dark .slide-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .slide-dark .slide-header .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--yellow);
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+  .slide-dark .slide-header h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ── Three-Column Cards ── */
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .value-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .value-card .vc-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+  .value-card .vc-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--yellow);
+    margin-bottom: 10px;
+  }
+  .value-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .value-card p {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+  }
+
+  /* ── Two-Column Grid ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ── Entity Map Visual ── */
+  .entity-map {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .entity-cube {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 8px;
+    line-height: 1.3;
+    position: relative;
+  }
+  .entity-cube.primary {
+    background: var(--yellow);
+    color: var(--navy);
+    width: 110px;
+    height: 110px;
+    font-size: 0.7rem;
+    z-index: 2;
+  }
+  .entity-cube.close {
+    background: rgba(234,255,106,0.25);
+    color: var(--yellow);
+    border: 1px solid rgba(234,255,106,0.3);
+  }
+  .entity-cube.mid {
+    background: rgba(60,148,209,0.15);
+    color: var(--sky);
+    border: 1px solid rgba(60,148,209,0.2);
+  }
+  .entity-cube.far {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.3);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Factor Cards ── */
+  .factor-card {
+    background: #fff;
+    border: 1px solid rgba(7,55,79,0.08);
+    padding: 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .factor-card .factor-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--sky);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .factor-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .factor-card p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── Journey Flow ── */
+  .journey-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .journey-step {
+    text-align: center;
+    padding: 20px 24px;
+    flex: 1;
+    position: relative;
+  }
+  .journey-step .step-icon {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+  .journey-step h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .journey-step p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .journey-arrow {
+    font-size: 1.5rem;
+    color: var(--sky);
+    flex-shrink: 0;
+  }
+
+  /* ── Asset Cards (light) ── */
+  .asset-card {
+    background: #fff;
+    border: 1px solid rgba(7,55,79,0.08);
+    padding: 24px 28px;
+    position: relative;
+  }
+  .asset-card.full { grid-column: 1 / -1; }
+  .asset-card .asset-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .asset-card .asset-tag.define { color: var(--sky); }
+  .asset-card .asset-tag.place { color: #e67e22; }
+  .asset-card .asset-tag.convert { color: #27ae60; }
+  .asset-card .asset-tag.critical { color: #e74c3c; }
+  .asset-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .asset-card p, .asset-card li {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+  .asset-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .asset-card li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .asset-card li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--sky);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ── Dark Asset Cards ── */
+  .dark-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 24px 28px;
+  }
+  .dark-card.full { grid-column: 1 / -1; }
+  .dark-card .asset-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .dark-card .asset-tag.critical { color: var(--yellow); }
+  .dark-card .asset-tag.define { color: var(--sky); }
+  .dark-card .asset-tag.place { color: #e67e22; }
+  .dark-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .dark-card p, .dark-card li {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.55;
+  }
+  .dark-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .dark-card li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .dark-card li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--yellow);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ── Impact Meter ── */
+  .impact-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(7,55,79,0.06);
+  }
+  .impact-row:last-child { border-bottom: none; }
+  .impact-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+    width: 200px;
+    flex-shrink: 0;
+  }
+  .impact-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: rgba(7,55,79,0.06);
+    position: relative;
+  }
+  .impact-bar {
+    height: 100%;
+    position: absolute;
+    left: 0; top: 0;
+  }
+  .impact-bar.high { background: var(--navy); }
+  .impact-bar.medium { background: var(--sky); }
+  .impact-bar.low { background: rgba(7,55,79,0.2); }
+  .impact-level {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    width: 70px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .impact-level.high { color: var(--navy); }
+  .impact-level.medium { color: var(--sky); }
+  .impact-level.low { color: var(--text-muted); }
+
+  /* ── Spec Table ── */
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .spec-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 12px 16px;
+  }
+  .spec-table td {
+    font-size: 0.85rem;
+    padding: 12px 16px;
+    line-height: 1.5;
+  }
+  .spec-table.light th {
+    color: var(--navy);
+    background: rgba(7,55,79,0.04);
+  }
+  .spec-table.light td {
+    color: var(--text);
+    border-bottom: 1px solid rgba(7,55,79,0.06);
+  }
+  .spec-table.dark th {
+    color: var(--yellow);
+    background: rgba(234,255,106,0.06);
+  }
+  .spec-table.dark td {
+    color: rgba(255,255,255,0.65);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ── Closing Slide ── */
+  .slide-closing {
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px;
+    position: relative;
+  }
+  .slide-closing .yellow-stripe { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: var(--yellow); }
+  .slide-closing .close-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 20px;
+  }
+  .slide-closing h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .slide-closing p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.7;
+    max-width: 560px;
+  }
+  .slide-closing .logo-bar {
+    position: absolute;
+    bottom: 30px;
+    left: 0; right: 0;
+    text-align: center;
+  }
+  .slide-closing .logo-bar img {
+    height: 24px;
+    opacity: 0.3;
+  }
+
+  /* ── Why Item (dark) ── */
+  .why-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .why-item .why-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+  .why-item span {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+  }
+
+  /* ── Print ── */
+  @page {
+    size: 11in 8.5in;
+    margin: 0;
+  }
+  @media print {
+    body {
+      background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .slide {
+      width: 11in;
+      height: 8.5in;
+      min-height: 8.5in;
+      max-height: 8.5in;
+      box-shadow: none;
+      margin: 0;
+      overflow: hidden;
+      page-break-after: always;
+      break-after: page;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .slide-title,
+    .slide-section,
+    .slide-closing {
+      height: 8.5in;
+      min-height: 8.5in;
+    }
+    .slide-content,
+    .slide-dark {
+      height: 8.5in;
+      min-height: 8.5in;
+      padding: 50px 70px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 1: TITLE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-title">
+  <div class="yellow-stripe"></div>
+  <div class="phase-tag">Internal Training Resource</div>
+  <h1>Strategic Assets<br><span>Framework</span></h1>
+  <div class="subtitle">How LLMs understand entities, why traditional content strategy is obsolete, and the prescriptive assets that drive AI visibility for law firms.</div>
+  <div class="logo-bar">
+    <img src="goat.png" alt="Rankings.io">
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 2: SECTION — PART I -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">01</div>
+  <div class="section-content">
+    <div class="section-label">Part I</div>
+    <h2>Fundamentals of LLMs &amp; Entity-Based Positioning</h2>
+    <div class="section-desc">LLMs don't think in keywords. They think in entities and relationships. Understanding this changes everything about how we build content.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 3: HOW LLMs OPERATE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-dark">
+  <div class="slide-header">
+    <div class="num">01</div>
+    <h3>How LLMs Operate</h3>
+  </div>
+
+  <div class="two-col" style="margin-bottom: 30px;">
+    <div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>LLMs function using <strong style="color: var(--yellow);">entities</strong> and <strong style="color: var(--yellow);">relationships</strong></span>
+        </div>
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>An entity is a singularly defined person, place, thing, or idea</span>
+        </div>
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>Relationships determine how closely entities are connected to one another</span>
+        </div>
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>Think of a 3D map where entities are cubes &mdash; closer cubes = stronger relationships</span>
+        </div>
+      </div>
+    </div>
+    <div class="entity-map">
+      <div class="entity-cube far">Glossary</div>
+      <div class="entity-cube mid">Blog Post</div>
+      <div class="entity-cube close">Practice Area</div>
+      <div class="entity-cube primary">Law Firm</div>
+      <div class="entity-cube close">Location</div>
+      <div class="entity-cube mid">Attorney</div>
+      <div class="entity-cube far">Directory</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 4: FOUR FACTORS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">02</div>
+    <h3>Four Factors That Influence Entity Placement</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="factor-card">
+      <div class="factor-num">01</div>
+      <div>
+        <h4>Website Content</h4>
+        <p>Your site's own pages are the primary signal for entity definition. What you say about yourself matters most.</p>
+      </div>
+    </div>
+    <div class="factor-card">
+      <div class="factor-num">02</div>
+      <div>
+        <h4>Wikimedia Empire</h4>
+        <p>Wikidata and related platforms carry outsized weight as structured, trusted knowledge sources for LLMs.</p>
+      </div>
+    </div>
+    <div class="factor-card">
+      <div class="factor-num">03</div>
+      <div>
+        <h4>Off-Site Presence</h4>
+        <p>Backlinks and citations from authoritative sources reinforce entity relationships and build placement.</p>
+      </div>
+    </div>
+    <div class="factor-card">
+      <div class="factor-num">04</div>
+      <div>
+        <h4>User-Generated Content</h4>
+        <p>Reviews, social mentions, and organic conversation create trust signals that LLMs weigh heavily.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 5: MODERN SEARCH BEHAVIOR -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">03</div>
+    <h3>Modern Search Behavior</h3>
+  </div>
+
+  <div class="journey-flow">
+    <div class="journey-step">
+      <div class="step-icon">&#x1F4AC;</div>
+      <h4>Ask an LLM</h4>
+      <p>User queries ChatGPT, Gemini, Claude, Perplexity, or Grok for a recommendation</p>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step">
+      <div class="step-icon">&#x2705;</div>
+      <h4>Get an Answer</h4>
+      <p>LLM responds with entity-based recommendations from its knowledge map</p>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step">
+      <div class="step-icon">&#x1F50D;</div>
+      <h4>Branded Search</h4>
+      <p>User Googles the firm name to verify its existence and credibility</p>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step">
+      <div class="step-icon">&#x1F3E0;</div>
+      <h4>Homepage Landing</h4>
+      <p>They check reviews, engagement, and company info &mdash; homepage is the critical verification page</p>
+    </div>
+  </div>
+
+  <div style="background: rgba(7,55,79,0.04); padding: 20px 28px; margin-top: 20px; border-left: 4px solid var(--navy);">
+    <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 6px;">KEY TAKEAWAY</p>
+    <p style="font-size: 0.88rem; color: var(--text); line-height: 1.6;">The homepage is no longer just a front door &mdash; it's the <strong>verification checkpoint</strong> after AI-driven discovery. Every element must communicate identity clearly to both robots and humans.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 6: SECTION — PART II -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">02</div>
+  <div class="section-content">
+    <div class="section-label">Part II</div>
+    <h2>Strategic Assets: Definition &amp; Purpose</h2>
+    <div class="section-desc">Content with a specific purpose to achieve entity definition, entity placement, or conversion. Not keyword-driven. Not volume-based. Goal-driven and prescriptive.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 7: THREE FUNCTIONS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-dark">
+  <div class="slide-header">
+    <div class="num">04</div>
+    <h3>Three Functions of Strategic Assets</h3>
+  </div>
+
+  <div class="three-col">
+    <div class="value-card">
+      <div class="vc-num">01</div>
+      <h4>Entity Definition</h4>
+      <p>Establishing who the firm is. Making the entity unmistakable, unambiguous, and well-defined in the LLM knowledge map.</p>
+    </div>
+    <div class="value-card">
+      <div class="vc-num">02</div>
+      <h4>Entity Placement</h4>
+      <p>Positioning the firm favorably in the LLM relationship map. Moving the entity cube closer to relevant practice areas and locations.</p>
+    </div>
+    <div class="value-card">
+      <div class="vc-num">03</div>
+      <h4>Conversion</h4>
+      <p>Helping prospects convert once they reach the website. May not directly improve AI visibility, but still a critical business function.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px 28px; background: rgba(234,255,106,0.06); border-left: 4px solid var(--yellow);">
+    <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--yellow); margin-bottom: 6px;">FRAMEWORK PRINCIPLE</p>
+    <p style="font-size: 0.88rem; color: rgba(255,255,255,0.6); line-height: 1.6;">This is not one-size-fits-all. Every asset is tailored to client objectives. The shift is from keyword-driven, volume-based content to goal-driven, prescriptive content.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 8: SECTION — PART III -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">03</div>
+  <div class="section-content">
+    <div class="section-label">Part III</div>
+    <h2>Critical Strategic Assets</h2>
+    <div class="section-desc">The high-impact assets that directly influence entity definition, placement, and conversion. These are non-negotiable.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 9: HOMEPAGE + ABOUT PAGE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">05</div>
+    <h3>Homepage &amp; About Page</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="asset-card">
+      <div class="asset-tag critical">Critical &middot; Definition + Conversion</div>
+      <h4>Homepage</h4>
+      <p>The single most-visited page. The primary landing point after branded searches. Must clearly communicate identity to both robots and humans.</p>
+      <ul>
+        <li>Expressly state who you are, what you do, and where you do it</li>
+        <li>Directly say you are a lawyer &mdash; don't imply it</li>
+        <li>State headquarters and city locations &mdash; don't rely on map listings alone</li>
+        <li>Include entities/nouns you want associated with the firm</li>
+      </ul>
+    </div>
+    <div class="asset-card">
+      <div class="asset-tag critical">Critical &middot; Definition</div>
+      <h4>About Page</h4>
+      <p>The single most important page for defining entity on the website. Historically underutilized, now essential.</p>
+      <ul>
+        <li>Requires dedicated planning as its own strategic asset</li>
+        <li>Must expressly state: who you are, what you do, where you do it</li>
+        <li>Never rely on implied information</li>
+        <li>Think about every entity/noun you want associated with the firm</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 10: ATTORNEY BIOS + PRESS RELEASES -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">06</div>
+    <h3>Attorney Bios &amp; Press Releases</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="asset-card">
+      <div class="asset-tag define">Definition</div>
+      <h4>Attorney Bio Pages</h4>
+      <p>Attorneys are distinct entities from the law firm. They should be closely related in the LLM map but treated as separate entities.</p>
+      <ul>
+        <li>Each attorney is their own entity with their own entity definition</li>
+        <li>Bio pages should strengthen the relationship between attorney and firm entities</li>
+        <li>Content must be specific to the individual, not the firm</li>
+      </ul>
+    </div>
+    <div class="asset-card">
+      <div class="asset-tag place">Placement &middot; GEO/AIO</div>
+      <h4>Press Releases</h4>
+      <p>More important today than at any point in internet history. Distributed to 200+ websites immediately.</p>
+      <ul>
+        <li>Creates brand conversation across the web instantly</li>
+        <li>Functions as "backlinks on steroids" for GEO/AIO</li>
+        <li>Should be a standard ongoing asset for every client</li>
+        <li>Massive entity placement signal at scale</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 11: HIRE US + SERVICE PAGES -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-dark">
+  <div class="slide-header">
+    <div class="num">07</div>
+    <h3>Hire Us Content &amp; Service Pages</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="dark-card">
+      <div class="asset-tag critical">Critical &middot; Conversion + Placement</div>
+      <h4>"Hire Us" Style Content</h4>
+      <p style="color: rgba(255,255,255,0.55);">Focus on differentiation, not generic service descriptions. "Why you are the best choice" &mdash; not "here's what we offer."</p>
+      <ul>
+        <li>AMs lead conversations to uncover non-commodity differentiators</li>
+        <li>Examples: deep community ties, unique philosophy, long-term involvement</li>
+        <li>Must be pushed hard during and after onboarding</li>
+        <li>Differentiation is <strong style="color: var(--yellow);">non-negotiable</strong> for AI visibility</li>
+      </ul>
+    </div>
+    <div class="dark-card">
+      <div class="asset-tag define">Definition</div>
+      <h4>Service Pages</h4>
+      <p style="color: rgba(255,255,255,0.55);">Traditional pages explaining what the firm does. Still valuable as foundational entity definition content.</p>
+      <ul>
+        <li>Remain important as foundational content</li>
+        <li>Should pair with hire-us content for maximum impact</li>
+        <li>Define practice areas as related entities</li>
+        <li>Best when combined with differentiation messaging</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 12: TESTIMONIALS + TRUST SIGNALS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">08</div>
+    <h3>Testimonials &amp; Trust Signals</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="asset-card">
+      <div class="asset-tag convert">Conversion + Placement</div>
+      <h4>Testimonial &amp; Review Pages</h4>
+      <p>Dedicated review pages &mdash; not just widgets pulling Google reviews. Details matter more than settlement amounts alone.</p>
+      <ul>
+        <li>Use the <strong>Before / During / After</strong> narrative format</li>
+        <li>Creates non-commodity, non-repeatable content</li>
+        <li>Addresses prospect psychology: emotionally distressed, ignorant about legal process, distrustful</li>
+        <li>Detailed stories outperform dollar figures</li>
+      </ul>
+    </div>
+    <div class="asset-card">
+      <div class="asset-tag place">Placement + Conversion</div>
+      <h4>Trust Signals &amp; UGC</h4>
+      <p>Third-party mentions carry higher inherent trust than first-party claims. Media perception of lawyers as "necessary evil" requires active trust-building.</p>
+      <ul>
+        <li>Google and Facebook reviews are valuable baseline</li>
+        <li>Third-party mentions carry higher inherent trust value</li>
+        <li>Client interviews yield non-commodity content</li>
+        <li>Source-based quotes increase AI citation likelihood</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 13: SECTION — PART IV -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">04</div>
+  <div class="section-content">
+    <div class="section-label">Part IV</div>
+    <h2>Supporting Strategic Assets</h2>
+    <div class="section-desc">Assets that reinforce entity definition and placement. Important, but secondary to the critical assets above.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 14: WIKIDATA + INFOGRAPHICS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">09</div>
+    <h3>Wikidata, Infographics &amp; Media</h3>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+    <div class="asset-card">
+      <div class="asset-tag define">Day-One Task</div>
+      <h4>Wikidata Entries</h4>
+      <ul>
+        <li>Day-one task for every new client</li>
+        <li>Must be factual and documentation-focused, not marketing</li>
+        <li>Include: legal name variations, locations, establishment year, DBA names</li>
+        <li>Agency handles resubmission until approval</li>
+        <li>Resolves Google citation confusion with multiple legal names</li>
+      </ul>
+    </div>
+    <div class="asset-card">
+      <div class="asset-tag place">Engagement</div>
+      <h4>Infographics</h4>
+      <ul>
+        <li>Underutilized visual asset with high engagement potential</li>
+        <li>Average user spends 42 seconds on a website and reads ~80 words</li>
+        <li>Visual content dramatically outperforms dense text</li>
+        <li>Easier to digest and share</li>
+      </ul>
+    </div>
+    <div class="asset-card">
+      <div class="asset-tag place">Future State</div>
+      <h4>Video &amp; Audio</h4>
+      <ul>
+        <li>Video will become increasingly important as AI video understanding improves</li>
+        <li>People more likely to watch and listen than read</li>
+        <li>Audio playback widgets will become standard offering</li>
+        <li>Improves accessibility and addresses learning preferences</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 15: IMPACT RANKINGS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">10</div>
+    <h3>Strategic Asset Impact Ranking</h3>
+  </div>
+
+  <div class="impact-row">
+    <div class="impact-label">Homepage</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 98%;"></div></div>
+    <div class="impact-level high">Critical</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">About Page</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 96%;"></div></div>
+    <div class="impact-level high">Critical</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Press Releases</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 93%;"></div></div>
+    <div class="impact-level high">Critical</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Hire Us Content</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 90%;"></div></div>
+    <div class="impact-level high">Critical</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Attorney Bios</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 85%;"></div></div>
+    <div class="impact-level high">High</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Testimonials</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 82%;"></div></div>
+    <div class="impact-level high">High</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Trust Signals / UGC</div>
+    <div class="impact-bar-bg"><div class="impact-bar high" style="width: 80%;"></div></div>
+    <div class="impact-level high">High</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Service Pages</div>
+    <div class="impact-bar-bg"><div class="impact-bar medium" style="width: 75%;"></div></div>
+    <div class="impact-level medium">Medium</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Wikidata</div>
+    <div class="impact-bar-bg"><div class="impact-bar medium" style="width: 70%;"></div></div>
+    <div class="impact-level medium">Medium</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Infographics</div>
+    <div class="impact-bar-bg"><div class="impact-bar medium" style="width: 55%;"></div></div>
+    <div class="impact-level medium">Medium</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Video / Audio</div>
+    <div class="impact-bar-bg"><div class="impact-bar medium" style="width: 50%;"></div></div>
+    <div class="impact-level medium">Medium</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Blog Content</div>
+    <div class="impact-bar-bg"><div class="impact-bar low" style="width: 20%;"></div></div>
+    <div class="impact-level low">Low</div>
+  </div>
+  <div class="impact-row">
+    <div class="impact-label">Glossary Definitions</div>
+    <div class="impact-bar-bg"><div class="impact-bar low" style="width: 12%;"></div></div>
+    <div class="impact-level low">Low</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 16: SECTION — HOMEPAGE / ABOUT SPECS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">05</div>
+  <div class="section-content">
+    <div class="section-label">Part VI</div>
+    <h2>Perfect Homepage &amp; About Page Specs</h2>
+    <div class="section-desc">The core requirements every homepage and about page must meet. No implied information. No assumptions. Explicit, clear, entity-driven.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 17: SPECS TABLE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-dark">
+  <div class="slide-header">
+    <div class="num">11</div>
+    <h3>Homepage &amp; About Page Requirements</h3>
+  </div>
+
+  <table class="spec-table dark">
+    <thead>
+      <tr>
+        <th style="width: 30%;">Requirement</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color: var(--yellow); font-weight: 600;">State identity explicitly</td>
+        <td>"Here's who I am, what I do, and where I do it" &mdash; directly, not by implication</td>
+      </tr>
+      <tr>
+        <td style="color: var(--yellow); font-weight: 600;">Declare profession</td>
+        <td>Directly say you are a lawyer. Don't assume visitors or AI will infer it from context.</td>
+      </tr>
+      <tr>
+        <td style="color: var(--yellow); font-weight: 600;">State locations</td>
+        <td>Directly state headquarters and all city locations. Don't rely on embedded maps or directory listings alone.</td>
+      </tr>
+      <tr>
+        <td style="color: var(--yellow); font-weight: 600;">Entity association</td>
+        <td>Think about the entities/nouns you want associated with the firm and explicitly include them on the page.</td>
+      </tr>
+      <tr>
+        <td style="color: var(--yellow); font-weight: 600;">Avoid implied info</td>
+        <td>If it's important, say it. Every assumption is a missed signal to both humans and AI.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 18: SECTION — DIFFERENTIATION -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="yellow-stripe"></div>
+  <div class="section-num">06</div>
+  <div class="section-content">
+    <div class="section-label">Part VII</div>
+    <h2>Strategic Differentiation</h2>
+    <div class="section-desc">Competitors still using content and links strategy are behind. Strategic assets represent competitive separation from market.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 19: MARKET POSITIONING -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-dark">
+  <div class="slide-header">
+    <div class="num">12</div>
+    <h3>Market Positioning Through Strategic Assets</h3>
+  </div>
+
+  <div class="two-col" style="margin-bottom: 30px;">
+    <div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>Competitors relying on content + links are operating on an <strong style="color: var(--yellow);">outdated playbook</strong></span>
+        </div>
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>Strategic assets create competitive separation that cannot be easily replicated</span>
+        </div>
+        <div class="why-item">
+          <div class="why-dot"></div>
+          <span>The approach is forward-looking: "Here's how everyone should be doing this going forward"</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="dark-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+        <div class="asset-tag critical">Core Positioning</div>
+        <h4 style="font-size: 1.1rem; line-height: 1.4;">Not "here's how we do it" &mdash; but "here's how everyone should be doing this because it will make the most impact."</h4>
+        <p style="color: rgba(255,255,255,0.45); margin-top: 12px; font-size: 0.85rem;">This framework isn't about catching up. It's about setting the standard that the rest of the market will eventually follow.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 20: DEPRIORITIZE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="slide-header">
+    <div class="num">13</div>
+    <h3>Low-Impact Assets (Deprioritize)</h3>
+  </div>
+
+  <div class="two-col">
+    <div class="asset-card" style="border-left: 4px solid var(--text-muted);">
+      <h4 style="color: var(--text-muted);">Blog Content</h4>
+      <p>Carries minimal weight in AI search. Should be deprioritized in favor of higher-impact strategic assets. Still provides some traditional SEO value but is no longer a strategic focus.</p>
+    </div>
+    <div class="asset-card" style="border-left: 4px solid var(--text-muted);">
+      <h4 style="color: var(--text-muted);">Glossary Definitions</h4>
+      <p>Minimal impact on AI visibility. Historically emphasized in SEO but no longer a strategic priority. Time and resources are better spent on entity-defining assets.</p>
+    </div>
+  </div>
+
+  <div style="background: rgba(7,55,79,0.04); padding: 20px 28px; margin-top: 24px; border-left: 4px solid var(--sky);">
+    <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 6px;">RESOURCE ALLOCATION</p>
+    <p style="font-size: 0.88rem; color: var(--text); line-height: 1.6;">Every hour spent on blog content or glossary definitions is an hour <em>not</em> spent on homepage optimization, about page refinement, press releases, or hire-us differentiation. Prioritize accordingly.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SLIDE 21: CLOSING -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="slide slide-closing">
+  <div class="close-label">Strategic Assets Framework</div>
+  <h2>Entities. Relationships.<br>Visibility.</h2>
+  <p>The firms that define their entities clearly, position them strategically, and differentiate boldly will dominate AI-driven search. This is the playbook.</p>
+  <div class="logo-bar">
+    <img src="goat.png" alt="Rankings.io">
+  </div>
+  <div class="yellow-stripe"></div>
+</div>
+
+</body>
+</html>
