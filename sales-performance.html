@@ -505,12 +505,13 @@
                 }
             });
 
-            // Outbound bar chart — single month (skip Closed Won ARR)
+            // Outbound bar chart — single month (only Sets & Holds)
             var outLabels = [];
             var outData = [];
             outRows.forEach(function(r) {
                 var name = (gv(r, 0) || '').trim();
                 if (name.toLowerCase().indexOf('closed won') !== -1) return;
+                if (name.toLowerCase().indexOf('avg daily') !== -1) return;
                 outLabels.push(name);
                 outData.push(gv(r, lastCol) || 0);
             });
