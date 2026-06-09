@@ -437,7 +437,7 @@
         html += '</div>';
 
         // Outbound detail table — selected month only
-        var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
+        var outRows = sectionRows(rows, 'Outbound', ['Inbound', 'Feb Pipeline Carryover', 'Pipeline']);
         html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Outbound Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>' + curMonthLabel + '</th>';
         if (prevLabel) html += '<th>' + prevLabel + '</th>';
         html += '<th>Change</th></tr></thead><tbody>';
