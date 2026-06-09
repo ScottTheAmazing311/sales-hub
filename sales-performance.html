@@ -150,9 +150,12 @@
         <p id="dash-subtitle">Loading&hellip;</p>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="sales">Sales</button>
-        <button class="tab-btn" data-tab="marketing">Marketing</button>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <div class="tabs" style="margin-bottom:0;">
+            <button class="tab-btn active" data-tab="sales">Sales</button>
+            <button class="tab-btn" data-tab="marketing">Marketing</button>
+        </div>
+        <div id="month-nav" class="tabs" style="margin-bottom:0;"></div>
     </div>
 
     <div class="tab-panel active" id="tab-sales">
@@ -178,7 +181,7 @@
     var SHEET_ID = '1OR7ypbyUa0TVNzQEwUVp0oGgzAGEYJ2TquvQPFf1-sU';
     // TODO: After first run of buildSalesSummary(), replace this GID with the actual
     // "Sales Summary" tab GID from the master sheet URL (?gid=XXXXXXXXX)
-    var SALES_SUMMARY_GID = '1676865996';
+    var SALES_SUMMARY_GID = '1836334717';
     var COLORS = {
         primary: '#07374F',
         primaryLight: 'rgba(7,55,79,0.7)',
@@ -202,12 +205,24 @@
     Chart.defaults.scale.grid.color = 'rgba(0,0,0,0.05)';
     Chart.defaults.scale.ticks.color = '#737373';
 
-    function sheetURL(gid) {
-        return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + gid;
-    }
-    function fetchSheet(gid) {
-        return fetch(sheetURL(gid)).then(function(r) { return r.text(); }).then(function(text) {
-            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table;
+    function fetchSheet(gid, range) {
+        return new Promise(function(resolve, reject) {
+            var cb = '__perfData_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=responseHandler:' + cb + '&gid=' + gid;
+            if (range) url += '&range=' + encodeURIComponent(range);
+            window[cb] = function(response) {
+                delete window[cb];
+                if (script.parentNode) script.parentNode.removeChild(script);
+                resolve(response.table);
+            };
+            var script = document.createElement('script');
+            script.src = url;
+            script.onerror = function() {
+                delete window[cb];
+                if (script.parentNode) script.parentNode.removeChild(script);
+                reject(new Error('Failed to load sheet'));
+            };
+            document.head.appendChild(script);
         });
     }
     function gv(row, col) { return (row && row.c && row.c[col]) ? row.c[col].v : null; }
@@ -277,14 +292,38 @@
     // ═══════════════════════════════════════════════
     // Fetch the full sales sheet + a second range fetch for Pipeline (col B is number-typed
     // globally, so string values like "$145k / $1.74M" get dropped in the full fetch).
-    function fetchPipelineRange() {
-        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + SALES_SUMMARY_GID + '&range=A20:C40';
-        return fetch(url).then(function(r) { return r.text(); }).then(function(text) {
-            return JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '')).table;
+    // ── Month navigation state ──
+    var allMonthCols = [];
+    var selectedMonthIdx = -1;
+    var salesTable = null, salesPipelineTable = null, mktTable = null;
+
+    function selectMonth(idx) {
+        selectedMonthIdx = idx;
+        // Update button styles
+        document.querySelectorAll('.month-btn').forEach(function(b, i) {
+            b.classList.toggle('active', i === idx);
+        });
+        if (salesTable) renderSales(salesTable, salesPipelineTable);
+        if (mktTable) renderMarketing(mktTable);
+    }
+    window.selectMonth = selectMonth;
+
+    function buildMonthNav() {
+        var nav = document.getElementById('month-nav');
+        nav.innerHTML = '';
+        allMonthCols.forEach(function(m, i) {
+            var btn = document.createElement('button');
+            btn.className = 'tab-btn month-btn' + (i === selectedMonthIdx ? ' active' : '');
+            btn.textContent = m.label;
+            btn.onclick = function() { selectMonth(i); };
+            nav.appendChild(btn);
         });
     }
-    Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchPipelineRange()]).then(function(results) {
-        renderSales(results[0], results[1]);
+
+    Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchSheet(SALES_SUMMARY_GID, 'A20:C40')]).then(function(results) {
+        salesTable = results[0];
+        salesPipelineTable = results[1];
+        renderSales(salesTable, salesPipelineTable);
     }).catch(function(err) {
         document.getElementById('tab-sales').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load sales data: ' + err.message + '</div>';
     });
@@ -313,13 +352,28 @@
             }
         }
         var monthLabels = monthCols.map(function(m) { return m.label; });
-        var lastCol = monthCols.length ? monthCols[monthCols.length - 1].idx : 1;
-        var prevCol = monthCols.length > 1 ? monthCols[monthCols.length - 2].idx : null;
-        var prevLabel = monthCols.length > 1 ? monthCols[monthCols.length - 2].label : '';
+
+        // Initialize month navigation on first load
+        if (allMonthCols.length === 0) {
+            allMonthCols = monthCols.slice();
+            // Find the latest month with data
+            var latestWithData = monthCols.length - 1;
+            for (var mi = monthCols.length - 1; mi >= 0; mi--) {
+                var testRow = findRow(rows, 'Total ARR');
+                if (testRow && gv(testRow, monthCols[mi].idx)) { latestWithData = mi; break; }
+            }
+            selectedMonthIdx = latestWithData;
+            buildMonthNav();
+        }
+
+        var curIdx = selectedMonthIdx;
+        var lastCol = monthCols[curIdx] ? monthCols[curIdx].idx : 1;
+        var prevCol = curIdx > 0 ? monthCols[curIdx - 1].idx : null;
+        var prevLabel = curIdx > 0 ? monthCols[curIdx - 1].label : '';
 
         // Update subtitle
         if (monthLabels.length > 0) {
-            document.getElementById('dash-subtitle').textContent = monthLabels[0] + ' \u2013 ' + monthLabels[monthLabels.length - 1] + ' 2026 \u00B7 Rankings.io';
+            document.getElementById('dash-subtitle').textContent = monthCols[curIdx].label + ' 2026 \u00B7 Rankings.io';
         }
 
         function lastVal(key) { var r = findRow(rows, key); return r ? (gv(r, lastCol) || 0) : 0; }
@@ -328,7 +382,7 @@
             var r = findRow(rows, key);
             if (!r) return 0;
             var sum = 0;
-            monthCols.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            for (var i = 0; i <= curIdx; i++) { sum += (gv(r, monthCols[i].idx) || 0); }
             return sum;
         }
 
@@ -347,9 +401,10 @@
             typeof wrPrev === 'number' && wrPrev < 1 ? (wrPrev * 100).toFixed(0) + '%' : fmtNum(wrPrev) + '%');
         html += '</div>';
 
-        // Key Metrics Detail table
-        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th>';
-        monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+        // Key Metrics Detail table — selected month only
+        var curMonthLabel = monthCols[curIdx].label;
+        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th><th>' + curMonthLabel + '</th>';
+        if (prevLabel) html += '<th>' + prevLabel + '</th>';
         html += '<th>Change</th></tr></thead><tbody>';
         var kpiRows = [
             ['Total ARR', 'money'], ['Total MRR', 'money'], ['Deals Closed', 'num'],
@@ -360,44 +415,42 @@
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
             if (!r) return;
-            var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
-            var ch = vals.length > 1 ? pctChange(vals[vals.length - 2], vals[vals.length - 1], !!k[2]) : { text: '\u2014', cls: '' };
-            html += '<tr><td>' + k[0] + '</td>';
-            vals.forEach(function(v, vi) {
-                var str;
-                if (k[1] === 'money') str = fmtMoney(v);
-                else if (k[1] === 'days') str = fmtNum(v) + 'd';
-                else if (k[1] === 'pct') str = typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
-                else str = fmtNum(v);
-                if (vi === vals.length - 1 && vals.length > 1) {
-                    html += '<td class="mono ' + ch.cls + '">' + str + '</td>';
-                } else {
-                    html += '<td class="mono">' + str + '</td>';
-                }
-            });
+            var curVal = gv(r, lastCol) || 0;
+            var prvVal = prevCol ? (gv(r, prevCol) || 0) : 0;
+            var ch = prevCol ? pctChange(prvVal, curVal, !!k[2]) : { text: '\u2014', cls: '' };
+            function fmtKpi(v) {
+                if (k[1] === 'money') return fmtMoney(v);
+                if (k[1] === 'days') return fmtNum(v) + 'd';
+                if (k[1] === 'pct') return typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
+                return fmtNum(v);
+            }
+            html += '<tr><td>' + k[0] + '</td><td class="mono">' + fmtKpi(curVal) + '</td>';
+            if (prevLabel) html += '<td class="mono" style="color:var(--muted-fg)">' + fmtKpi(prvVal) + '</td>';
             html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td></tr>';
         });
         html += '</tbody></table></div></div>';
 
-        // Charts: Rep ARR + Outbound
+        // Charts: Rep ARR + Outbound — selected month only
         html += '<div class="chart-grid">';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + monthLabels.join(' vs ') + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
-        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">Key outbound metrics</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Closed Won ARR by Rep</div><div class="card-desc">' + curMonthLabel + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-rep-arr"></canvas></div></div></div>';
+        html += '<div class="card"><div class="card-header"><div class="card-title">Outbound Performance</div><div class="card-desc">' + curMonthLabel + '</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-outbound"></canvas></div></div></div>';
         html += '</div>';
 
-        // Outbound detail table
+        // Outbound detail table — selected month only
         var outRows = sectionRows(rows, 'Outbound', ['Feb Pipeline Carryover', 'Pipeline']);
-        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Outbound Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
-        monthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+        html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Outbound Detail</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>' + curMonthLabel + '</th>';
+        if (prevLabel) html += '<th>' + prevLabel + '</th>';
         html += '<th>Change</th></tr></thead><tbody>';
         outRows.forEach(function(r) {
             var metric = gv(r, 0);
             if (!metric || !metric.trim()) return;
-            var vals = monthCols.map(function(m) { return gv(r, m.idx) || 0; });
+            var curVal = gv(r, lastCol) || 0;
+            var prvVal = prevCol ? (gv(r, prevCol) || 0) : 0;
             var isMoney = metric.toLowerCase().indexOf('arr') !== -1;
-            var ch = vals.length > 1 ? pctChange(vals[vals.length - 2], vals[vals.length - 1]) : { text: '\u2014', cls: '' };
-            html += '<tr><td>' + metric.trim() + '</td>';
-            vals.forEach(function(v) { html += '<td class="mono">' + (isMoney ? fmtMoney(v) : fmtNum(v)) + '</td>'; });
+            var ch = prevCol ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
+            var fmt = isMoney ? fmtMoney : fmtNum;
+            html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + fmt(curVal) + '</td>';
+            if (prevLabel) html += '<td class="mono" style="color:var(--muted-fg)">' + fmt(prvVal) + '</td>';
             html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td></tr>';
         });
         html += '</tbody></table></div></div>';
@@ -410,74 +463,63 @@
 
         el.innerHTML = html;
 
-        // ── Build charts ──
+        // ── Build charts — selected month only ──
         setTimeout(function() {
-            // Rep ARR bar chart
+            // Rep ARR bar chart — single month
             var repRows = sectionRows(rows, 'Sales Rep', ['Outbound']);
             var repNames = [];
-            var repDatasets = [];
-            monthCols.forEach(function(m, mi) {
-                var data = [];
-                repRows.forEach(function(r, ri) {
-                    if (mi === 0) repNames.push(gv(r, 0) || '');
-                    data.push(gv(r, m.idx) || 0);
-                });
-                repDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi % BAR_COLORS.length], borderRadius: 4 });
+            var repData = [];
+            repRows.forEach(function(r) {
+                repNames.push(gv(r, 0) || '');
+                repData.push(gv(r, lastCol) || 0);
             });
-            // Plugin to draw dollar amounts above each bar
             var barLabelPlugin = {
                 id: 'barLabels',
                 afterDatasetsDraw: function(chart) {
                     var ctx = chart.ctx;
-                    chart.data.datasets.forEach(function(dataset, di) {
-                        var meta = chart.getDatasetMeta(di);
-                        meta.data.forEach(function(bar, i) {
-                            var val = dataset.data[i];
-                            if (!val) return;
-                            var label = val >= 1000 ? '$' + (val / 1000).toFixed(0) + 'K' : '$' + val;
-                            ctx.save();
-                            ctx.font = '600 10px Inter, sans-serif';
-                            ctx.fillStyle = '#07374F';
-                            ctx.textAlign = 'center';
-                            ctx.fillText(label, bar.x, bar.y - 5);
-                            ctx.restore();
-                        });
+                    var meta = chart.getDatasetMeta(0);
+                    meta.data.forEach(function(bar, i) {
+                        var val = chart.data.datasets[0].data[i];
+                        if (!val) return;
+                        var label = val >= 1000 ? '$' + (val / 1000).toFixed(0) + 'K' : '$' + val;
+                        ctx.save();
+                        ctx.font = '600 10px Inter, sans-serif';
+                        ctx.fillStyle = '#07374F';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(label, bar.x, bar.y - 5);
+                        ctx.restore();
                     });
                 }
             };
             new Chart(document.getElementById('chart-rep-arr'), {
                 type: 'bar',
-                data: { labels: repNames, datasets: repDatasets },
+                data: { labels: repNames, datasets: [{ label: curMonthLabel, data: repData, backgroundColor: repNames.map(function(_, i) { return BAR_COLORS[i % BAR_COLORS.length]; }), borderRadius: 4 }] },
                 plugins: [barLabelPlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
-                        tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
+                    plugins: { legend: { display: false },
+                        tooltip: { callbacks: { label: function(c) { return '$' + c.raw.toLocaleString(); } } }
                     },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + (v/1000) + 'K'; } } } }
                 }
             });
 
-            // Outbound bar chart (sets, holds, avg daily dials — skip Closed Won ARR)
+            // Outbound bar chart — single month (skip Closed Won ARR)
             var outLabels = [];
-            var outDatasets = [];
-            monthCols.forEach(function(m, mi) {
-                var data = [];
-                outRows.forEach(function(r, ri) {
-                    var name = (gv(r, 0) || '').trim();
-                    if (name.toLowerCase().indexOf('closed won') !== -1) return;
-                    if (mi === 0) outLabels.push(name);
-                    data.push(gv(r, m.idx) || 0);
-                });
-                outDatasets.push({ label: m.label, data: data, backgroundColor: BAR_COLORS[mi % BAR_COLORS.length], borderRadius: 4 });
+            var outData = [];
+            outRows.forEach(function(r) {
+                var name = (gv(r, 0) || '').trim();
+                if (name.toLowerCase().indexOf('closed won') !== -1) return;
+                outLabels.push(name);
+                outData.push(gv(r, lastCol) || 0);
             });
             new Chart(document.getElementById('chart-outbound'), {
                 type: 'bar',
-                data: { labels: outLabels, datasets: outDatasets },
+                data: { labels: outLabels, datasets: [{ label: curMonthLabel, data: outData, backgroundColor: outLabels.map(function(_, i) { return BAR_COLORS[i % BAR_COLORS.length]; }), borderRadius: 4 }] },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { x: { beginAtZero: true } }
                 }
             });
@@ -611,7 +653,7 @@
     // ═══════════════════════════════════════════════
     //  MARKETING TAB
     // ═══════════════════════════════════════════════
-    fetchSheet('2097807044').then(renderMarketing).catch(function(err) {
+    fetchSheet('1224971331').then(function(table) { mktTable = table; renderMarketing(table); }).catch(function(err) {
         document.getElementById('tab-marketing').innerHTML = '<div class="loading" style="color:var(--destructive)">Failed to load marketing data: ' + err.message + '</div>';
     });
 
@@ -637,9 +679,11 @@
             ];
         }
         var mktMonthLabels = mktMonths.map(function(m) { return m.label; });
-        var mktLast = mktMonths[mktMonths.length - 1].idx;
-        var mktPrev = mktMonths.length > 1 ? mktMonths[mktMonths.length - 2].idx : null;
-        var mktPrevLabel = mktMonths.length > 1 ? mktMonths[mktMonths.length - 2].label : '';
+        // Use selected month index (mapped to mktMonths)
+        var mktCurIdx = Math.min(selectedMonthIdx >= 0 ? selectedMonthIdx : mktMonths.length - 1, mktMonths.length - 1);
+        var mktLast = mktMonths[mktCurIdx].idx;
+        var mktPrev = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].idx : null;
+        var mktPrevLabel = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].label : '';
         // Notes column is after months
         var notesCol = mktMonths[mktMonths.length - 1].idx + 1;
 
@@ -650,13 +694,13 @@
             var r = mktRow(label);
             if (!r) return 0;
             var sum = 0;
-            mktMonths.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            for (var i = 0; i <= mktCurIdx; i++) { sum += (gv(r, mktMonths[i].idx) || 0); }
             return sum;
         }
         function rowYtdSum(r) {
             if (!r) return 0;
             var sum = 0;
-            mktMonths.forEach(function(m) { sum += (gv(r, m.idx) || 0); });
+            for (var i = 0; i <= mktCurIdx; i++) { sum += (gv(r, mktMonths[i].idx) || 0); }
             return sum;
         }
         function mktAllMonths(label) {
@@ -680,7 +724,7 @@
         function mktLatestNonNull(label) {
             var r = mktRow(label);
             if (!r) return 0;
-            for (var ci = mktMonths.length - 1; ci >= 0; ci--) {
+            for (var ci = mktCurIdx; ci >= 0; ci--) {
                 var v = gv(r, mktMonths[ci].idx);
                 if (v != null && v !== 0) return v;
             }
@@ -774,35 +818,31 @@
             { title: 'Inbound Leads', start: 'Inbound Leads', end: ['__END__'] }
         ];
 
+        var mktCurLabel = mktMonths[mktCurIdx].label;
+        var mktPrevLabelCol = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].label : '';
         sections.forEach(function(sec) {
             var secRows = sec.rows || mktSectionRows(rows, sec.start, sec.end);
             if (secRows.length === 0) return;
-            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">' + sec.title + '</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th>';
-            mktMonthLabels.forEach(function(m) { html += '<th>' + m + '</th>'; });
+            html += '<div class="card chart-full"><div class="card-header"><div class="card-title">' + sec.title + '</div></div><div class="card-content"><table class="dtable"><thead><tr><th>Metric</th><th>' + mktCurLabel + '</th>';
+            if (mktPrevLabelCol) html += '<th>' + mktPrevLabelCol + '</th>';
             html += '<th>Change</th><th>Notes</th></tr></thead><tbody>';
             secRows.forEach(function(r) {
                 var metric = gv(r, 1); if (!metric || !metric.trim()) return;
-                var vals = mktMonths.map(function(m) { return gv(r, m.idx); });
+                var curVal = gv(r, mktLast);
+                var prvVal = mktPrev != null ? gv(r, mktPrev) : null;
                 var note = gv(r, notesCol) || '';
                 var isPct = (metric.toLowerCase().indexOf('rate') !== -1 || metric.toLowerCase().indexOf('consumption') !== -1);
                 var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1 || metric.toLowerCase().indexOf('arr') !== -1);
 
-                // Calculate change from last two non-null values
-                var lastTwo = [];
-                for (var vi = vals.length - 1; vi >= 0 && lastTwo.length < 2; vi--) {
-                    if (vals[vi] != null) lastTwo.unshift(vals[vi]);
+                var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
+                function fmtMkt(v) {
+                    if (v == null) return '\u2014';
+                    if (isPct) return typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
+                    if (isMoney) return fmtMoney(v);
+                    return fmtNum(v);
                 }
-                var ch = lastTwo.length === 2 ? pctChange(lastTwo[0], lastTwo[1]) : { text: '\u2014', cls: '' };
-
-                html += '<tr><td>' + metric.trim() + '</td>';
-                vals.forEach(function(v) {
-                    var str;
-                    if (v == null) str = '\u2014';
-                    else if (isPct) str = typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
-                    else if (isMoney) str = fmtMoney(v);
-                    else str = fmtNum(v);
-                    html += '<td class="mono">' + str + '</td>';
-                });
+                html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + fmtMkt(curVal) + '</td>';
+                if (mktPrevLabelCol) html += '<td class="mono" style="color:var(--muted-fg)">' + fmtMkt(prvVal) + '</td>';
                 html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td>';
                 html += '<td class="muted" style="font-size:0.78rem;font-style:italic">' + (note || '') + '</td></tr>';
             });
@@ -822,21 +862,17 @@
                 { label: 'TikTok', metric: 'Rankings TikTok Followers' },
                 // X / Twitter excluded per request
             ];
-            // Get most recent non-null value for a metric (falls back through months)
-            function mktMostRecent(label) {
+            // Get value for selected month
+            function mktSelected(label) {
                 var r = mktRow(label);
                 if (!r) return 0;
-                for (var ci = mktMonths.length - 1; ci >= 0; ci--) {
-                    var v = gv(r, mktMonths[ci].idx);
-                    if (v != null && v !== 0) return v;
-                }
-                return 0;
+                return gv(r, mktLast) || 0;
             }
             var socialLabels = [], socialValues = [];
             socialPlatforms.forEach(function(sp) {
-                var val = mktMostRecent(sp.metric);
+                var val = mktSelected(sp.metric);
                 if (!val) {
-                    val = mktMostRecent(sp.metric.replace('Linkedin', 'LinkedIn'));
+                    val = mktSelected(sp.metric.replace('Linkedin', 'LinkedIn'));
                 }
                 socialLabels.push(sp.label);
                 socialValues.push(val || 0);
@@ -857,195 +893,159 @@
                 }
             });
 
-            // Social Posts Published — months on x-axis, platforms as datasets
+            // Social Posts Published — selected month, platforms as bars
             var postPlatforms = [
                 { label: 'Instagram', metrics: ['PIM Instagram # Posts', 'Rankings Instagram # posts'], color: '#e4405f' },
                 { label: 'Facebook', metrics: ['PIM Facebook # Posts', 'Rankings Facebook # posts'], color: '#1877f2' },
                 { label: 'LinkedIn', metrics: ['PIM LinkedIn # posts', 'Rankings LinkedIn # posts'], color: COLORS.primary },
                 { label: 'TikTok', metrics: ['PIM TikTok # Posts'], color: '#000' }
             ];
-            var postDatasets = postPlatforms.map(function(pp) {
-                return {
-                    label: pp.label,
-                    data: mktMonths.map(function(m) {
-                        var total = 0;
-                        pp.metrics.forEach(function(metric) {
-                            var r = mktRow(metric);
-                            if (r) total += (gv(r, m.idx) || 0);
-                        });
-                        return total;
-                    }),
-                    backgroundColor: pp.color,
-                    borderRadius: 4
-                };
+            var postLabels = [], postData = [], postColors = [];
+            postPlatforms.forEach(function(pp) {
+                var total = 0;
+                pp.metrics.forEach(function(metric) { var r = mktRow(metric); if (r) total += (gv(r, mktLast) || 0); });
+                postLabels.push(pp.label); postData.push(total); postColors.push(pp.color);
             });
             new Chart(document.getElementById('chart-social-posts'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: postDatasets },
+                data: { labels: postLabels, datasets: [{ data: postData, backgroundColor: postColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // PIM Socials — months on x-axis, platforms as datasets
+            // PIM Socials — selected month, platforms as bars
             var pimPlatforms = [
                 { label: 'Instagram', metric: 'PIM Instagram Followers', color: '#e4405f' },
                 { label: 'Facebook', metric: 'PIM Facebook Followers', color: '#1877f2' },
                 { label: 'LinkedIn', metric: 'PIM LinkedIn Followers', color: COLORS.primary },
                 { label: 'TikTok', metric: 'PIM TikTok Followers', color: '#000' }
             ];
-            var pimDatasets = pimPlatforms.map(function(pp) {
+            var pimLabels = [], pimData = [], pimColors = [];
+            pimPlatforms.forEach(function(pp) {
                 var r = mktRow(pp.metric);
-                return {
-                    label: pp.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: pp.color,
-                    borderRadius: 4
-                };
+                pimLabels.push(pp.label); pimData.push(r ? (gv(r, mktLast) || 0) : 0); pimColors.push(pp.color);
             });
             new Chart(document.getElementById('chart-pim-socials'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: pimDatasets },
+                data: { labels: pimLabels, datasets: [{ data: pimData, backgroundColor: pimColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v; } } } }
                 }
             });
 
-            // Personal Social (Chris) — months on x-axis, platforms as datasets
+            // Personal Social (Chris) — selected month, platforms as bars
             var chrisPlatforms = [
                 { label: 'Instagram', metric: 'Instagram Followers', color: '#e4405f' },
                 { label: 'LinkedIn', metric: 'LinkedIn Followers', color: COLORS.primary },
                 { label: 'Facebook', metric: 'Facebook Followers', color: '#1877f2' },
                 { label: 'X / Twitter', metric: 'X Followers', color: '#000' }
             ];
-            var chrisDatasets = chrisPlatforms.map(function(cp) {
+            var chrisLabels = [], chrisData = [], chrisColors = [];
+            chrisPlatforms.forEach(function(cp) {
                 var r = mktRow(cp.metric);
-                return {
-                    label: cp.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: cp.color,
-                    borderRadius: 4
-                };
+                chrisLabels.push(cp.label); chrisData.push(r ? (gv(r, mktLast) || 0) : 0); chrisColors.push(cp.color);
             });
             new Chart(document.getElementById('chart-chris-socials'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: chrisDatasets },
+                data: { labels: chrisLabels, datasets: [{ data: chrisData, backgroundColor: chrisColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v; } } } }
                 }
             });
 
-            // Podcast activity — months on x-axis, metrics as datasets
+            // Podcast activity — selected month, metrics as bars
             var podActivityItems = [
                 { label: 'Episodes Released', metric: 'Episodes Released', color: COLORS.primary },
                 { label: 'Guests Booked', metric: 'Guests Booked', color: COLORS.blue },
                 { label: 'Guests Interviewed', metric: 'Guests Interviewed', color: '#22c55e' }
             ];
-            var podActivityDatasets = podActivityItems.map(function(pa) {
+            var podLabels = [], podData = [], podColors = [];
+            podActivityItems.forEach(function(pa) {
                 var r = mktRow(pa.metric);
-                return {
-                    label: pa.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: pa.color,
-                    borderRadius: 4
-                };
+                podLabels.push(pa.label); podData.push(r ? (gv(r, mktLast) || 0) : 0); podColors.push(pa.color);
             });
             new Chart(document.getElementById('chart-podcast'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: podActivityDatasets },
+                data: { labels: podLabels, datasets: [{ data: podData, backgroundColor: podColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // Podcast audience — months on x-axis, metrics as datasets
+            // Podcast audience — selected month, metrics as bars
             var podAudienceItems = [
                 { label: 'Downloads + Streams', metric: 'Downloads + Streams', color: COLORS.primary },
                 { label: 'Unique Listeners', metric: 'Unique Listener Reach', color: COLORS.blue }
             ];
-            var podAudienceDatasets = podAudienceItems.map(function(pa) {
+            var podAudLabels = [], podAudData = [], podAudColors = [];
+            podAudienceItems.forEach(function(pa) {
                 var r = mktRow(pa.metric);
-                return {
-                    label: pa.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: pa.color,
-                    borderRadius: 4
-                };
+                podAudLabels.push(pa.label); podAudData.push(r ? (gv(r, mktLast) || 0) : 0); podAudColors.push(pa.color);
             });
             new Chart(document.getElementById('chart-podcast-audience'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: podAudienceDatasets },
+                data: { labels: podAudLabels, datasets: [{ data: podAudData, backgroundColor: podAudColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1) + 'K' : v; } } } }
                 }
             });
 
-            // Podcast consumption line chart (percentage)
+            // Podcast consumption — selected month as single gauge-like bar
             var consumptionRow = mktRow('Average Consumption');
-            var consumptionVals = mktMonths.map(function(m) {
-                if (!consumptionRow) return 0;
-                var v = gv(consumptionRow, m.idx);
-                return v != null ? (v < 1 ? v * 100 : v) : 0;
-            });
+            var consumptionVal = 0;
+            if (consumptionRow) {
+                var v = gv(consumptionRow, mktLast);
+                consumptionVal = v != null ? (v < 1 ? v * 100 : v) : 0;
+            }
             new Chart(document.getElementById('chart-podcast-consumption'), {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: mktMonthLabels,
-                    datasets: [{
-                        label: 'Avg Consumption %',
-                        data: consumptionVals,
-                        borderColor: COLORS.primary,
-                        backgroundColor: 'rgba(7,55,79,0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointBackgroundColor: COLORS.primary
-                    }]
+                    labels: ['Avg Consumption'],
+                    datasets: [{ data: [consumptionVal], backgroundColor: [COLORS.primary], borderRadius: 4 }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false },
                         tooltip: { callbacks: { label: function(c) { return c.raw.toFixed(0) + '%'; } } }
                     },
-                    scales: { y: { min: 0, max: 100, ticks: { callback: function(v) { return v + '%'; } } } }
+                    scales: { x: { min: 0, max: 100, ticks: { callback: function(v) { return v + '%'; } } } }
                 }
             });
 
-            // Inbound vs MDR chart
-            var inbMdrLabels = mktMonthLabels;
-            var inbSetsVals = mktMonths.map(function(m) { return inbSetsRow ? (gv(inbSetsRow, m.idx) || 0) : 0; });
-            var inbHoldsVals = mktMonths.map(function(m) { return inbHoldsRow ? (gv(inbHoldsRow, m.idx) || 0) : 0; });
-            var mdrSetsVals = mktMonths.map(function(m) { return mdrSetsRow ? (gv(mdrSetsRow, m.idx) || 0) : 0; });
-            var mdrHoldsVals = mktMonths.map(function(m) { return mdrHoldsRow ? (gv(mdrHoldsRow, m.idx) || 0) : 0; });
+            // Inbound vs MDR chart — selected month
+            var inbMdrLabels = ['Inbound Sets', 'Inbound Holds', 'MDR Sets', 'MDR Holds'];
+            var inbMdrData = [
+                inbSetsRow ? (gv(inbSetsRow, mktLast) || 0) : 0,
+                inbHoldsRow ? (gv(inbHoldsRow, mktLast) || 0) : 0,
+                mdrSetsRow ? (gv(mdrSetsRow, mktLast) || 0) : 0,
+                mdrHoldsRow ? (gv(mdrHoldsRow, mktLast) || 0) : 0
+            ];
+            var inbMdrColors = [COLORS.primary, COLORS.blue, '#eedc82', '#f97316'];
             new Chart(document.getElementById('chart-inbound-mdr'), {
                 type: 'bar',
                 data: {
                     labels: inbMdrLabels,
-                    datasets: [
-                        { label: 'Inbound Sets', data: inbSetsVals, backgroundColor: COLORS.primary, borderRadius: 4 },
-                        { label: 'Inbound Holds', data: inbHoldsVals, backgroundColor: COLORS.blue, borderRadius: 4 },
-                        { label: 'MDR Sets', data: mdrSetsVals, backgroundColor: '#eedc82', borderRadius: 4 },
-                        { label: 'MDR Holds', data: mdrHoldsVals, backgroundColor: '#f97316', borderRadius: 4 }
-                    ]
+                    datasets: [{ data: inbMdrData, backgroundColor: inbMdrColors, borderRadius: 4 }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // PIMCON chart — months on x-axis, metrics as datasets
+            // PIMCON chart — selected month
             var pimconMetrics = [
                 { label: 'Projected Attendance', metric: 'Projected attendance cumulative', color: COLORS.primary },
                 { label: 'Registered', metric: 'Registered attendees cumulative', color: COLORS.blue },
@@ -1056,77 +1056,63 @@
                 'Registered attendees cumulative': ['Registered attendees'],
                 'Total PIMCON sponsorship sold cumulative': ['Total sponnsorship sold', 'Total sponsorship sold', 'Total PIMCON sponsorship sold']
             };
-            var pcDatasets = pimconMetrics.map(function(pm) {
+            var pcLabels = [], pcData = [], pcColors = [];
+            pimconMetrics.forEach(function(pm) {
                 var r = mktRow(pm.metric);
                 if (!r && pimconFallbacks[pm.metric]) {
                     pimconFallbacks[pm.metric].some(function(fb) { r = mktRow(fb); return !!r; });
                 }
-                return {
-                    label: pm.label,
-                    data: mktMonths.map(function(m) {
-                        var val = r ? (gv(r, m.idx) || 0) : 0;
-                        return pm.divisor ? val / pm.divisor : val;
-                    }),
-                    backgroundColor: pm.color,
-                    borderRadius: 4
-                };
+                var val = r ? (gv(r, mktLast) || 0) : 0;
+                pcLabels.push(pm.label); pcData.push(pm.divisor ? val / pm.divisor : val); pcColors.push(pm.color);
             });
             new Chart(document.getElementById('chart-pimcon'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: pcDatasets },
+                data: { labels: pcLabels, datasets: [{ data: pcData, backgroundColor: pcColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // Newsletter chart — months on x-axis, metrics as datasets
+            // Newsletter chart — selected month
             var nlItems = [
                 { label: 'Total Subscribers', metric: 'Total Subscribers', color: COLORS.primary },
                 { label: 'New Subscribers', metric: 'New Subscribers', color: COLORS.blue },
                 { label: 'Total Views', metric: 'Total Views', color: '#22c55e' }
             ];
-            var nlDatasets = nlItems.map(function(nl) {
+            var nlLabels = [], nlData = [], nlColors = [];
+            nlItems.forEach(function(nl) {
                 var r = mktRow(nl.metric);
-                return {
-                    label: nl.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: nl.color,
-                    borderRadius: 4
-                };
+                nlLabels.push(nl.label); nlData.push(r ? (gv(r, mktLast) || 0) : 0); nlColors.push(nl.color);
             });
             new Chart(document.getElementById('chart-newsletter'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: nlDatasets },
+                data: { labels: nlLabels, datasets: [{ data: nlData, backgroundColor: nlColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // YouTube chart — months on x-axis, metrics as datasets
+            // YouTube chart — selected month
             var ytItems = [
                 { label: 'Subscribers', metric: 'YouTube Total Subscribers', color: '#ff0000' },
                 { label: 'Long Form Views', metric: 'YouTube Long Form Average Views', color: COLORS.primary },
                 { label: 'Shorts Views', metric: 'YouTube Shorts Average Views', color: COLORS.blue }
             ];
-            var ytDatasets = ytItems.map(function(yt) {
+            var ytLabels = [], ytData = [], ytColors = [];
+            ytItems.forEach(function(yt) {
                 var r = mktRow(yt.metric);
-                return {
-                    label: yt.label,
-                    data: mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; }),
-                    backgroundColor: yt.color,
-                    borderRadius: 4
-                };
+                ytLabels.push(yt.label); ytData.push(r ? (gv(r, mktLast) || 0) : 0); ytColors.push(yt.color);
             });
             new Chart(document.getElementById('chart-youtube'), {
                 type: 'bar',
-                data: { labels: mktMonthLabels, datasets: ytDatasets },
+                data: { labels: ytLabels, datasets: [{ data: ytData, backgroundColor: ytColors, borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } },
+                    plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
