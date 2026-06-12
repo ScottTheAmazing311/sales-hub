@@ -9,7 +9,9 @@
  * 5. Run createSalesSummaryTrigger() once to auto-refresh every 30 minutes
  *
  * DATA SOURCES:
- * - "Closed Deals" tab → Total MRR/ARR, Deals Closed, Averages, per-rep Closed Won ARR
+ * - "Closed Deals" tab → Total MRR/ARR, Deals Closed, Averages, per-rep Closed Won ARR,
+ *   and (via the "Pipeline Direction" column) Closed Won ARR + deal counts split
+ *   by Outbound / Inbound
  * - "BDR Rollup" tab → Outbound Sets (by Date Set), Outbound Holds/Shows (by Date of Meeting)
  * - "Lead Log" tab → Inbound Sets (by Date Inbound)
  *
@@ -49,21 +51,27 @@ var HISTORICAL_REPS = {};
 REPS.forEach(function(r) { HISTORICAL_REPS[r] = [null, null, null, null]; });
 
 // Outbound rows
+// NOTE: 'Numer of Deals' [sic] matches the existing row label in the sheet —
+// don't fix the typo here without renaming the sheet row too.
 var OUTBOUND_ROWS = [
   'Sets',
   'Holds / Shows',
   'Avg Daily Dials',
   'Closed Won ARR (Outbound)',
+  'Numer of Deals',
 ];
 
 // Outbound rows that are auto-calculated (the rest stay manual)
-var OUTBOUND_AUTO = ['Sets', 'Holds / Shows'];
+var OUTBOUND_AUTO = ['Sets', 'Holds / Shows', 'Closed Won ARR (Outbound)', 'Numer of Deals'];
 
-// Inbound rows
+// Inbound rows ('Holds' and 'Avg Daily Dials' stay manual — no data source in this sheet)
 var INBOUND_ROWS = [
   'Inbound Sets',
+  'Holds',
+  'Closed Won ARR',
+  'Avg Daily Dials',
 ];
-var INBOUND_AUTO = ['Inbound Sets'];
+var INBOUND_AUTO = ['Inbound Sets', 'Closed Won ARR'];
 
 function buildSalesSummary() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -99,6 +107,7 @@ function buildSalesSummary() {
       mrr: mrr,
       arr: mrr * 12,
       owner: owner,
+      direction: (row[6] || '').trim().toLowerCase(), // "Pipeline Direction": outbound / inbound
       dateClosed: dateClosed,
       month: dateClosed.getMonth(),
       year: dateClosed.getFullYear(),
@@ -165,13 +174,24 @@ function buildSalesSummary() {
   // ── Compute monthly metrics ──
   var monthlyDeals = {};
   var repMonthlyARR = {};
+  var outboundARR = {}, outboundDeals = {}, inboundARR = {};
 
-  MONTHS.forEach(function(_, mi) { monthlyDeals[mi] = []; });
+  MONTHS.forEach(function(_, mi) {
+    monthlyDeals[mi] = [];
+    outboundARR[mi] = 0; outboundDeals[mi] = 0; inboundARR[mi] = 0;
+  });
   REPS.forEach(function(r) { repMonthlyARR[r] = {}; });
 
   deals.forEach(function(d) {
     if (d.year !== YEAR) return;
     monthlyDeals[d.month].push(d);
+
+    if (d.direction.indexOf('outbound') !== -1) {
+      outboundARR[d.month] += d.arr;
+      outboundDeals[d.month]++;
+    } else if (d.direction.indexOf('inbound') !== -1) {
+      inboundARR[d.month] += d.arr;
+    }
 
     var repKey = null;
     REPS.forEach(function(r) {
@@ -257,8 +277,13 @@ function buildSalesSummary() {
         row.push(outboundSets[mi] > 0 ? outboundSets[mi] : '');
       } else if (label === 'Holds / Shows') {
         row.push(outboundHolds[mi] > 0 ? outboundHolds[mi] : '');
+      } else if (label === 'Closed Won ARR (Outbound)') {
+        // Write (possibly 0) once the month has any closed deals; blank until then
+        row.push(monthlyDeals[mi].length > 0 ? outboundARR[mi] : '');
+      } else if (label === 'Numer of Deals') {
+        row.push(monthlyDeals[mi].length > 0 ? outboundDeals[mi] : '');
       } else {
-        row.push(''); // manual rows (Avg Daily Dials, Closed Won ARR Outbound)
+        row.push(''); // manual rows (Avg Daily Dials)
       }
     }
     output.push(row);
@@ -276,8 +301,10 @@ function buildSalesSummary() {
         row.push(''); // historical — manual
       } else if (label === 'Inbound Sets') {
         row.push(inboundSets[mi] > 0 ? inboundSets[mi] : '');
+      } else if (label === 'Closed Won ARR') {
+        row.push(monthlyDeals[mi].length > 0 ? inboundARR[mi] : '');
       } else {
-        row.push('');
+        row.push(''); // manual rows (Holds, Avg Daily Dials)
       }
     }
     output.push(row);

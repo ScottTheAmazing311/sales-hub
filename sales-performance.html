@@ -378,6 +378,9 @@
 
         function lastVal(key) { var r = findRow(rows, key); return r ? (gv(r, lastCol) || 0) : 0; }
         function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return r ? (gv(r, prevCol) || 0) : 0; }
+        // Raw variants: null = cell not filled in yet (distinct from a real 0)
+        function lastValRaw(key) { var r = findRow(rows, key); return r ? gv(r, lastCol) : null; }
+        function prevValRaw(key) { if (!prevCol) return null; var r = findRow(rows, key); return r ? gv(r, prevCol) : null; }
         function ytdSum(key) {
             var r = findRow(rows, key);
             if (!r) return 0;
@@ -389,16 +392,20 @@
         var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
         var mrrLast = lastVal('Total MRR'), mrrPrev = prevVal('Total MRR');
         var dealsLast = lastVal('Deals Closed'), dealsPrev = prevVal('Deals Closed');
-        var wrLast = lastVal('Win Rate (From Qualifed)'), wrPrev = prevVal('Win Rate (From Qualifed)');
+        var wrLast = lastValRaw('Win Rate (From Qualifed)'), wrPrev = prevValRaw('Win Rate (From Qualifed)');
+        function fmtPctVal(v) {
+            if (v == null) return '—';
+            return typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
+        }
 
         // Stat cards
         html += '<div class="stat-grid">';
         html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev), fmtMoney(ytdSum('Total ARR')));
         html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev), fmtMoney(ytdSum('Total MRR')));
         html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev), fmtNum(ytdSum('Deals Closed')));
-        html += statCard('Win Rate', typeof wrLast === 'number' && wrLast < 1 ? (wrLast * 100).toFixed(0) + '%' : fmtNum(wrLast) + '%',
-            pctChangeFromPrev(wrPrev, wrLast, prevLabel), ICONS.trending,
-            typeof wrPrev === 'number' && wrPrev < 1 ? (wrPrev * 100).toFixed(0) + '%' : fmtNum(wrPrev) + '%');
+        html += statCard('Win Rate', fmtPctVal(wrLast),
+            (wrLast == null || wrPrev == null) ? { text: '—', cls: '' } : pctChangeFromPrev(wrPrev, wrLast, prevLabel),
+            ICONS.trending, fmtPctVal(wrPrev));
         html += '</div>';
 
         // Key Metrics Detail table — selected month only
@@ -415,10 +422,11 @@
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
             if (!r) return;
-            var curVal = gv(r, lastCol) || 0;
-            var prvVal = prevCol ? (gv(r, prevCol) || 0) : 0;
-            var ch = prevCol ? pctChange(prvVal, curVal, !!k[2]) : { text: '\u2014', cls: '' };
+            var curVal = gv(r, lastCol);
+            var prvVal = prevCol ? gv(r, prevCol) : null;
+            var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal, !!k[2]) : { text: '\u2014', cls: '' };
             function fmtKpi(v) {
+                if (v == null) return '\u2014';
                 if (k[1] === 'money') return fmtMoney(v);
                 if (k[1] === 'days') return fmtNum(v) + 'd';
                 if (k[1] === 'pct') return typeof v === 'number' && v < 1 ? (v * 100).toFixed(0) + '%' : fmtNum(v) + '%';
@@ -444,11 +452,11 @@
         outRows.forEach(function(r) {
             var metric = gv(r, 0);
             if (!metric || !metric.trim()) return;
-            var curVal = gv(r, lastCol) || 0;
-            var prvVal = prevCol ? (gv(r, prevCol) || 0) : 0;
-            var isMoney = metric.toLowerCase().indexOf('arr') !== -1;
-            var ch = prevCol ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
-            var fmt = isMoney ? fmtMoney : fmtNum;
+            var curVal = gv(r, lastCol);
+            var prvVal = prevCol ? gv(r, prevCol) : null;
+            var isMoney = /(^|[^a-z])arr([^a-z]|$)/i.test(metric); // "ARR" as own word — don't match "Carry Over"
+            var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
+            var fmt = function(v) { return v == null ? '\u2014' : (isMoney ? fmtMoney(v) : fmtNum(v)); };
             html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + fmt(curVal) + '</td>';
             if (prevLabel) html += '<td class="mono" style="color:var(--muted-fg)">' + fmt(prvVal) + '</td>';
             html += '<td><span class="' + ch.cls + '">' + ch.text + '</span></td></tr>';
@@ -833,7 +841,7 @@
                 var prvVal = mktPrev != null ? gv(r, mktPrev) : null;
                 var note = gv(r, notesCol) || '';
                 var isPct = (metric.toLowerCase().indexOf('rate') !== -1 || metric.toLowerCase().indexOf('consumption') !== -1);
-                var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1 || metric.toLowerCase().indexOf('arr') !== -1);
+                var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1 || /(^|[^a-z])arr([^a-z]|$)/i.test(metric));
 
                 var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
                 function fmtMkt(v) {
