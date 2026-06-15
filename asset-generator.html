@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Generator — Rankings</title>
+    <link rel="icon" href="favicon.svg">
+    <script src="auth.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Rankings brand fonts (from Rankings Assets/BrandKit) */
+        @font-face {
+            font-family: 'Roslindale';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/roslindale/Roslindale-DisplayCondensedBold.ttf') format('truetype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Roslindale';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/roslindale/Roslindale-DisplayCondensedSemiBold.ttf') format('truetype');
+            font-weight: 600;
+        }
+        @font-face {
+            font-family: 'Roslindale';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/roslindale/Roslindale-DisplayCondensedBoldItalic.ttf') format('truetype');
+            font-weight: 700;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'Roslindale';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/roslindale/Roslindale-DisplayCondensedSemiBoldItalic.ttf') format('truetype');
+            font-weight: 600;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-Regular.otf') format('opentype');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-Italic.otf') format('opentype');
+            font-weight: 400;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-Medium.otf') format('opentype');
+            font-weight: 500;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-Bold.otf') format('opentype');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-BoldItalic.otf') format('opentype');
+            font-weight: 700;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'Satoshi';
+            src: url('Rankings%20Assets/BrandKit/RANKINGS/Fonts/satoshi/Satoshi-Black.otf') format('opentype');
+            font-weight: 900;
+        }
+        :root {
+            --navy: #07374F;
+            --navy-light: #0e5f87;
+            --yellow: #eaff6a;
+            --yellow-warm: #eedc82;
+            --cream: #fefaed;
+            --bg: #f4f0e6;
+            --text: #2c2c2c;
+            --text-muted: #6b6b6b;
+            --destructive: #c0392b;
+            --warning: #f59e0b;
+            --border: rgba(7,55,79,0.12);
+            --radius: 10px;
+            /* Rankings brand (official BrandKit values) */
+            --midnight: #14364d;
+            --chartreuse: #c6e005;
+            --sky: #3a93cf;
+            --suede: #fcfaec;
+            --flax: #eedc82;
+            --tux: #282828;
+            --pearl: #ffffff;
+            --serif: 'Roslindale', 'DM Serif Display', Georgia, serif;
+            --sans: 'Satoshi', 'IBM Plex Sans', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* ── Top bar ─────────────────────────────── */
+        .topbar {
+            background: var(--navy);
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .topbar .logo-mark {
+            background: var(--yellow);
+            color: var(--navy);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .topbar h1 { font-size: 17px; font-weight: 600; }
+        .topbar .sub { font-size: 12px; opacity: 0.65; font-family: 'IBM Plex Mono', monospace; }
+        .yellow-stripe { height: 5px; background: var(--yellow); }
+
+        .tabs { display: flex; gap: 6px; margin-left: auto; }
+        .tab-btn {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 999px;
+            padding: 7px 18px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tab-btn:hover { border-color: var(--yellow); }
+        .tab-btn.active { background: var(--yellow); color: var(--navy); border-color: var(--yellow); font-weight: 600; }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-primary { background: var(--navy); color: #fff; }
+        .btn-primary:hover { background: var(--navy-light); }
+        .btn-yellow { background: var(--yellow); color: var(--navy); }
+        .btn-yellow:hover { filter: brightness(0.95); }
+        .btn-ghost { background: transparent; color: var(--navy); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--navy); }
+        .btn-danger { background: transparent; color: var(--destructive); border: 1px solid rgba(192,57,43,0.3); }
+        .btn-danger:hover { background: rgba(192,57,43,0.08); }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+        /* ── Build view layout ───────────────────── */
+        .view { display: none; }
+        .view.active { display: block; }
+        .build-layout {
+            display: flex;
+            height: calc(100vh - 62px);
+        }
+        .sidebar {
+            width: 360px;
+            min-width: 360px;
+            background: var(--cream);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 18px;
+        }
+        .preview-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .panel-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 18px 0 8px;
+        }
+        .panel-label:first-child { margin-top: 0; }
+
+        .field { margin-bottom: 10px; }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 3px;
+        }
+        .field input[type="text"], .field input[type="date"], .field select, .field textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            background: #fff;
+            color: var(--text);
+        }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: 2px solid var(--navy-light);
+            outline-offset: -1px;
+        }
+        .field-row { display: flex; gap: 10px; }
+        .field-row .field { flex: 1; }
+        .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+
+        /* Library browser in sidebar */
+        .search-box { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 999px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; margin-bottom: 10px; background: #fff; }
+        .cat-group { margin-bottom: 6px; }
+        .cat-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--navy);
+            background: rgba(7,55,79,0.06);
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cat-header .count { color: var(--text-muted); }
+        .lib-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .lib-item:hover { border-color: var(--navy); }
+        .lib-item.in-doc { background: rgba(234,255,106,0.35); border-color: rgba(7,55,79,0.3); }
+        .lib-item .li-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.25; }
+        .lib-item .li-size {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .lib-item .li-add {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: var(--navy);
+            color: var(--yellow);
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .lib-item.in-doc .li-add { background: var(--text-muted); }
+
+        /* Selected list */
+        .sel-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 5px;
+            cursor: grab;
+        }
+        .sel-item.dragging { opacity: 0.4; }
+        .sel-item .drag-handle { color: var(--text-muted); font-size: 14px; cursor: grab; user-select: none; }
+        .sel-item .si-title { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.25; }
+        .sel-item .si-remove {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--destructive);
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .sel-item .si-remove:hover { background: rgba(192,57,43,0.1); }
+        .empty-note { font-size: 12.5px; color: var(--text-muted); padding: 8px 2px; line-height: 1.5; }
+
+        /* ── The printed page (Rankings brand) ───── */
+        .page {
+            width: 8.5in;
+            height: 11in;
+            background: var(--suede);
+            box-shadow: 0 4px 20px rgba(7,55,79,0.15);
+            padding: 0.45in 0.5in;
+            display: flex;
+            flex-direction: column;
+            gap: 0.16in;
+            position: relative;
+            flex-shrink: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .page-num {
+            position: absolute;
+            bottom: 0.18in;
+            right: 0.5in;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5pt;
+            color: var(--text-muted);
+        }
+        .doc-header {
+            margin: -0.45in -0.5in 0;
+            padding: 0.26in 0.5in 0.22in;
+            background: var(--midnight);
+            border-bottom: 6px solid var(--chartreuse);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .doc-header .dh-left .dh-kicker {
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--chartreuse);
+            margin-bottom: 4px;
+        }
+        .doc-header .dh-left h2 {
+            font-family: var(--serif);
+            font-size: 27pt;
+            font-weight: 700;
+            color: var(--pearl);
+            line-height: 1.02;
+            letter-spacing: 0.01em;
+        }
+        .doc-header .dh-right { text-align: right; }
+        .doc-header .dh-logo { margin-bottom: 6px; }
+        .doc-header .dh-logo img { height: 0.34in; display: inline-block; }
+        .doc-header .dh-meta {
+            font-family: var(--sans);
+            font-size: 8pt;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.5;
+        }
+
+        /* ── Cards on the page (Rankings brand) ──── */
+        .pcard {
+            border: 1px solid rgba(20,54,77,0.16);
+            border-radius: 10px;
+            padding: 0.18in 0.22in;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+            background: var(--pearl);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .pcard.size-third { height: 3.05in; }
+        .pcard.size-half { height: 4.7in; }
+        .pcard.size-twothirds { height: 6.35in; }
+        .pcard .pc-kicker {
+            font-family: var(--sans);
+            font-size: 8pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--midnight);
+            display: inline-block;
+            border-bottom: 3px solid var(--chartreuse);
+            padding-bottom: 2px;
+            margin-bottom: 7px;
+        }
+        .pcard .pc-title {
+            font-family: var(--serif);
+            font-size: 17pt;
+            font-weight: 700;
+            color: var(--midnight);
+            line-height: 1.05;
+            margin-bottom: 8px;
+        }
+        .pcard .pc-body { font-family: var(--sans); font-size: 9.5pt; line-height: 1.45; color: var(--tux); }
+        .pc-body p { margin-bottom: 6px; }
+        .pc-body h4 {
+            font-family: var(--sans);
+            font-size: 9.5pt;
+            font-weight: 900;
+            color: var(--midnight);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 9px 0 4px;
+        }
+        .pc-body ul { margin: 2px 0 7px 0; padding-left: 0; list-style: none; }
+        .pc-body li {
+            padding-left: 14px;
+            position: relative;
+            margin-bottom: 3.5px;
+        }
+        .pc-body ul.plain li::before {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 7px;
+            width: 5px;
+            height: 5px;
+            background: var(--sky);
+            border-radius: 50%;
+        }
+        .pc-body ul.checks li { padding-left: 17px; }
+        .pc-body ul.checks li::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--sky);
+            font-weight: 900;
+        }
+        .pc-body ol { margin: 2px 0 7px 0; padding-left: 0; counter-reset: steps; list-style: none; }
+        .pc-body ol li { padding-left: 20px; position: relative; margin-bottom: 4px; counter-increment: steps; }
+        .pc-body ol li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 1px;
+            width: 13px;
+            height: 13px;
+            background: var(--midnight);
+            color: var(--chartreuse);
+            font-size: 7.5pt;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pc-body .callout {
+            background: transparent;
+            border: 1.5px solid var(--chartreuse);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-style: italic;
+            font-weight: 500;
+            margin: 8px 0;
+            color: var(--midnight);
+        }
+        .pc-body .stat-row {
+            display: flex;
+            gap: 12px;
+            margin: 8px 0;
+        }
+        .pc-body .stat {
+            flex: 1;
+            background: var(--suede);
+            border-radius: 8px;
+            padding: 9px 10px;
+            text-align: center;
+        }
+        .pc-body .stat .num {
+            font-family: var(--serif);
+            font-size: 19pt;
+            font-weight: 700;
+            color: var(--midnight);
+            display: block;
+            line-height: 1.05;
+        }
+        .pc-body .stat .lbl {
+            font-size: 7.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 3px;
+        }
+        .pc-body hr { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+        .pc-body strong { color: var(--midnight); }
+        .pc-body em { font-style: italic; }
+
+        /* icon feature row — like "Why Rankings dominates" sidebar */
+        .pc-body .icon-row {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            margin: 7px 0;
+        }
+        .pc-body .icon-row .ir-icon {
+            width: 0.3in;
+            height: 0.3in;
+            background: var(--midnight);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12pt;
+            flex-shrink: 0;
+        }
+        .pc-body .icon-row .ir-label {
+            font-weight: 900;
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--midnight);
+            display: block;
+        }
+        .pc-body .icon-row .ir-desc { font-size: 9pt; line-height: 1.35; }
+
+        /* pricing tier cards — like the 4-Tier Search Dominance row */
+        .pc-body .tier-row { display: flex; gap: 10px; margin: 8px 0; align-items: stretch; }
+        .pc-body .tier {
+            flex: 1;
+            background: var(--suede);
+            border: 1px solid rgba(20,54,77,0.14);
+            border-radius: 10px;
+            padding: 9px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            color: var(--tux); /* tier boxes stay light even on dark cards */
+        }
+        .pc-body .tier .t-name {
+            font-family: var(--serif);
+            font-style: italic;
+            font-weight: 700;
+            font-size: 13pt;
+            color: var(--sky);
+            line-height: 1.1;
+        }
+        .pc-body .tier .t-sub {
+            font-weight: 900;
+            font-size: 7.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--midnight);
+            margin: 2px 0 6px;
+        }
+        .pc-body .tier ul { text-align: left; margin: 0 0 6px; }
+        .pc-body .tier ul.checks li { font-size: 8pt; margin-bottom: 2.5px; padding-left: 14px; }
+        .pc-body .tier .t-price {
+            margin-top: auto;
+            font-weight: 900;
+            font-size: 9pt;
+            color: var(--midnight);
+            text-decoration: underline;
+            text-decoration-color: var(--chartreuse);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+        }
+
+        /* CTA chip — like the LET'S TALK button */
+        .pc-body .cta {
+            display: inline-block;
+            background: var(--chartreuse);
+            color: var(--midnight);
+            font-weight: 900;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 7px 18px;
+            border-radius: 4px;
+            margin: 6px 0;
+        }
+
+        /* ghosted closing statement — like "The time to dominate is NOW." */
+        .pc-body .big {
+            font-family: var(--serif);
+            font-style: italic;
+            font-weight: 700;
+            font-size: 26pt;
+            line-height: 1.05;
+            color: rgba(20,54,77,0.22);
+            margin: 8px 0;
+        }
+
+        /* column split */
+        .pc-body .col-row { display: flex; gap: 0.22in; }
+        .pc-body .col-row .col { flex: 1; min-width: 0; }
+        .pc-body .col-row .col + .col { border-left: 1px solid rgba(20,54,77,0.18); padding-left: 0.22in; }
+
+        /* dark variant — Midnight panel like sell-sheet sidebars */
+        .pcard.dark { background: var(--midnight); border-color: var(--midnight); }
+        .pcard.dark .pc-kicker { color: var(--chartreuse); border-bottom-color: var(--chartreuse); }
+        .pcard.dark .pc-title { color: var(--pearl); }
+        .pcard.dark .pc-body { color: rgba(255,255,255,0.88); }
+        .pcard.dark .pc-body h4 { color: var(--chartreuse); }
+        .pcard.dark .pc-body strong { color: var(--pearl); }
+        .pcard.dark .pc-body ul.plain li::before { background: var(--chartreuse); }
+        .pcard.dark .pc-body ul.checks li::before { color: var(--chartreuse); }
+        .pcard.dark .pc-body .tier ul.checks li::before { color: var(--sky); }
+        .pcard.dark .pc-body .tier strong { color: var(--midnight); }
+        .pcard.dark .pc-body ol li::before { background: var(--chartreuse); color: var(--midnight); }
+        .pcard.dark .pc-body .callout { border-color: var(--chartreuse); color: var(--pearl); }
+        .pcard.dark .pc-body .stat { background: rgba(255,255,255,0.08); }
+        .pcard.dark .pc-body .stat .num { color: var(--chartreuse); }
+        .pcard.dark .pc-body .stat .lbl { color: rgba(255,255,255,0.65); }
+        .pcard.dark .pc-body .icon-row .ir-icon { background: var(--chartreuse); }
+        .pcard.dark .pc-body .icon-row .ir-label { color: var(--chartreuse); }
+        .pcard.dark .pc-body .big { color: rgba(252,250,236,0.25); }
+        .pcard.dark .pc-body .col-row .col + .col { border-left-color: rgba(255,255,255,0.25); }
+        .pcard.dark .pc-body hr { border-top-color: rgba(255,255,255,0.2); }
+
+        .pc-body .pc-graphic { display: block; object-fit: contain; border-radius: 4px; margin: 6px auto; max-height: 2.6in; }
+
+        .overflow-flag {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            background: var(--warning);
+            color: #fff;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            z-index: 2;
+        }
+        .doc-footer {
+            margin-top: auto;
+            padding-top: 0.08in;
+            border-top: 1px solid var(--border);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 7.5pt;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        /* ── Library manager view ────────────────── */
+        .lib-layout { padding: 24px 32px; max-width: 1280px; margin: 0 auto; }
+        .lib-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .lib-toolbar .spacer { flex: 1; }
+        .cat-filter {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            background: #fff;
+        }
+        .lib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 18px;
+        }
+        .lib-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.15s;
+        }
+        .lib-card:hover { box-shadow: 0 4px 16px rgba(7,55,79,0.12); }
+        .lib-card .lc-preview {
+            padding: 14px 16px;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+        .lib-card .lc-preview::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, #fff);
+        }
+        .lib-card .lc-preview .pc-body { font-size: 8.5pt; }
+        .lib-card .lc-preview .pcard { border: none; padding: 0; border-radius: 6px; }
+        .lib-card .lc-preview .pcard.dark { padding: 10px 12px; }
+        .lib-card .lc-footer {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--cream);
+        }
+        .lib-card .lc-meta {
+            flex: 1;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .badge-custom {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            font-weight: 600;
+            background: var(--yellow);
+            color: var(--navy);
+            padding: 2px 7px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+        .badge-edited {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            font-weight: 600;
+            background: var(--navy);
+            color: var(--yellow);
+            padding: 2px 7px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+
+        /* ── Editor modal ────────────────────────── */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(7,55,79,0.45);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal {
+            background: var(--bg);
+            border-radius: 14px;
+            width: min(1100px, 100%);
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-head {
+            background: var(--navy);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-head h3 { font-size: 15px; font-weight: 600; }
+        .modal-head .close-x { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; line-height: 1; }
+        .modal-body {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .editor-form { flex: 1; min-width: 0; }
+        .editor-preview { flex: 1.1; min-width: 0; }
+        .editor-preview .panel-label { margin-top: 0; }
+        .editor-preview .preview-stage {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 62vh;
+        }
+        .editor-form textarea { min-height: 260px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; line-height: 1.5; resize: vertical; }
+        .syntax-help {
+            background: rgba(7,55,79,0.05);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+        .syntax-help code { color: var(--navy); font-weight: 600; }
+        .modal-foot {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            background: var(--cream);
+        }
+        .modal-foot .spacer { flex: 1; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--navy);
+            color: #fff;
+            padding: 11px 22px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: transform 0.25s;
+            z-index: 200;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ── Print ───────────────────────────────── */
+        @media print {
+            @page { size: letter; margin: 0; }
+            body { background: #fff; }
+            .topbar, .yellow-stripe, .sidebar, .toast, .modal-backdrop, .overflow-flag, #view-library { display: none !important; }
+            .build-layout { display: block; height: auto; }
+            .preview-area { padding: 0; display: block; overflow: visible; }
+            .page {
+                box-shadow: none;
+                page-break-after: always;
+                margin: 0;
+            }
+            .page:last-child { page-break-after: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <span class="logo-mark">RK</span>
+    <div>
+        <h1>Asset Generator</h1>
+        <div class="sub">card library &rarr; custom one-pagers</div>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-view="build" onclick="switchView('build')">Build a One-Pager</button>
+        <button class="tab-btn" data-view="library" onclick="switchView('library')">Card Library</button>
+    </div>
+</div>
+<div class="yellow-stripe"></div>
+
+<!-- ═══════════ BUILD VIEW ═══════════ -->
+<div class="view active" id="view-build">
+    <div class="build-layout">
+        <div class="sidebar">
+            <div class="panel-label">Document Setup</div>
+            <div class="field">
+                <label>Prospect / Firm Name</label>
+                <input type="text" id="inp-prospect" placeholder="e.g. Smith &amp; Associates" oninput="onDocSettingChange()">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Prepared By</label>
+                    <input type="text" id="inp-preparedby" placeholder="Your name" oninput="onDocSettingChange()">
+                </div>
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="inp-date" oninput="onDocSettingChange()">
+                </div>
+            </div>
+            <div class="field">
+                <label>Document Title</label>
+                <input type="text" id="inp-doctitle" placeholder="Why Rankings" oninput="onDocSettingChange()">
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="inp-showlogo" checked onchange="onDocSettingChange()">
+                <label for="inp-showlogo" style="font-weight:500; margin:0; cursor:pointer;">Show Rankings logo</label>
+            </div>
+
+            <div class="panel-label">Selected Cards <span id="sel-count" style="color:var(--text-muted)"></span></div>
+            <div id="selected-list"></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button class="btn btn-yellow" style="flex:1;" onclick="window.print()">Print / Save PDF</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearDoc()" title="Remove all cards">Clear</button>
+            </div>
+
+            <div class="panel-label" style="margin-top:24px;">Card Library</div>
+            <input type="text" class="search-box" id="lib-search" placeholder="Search cards…" oninput="renderSidebarLibrary()">
+            <div id="sidebar-library"></div>
+        </div>
+
+        <div class="preview-area" id="page-stack">
+            <!-- pages rendered here -->
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ LIBRARY VIEW ═══════════ -->
+<div class="view" id="view-library">
+    <div class="lib-layout">
+        <div class="lib-toolbar">
+            <button class="btn btn-primary" onclick="openEditor(null)">+ New Card</button>
+            <select class="cat-filter" id="lib-cat-filter" onchange="renderLibraryGrid()">
+                <option value="">All categories</option>
+            </select>
+            <div class="spacer"></div>
+            <button class="btn btn-ghost btn-sm" onclick="exportLibrary()">Export Library</button>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()">Import Library</button>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importLibrary(event)">
+            <button class="btn btn-danger btn-sm" onclick="resetLibrary()">Reset to Defaults</button>
+        </div>
+        <div class="lib-grid" id="library-grid"></div>
+    </div>
+</div>
+
+<!-- ═══════════ EDITOR MODAL ═══════════ -->
+<div class="modal-backdrop" id="editor-modal">
+    <div class="modal">
+        <div class="modal-head">
+            <h3 id="editor-title">Edit Card</h3>
+            <button class="close-x" onclick="closeEditor()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="editor-form">
+                <div class="field">
+                    <label>Card Title</label>
+                    <input type="text" id="ed-title" oninput="renderEditorPreview()" placeholder="e.g. Where the Market Is Heading">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>Category</label>
+                        <input type="text" id="ed-category" list="cat-datalist" oninput="renderEditorPreview()" placeholder="e.g. Market Insights">
+                        <datalist id="cat-datalist"></datalist>
+                    </div>
+                    <div class="field">
+                        <label>Size (share of page)</label>
+                        <select id="ed-size" onchange="renderEditorPreview()">
+                            <option value="third">1/3 page</option>
+                            <option value="half">1/2 page</option>
+                            <option value="twothirds">2/3 page</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Style</label>
+                        <select id="ed-style" onchange="renderEditorPreview()">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark (Midnight)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Background Image</label>
+                        <select id="ed-bg" onchange="renderEditorPreview()">
+                            <option value="">None (solid)</option>
+                            <option value="Dark blue gradient backdrop.png">Dark blue gradient</option>
+                            <option value="Light blue gradient backdrop.png">Sky blue gradient</option>
+                            <option value="gradient.png">Midnight + chartreuse gradient</option>
+                            <option value="26_RANK_PandadocCover_background.png">Mountains at night</option>
+                            <option value="26_RANK_Mountains.png">Mountains (cutout)</option>
+                            <option value="Internet Marketing for Lawyers-2.png">6-step process backdrop</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Content</label>
+                    <textarea id="ed-content" oninput="renderEditorPreview()" placeholder="Write the card content here…"></textarea>
+                </div>
+                <div class="syntax-help">
+                    <code>## Heading</code> &nbsp;subheading &nbsp;·&nbsp; <code>- item</code> &nbsp;bullet &nbsp;·&nbsp; <code>[x] item</code> &nbsp;checkmark<br>
+                    <code>1. item</code> &nbsp;numbered step &nbsp;·&nbsp; <code>&gt; text</code> &nbsp;outlined callout<br>
+                    <code>**bold**</code> / <code>*italic*</code> &nbsp;·&nbsp; <code>---</code> &nbsp;divider &nbsp;·&nbsp; <code>{{prospect}}</code> &nbsp;firm name<br>
+                    <code>stats: 74%|Label; 3.2x|Label</code> &nbsp;stat blocks<br>
+                    <code>icon: &#9878;&#65039; | Label | description</code> &nbsp;icon feature row<br>
+                    <code>tier: Name | Subtitle | item; item | $5,000/mo</code> &nbsp;pricing card (stack lines for a row)<br>
+                    <code>cta: Let's Talk</code> &nbsp;button chip &nbsp;·&nbsp; <code>big: Statement.</code> &nbsp;ghosted headline<br>
+                    <code>img: filename.png</code> &nbsp;embed a Blank Files graphic &nbsp;·&nbsp; <code>img: filename.png | 60%</code> &nbsp;at specific width<br>
+                    <code>|||</code> &nbsp;on its own line splits the card into columns
+                </div>
+            </div>
+            <div class="editor-preview">
+                <div class="panel-label">Live Preview</div>
+                <div class="preview-stage" id="editor-preview-stage"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-danger" id="ed-delete-btn" onclick="deleteCurrentCard()">Delete Card</button>
+            <div class="spacer"></div>
+            <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveCardFromEditor()">Save Card</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════
+   SEED CARD LIBRARY
+   These ship with the tool. Edits/deletes are stored
+   as localStorage overrides so seeds stay recoverable.
+   ════════════════════════════════════════════════ */
+const SEED_CARDS = [
+    {
+        id: 'seed-market-direction',
+        title: 'Where the Market Is Heading',
+        category: 'Market Insights',
+        size: 'half',
+        content:
+`Legal consumers no longer start with a phone book or even a list of ten blue links — they start with a question and expect a single trusted answer. Three forces are reshaping how firms get found:
+
+- **AI-first search.** Google's AI Overviews and tools like ChatGPT now answer legal questions directly, citing a short list of sources. If your firm isn't one of them, you're invisible at the moment of decision.
+- **Trust signals over volume.** Rankings, reviews, and third-party validation increasingly decide who gets cited — not just who publishes the most content.
+- **Local intent concentration.** The majority of high-value matters still convert through local discovery, where map-pack position and entity authority dominate.
+
+> The firms that win the next five years are the ones treated as *the* authoritative answer — not just another result.`
+    },
+    {
+        id: 'seed-ai-search-shift',
+        title: 'The Shift to AI-Driven Search',
+        category: 'Market Insights',
+        size: 'third',
+        content:
+`stats: 60%+|of searches end without a click; #1|cited source wins the matter; 24/7|AI answers questions about your firm
+
+AI assistants and Google AI Overviews compress the buyer journey: prospects get one synthesized answer instead of a results page. The inputs those systems trust — structured rankings, authoritative profiles, consistent entity data — are exactly what we build and maintain for your firm.`
+    },
+    {
+        id: 'seed-competitor-diff',
+        title: 'Competitor Differentiation',
+        category: 'Competitive Edge',
+        size: 'half',
+        content:
+`Most legal marketing vendors sell activity. We sell position.
+
+## Typical agency
+- Generic SEO retainers measured in deliverables, not outcomes
+- Content volume plays that AI search increasingly ignores
+- No owned assets — when you leave, everything resets to zero
+
+## Revenue Kitchen
+- **Owned ranking assets** that compound: your position strengthens every month and travels with you
+- **Built for AI-era discovery** — structured data and authority signals that AI Overviews and LLMs actually cite
+- **Transparent scoreboard** — you see exactly where you rank, against whom, and what moved
+
+> The question isn't "who does more marketing" — it's "who does the market, and now the machines, treat as the authority?"`
+    },
+    {
+        id: 'seed-why-firms-switch',
+        title: 'Why Firms Switch to Us',
+        category: 'Competitive Edge',
+        size: 'third',
+        content:
+`- **Tired of black-box retainers.** They were paying for hours and reports, not movement.
+- **AI search changed the rules.** Their old playbook stopped producing visibility where decisions now happen.
+- **They wanted assets, not rent.** Our rankings and profiles are durable positions {{prospect}} owns — not leased ad space that vanishes with the budget.`
+    },
+    {
+        id: 'seed-uth-local',
+        title: 'Under the Hood: Local',
+        category: 'Under the Hood',
+        size: 'half',
+        content:
+`How we win the local layer — where most high-value matters are still decided.
+
+## What we do
+- **Entity & profile engineering** — your Google Business Profile, citations, and structured data made airtight and consistent everywhere machines look
+- **Map-pack positioning** — systematic review velocity, category targeting, and proximity coverage across your priority practice areas
+- **Local authority loops** — rankings and local press signals that feed back into how Google scores your firm in-market
+
+## What you see
+stats: Top 3|map-pack targeting; 100%|profile coverage; Monthly|position reporting`
+    },
+    {
+        id: 'seed-uth-aio',
+        title: 'Under the Hood: AIO',
+        category: 'Under the Hood',
+        size: 'half',
+        content:
+`AI Overviews and LLM assistants are the new front page. Here's how we get {{prospect}} cited.
+
+## What we do
+- **Citation-worthy structure** — rankings, FAQs, and authority pages formatted the way AI systems extract and attribute answers
+- **Entity reinforcement** — consistent firm data across the sources LLMs train on and retrieve from
+- **Answer ownership** — targeting the specific questions your best clients ask, so the AI's answer features your firm
+
+## Why it matters
+> When a prospect asks an AI "who's the best firm for X near me," the answer is assembled from sources. We make sure you're the source.`
+    },
+    {
+        id: 'seed-uth-strategic-assets',
+        title: 'Under the Hood: Strategic Assets',
+        category: 'Under the Hood',
+        size: 'half',
+        content:
+`Marketing spend usually evaporates. We build positions you keep.
+
+## The asset stack
+- **Ranking placements** — durable positions on authoritative ranking properties that compound in value and feed both human trust and AI citation
+- **Authority profiles** — deep, structured firm profiles that act as the canonical record machines reference
+- **Badge & validation kit** — third-party proof your intake team and website convert with from day one
+
+## The compounding effect
+Every month strengthens the moat: more validation, more citations, more entity authority — and none of it disappears if you pause a campaign.`
+    },
+    {
+        id: 'seed-results-snapshot',
+        title: 'Results Snapshot',
+        category: 'Proof & Results',
+        size: 'third',
+        content:
+`stats: 200+|law firms ranked; Top 3|typical map-pack result; 90 days|to first measurable movement
+
+Firms come to us for visibility and stay for the compounding: positions, citations, and authority that strengthen every month. Ask us for the case study closest to {{prospect}}'s practice area and market.`
+    },
+    {
+        id: 'seed-first-90-days',
+        title: 'Your First 90 Days',
+        category: 'Process',
+        size: 'third',
+        content:
+`- **Weeks 1–2: Audit & baseline.** Full visibility audit — local, AI Overviews, rankings, entity data — so every claim of progress is measured against day zero.
+- **Weeks 3–6: Foundation.** Profiles engineered, structured data shipped, ranking assets live.
+- **Weeks 7–12: Momentum.** Position tracking, review velocity, first AI-citation wins — reported on a scoreboard you can read in 60 seconds.`
+    },
+    {
+        id: 'seed-what-you-get',
+        title: 'What {{prospect}} Gets',
+        category: 'Overview',
+        size: 'twothirds',
+        content:
+`A complete authority system — built once, compounding monthly.
+
+## Visibility where decisions happen
+- **Local** — map-pack positioning, airtight profiles, and review systems in your priority markets
+- **AI Overviews & LLMs** — structured, citation-worthy assets so AI answers feature your firm
+- **Rankings** — durable placements on authoritative properties that humans trust and machines cite
+
+## Proof your team can sell with
+- Badge and validation kit for your website, signatures, and intake scripts
+- A live scoreboard: where you rank, against whom, and what moved this month
+
+## A partner, not a vendor
+- Dedicated strategist who knows your market and practice mix
+- Quarterly strategy reviews tied to case volume goals, not vanity metrics
+
+> Everything we build is an asset {{prospect}} owns — the value compounds and it doesn't reset when a campaign ends.`
+    },
+
+    /* ── Blank templates extracted from Delivery files designs ── */
+    {
+        id: 'tpl-problem-solution',
+        title: '[Headline: name the opportunity]',
+        category: 'Templates',
+        size: 'half',
+        style: 'light',
+        content:
+`## The Problem
+**[Punchy two-line framing of what's broken.]**
+
+- [Stat that proves the pain, e.g. 73% of PI leads start with online search]
+- [Second proof point]
+- [What most firms get wrong]
+|||
+## Our Solution
+**[One-line name for your approach]**
+
+[Two sentences on what you actually do differently.]
+
+*[Channel | Channel | Channel | Channel]*
+
+**Results:** [One sentence on the outcome.]
+|||
+## Our Results
+**[Proof header, e.g. proven results from real firms:]**
+
+- [$ headline number + what it means]
+- [Multiple-style stat, e.g. 4.2x average ROI]
+- [Named mini case: X → Y]
+- [Second mini case]`
+    },
+    {
+        id: 'tpl-pricing-tiers',
+        title: '[Name of your tiered system]',
+        category: 'Templates',
+        size: 'half',
+        style: 'dark',
+        content:
+`tier: Tier 1 | [Tier name] | [Deliverable]; [Deliverable]; [Deliverable]; [Deliverable] | [$X,000/month]
+tier: Tier 2 | [Tier name] | Everything in Tier 1 plus:; [Deliverable]; [Deliverable]; [Deliverable] | [$X,000/month]
+tier: Tier 3 | [Tier name] | Everything in Tier 2 plus:; [Deliverable]; [Deliverable]; [Deliverable] | [$X,000/mo + X%]
+tier: Tier 4 | [Tier name] | Everything in Tier 3 plus:; [Deliverable]; [Deliverable]; [Deliverable] | [$X,000/mo + X%]`
+    },
+    {
+        id: 'tpl-why-we-win',
+        title: '[Why Rankings wins at __]',
+        category: 'Templates',
+        size: 'half',
+        style: 'dark',
+        content:
+`icon: ⚖️ | [Differentiator label] | [One line on why it matters to the prospect.]
+icon: 🏆 | [Proof label] | [Credibility stat, e.g. 100+ firms under management.]
+icon: 🤖 | [Capability label] | [What you have that competitors don't.]
+icon: 🤝 | [Terms label] | [Risk-reversal, e.g. month-to-month flexibility.]`
+    },
+    {
+        id: 'tpl-next-steps',
+        title: 'Next Steps',
+        category: 'Templates',
+        size: 'third',
+        style: 'light',
+        content:
+`1. **[Step name]:** [What happens, e.g. 30-minute consultation analyzing your position]
+2. **[Step name]:** [What they get out of it]
+3. **[Step name]:** [Decision point]
+4. **[Step name]:** [Time-bound kickoff, e.g. launch in 14 days]
+|||
+> [Risk reversal lines: no long-term contracts. No setup fees. 30-day notice.]
+
+[One sentence creating urgency.]
+
+cta: Let's Talk`
+    },
+    {
+        id: 'tpl-intro',
+        title: 'An Introduction to Rankings',
+        category: 'Templates',
+        size: 'half',
+        style: 'light',
+        content:
+`[Why {{prospect}} is reading this — one warm, low-pressure framing sentence. E.g.: this was shared with you because we work with firms like yours on the execution side of digital growth.]
+
+## What we help with
+[x] **[Service]** — [outcome it drives]
+[x] **[Service]** — [outcome it drives]
+[x] **[Service]** — [outcome it drives]
+[x] **[Service]** — [outcome it drives]
+
+[One closing sentence: our role is to execute cleanly and consistently.]
+
+## When firms usually talk to us
+- [Trigger moment, e.g. performance has plateaued]
+- [Trigger moment, e.g. spend is high but ROI is unclear]
+- [Trigger moment, e.g. they want a specialist, not a generalist]`
+    },
+    {
+        id: 'tpl-closing',
+        title: '[Section header]',
+        category: 'Templates',
+        size: 'third',
+        style: 'light',
+        content:
+`[One short paragraph that lands the final argument for {{prospect}}.]
+
+big: [The time to dominate is NOW.]
+
+cta: [Book a strategy session]`
+    },
+
+    /* ── Graphic asset cards ── */
+    {
+        id: 'graphic-flywheel',
+        title: 'The Growth Flywheel',
+        category: 'Graphics',
+        size: 'half',
+        style: 'light',
+        content:
+`Rankings builds a self-reinforcing system — each channel feeds the others, compounding authority month over month.
+
+img: flywheel.png | 72%
+
+- **Visibility** drives branded search, which drives reviews, which drives local rankings
+- **AI citations** come from the same authoritative content that earns organic placements
+- **Case volume** funds ongoing investment — the flywheel accelerates as it spins`
+    },
+    {
+        id: 'graphic-funnel',
+        title: 'From Search to Signed',
+        category: 'Graphics',
+        size: 'half',
+        style: 'light',
+        content:
+`Every client journey starts with a search. We engineer the path from first impression to retained client.
+
+img: 26_RANK_FunnelGraphic_2.png | 68%
+
+[x] **Awareness** — map pack, organic, and AI overview placements
+[x] **Consideration** — review velocity, reputation assets, and content depth
+[x] **Conversion** — intake-ready traffic from prospects who already trust the brand`
+    },
+    {
+        id: 'graphic-five-channels',
+        title: 'Five Channels. One System.',
+        category: 'Graphics',
+        size: 'half',
+        style: 'light',
+        content:
+`Most agencies pick one channel. We integrate all five into a single authority engine.
+
+img: circle graphic.png | 65%
+
+- **Local** — map pack, GMB, and review systems
+- **Organic** — on-site authority and targeted content
+- **AI Overviews** — structured assets optimized for LLM citation
+- **Strategic Assets** — off-site properties and link authority
+- **Branded** — reputation infrastructure that converts at the bottom of funnel`
+    },
+    {
+        id: 'graphic-process',
+        title: 'Our Six-Step Process',
+        category: 'Graphics',
+        size: 'half',
+        style: 'dark',
+        bg: 'Internet Marketing for Lawyers-2.png',
+        content:
+`big: [Step 1] → [Step 2] → [Step 3] → [Step 4] → [Step 5] → [Step 6]
+
+[Replace the big: line above with your process steps, or edit the six labels to match your engagement flow.]
+
+cta: Start the conversation`
+    },
+    {
+        id: 'graphic-cover-mountains',
+        title: '{{prospect}} × Rankings',
+        category: 'Graphics',
+        size: 'twothirds',
+        style: 'dark',
+        bg: '26_RANK_PandadocCover_background.png',
+        content:
+`big: The view from the top is worth the climb.
+
+[Replace this with one bold positioning statement — why this firm, why now, why Rankings.]
+
+---
+
+cta: Let's build something that lasts`
+    },
+    {
+        id: 'graphic-dark-gradient',
+        title: '[Bold statement card]',
+        category: 'Graphics',
+        size: 'third',
+        style: 'dark',
+        bg: 'gradient.png',
+        content:
+`big: [Your most important number or claim goes here.]
+
+[One follow-up sentence that makes it credible.]
+
+cta: [Call to action]`
+    }
+];
+
+/* ════════════════════════════════════════════════
+   LIBRARY STORAGE
+   ════════════════════════════════════════════════ */
+const LIB_KEY = 'asset-gen-library-v1';
+const DOC_KEY = 'asset-gen-doc-v1';
+
+function loadLibState() {
+    try {
+        return Object.assign({ overrides: {}, custom: [], hidden: [] }, JSON.parse(localStorage.getItem(LIB_KEY) || '{}'));
+    } catch (e) {
+        return { overrides: {}, custom: [], hidden: [] };
+    }
+}
+function saveLibState(s) { localStorage.setItem(LIB_KEY, JSON.stringify(s)); }
+
+function getLibrary() {
+    const s = loadLibState();
+    const seeds = SEED_CARDS
+        .filter(c => !s.hidden.includes(c.id))
+        .map(c => s.overrides[c.id] ? Object.assign({}, c, s.overrides[c.id], { id: c.id }) : c);
+    return seeds.concat(s.custom);
+}
+function getCard(id) { return getLibrary().find(c => c.id === id); }
+function isSeed(id) { return SEED_CARDS.some(c => c.id === id); }
+function isEdited(id) { return !!loadLibState().overrides[id]; }
+
+function upsertCard(card) {
+    const s = loadLibState();
+    if (isSeed(card.id)) {
+        const seed = SEED_CARDS.find(c => c.id === card.id);
+        const ov = {};
+        ['title', 'category', 'size', 'style', 'bg', 'content'].forEach(k => { if ((card[k] || (k === 'style' ? 'light' : '')) !== (seed[k] || (k === 'style' ? 'light' : ''))) ov[k] = card[k]; });
+        if (Object.keys(ov).length) s.overrides[card.id] = ov;
+        else delete s.overrides[card.id];
+    } else {
+        const i = s.custom.findIndex(c => c.id === card.id);
+        if (i >= 0) s.custom[i] = card;
+        else s.custom.push(card);
+    }
+    saveLibState(s);
+}
+function deleteCard(id) {
+    const s = loadLibState();
+    if (isSeed(id)) {
+        if (!s.hidden.includes(id)) s.hidden.push(id);
+        delete s.overrides[id];
+    } else {
+        s.custom = s.custom.filter(c => c.id !== id);
+    }
+    saveLibState(s);
+    doc.selected = doc.selected.filter(sid => sid !== id);
+    saveDoc();
+}
+
+/* ════════════════════════════════════════════════
+   DOC (builder) STATE
+   ════════════════════════════════════════════════ */
+let doc = { selected: [], prospect: '', preparedBy: '', date: '', docTitle: '', showLogo: true };
+function loadDoc() {
+    try { doc = Object.assign(doc, JSON.parse(localStorage.getItem(DOC_KEY) || '{}')); } catch (e) {}
+    // Drop cards that no longer exist in the library
+    const ids = new Set(getLibrary().map(c => c.id));
+    doc.selected = doc.selected.filter(id => ids.has(id));
+}
+function saveDoc() { localStorage.setItem(DOC_KEY, JSON.stringify(doc)); }
+
+function onDocSettingChange() {
+    doc.prospect = document.getElementById('inp-prospect').value;
+    doc.preparedBy = document.getElementById('inp-preparedby').value;
+    doc.date = document.getElementById('inp-date').value;
+    doc.docTitle = document.getElementById('inp-doctitle').value;
+    doc.showLogo = document.getElementById('inp-showlogo').checked;
+    saveDoc();
+    renderPages();
+}
+
+/* ════════════════════════════════════════════════
+   CONTENT RENDERER (markdown-lite)
+   ════════════════════════════════════════════════ */
+function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function inline(s) {
+    return esc(s)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>')
+        .replace(/\{\{\s*prospect\s*\}\}/gi, () => esc(doc.prospect || 'your firm'));
+}
+function renderSegment(lines) {
+    let html = '', list = null, tiers = [];
+    const closeList = () => { if (list) { html += '</' + list.tag + '>'; list = null; } };
+    const openList = (tag, cls) => {
+        if (!list || list.tag !== tag || list.cls !== cls) {
+            closeList();
+            html += '<' + tag + (cls ? ' class="' + cls + '"' : '') + '>';
+            list = { tag, cls };
+        }
+    };
+    const flushTiers = () => {
+        if (!tiers.length) return;
+        html += '<div class="tier-row">' + tiers.map(t =>
+            '<div class="tier">' +
+            '<div class="t-name">' + inline(t.name) + '</div>' +
+            (t.sub ? '<div class="t-sub">' + inline(t.sub) + '</div>' : '') +
+            '<ul class="checks">' + t.items.map(i => '<li>' + inline(i) + '</li>').join('') + '</ul>' +
+            (t.price ? '<div class="t-price">' + inline(t.price) + '</div>' : '') +
+            '</div>').join('') + '</div>';
+        tiers = [];
+    };
+    for (const line of lines) {
+        const t = line.trim();
+        if (/^tier:/i.test(t)) {
+            closeList();
+            const parts = t.replace(/^tier:/i, '').split('|').map(s => s.trim());
+            tiers.push({
+                name: parts[0] || '',
+                sub: parts[1] || '',
+                items: (parts[2] || '').split(';').map(s => s.trim()).filter(Boolean),
+                price: parts[3] || ''
+            });
+            continue;
+        }
+        flushTiers();
+        if (!t) { closeList(); continue; }
+        if (t.startsWith('## ')) {
+            closeList();
+            html += '<h4>' + inline(t.slice(3)) + '</h4>';
+        } else if (t.startsWith('[x] ')) {
+            openList('ul', 'checks');
+            html += '<li>' + inline(t.slice(4)) + '</li>';
+        } else if (t.startsWith('- ')) {
+            openList('ul', 'plain');
+            html += '<li>' + inline(t.slice(2)) + '</li>';
+        } else if (/^\d+\.\s/.test(t)) {
+            openList('ol', '');
+            html += '<li>' + inline(t.replace(/^\d+\.\s/, '')) + '</li>';
+        } else if (t.startsWith('> ')) {
+            closeList();
+            html += '<div class="callout">' + inline(t.slice(2)) + '</div>';
+        } else if (t === '---') {
+            closeList();
+            html += '<hr>';
+        } else if (/^icon:/i.test(t)) {
+            closeList();
+            const [icon, label, desc] = t.replace(/^icon:/i, '').split('|').map(s => (s || '').trim());
+            html += '<div class="icon-row"><div class="ir-icon">' + esc(icon || '') + '</div><div>' +
+                (label ? '<span class="ir-label">' + inline(label) + '</span>' : '') +
+                (desc ? '<span class="ir-desc">' + inline(desc) + '</span>' : '') +
+                '</div></div>';
+        } else if (/^cta:/i.test(t)) {
+            closeList();
+            html += '<div><span class="cta">' + inline(t.replace(/^cta:/i, '').trim()) + '</span></div>';
+        } else if (/^big:/i.test(t)) {
+            closeList();
+            html += '<div class="big">' + inline(t.replace(/^big:/i, '').trim()) + '</div>';
+        } else if (/^stats:/i.test(t)) {
+            closeList();
+            const stats = t.replace(/^stats:/i, '').split(';').map(p => {
+                const [num, lbl] = p.split('|');
+                return '<div class="stat"><span class="num">' + inline((num || '').trim()) + '</span><span class="lbl">' + inline((lbl || '').trim()) + '</span></div>';
+            }).join('');
+            html += '<div class="stat-row">' + stats + '</div>';
+        } else if (/^img:/i.test(t)) {
+            closeList();
+            const parts = t.replace(/^img:/i, '').split('|').map(s => s.trim());
+            const file = parts[0].replace(/["'<>]/g, '');
+            const w = parts[1] ? (parts[1].replace(/[^0-9%.]/g, '') || '100%') : '100%';
+            html += '<img class="pc-graphic" src="Blank%20files/' + file.replace(/ /g, '%20') + '" style="width:' + w + '" alt="">';
+        } else {
+            closeList();
+            html += '<p>' + inline(t) + '</p>';
+        }
+    }
+    closeList();
+    flushTiers();
+    return html;
+}
+function renderContent(raw) {
+    // "|||" on its own line splits the card into side-by-side columns
+    const segments = [];
+    let cur = [];
+    for (const line of (raw || '').split('\n')) {
+        if (line.trim() === '|||') { segments.push(cur); cur = []; }
+        else cur.push(line);
+    }
+    segments.push(cur);
+    if (segments.length === 1) return renderSegment(segments[0]);
+    return '<div class="col-row">' + segments.map(s => '<div class="col">' + renderSegment(s) + '</div>').join('') + '</div>';
+}
+
+function cardHTML(card, opts) {
+    opts = opts || {};
+    let s = opts.fluid ? 'height:auto;' : '';
+    if (card.bg) s += 'background-image:url("Blank%20files/' + card.bg.replace(/ /g, '%20').replace(/["'<>]/g, '') + '");background-size:cover;background-position:center;';
+    const styleStr = s ? ' style="' + s + '"' : '';
+    return '<div class="pcard size-' + card.size + (card.style === 'dark' ? ' dark' : '') + '"' + styleStr + '>' +
+        '<div class="pc-kicker">' + esc(card.category) + '</div>' +
+        '<div class="pc-title">' + inline(card.title) + '</div>' +
+        '<div class="pc-body">' + renderContent(card.content) + '</div>' +
+    '</div>';
+}
+
+/* ════════════════════════════════════════════════
+   PAGE LAYOUT + RENDER
+   Heights (inches): page usable 10.1,
+   third 3.05 / half 4.7 / twothirds 6.35, gap 0.16.
+   HEADER_H = header band height beyond the page's
+   own top padding (band ≈1.05in − 0.45in padding,
+   plus safety margin).
+   ════════════════════════════════════════════════ */
+const CARD_H = { third: 3.05, half: 4.7, twothirds: 6.35 };
+const GAP = 0.16;
+const PAGE_USABLE = 10.1;
+const HEADER_H = 1.05; // measured band ≈1.32in − 0.45in page padding + safety
+const FOOTER_H = 0.35;
+
+function paginate(cards) {
+    const pages = [];
+    let cur = [], remaining = PAGE_USABLE - HEADER_H - FOOTER_H;
+    for (const card of cards) {
+        const h = CARD_H[card.size] + (cur.length ? GAP : 0);
+        if (h > remaining && cur.length) {
+            pages.push(cur);
+            cur = [];
+            remaining = PAGE_USABLE - FOOTER_H;
+        }
+        cur.push(card);
+        remaining -= CARD_H[card.size] + (cur.length > 1 ? GAP : 0);
+    }
+    if (cur.length || !pages.length) pages.push(cur);
+    return pages;
+}
+
+function fmtDate(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-').map(Number);
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return months[m - 1] + ' ' + d + ', ' + y;
+}
+
+function renderPages() {
+    const stack = document.getElementById('page-stack');
+    const cards = doc.selected.map(getCard).filter(Boolean);
+    const pages = paginate(cards);
+    let html = '';
+    pages.forEach((pageCards, pi) => {
+        html += '<div class="page">';
+        if (pi === 0) {
+            html += '<div class="doc-header"><div class="dh-left">' +
+                '<div class="dh-kicker">Prepared for ' + (doc.prospect ? inline(doc.prospect) : '&hellip;') + '</div>' +
+                '<h2>' + (doc.docTitle ? inline(doc.docTitle) : 'Why Rankings') + '</h2>' +
+                '</div><div class="dh-right">' +
+                (doc.showLogo ? '<div class="dh-logo"><img src="Rankings%20Assets/BrandKit/RANKINGS/Logos/with_Trademark/svg/Wordmark202B20GOAT20White.svg" alt="Rankings"></div>' : '') +
+                '<div class="dh-meta">' +
+                (doc.preparedBy ? 'Prepared by ' + esc(doc.preparedBy) + '<br>' : '') +
+                esc(fmtDate(doc.date)) +
+                '</div></div></div>';
+        }
+        for (const card of pageCards) html += cardHTML(card);
+        html += '<div class="doc-footer"><span>Rankings' + (doc.prospect ? ' &times; ' + esc(doc.prospect) : '') + '</span><span>rankings.io</span></div>';
+        if (pages.length > 1) html += '<div class="page-num">' + (pi + 1) + ' / ' + pages.length + '</div>';
+        html += '</div>';
+    });
+    if (!cards.length) {
+        html = '<div class="page" style="align-items:center; justify-content:center; display:flex;">' +
+            '<div style="text-align:center; color:var(--text-muted); max-width:4.5in;">' +
+            '<div style="font-size:40px; margin-bottom:12px;">&#128196;</div>' +
+            '<div style="font-weight:600; color:var(--navy); margin-bottom:6px;">Your one-pager is empty</div>' +
+            '<div style="font-size:13px; line-height:1.5;">Add cards from the library on the left. Each card takes 1/3 to 2/3 of a page; pages are added automatically as you go.</div>' +
+            '</div></div>';
+    }
+    stack.innerHTML = html;
+    flagOverflows();
+}
+
+function flagOverflows() {
+    document.querySelectorAll('#page-stack .pcard').forEach(el => {
+        const body = el.querySelector('.pc-body');
+        if (el.scrollHeight > el.clientHeight + 4) {
+            const flag = document.createElement('div');
+            flag.className = 'overflow-flag';
+            flag.textContent = 'content clipped';
+            flag.title = 'This card has more content than fits its size. Shorten the content or pick a larger size in the Library.';
+            el.appendChild(flag);
+        }
+    });
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR: library browser + selected list
+   ════════════════════════════════════════════════ */
+const SIZE_LABEL = { third: '1/3', half: '1/2', twothirds: '2/3' };
+
+function groupByCategory(cards) {
+    const groups = {};
+    for (const c of cards) (groups[c.category] = groups[c.category] || []).push(c);
+    return groups;
+}
+
+function renderSidebarLibrary() {
+    const q = document.getElementById('lib-search').value.toLowerCase();
+    const lib = getLibrary().filter(c =>
+        !q || c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.content.toLowerCase().includes(q));
+    const groups = groupByCategory(lib);
+    let html = '';
+    for (const cat of Object.keys(groups)) {
+        html += '<div class="cat-group"><div class="cat-header"><span>' + esc(cat) + '</span><span class="count">' + groups[cat].length + '</span></div>';
+        for (const c of groups[cat]) {
+            const inDoc = doc.selected.includes(c.id);
+            html += '<div class="lib-item' + (inDoc ? ' in-doc' : '') + '" onclick="toggleCard(\'' + c.id + '\')">' +
+                '<span class="li-title">' + inline(c.title) + '</span>' +
+                '<span class="li-size">' + SIZE_LABEL[c.size] + ' pg</span>' +
+                '<button class="li-add" title="' + (inDoc ? 'Remove from doc' : 'Add to doc') + '">' + (inDoc ? '&minus;' : '+') + '</button>' +
+            '</div>';
+        }
+        html += '</div>';
+    }
+    document.getElementById('sidebar-library').innerHTML = html || '<div class="empty-note">No cards match your search.</div>';
+}
+
+function toggleCard(id) {
+    const i = doc.selected.indexOf(id);
+    if (i >= 0) doc.selected.splice(i, 1);
+    else doc.selected.push(id);
+    saveDoc();
+    renderSidebarLibrary();
+    renderSelectedList();
+    renderPages();
+}
+
+function clearDoc() {
+    if (doc.selected.length && !confirm('Remove all cards from this one-pager?')) return;
+    doc.selected = [];
+    saveDoc();
+    renderSidebarLibrary();
+    renderSelectedList();
+    renderPages();
+}
+
+let dragIndex = null;
+function renderSelectedList() {
+    const el = document.getElementById('selected-list');
+    document.getElementById('sel-count').textContent = doc.selected.length ? '(' + doc.selected.length + ')' : '';
+    if (!doc.selected.length) {
+        el.innerHTML = '<div class="empty-note">No cards yet — add some from the library below. Drag to reorder once added.</div>';
+        return;
+    }
+    el.innerHTML = doc.selected.map((id, i) => {
+        const c = getCard(id);
+        if (!c) return '';
+        return '<div class="sel-item" draggable="true" data-index="' + i + '">' +
+            '<span class="drag-handle">&#x2630;</span>' +
+            '<span class="si-title">' + inline(c.title) + '</span>' +
+            '<span class="li-size" style="font-family:\'IBM Plex Mono\',monospace; font-size:10px; color:var(--text-muted);">' + SIZE_LABEL[c.size] + '</span>' +
+            '<button class="si-remove" onclick="toggleCard(\'' + id + '\')" title="Remove">&times;</button>' +
+        '</div>';
+    }).join('');
+    el.querySelectorAll('.sel-item').forEach(item => {
+        item.addEventListener('dragstart', e => {
+            dragIndex = +item.dataset.index;
+            item.classList.add('dragging');
+        });
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+            dragIndex = null;
+        });
+        item.addEventListener('dragover', e => e.preventDefault());
+        item.addEventListener('drop', e => {
+            e.preventDefault();
+            const to = +item.dataset.index;
+            if (dragIndex === null || dragIndex === to) return;
+            const [moved] = doc.selected.splice(dragIndex, 1);
+            doc.selected.splice(to, 0, moved);
+            saveDoc();
+            renderSelectedList();
+            renderPages();
+        });
+    });
+}
+
+/* ════════════════════════════════════════════════
+   LIBRARY MANAGER VIEW
+   ════════════════════════════════════════════════ */
+function renderLibraryGrid() {
+    const filter = document.getElementById('lib-cat-filter').value;
+    const lib = getLibrary().filter(c => !filter || c.category === filter);
+    const grid = document.getElementById('library-grid');
+    grid.innerHTML = lib.map(c => {
+        let badge = '';
+        if (!isSeed(c.id)) badge = '<span class="badge-custom">Custom</span>';
+        else if (isEdited(c.id)) badge = '<span class="badge-edited">Edited</span>';
+        return '<div class="lib-card">' +
+            '<div class="lc-preview">' + cardHTML(c, { fluid: true }) + '</div>' +
+            '<div class="lc-footer">' +
+                '<span class="lc-meta">' + SIZE_LABEL[c.size] + ' page</span>' +
+                badge +
+                '<button class="btn btn-ghost btn-sm" onclick="duplicateCard(\'' + c.id + '\')">Duplicate</button>' +
+                '<button class="btn btn-primary btn-sm" onclick="openEditor(\'' + c.id + '\')">Edit</button>' +
+            '</div>' +
+        '</div>';
+    }).join('') || '<div class="empty-note">No cards in this category yet.</div>';
+    refreshCategoryControls();
+}
+
+function refreshCategoryControls() {
+    const cats = [...new Set(getLibrary().map(c => c.category))].sort();
+    const sel = document.getElementById('lib-cat-filter');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option' + (c === current ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+    document.getElementById('cat-datalist').innerHTML = cats.map(c => '<option value="' + esc(c) + '">').join('');
+}
+
+function duplicateCard(id) {
+    const c = getCard(id);
+    if (!c) return;
+    const copy = Object.assign({}, c, { id: 'custom-' + Date.now(), title: c.title + ' (copy)' });
+    upsertCard(copy);
+    renderLibraryGrid();
+    renderSidebarLibrary();
+    toast('Card duplicated — edit the copy to customize it.');
+}
+
+/* ════════════════════════════════════════════════
+   EDITOR MODAL
+   ════════════════════════════════════════════════ */
+let editingId = null;
+
+function openEditor(id) {
+    editingId = id;
+    const c = id ? getCard(id) : { title: '', category: '', size: 'half', style: 'light', content: '' };
+    document.getElementById('editor-title').textContent = id ? 'Edit Card' : 'New Card';
+    document.getElementById('ed-title').value = c.title;
+    document.getElementById('ed-category').value = c.category;
+    document.getElementById('ed-size').value = c.size;
+    document.getElementById('ed-style').value = c.style || 'light';
+    document.getElementById('ed-bg').value = c.bg || '';
+    document.getElementById('ed-content').value = c.content;
+    document.getElementById('ed-delete-btn').style.display = id ? '' : 'none';
+    refreshCategoryControls();
+    renderEditorPreview();
+    document.getElementById('editor-modal').classList.add('open');
+}
+function closeEditor() {
+    document.getElementById('editor-modal').classList.remove('open');
+    editingId = null;
+}
+function renderEditorPreview() {
+    const card = {
+        title: document.getElementById('ed-title').value || 'Card Title',
+        category: document.getElementById('ed-category').value || 'Category',
+        size: document.getElementById('ed-size').value,
+        style: document.getElementById('ed-style').value,
+        bg: document.getElementById('ed-bg').value,
+        content: document.getElementById('ed-content').value
+    };
+    document.getElementById('editor-preview-stage').innerHTML = cardHTML(card, { fluid: true });
+}
+function saveCardFromEditor() {
+    const title = document.getElementById('ed-title').value.trim();
+    if (!title) { toast('Give the card a title first.'); return; }
+    const card = {
+        id: editingId || ('custom-' + Date.now()),
+        title: title,
+        category: document.getElementById('ed-category').value.trim() || 'Uncategorized',
+        size: document.getElementById('ed-size').value,
+        style: document.getElementById('ed-style').value,
+        bg: document.getElementById('ed-bg').value,
+        content: document.getElementById('ed-content').value
+    };
+    upsertCard(card);
+    closeEditor();
+    renderLibraryGrid();
+    renderSidebarLibrary();
+    renderPages();
+    toast('Card saved.');
+}
+function deleteCurrentCard() {
+    if (!editingId) return;
+    const seed = isSeed(editingId);
+    if (!confirm(seed ? 'Remove this built-in card from the library? (Reset to Defaults brings it back.)' : 'Delete this card permanently?')) return;
+    deleteCard(editingId);
+    closeEditor();
+    renderLibraryGrid();
+    renderSidebarLibrary();
+    renderSelectedList();
+    renderPages();
+    toast('Card deleted.');
+}
+
+/* ════════════════════════════════════════════════
+   IMPORT / EXPORT / RESET
+   ════════════════════════════════════════════════ */
+function exportLibrary() {
+    const data = { exportedAt: new Date().toISOString(), cards: getLibrary() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rk-card-library.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Library exported as JSON.');
+}
+function importLibrary(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const data = JSON.parse(reader.result);
+            const cards = data.cards || data;
+            if (!Array.isArray(cards)) throw new Error('bad format');
+            let added = 0, updated = 0;
+            for (const c of cards) {
+                if (!c.title || !c.content) continue;
+                const card = {
+                    id: c.id || ('custom-' + Date.now() + '-' + added),
+                    title: c.title,
+                    category: c.category || 'Uncategorized',
+                    size: CARD_H[c.size] ? c.size : 'half',
+                    style: c.style === 'dark' ? 'dark' : 'light',
+                    content: c.content
+                };
+                if (getCard(card.id)) updated++; else added++;
+                upsertCard(card);
+            }
+            renderLibraryGrid();
+            renderSidebarLibrary();
+            renderPages();
+            toast('Imported: ' + added + ' new, ' + updated + ' updated.');
+        } catch (e) {
+            toast('Import failed — file must be a JSON export from this tool.');
+        }
+    };
+    reader.readAsText(file);
+    ev.target.value = '';
+}
+function resetLibrary() {
+    if (!confirm('Reset the library to the built-in defaults? Custom cards and edits will be removed.')) return;
+    localStorage.removeItem(LIB_KEY);
+    loadDoc();
+    renderLibraryGrid();
+    renderSidebarLibrary();
+    renderSelectedList();
+    renderPages();
+    toast('Library reset to defaults.');
+}
+
+/* ════════════════════════════════════════════════
+   VIEW SWITCHING + INIT
+   ════════════════════════════════════════════════ */
+function switchView(v) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+    document.getElementById('view-build').classList.toggle('active', v === 'build');
+    document.getElementById('view-library').classList.toggle('active', v === 'library');
+    if (v === 'library') renderLibraryGrid();
+    else { renderSidebarLibrary(); renderSelectedList(); renderPages(); }
+}
+
+let toastTimer = null;
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+(function init() {
+    loadDoc();
+    document.getElementById('inp-prospect').value = doc.prospect;
+    document.getElementById('inp-preparedby').value = doc.preparedBy;
+    document.getElementById('inp-doctitle').value = doc.docTitle;
+    document.getElementById('inp-showlogo').checked = doc.showLogo;
+    if (!doc.date) {
+        const now = new Date();
+        doc.date = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    }
+    document.getElementById('inp-date').value = doc.date;
+    renderSidebarLibrary();
+    renderSelectedList();
+    renderPages();
+})();
+</script>
+</body>
+</html>
