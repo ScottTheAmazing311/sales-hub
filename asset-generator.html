@@ -612,6 +612,22 @@
 
         .pc-body .pc-graphic { display: block; object-fit: contain; border-radius: 4px; margin: 6px auto; max-height: 2.6in; }
 
+        /* Background image overlay — tints the bg image for text readability */
+        .pcard.has-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .pcard.has-bg.ov-light::before  { background: rgba(252,250,236,0.72); }
+        .pcard.has-bg.ov-dark::before   { background: rgba(20,54,77,0.52); }
+        .pcard.has-bg.ov-heavy::before  { background: rgba(20,54,77,0.82); }
+        .pcard.has-bg .pc-kicker,
+        .pcard.has-bg .pc-title,
+        .pcard.has-bg .pc-body { position: relative; z-index: 1; }
+
         .overflow-flag {
             position: absolute;
             bottom: 6px;
@@ -948,6 +964,19 @@
                             <option value="26_RANK_PandadocCover_background.png">Mountains at night</option>
                             <option value="26_RANK_Mountains.png">Mountains (cutout)</option>
                             <option value="Internet Marketing for Lawyers-2.png">6-step process backdrop</option>
+                            <option value="26_RANK_Infographic.png">Note card grid</option>
+                            <option value="26_RANK_FunnelGraphic_2.png">Funnel graphic</option>
+                            <option value="flywheel.png">Flywheel</option>
+                            <option value="circle graphic.png">5-segment circle</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Overlay</label>
+                        <select id="ed-overlay" onchange="renderEditorPreview()">
+                            <option value="">None</option>
+                            <option value="ov-light">Light (cream)</option>
+                            <option value="ov-dark">Dark (midnight)</option>
+                            <option value="ov-heavy">Heavy dark</option>
                         </select>
                     </div>
                 </div>
@@ -1381,7 +1410,7 @@ function upsertCard(card) {
     if (isSeed(card.id)) {
         const seed = SEED_CARDS.find(c => c.id === card.id);
         const ov = {};
-        ['title', 'category', 'size', 'style', 'bg', 'content'].forEach(k => { if ((card[k] || (k === 'style' ? 'light' : '')) !== (seed[k] || (k === 'style' ? 'light' : ''))) ov[k] = card[k]; });
+        ['title', 'category', 'size', 'style', 'bg', 'overlay', 'content'].forEach(k => { if ((card[k] || (k === 'style' ? 'light' : '')) !== (seed[k] || (k === 'style' ? 'light' : ''))) ov[k] = card[k]; });
         if (Object.keys(ov).length) s.overrides[card.id] = ov;
         else delete s.overrides[card.id];
     } else {
@@ -1545,7 +1574,8 @@ function cardHTML(card, opts) {
     let s = opts.fluid ? 'height:auto;' : '';
     if (card.bg) s += 'background-image:url("Blank%20files/' + card.bg.replace(/ /g, '%20').replace(/["'<>]/g, '') + '");background-size:cover;background-position:center;';
     const styleStr = s ? ' style="' + s + '"' : '';
-    return '<div class="pcard size-' + card.size + (card.style === 'dark' ? ' dark' : '') + '"' + styleStr + '>' +
+    const bgClass = card.bg ? (' has-bg' + (card.overlay ? ' ' + card.overlay : '')) : '';
+    return '<div class="pcard size-' + card.size + (card.style === 'dark' ? ' dark' : '') + bgClass + '"' + styleStr + '>' +
         '<div class="pc-kicker">' + esc(card.category) + '</div>' +
         '<div class="pc-title">' + inline(card.title) + '</div>' +
         '<div class="pc-body">' + renderContent(card.content) + '</div>' +
@@ -1786,6 +1816,7 @@ function openEditor(id) {
     document.getElementById('ed-size').value = c.size;
     document.getElementById('ed-style').value = c.style || 'light';
     document.getElementById('ed-bg').value = c.bg || '';
+    document.getElementById('ed-overlay').value = c.overlay || '';
     document.getElementById('ed-content').value = c.content;
     document.getElementById('ed-delete-btn').style.display = id ? '' : 'none';
     refreshCategoryControls();
@@ -1803,6 +1834,7 @@ function renderEditorPreview() {
         size: document.getElementById('ed-size').value,
         style: document.getElementById('ed-style').value,
         bg: document.getElementById('ed-bg').value,
+        overlay: document.getElementById('ed-overlay').value,
         content: document.getElementById('ed-content').value
     };
     document.getElementById('editor-preview-stage').innerHTML = cardHTML(card, { fluid: true });
@@ -1817,6 +1849,7 @@ function saveCardFromEditor() {
         size: document.getElementById('ed-size').value,
         style: document.getElementById('ed-style').value,
         bg: document.getElementById('ed-bg').value,
+        overlay: document.getElementById('ed-overlay').value,
         content: document.getElementById('ed-content').value
     };
     upsertCard(card);
