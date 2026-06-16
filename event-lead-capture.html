@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>Event Lead Capture · Revenue Kitchen</title>
   <link rel="icon" href="favicon.svg" />
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -292,12 +292,31 @@
     h(backBar(rep) + '<h1 style="margin-top:16px">My QR code</h1>' +
       '<div class="qrcard" style="margin-top:20px">' +
         '<p class="muted">Have the lead point their camera here. It opens your capture form.</p>' +
-        '<div class="qrbox"><canvas id="qr"></canvas></div>' +
+        '<div class="qrbox" id="qrbox"></div>' +
         "<p style=\"font-weight:600;font-size:18px;margin:0\">" + esc(rep.name) + "</p>" +
         '<p class="small">' + esc(url) + "</p>" +
       "</div>");
     bindBack();
-    QRCode.toCanvas(document.getElementById("qr"), url, { width: 256, margin: 2 });
+    renderQR(document.getElementById("qrbox"), url, 256);
+  }
+
+  // Render a QR into `box`. Primary: the qrious library (canvas). Fallback:
+  // an image service, so the code still shows if the library didn't load.
+  function renderQR(box, url, size) {
+    box.innerHTML = "";
+    try {
+      if (typeof QRious === "function") {
+        var canvas = document.createElement("canvas");
+        box.appendChild(canvas);
+        new QRious({ element: canvas, value: url, size: size, level: "M", padding: 8 });
+        return;
+      }
+    } catch (e) { /* fall through to image */ }
+    var img = document.createElement("img");
+    img.width = size; img.height = size; img.alt = "QR code";
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size +
+      "&margin=8&data=" + encodeURIComponent(url);
+    box.appendChild(img);
   }
 
   function viewScan() {
