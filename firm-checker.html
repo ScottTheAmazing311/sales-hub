@@ -137,6 +137,25 @@
         }
         .frame-note a { color: var(--sky); text-decoration: none; }
         .frame-note a:hover { text-decoration: underline; }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            margin-bottom: 1.25rem;
+        }
+        .status .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .status.checking { background: rgba(7,55,79,0.08); color: var(--text-muted); }
+        .status.checking .dot { background: var(--text-muted); }
+        .status.active { background: rgba(46,160,67,0.12); color: #1a7f37; }
+        .status.active .dot { background: #2ea043; box-shadow: 0 0 0 3px rgba(46,160,67,0.18); }
+        .status.inactive { background: rgba(207,34,46,0.12); color: #b3261e; }
+        .status.inactive .dot { background: #cf222e; }
     </style>
 </head>
 <body>
@@ -168,6 +187,8 @@
             <div class="hero-desc">Enter a law firm's name and website to check its legal-directory listings (Martindale, FindLaw, Lawyers.com, and more) for presence and NAP consistency — plus whether the site looks due for a redesign.</div>
         </div>
 
+        <div id="tool-status" class="status checking"><span class="dot"></span>Checking tool status…</div>
+
         <div class="tool-frame">
             <iframe
                 src="https://scotts-mac-mini.tail70079e.ts.net/?token=fd4ae79af73ce68abeedd0f158f2f349b1048c374e3e4c5f"
@@ -179,6 +200,29 @@
             <a href="https://scotts-mac-mini.tail70079e.ts.net/?token=fd4ae79af73ce68abeedd0f158f2f349b1048c374e3e4c5f" target="_blank" rel="noopener">open it in a new tab</a>.
         </div>
     </div>
+
+    <script>
+        (function () {
+            var el = document.getElementById('tool-status');
+            var HEALTH = 'https://scotts-mac-mini.tail70079e.ts.net/health';
+            function set(cls, txt) { el.className = 'status ' + cls; el.innerHTML = '<span class="dot"></span>' + txt; }
+            async function check() {
+                try {
+                    var ctrl = new AbortController();
+                    var t = setTimeout(function () { ctrl.abort(); }, 8000);
+                    var r = await fetch(HEALTH, { cache: 'no-store', signal: ctrl.signal });
+                    clearTimeout(t);
+                    var j = await r.json();
+                    if (r.ok && j && j.ok) set('active', 'Tool active');
+                    else set('inactive', 'Tool inactive');
+                } catch (e) {
+                    set('inactive', 'Tool inactive — server offline');
+                }
+            }
+            check();
+            setInterval(check, 30000);
+        })();
+    </script>
 
 </body>
 </html>
