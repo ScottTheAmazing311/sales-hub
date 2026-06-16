@@ -155,6 +155,7 @@
   var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHNIQ_wa-lShX9dPHmNnTGRG947V4lUf6II7buL-TSTyv4qSGq85btK2fZWzcCcjOykA/exec";
   var APP_URL = location.origin + location.pathname;
   var STORAGE_KEY = "rk.elc.activeRepId";
+  var STORAGE_EVENT = "rk.elc.activeEvent";
 
   // ---- Helpers ------------------------------------------------------------
   var app = document.getElementById("app");
@@ -173,13 +174,41 @@
   function icon(name) { return '<svg viewBox="0 0 24 24">' + (ICONS[name] || "") + "</svg>"; }
 
   var reps = [];
+  var events = [];
   function repById(id) { for (var i = 0; i < reps.length; i++) if (reps[i].rep_id === id) return reps[i]; return null; }
+  function getEvent() { return localStorage.getItem(STORAGE_EVENT) || ""; }
+  function setEvent(v) { if (v) localStorage.setItem(STORAGE_EVENT, v); else localStorage.removeItem(STORAGE_EVENT); }
+  function eventOptions() {
+    var cur = getEvent(), out = '<option value="">— Select event —</option>';
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      out += '<option value="' + esc(ev) + '"' + (ev === cur ? " selected" : "") + ">" + esc(ev) + "</option>";
+    }
+    return out;
+  }
+  function eventHint() {
+    if (!events.length) return '<p class="muted" style="margin-top:6px">Add events in the Events tab of the Sheet.</p>';
+    if (!getEvent()) return '<p class="muted" style="margin-top:6px">Pick your event so leads get tagged.</p>';
+    return "";
+  }
+  function tagLabel() {
+    var ev = getEvent();
+    return ev
+      ? '<p class="muted" style="margin-top:4px">Tagging event: <b style="color:var(--navy)">' + esc(ev) + "</b></p>"
+      : '<p class="note warn" style="margin-top:8px">No event selected — pick one on the home screen, or tag it on the sheet later.</p>';
+  }
 
   // ---- API ----------------------------------------------------------------
   function loadReps() {
     return fetch(APPS_SCRIPT_URL + "?action=reps")
       .then(function (r) { return r.json(); })
       .then(function (d) { reps = (d && d.reps) || []; return reps; });
+  }
+  function loadEvents() {
+    return fetch(APPS_SCRIPT_URL + "?action=events")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { events = (d && d.events) || []; return events; })
+      .catch(function () { events = []; });
   }
   function postAction(payload) {
     return fetch(APPS_SCRIPT_URL, {
@@ -266,6 +295,7 @@
         firm: val("f_firm"), email: val("f_email"),
         contact_type: opts.extras ? val("f_type") : "Lead",
         notes: opts.extras ? val("f_notes") : "",
+        event_name: opts.eventName || "",
       };
 
       postAction(payload).then(function (res) {
@@ -312,7 +342,12 @@
         "<div><p class=\"muted\" style=\"margin:0\">Capturing as</p><h1>" + esc(rep.name) + "</h1></div>" +
         '<button class="link" id="switch">Switch</button>' +
       "</div>" +
-      '<div class="stack" style="margin-top:24px">' +
+      '<div style="margin-top:18px">' +
+        '<label class="field"><span>Current event</span>' +
+          '<select class="ctrl" id="eventsel">' + eventOptions() + "</select></label>" +
+        eventHint() +
+      "</div>" +
+      '<div class="stack" style="margin-top:18px">' +
         tile("qr", "qr", "My QR code", "Let a lead scan to fill the form") +
         tile("scan", "camera", "Scan a card", "Photo → auto-fill → save") +
         tile("manual", "keyboard", "Manual entry", "Type it in or hand over the phone") +
@@ -323,6 +358,8 @@
     document.getElementById("switch").addEventListener("click", function () {
       localStorage.removeItem(STORAGE_KEY); viewPicker();
     });
+    var sel = document.getElementById("eventsel");
+    if (sel) sel.addEventListener("change", function () { setEvent(sel.value); viewHome(); });
     bindNav();
   }
   function tile(route, ic, title, sub) {
@@ -346,16 +383,18 @@
   function viewManual() {
     var rep = repById(localStorage.getItem(STORAGE_KEY));
     if (!rep) return viewHome();
-    h(backBar(rep) + '<h1 style="margin-top:14px">Manual entry</h1>' +
+    h(backBar(rep) + '<h1 style="margin-top:14px">Manual entry</h1>' + tagLabel() +
       '<div style="margin-top:16px">' + leadFormHTML({ extras: true, submitLabel: "Save lead" }) + "</div>");
     bindBack();
-    wireLeadForm({ repId: rep.rep_id, source: "manual", extras: true });
+    wireLeadForm({ repId: rep.rep_id, source: "manual", extras: true, eventName: getEvent() });
   }
 
   function viewQR() {
     var rep = repById(localStorage.getItem(STORAGE_KEY));
     if (!rep) return viewHome();
-    var url = APP_URL + "?capture=" + encodeURIComponent(rep.rep_id);
+    var ev = getEvent();
+    var url = APP_URL + "?capture=" + encodeURIComponent(rep.rep_id) +
+      (ev ? "&event=" + encodeURIComponent(ev) : "");
     h(backBar(rep) + '<h1 style="margin-top:14px">My QR code</h1>' +
       '<div class="qrcard" style="margin-top:20px">' +
         '<p class="muted">Have the lead point their camera here. It opens your capture form.</p>' +
@@ -388,7 +427,7 @@
   function viewScan() {
     var rep = repById(localStorage.getItem(STORAGE_KEY));
     if (!rep) return viewHome();
-    h(backBar(rep) + '<h1 style="margin-top:14px">Scan a card</h1>' +
+    h(backBar(rep) + '<h1 style="margin-top:14px">Scan a card</h1>' + tagLabel() +
       '<div id="scanbody" style="margin-top:16px"></div>' +
       '<input id="file" type="file" accept="image/*" capture="environment" class="hidden" />');
     bindBack();
@@ -412,7 +451,7 @@
         '<button class="btn ghost" id="again" style="margin-top:12px">Scan another card</button>';
       setVal("f_first", fields.firstName); setVal("f_last", fields.lastName);
       setVal("f_firm", fields.firm); setVal("f_email", fields.email);
-      wireLeadForm({ repId: rep.rep_id, source: "card", extras: true });
+      wireLeadForm({ repId: rep.rep_id, source: "card", extras: true, eventName: getEvent() });
       document.getElementById("again").addEventListener("click", function () { showStart(false); fileEl.click(); });
     }
 
@@ -450,7 +489,7 @@
       "</div>" +
       '<div class="footer"><span class="small">Powered by Rankings.io</span></div>'
     );
-    wireLeadForm({ repId: rep.rep_id, source: "qr", extras: false, rep: rep, successLabel: "Thanks — you're all set ✓" });
+    wireLeadForm({ repId: rep.rep_id, source: "qr", extras: false, rep: rep, eventName: qs("event") || "", successLabel: "Thanks — you're all set ✓" });
   }
 
   // ---- Boot ---------------------------------------------------------------
@@ -460,7 +499,7 @@
         "Paste your Apps Script web-app URL into <code>APPS_SCRIPT_URL</code> in this file. See SETUP.md.</div>");
       return;
     }
-    loadReps().then(function () {
+    Promise.all([loadReps(), loadEvents()]).then(function () {
       var cap = qs("capture");
       if (cap) viewCapture(cap); else viewHome();
     }).catch(function () {
