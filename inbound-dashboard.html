@@ -809,6 +809,9 @@
         .week-source-card.goal-met { border-color: rgba(34,197,94,0.4); }
         .week-source-card.goal-met .wsc-bar-fill { background: var(--success) !important; }
         .week-source-card.goal-met .wsc-detail .wsc-pct { color: var(--success); }
+        .wsc-event-breakdown { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.08); }
+        .wsc-event-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-muted); padding: 2px 0; }
+        .wsc-event-item .wsc-event-cnt { font-weight: 700; color: var(--text); font-size: 0.75rem; }
 
         /* ── Loading ── */
         .loading-state {
@@ -931,6 +934,7 @@ const COL = {
     AE_DATE: 7,
     CITY: 8,
     SOURCE: 9,
+    EVENT_NAME: 10, // Column K — event name (filled when Source = Event)
     MDR_TYPE: 9,   // Column J — check for "MDR Set"
     MDR_DATE: 4,   // Column E — date of the MDR set
     GOAL_TOTAL: 21,    // Column V — Total Inbound goal (optional)
@@ -1113,6 +1117,7 @@ async function fetchData() {
             aeDate: parseDateAny(cells[COL.AE_DATE]),
             city: cellVal(cells, COL.CITY),
             source: normalizeSource(cellVal(cells, COL.SOURCE)),
+            eventName: cellVal(cells, COL.EVENT_NAME),
             status: deriveStatus(cellVal(cells, COL.FTA_SHOW)),
         });
     }
@@ -1869,6 +1874,9 @@ function renderWoW(leads) {
         // Source breakdown cards (like MTD Traffic Source Breakdown)
         const trafficData = getTrafficData(b.leads);
         const total = b.leads.length || 1;
+        const eventNameMap = {};
+        b.leads.filter(l => sourceCategory(l.source) === 'event' && l.eventName)
+            .forEach(l => { eventNameMap[l.eventName] = (eventNameMap[l.eventName] || 0) + 1; });
 
         html += '<div class="week-breakdown">';
 
@@ -1907,6 +1915,13 @@ function renderWoW(leads) {
                 const pctOfTotal = total > 0 ? Math.round(sc.count / total * 100) : 0;
                 html += `<div class="wsc-bar"><div class="wsc-bar-fill" style="width:${pctOfTotal}%;background:${sc.color}"></div></div>`;
                 html += `<div class="wsc-detail"><span class="wsc-pct">${pctOfTotal}%</span> of total</div>`;
+            }
+            if (sc.name === 'Events' && Object.keys(eventNameMap).length) {
+                html += '<div class="wsc-event-breakdown">';
+                Object.entries(eventNameMap).sort((a, b) => b[1] - a[1]).forEach(([name, cnt]) => {
+                    html += `<div class="wsc-event-item"><span>${escapeHtml(name)}</span><span class="wsc-event-cnt">${cnt}</span></div>`;
+                });
+                html += '</div>';
             }
             html += '</div>';
         });
@@ -2018,7 +2033,7 @@ function buildLeadTable(leads) {
         html += `<td>${escapeHtml(l.ae)}</td>`;
         html += `<td style="white-space:nowrap">${formatShort(l.dateInbound)}</td>`;
         html += `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${statusColor};margin-right:6px;"></span>${escapeHtml(l.status)}</td>`;
-        html += `<td>${escapeHtml(l.source)}</td>`;
+        html += `<td>${escapeHtml(l.source)}${l.eventName ? '<br><span style="font-size:0.78em;color:var(--text-muted)">' + escapeHtml(l.eventName) + '</span>' : ''}</td>`;
         html += `<td>${escapeHtml(l.city)}</td>`;
         html += '</tr>';
     });
