@@ -905,6 +905,10 @@
                 Closed Won
                 <span class="tab-range" id="closed-won-range"></span>
             </button>
+            <button class="period-tab" data-period="events">
+                Events
+                <span class="tab-range" id="events-range"></span>
+            </button>
         </div>
 
         <div id="loading" class="loading-state">
@@ -1608,6 +1612,151 @@ function renderClosedWon() {
     return html;
 }
 
+// ── Events Dashboard ──
+function renderEventsDashboard() {
+    const yearStart = getYearStart(NOW);
+    const eventLeads = allLeads.filter(l => sourceCategory(l.source) === 'event' && l.dateInbound >= yearStart && l.dateInbound <= NOW);
+
+    let html = '';
+
+    if (!eventLeads.length) {
+        html += '<div class="section-block" style="text-align:center;color:var(--text-muted);padding:3rem 0;">No event leads recorded this year. Make sure Source = "Event" and Event Name (col K) is filled in the Lead Log.</div>';
+        return html;
+    }
+
+    // ── Summary stats ──
+    const totalEvent = eventLeads.length;
+    const heldEvent = eventLeads.filter(l => l.status === 'Held').length;
+    const noShowEvent = eventLeads.filter(l => l.status === 'No Show').length;
+    const pendingEvent = eventLeads.filter(l => l.status === 'Pending').length;
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Event Leads — Year to Date</div>';
+    html += '<div class="stat-grid">';
+    html += statCard('Total Event Leads', totalEvent, '', true);
+    html += statCard('Held', heldEvent, pct(heldEvent, totalEvent));
+    html += statCard('No Show', noShowEvent, pct(noShowEvent, totalEvent));
+    html += statCard('Pending', pendingEvent, 'Awaiting FTA');
+    html += '</div></div>';
+
+    // ── Per-event breakdown ──
+    const eventMap = {};
+    eventLeads.forEach(l => {
+        const key = l.eventName || '(unnamed)';
+        if (!eventMap[key]) eventMap[key] = [];
+        eventMap[key].push(l);
+    });
+    const eventEntries = Object.entries(eventMap).sort((a, b) => b[1].length - a[1].length);
+    const maxCount = eventEntries[0][1].length;
+
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Leads by Event</div>';
+    html += '<div class="traffic-hero" id="traffic-hero">';
+    html += '<div class="traffic-bars">';
+    eventEntries.forEach(([name, leads], i) => {
+        const cnt = leads.length;
+        const heldCnt = leads.filter(l => l.status === 'Held').length;
+        const barWidth = maxCount ? Math.max(cnt / maxCount * 100, 6) : 0;
+        const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+        html += '<div class="traffic-row">';
+        html += `<div class="source-name" style="width:160px">${escapeHtml(name)}</div>`;
+        html += '<div class="bar-track">';
+        html += `<div class="bar-fill" style="width:${barWidth}%;background:${color}"><span class="bar-count">${cnt}</span></div>`;
+        html += '</div>';
+        html += `<div class="bar-pct">${heldCnt} held</div>`;
+        html += '</div>';
+    });
+    html += '</div></div></div>';
+
+    // ── Per-event detail table ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Event Detail</div>';
+    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+    html += '<table class="report-table"><thead><tr>';
+    html += '<th>Event</th><th style="text-align:right">Leads</th><th style="text-align:right">Held</th><th style="text-align:right">No Show</th><th style="text-align:right">Pending</th><th style="text-align:right">Hold Rate</th>';
+    html += '</tr></thead><tbody>';
+    eventEntries.forEach(([name, leads]) => {
+        const cnt = leads.length;
+        const held = leads.filter(l => l.status === 'Held').length;
+        const noShow = leads.filter(l => l.status === 'No Show').length;
+        const pending = leads.filter(l => l.status === 'Pending').length;
+        html += '<tr>';
+        html += `<td><strong>${escapeHtml(name)}</strong></td>`;
+        html += `<td class="num">${cnt}</td>`;
+        html += `<td class="num">${held}</td>`;
+        html += `<td class="num">${noShow}</td>`;
+        html += `<td class="num">${pending}</td>`;
+        html += `<td class="num">${pct(held, cnt)}</td>`;
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div></div></div>';
+
+    // ── Weekly breakdown ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Week over Week — Event Leads</div>';
+    const weekBuckets = getWeeklyBuckets(eventLeads).filter(b => b.leads.length > 0);
+    if (!weekBuckets.length) {
+        html += '<div style="color:var(--text-muted);font-size:0.85rem;padding:1rem 0;">No event leads in recent weeks.</div>';
+    } else {
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr><th>Week</th><th style="text-align:right">Leads</th>';
+        eventEntries.forEach(([name]) => { html += `<th style="text-align:right">${escapeHtml(name)}</th>`; });
+        html += '</tr></thead><tbody>';
+        weekBuckets.forEach(b => {
+            const weekLabel = formatShort(b.start) + ' – ' + formatShort(b.end);
+            html += `<tr>`;
+            html += `<td style="white-space:nowrap">${weekLabel}${b.isCurrent ? ' <span style="font-size:0.7em;color:var(--sky);font-weight:700;">THIS WEEK</span>' : ''}</td>`;
+            html += `<td class="num">${b.leads.length}</td>`;
+            eventEntries.forEach(([name]) => {
+                const cnt = b.leads.filter(l => (l.eventName || '(unnamed)') === name).length;
+                html += `<td class="num">${cnt || '—'}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div></div></div>';
+    }
+    html += '</div>';
+
+    // ── Monthly breakdown ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Month by Month — Event Leads</div>';
+    const monthMap = {};
+    eventLeads.forEach(l => {
+        const key = l.dateInbound.getFullYear() + '-' + String(l.dateInbound.getMonth()).padStart(2, '0');
+        if (!monthMap[key]) monthMap[key] = { label: formatMonthYear(l.dateInbound), leads: [] };
+        monthMap[key].leads.push(l);
+    });
+    const sortedMonths = Object.keys(monthMap).sort().reverse();
+    if (!sortedMonths.length) {
+        html += '<div style="color:var(--text-muted);font-size:0.85rem;padding:1rem 0;">No monthly data yet.</div>';
+    } else {
+        html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr><th>Month</th><th style="text-align:right">Leads</th>';
+        eventEntries.forEach(([name]) => { html += `<th style="text-align:right">${escapeHtml(name)}</th>`; });
+        html += '</tr></thead><tbody>';
+        sortedMonths.forEach(key => {
+            const { label, leads } = monthMap[key];
+            html += `<tr><td style="white-space:nowrap">${escapeHtml(label)}</td>`;
+            html += `<td class="num">${leads.length}</td>`;
+            eventEntries.forEach(([name]) => {
+                const cnt = leads.filter(l => (l.eventName || '(unnamed)') === name).length;
+                html += `<td class="num">${cnt || '—'}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div></div></div>';
+    }
+    html += '</div>';
+
+    // ── Lead list ──
+    html += '<div class="section-block">';
+    html += '<div class="section-title">All Event Leads</div>';
+    html += '<div class="card"><div class="card-content" style="padding-top:0;"><div style="overflow-x:auto;">';
+    html += buildLeadTable(eventLeads);
+    html += '</div></div></div></div>';
+
+    return html;
+}
+
 // ── Render ──
 function render() {
     const leads = getFilteredLeads();
@@ -1636,6 +1785,14 @@ function render() {
     document.getElementById('ytd-range').textContent = formatShort(yearStart) + ' – ' + formatShort(NOW);
     document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
     document.getElementById('closed-won-range').textContent = NOW.getFullYear().toString();
+    document.getElementById('events-range').textContent = NOW.getFullYear().toString();
+
+    if (currentPeriod === 'events') {
+        dashboard.innerHTML = renderEventsDashboard();
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+        return;
+    }
 
     if (currentPeriod === 'wow') {
         dashboard.innerHTML = renderWoW(leads);
