@@ -1121,7 +1121,7 @@ async function fetchData() {
             aeDate: parseDateAny(cells[COL.AE_DATE]),
             city: cellVal(cells, COL.CITY),
             source: normalizeSource(cellVal(cells, COL.SOURCE)),
-            eventName: cellVal(cells, COL.EVENT_NAME),
+            eventName: cellVal(cells, COL.EVENT_NAME).toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
             status: deriveStatus(cellVal(cells, COL.FTA_SHOW)),
         });
     }
