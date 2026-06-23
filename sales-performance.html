@@ -533,12 +533,13 @@
 
         // Stat cards
         html += '<div class="stat-grid">';
-        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev), fmtMoney(ytdSum('Total ARR')));
-        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev), fmtMoney(ytdSum('Total MRR')));
-        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev), fmtNum(ytdSum('Deals Closed')));
+        var showPrevYtd = viewMode !== 'yearly';
+        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, showPrevYtd ? fmtMoney(arrPrev) : null, null);
+        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, showPrevYtd ? fmtMoney(mrrPrev) : null, null);
+        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, showPrevYtd ? fmtNum(dealsPrev) : null, showPrevYtd ? fmtNum(ytdSum('Deals Closed')) : null);
         html += statCard('Win Rate', fmtPctVal(wrLast),
             (wrLast == null || wrPrev == null) ? { text: '—', cls: '' } : pctChangeFromPrev(wrPrev, wrLast, prevLabel),
-            ICONS.trending, fmtPctVal(wrPrev));
+            ICONS.trending, showPrevYtd ? fmtPctVal(wrPrev) : null);
         html += '</div>';
 
         // Key Metrics Detail table
