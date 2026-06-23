@@ -410,7 +410,7 @@
         // Rate/percentage metrics -> average
         if (lower.indexOf('rate') !== -1 || lower.indexOf('consumption') !== -1 || lower.indexOf('average') !== -1 || lower.indexOf('avg') !== -1) return 'avg';
         // Point-in-time / cumulative metrics -> latest
-        if (lower.indexOf('followers') !== -1 || lower.indexOf('subscribers') !== -1 || lower.indexOf('total social') !== -1 || lower.indexOf('cumulative') !== -1 || lower.indexOf('pipeline') !== -1 || lower.indexOf('arr') !== -1 && lower.indexOf('closed') === -1) return 'latest';
+        if (lower.indexOf('followers') !== -1 || lower.indexOf('subscribers') !== -1 || lower.indexOf('total social') !== -1 || lower.indexOf('cumulative') !== -1 || lower.indexOf('pipeline') !== -1 || (lower.indexOf('total arr') !== -1) || (lower.indexOf('total mrr') !== -1)) return 'latest';
         return 'sum';
     }
 
