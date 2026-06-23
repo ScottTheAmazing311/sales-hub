@@ -331,7 +331,7 @@
             });
             currentPeriods = ['Q1','Q2','Q3','Q4'].filter(function(q) { return qMap[q]; }).map(function(q) { return qMap[q]; });
         } else { // yearly
-            currentPeriods = [{ label: 'YTD', monthIndices: allMonthCols.map(function(_, i) { return i; }) }];
+            currentPeriods = [{ label: '2026', monthIndices: allMonthCols.map(function(_, i) { return i; }) }];
         }
         // Select latest period with data
         selectedPeriodIdx = currentPeriods.length - 1;
@@ -598,9 +598,9 @@
         });
         html += '</tbody></table></div></div>';
 
-        // Pipeline
+        // Pipeline (monthly only)
         var pipeRows = sectionRows(rows, 'Pipeline', ['Total Pipeline']);
-        if (pipeRows.length > 0) {
+        if (pipeRows.length > 0 && viewMode === 'monthly') {
             html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Pipeline by Rep</div><div class="card-desc">MRR / ARR &amp; deal count</div></div><div class="card-content"><div class="chart-wrap" style="height:320px;"><canvas id="chart-pipeline"></canvas></div><div id="pipeline-total" style="margin-top:12px;"></div></div></div>';
         }
 
