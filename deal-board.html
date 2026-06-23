@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deal Board</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f5f0; overflow: hidden; height: 100vh; }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px; background: #07374F; color: #fff; z-index: 100; position: relative;
+  }
+  .topbar h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .topbar-right { display: flex; gap: 10px; align-items: center; }
+  .btn-top {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff;
+    padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 500;
+  }
+  .btn-top:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── Layout ── */
+  .layout { display: flex; height: calc(100vh - 52px); }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 280px; min-width: 280px; background: #fff; border-right: 1px solid #e0e0e0;
+    overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .sidebar-section { }
+  .sidebar-title {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888;
+    font-weight: 700; margin-bottom: 8px; padding: 0 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sidebar-title .add-btn {
+    font-size: 0.85rem; cursor: pointer; background: none; border: none; color: #07374F;
+    font-weight: 700; padding: 0 4px; line-height: 1;
+  }
+  .sidebar-title .add-btn:hover { color: #3b82f6; }
+  .rep-group { margin-bottom: 12px; }
+  .rep-name {
+    font-size: 0.8rem; font-weight: 700; color: #07374F; padding: 6px 8px;
+    background: #f0f4f7; border-radius: 6px; margin-bottom: 6px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .rep-name .count { font-weight: 400; color: #888; font-size: 0.75rem; }
+  .rep-deals { display: flex; flex-direction: column; gap: 4px; min-height: 4px; }
+
+  /* ── Deal card ── */
+  .deal-card {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px;
+    cursor: grab; user-select: none; transition: box-shadow 0.15s, transform 0.15s;
+    position: relative;
+  }
+  .deal-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .deal-card.dragging { opacity: 0.5; transform: scale(0.95); }
+  .deal-card .firm { font-size: 0.82rem; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+  .deal-card .meta { font-size: 0.72rem; color: #888; display: flex; gap: 8px; flex-wrap: wrap; }
+  .deal-card .mrr { color: #07374F; font-weight: 600; }
+  .deal-card .rep-dot {
+    width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 10px; right: 10px;
+  }
+  .deal-card .note-indicator {
+    position: absolute; top: 10px; right: 24px; font-size: 0.65rem; color: #f59e0b; cursor: pointer;
+  }
+  .deal-card .deal-note {
+    margin-top: 6px; padding-top: 6px; border-top: 1px solid #f0f0f0;
+    font-size: 0.72rem; color: #666; line-height: 1.4; white-space: pre-wrap;
+  }
+  .deal-card .stage-badge {
+    font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 600;
+  }
+
+  /* ── Canvas ── */
+  .canvas-wrap { flex: 1; position: relative; overflow: hidden; cursor: default; }
+  .canvas {
+    position: absolute; top: 0; left: 0; width: 4000px; height: 4000px;
+    background: radial-gradient(circle, #ddd 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .canvas .deal-card, .canvas .tag-card, .canvas .note-box { position: absolute; z-index: 10; }
+  .canvas .deal-card { min-width: 180px; max-width: 240px; }
+
+  /* ── Tag cards ── */
+  .tag-card {
+    padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+    cursor: grab; user-select: none; border: 2px dashed; min-width: 120px; text-align: center;
+    transition: box-shadow 0.15s; position: relative;
+  }
+  .tag-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .tag-card.dragging { opacity: 0.5; }
+  .tag-delete {
+    position: absolute; top: -6px; right: -6px; width: 16px; height: 16px;
+    background: #ef4444; color: #fff; border: none; border-radius: 50%;
+    font-size: 0.6rem; cursor: pointer; display: none; align-items: center;
+    justify-content: center; line-height: 1;
+  }
+  .tag-card:hover .tag-delete.custom-tag { display: flex; }
+  .tag-card[data-tag="stalled"]     { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+  .tag-card[data-tag="need-help"]   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .tag-card[data-tag="sure-thing"]  { background: #dcfce7; border-color: #22c55e; color: #166534; }
+  .tag-card[data-tag="competitive"] { background: #e0e7ff; border-color: #6366f1; color: #3730a3; }
+  .tag-card[data-tag="hot"]         { background: #ffe4e6; border-color: #f43f5e; color: #9f1239; }
+  .tag-card[data-tag="closing"]     { background: #d1fae5; border-color: #10b981; color: #065f46; }
+  .tag-card[data-tag^="custom-"]    { background: #f3f4f6; border-color: #9ca3af; color: #374151; }
+  .sidebar .tag-card { position: relative; margin-bottom: 4px; }
+
+  /* ── Note box ── */
+  .note-box {
+    background: #fffde7; border: 1px solid #e0d97e; border-radius: 8px; padding: 10px 12px;
+    min-width: 180px; max-width: 260px; cursor: grab; user-select: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08); position: relative;
+  }
+  .note-box:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+  .note-box .note-text {
+    font-size: 0.78rem; color: #555; line-height: 1.5; white-space: pre-wrap;
+    min-height: 20px; outline: none;
+  }
+  .note-box .note-header {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #b8a900; font-weight: 700; margin-bottom: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .note-box .note-delete {
+    background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.8rem; padding: 0 2px;
+  }
+  .note-box .note-delete:hover { color: #ef4444; }
+
+  /* ── Pipeline Picker (step 1) ── */
+  .picker-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .picker-overlay.hidden { display: none; }
+  .picker {
+    background: #fff; border-radius: 16px; width: 90vw; max-width: 1100px; height: 80vh;
+    display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    overflow: hidden;
+  }
+  .picker-header {
+    padding: 20px 28px 16px; border-bottom: 1px solid #e5e5e5;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .picker-header h2 { font-size: 1.1rem; color: #07374F; }
+  .picker-header .picker-actions { display: flex; gap: 10px; align-items: center; }
+  .picker-header .selected-count { font-size: 0.82rem; color: #888; }
+  .picker-btn {
+    padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+    font-weight: 600; border: none;
+  }
+  .picker-btn-primary { background: #07374F; color: #fff; }
+  .picker-btn-primary:hover { background: #0a4d6e; }
+  .picker-btn-secondary { background: #f3f4f6; color: #333; }
+  .picker-body {
+    flex: 1; overflow-y: auto; padding: 20px 28px;
+  }
+  .picker-rep {
+    margin-bottom: 24px;
+  }
+  .picker-rep-header {
+    font-size: 0.9rem; font-weight: 700; color: #07374F; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 2px solid #f0f4f7;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .picker-rep-header .dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .picker-rep-header .select-all {
+    font-size: 0.72rem; color: #3b82f6; cursor: pointer; font-weight: 500; margin-left: auto;
+  }
+  .picker-rep-header .select-all:hover { text-decoration: underline; }
+  .picker-stage {
+    margin-bottom: 12px; padding-left: 12px;
+  }
+  .picker-stage-label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #888; font-weight: 700; margin-bottom: 6px;
+  }
+  .picker-deals {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px;
+  }
+  .picker-deal {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border: 2px solid #e5e5e5; border-radius: 10px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .picker-deal:hover { border-color: #3b82f6; background: #f8faff; }
+  .picker-deal.selected { border-color: #07374F; background: #f0f7fb; }
+  .picker-deal .check {
+    width: 20px; height: 20px; border-radius: 6px; border: 2px solid #ccc;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    font-size: 0.75rem; color: #fff; transition: all 0.15s;
+  }
+  .picker-deal.selected .check { background: #07374F; border-color: #07374F; }
+  .picker-deal .deal-info { flex: 1; min-width: 0; }
+  .picker-deal .deal-firm { font-size: 0.82rem; font-weight: 600; color: #1a1a1a; }
+  .picker-deal .deal-meta { font-size: 0.72rem; color: #888; display: flex; gap: 8px; margin-top: 2px; }
+  .picker-deal .deal-mrr { color: #07374F; font-weight: 600; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px; width: 360px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .modal h3 { font-size: 0.95rem; margin-bottom: 14px; color: #07374F; }
+  .modal input, .modal textarea {
+    width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 0.85rem; font-family: inherit; margin-bottom: 10px;
+  }
+  .modal textarea { resize: vertical; min-height: 80px; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .modal-btns button {
+    padding: 8px 18px; border-radius: 6px; font-size: 0.82rem; cursor: pointer; font-weight: 600;
+    border: 1px solid #ddd; background: #f5f5f5; color: #333;
+  }
+  .modal-btns .btn-primary { background: #07374F; color: #fff; border-color: #07374F; }
+  .modal-btns .btn-primary:hover { background: #0a4d6e; }
+
+  /* ── Zoom indicator ── */
+  .zoom-indicator {
+    position: fixed; bottom: 16px; right: 16px; background: #07374F; color: #fff;
+    padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; z-index: 200;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── Pipeline Picker ── -->
+<div class="picker-overlay" id="picker-overlay">
+  <div class="picker">
+    <div class="picker-header">
+      <h2>Select Pipeline Deals</h2>
+      <div class="picker-actions">
+        <span class="selected-count" id="picker-count">0 selected</span>
+        <button class="picker-btn picker-btn-primary" onclick="confirmPicker()">Load to Board</button>
+      </div>
+    </div>
+    <div class="picker-body" id="picker-body"></div>
+  </div>
+</div>
+
+<!-- ── Board ── -->
+<div class="topbar">
+  <h1>Deal Board</h1>
+  <div class="topbar-right">
+    <button class="btn-top" onclick="openPicker()">Edit Pipeline</button>
+    <button class="btn-top" onclick="addNoteBox()">+ Note</button>
+    <button class="btn-top" onclick="resetBoard()">Reset Board</button>
+    <button class="btn-top" onclick="saveBoard()">Save Layout</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">
+        Identifiers
+        <button class="add-btn" onclick="showAddTagModal()" title="Add custom identifier">+</button>
+      </div>
+      <div id="tag-tray"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pipeline Deals</div>
+      <div id="rep-list"></div>
+    </div>
+  </div>
+  <div class="canvas-wrap" id="canvas-wrap">
+    <div class="canvas" id="canvas"></div>
+  </div>
+</div>
+
+<div class="zoom-indicator" id="zoom-indicator">100%</div>
+
+<!-- Add Identifier Modal -->
+<div class="modal-overlay hidden" id="modal-add-tag">
+  <div class="modal">
+    <h3>Add Custom Identifier</h3>
+    <input type="text" id="new-tag-name" placeholder="e.g. At Risk, Upsell, Demo Scheduled..." maxlength="30">
+    <div class="modal-btns">
+      <button onclick="closeModal('modal-add-tag')">Cancel</button>
+      <button class="btn-primary" onclick="addCustomTag()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deal Note Modal -->
+<div class="modal-overlay hidden" id="modal-deal-note">
+  <div class="modal">
+    <h3 id="note-modal-title">Note</h3>
+    <textarea id="deal-note-text" placeholder="Add a note about this deal..."></textarea>
+    <div class="modal-btns">
+      <button onclick="removeDealNote()">Remove Note</button>
+      <button onclick="closeModal('modal-deal-note')">Cancel</button>
+      <button class="btn-primary" onclick="saveDealNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Rep colors ──
+var REP_COLORS = {
+  'Mike Budny':      '#3b82f6',
+  'Megan Grothman':  '#ec4899',
+  'Simon Golding':   '#f59e0b',
+  'Jake Wangler':    '#22c55e',
+  'Brandon Steed':   '#8b5cf6',
+  'Jacob Man':       '#ef4444',
+};
+
+// ── Deal stages ──
+var STAGES = ['Discovery', 'Qualified', 'Proposal Sent', 'Negotiation', 'Contract Sent', 'Closed Won', 'Closed Lost'];
+var STAGE_COLORS = {
+  'Discovery':     { bg: '#f0f4f7', text: '#555' },
+  'Qualified':     { bg: '#e0e7ff', text: '#3730a3' },
+  'Proposal Sent': { bg: '#fef3c7', text: '#92400e' },
+  'Negotiation':   { bg: '#ffe4e6', text: '#9f1239' },
+  'Contract Sent': { bg: '#d1fae5', text: '#065f46' },
+  'Closed Won':    { bg: '#dcfce7', text: '#166534' },
+  'Closed Lost':   { bg: '#fee2e2', text: '#991b1b' },
+};
+
+// ── All deals (10 per rep, various stages) ──
+var ALL_DEALS = [
+  // Mike Budny
+  { id: 'd1',  firm: 'Morgan & Associates',     mrr: 4500,  close: '2026-06-15', rep: 'Mike Budny',     stage: 'Negotiation' },
+  { id: 'd2',  firm: 'Sterling Law Group',      mrr: 8200,  close: '2026-06-20', rep: 'Mike Budny',     stage: 'Contract Sent' },
+  { id: 'd3',  firm: 'Baker Defense LLC',        mrr: 3100,  close: '2026-07-01', rep: 'Mike Budny',     stage: 'Qualified' },
+  { id: 'd4a', firm: 'Hartley & Boone',          mrr: 5600,  close: '2026-07-10', rep: 'Mike Budny',     stage: 'Discovery' },
+  { id: 'd4b', firm: 'Pinnacle Legal',           mrr: 7200,  close: '2026-06-28', rep: 'Mike Budny',     stage: 'Proposal Sent' },
+  { id: 'd4c', firm: 'Summit Trial Attorneys',   mrr: 3900,  close: '2026-07-15', rep: 'Mike Budny',     stage: 'Discovery' },
+  { id: 'd4d', firm: 'Greystone Law',            mrr: 6100,  close: '2026-06-22', rep: 'Mike Budny',     stage: 'Negotiation' },
+  { id: 'd4e', firm: 'Atlas Injury Law',         mrr: 2800,  close: '2026-08-01', rep: 'Mike Budny',     stage: 'Qualified' },
+  { id: 'd4f', firm: 'Beacon Family Law',        mrr: 4100,  close: '2026-06-10', rep: 'Mike Budny',     stage: 'Closed Won' },
+  { id: 'd4g', firm: 'Ironside Legal Group',     mrr: 5300,  close: '2026-05-20', rep: 'Mike Budny',     stage: 'Closed Lost' },
+
+  // Megan Grothman
+  { id: 'd5',  firm: 'Westfield Legal',          mrr: 6700,  close: '2026-06-18', rep: 'Megan Grothman', stage: 'Contract Sent' },
+  { id: 'd6',  firm: 'Harding & Partners',       mrr: 5500,  close: '2026-06-25', rep: 'Megan Grothman', stage: 'Negotiation' },
+  { id: 'd7a', firm: 'Rivera Criminal Defense',  mrr: 3800,  close: '2026-07-10', rep: 'Megan Grothman', stage: 'Proposal Sent' },
+  { id: 'd7b', firm: 'Crestview Law Office',     mrr: 9200,  close: '2026-06-30', rep: 'Megan Grothman', stage: 'Qualified' },
+  { id: 'd7c', firm: 'Valor Legal Group',        mrr: 4400,  close: '2026-07-05', rep: 'Megan Grothman', stage: 'Discovery' },
+  { id: 'd7d', firm: 'Redwood Estate Law',       mrr: 3200,  close: '2026-07-20', rep: 'Megan Grothman', stage: 'Discovery' },
+  { id: 'd7e', firm: 'Bridgewater Attorneys',    mrr: 7800,  close: '2026-06-14', rep: 'Megan Grothman', stage: 'Negotiation' },
+  { id: 'd7f', firm: 'Harper DUI Defense',       mrr: 5100,  close: '2026-08-05', rep: 'Megan Grothman', stage: 'Qualified' },
+  { id: 'd7g', firm: 'Lantern Law',              mrr: 6300,  close: '2026-06-12', rep: 'Megan Grothman', stage: 'Closed Won' },
+  { id: 'd7h', firm: 'Fieldstone Associates',    mrr: 2700,  close: '2026-05-28', rep: 'Megan Grothman', stage: 'Closed Lost' },
+
+  // Simon Golding
+  { id: 'd8',  firm: 'Thompson Injury Law',      mrr: 9100,  close: '2026-06-12', rep: 'Simon Golding',  stage: 'Contract Sent' },
+  { id: 'd9',  firm: 'Chen Immigration',         mrr: 2800,  close: '2026-07-05', rep: 'Simon Golding',  stage: 'Qualified' },
+  { id: 'd10', firm: 'Blackstone Litigation',    mrr: 7400,  close: '2026-06-22', rep: 'Simon Golding',  stage: 'Proposal Sent' },
+  { id: 'd10a',firm: 'Whitaker & Dean',          mrr: 4800,  close: '2026-07-12', rep: 'Simon Golding',  stage: 'Discovery' },
+  { id: 'd10b',firm: 'Ridgeline Legal',          mrr: 5500,  close: '2026-06-28', rep: 'Simon Golding',  stage: 'Negotiation' },
+  { id: 'd10c',firm: 'Trident Law Firm',         mrr: 3600,  close: '2026-07-18', rep: 'Simon Golding',  stage: 'Qualified' },
+  { id: 'd10d',firm: 'Cedar & Oak Attorneys',    mrr: 8300,  close: '2026-06-16', rep: 'Simon Golding',  stage: 'Negotiation' },
+  { id: 'd10e',firm: 'Compass Employment Law',   mrr: 4200,  close: '2026-08-10', rep: 'Simon Golding',  stage: 'Discovery' },
+  { id: 'd10f',firm: 'Keystone Defense',         mrr: 6700,  close: '2026-06-08', rep: 'Simon Golding',  stage: 'Closed Won' },
+  { id: 'd10g',firm: 'Marble Law Group',         mrr: 3100,  close: '2026-05-15', rep: 'Simon Golding',  stage: 'Closed Lost' },
+
+  // Jake Wangler
+  { id: 'd11', firm: 'Davis Family Law',         mrr: 4200,  close: '2026-06-28', rep: 'Jake Wangler',   stage: 'Proposal Sent' },
+  { id: 'd12', firm: 'Park & Kim Attorneys',     mrr: 6100,  close: '2026-07-15', rep: 'Jake Wangler',   stage: 'Qualified' },
+  { id: 'd13a',firm: 'Oakwood Legal Group',      mrr: 3500,  close: '2026-06-30', rep: 'Jake Wangler',   stage: 'Negotiation' },
+  { id: 'd13b',firm: 'Copperton Law',            mrr: 7900,  close: '2026-07-08', rep: 'Jake Wangler',   stage: 'Contract Sent' },
+  { id: 'd13c',firm: 'Prairie Justice',          mrr: 4600,  close: '2026-06-20', rep: 'Jake Wangler',   stage: 'Discovery' },
+  { id: 'd13d',firm: 'Lakeview Litigation',      mrr: 5200,  close: '2026-07-22', rep: 'Jake Wangler',   stage: 'Discovery' },
+  { id: 'd13e',firm: 'Monument Attorneys',       mrr: 8100,  close: '2026-06-18', rep: 'Jake Wangler',   stage: 'Negotiation' },
+  { id: 'd13f',firm: 'Northstar DWI Law',        mrr: 3300,  close: '2026-08-15', rep: 'Jake Wangler',   stage: 'Qualified' },
+  { id: 'd13g',firm: 'Riverbend Legal',          mrr: 5800,  close: '2026-06-05', rep: 'Jake Wangler',   stage: 'Closed Won' },
+  { id: 'd13h',firm: 'Sentinel Partners',        mrr: 4000,  close: '2026-05-25', rep: 'Jake Wangler',   stage: 'Closed Lost' },
+
+  // Brandon Steed
+  { id: 'd14', firm: 'Nelson DUI Defense',       mrr: 5800,  close: '2026-06-19', rep: 'Brandon Steed',  stage: 'Contract Sent' },
+  { id: 'd15', firm: 'Fitzgerald & Cole',        mrr: 4900,  close: '2026-07-08', rep: 'Brandon Steed',  stage: 'Proposal Sent' },
+  { id: 'd15a',firm: 'Ramirez Employment Law',   mrr: 3200,  close: '2026-06-27', rep: 'Brandon Steed',  stage: 'Qualified' },
+  { id: 'd15b',firm: 'Cascade Trial Lawyers',    mrr: 6400,  close: '2026-07-14', rep: 'Brandon Steed',  stage: 'Negotiation' },
+  { id: 'd15c',firm: 'Ember Law Office',         mrr: 4700,  close: '2026-06-22', rep: 'Brandon Steed',  stage: 'Discovery' },
+  { id: 'd15d',firm: 'Frontier Defense Group',   mrr: 8600,  close: '2026-07-01', rep: 'Brandon Steed',  stage: 'Negotiation' },
+  { id: 'd15e',firm: 'Vanguard Legal',           mrr: 3500,  close: '2026-07-25', rep: 'Brandon Steed',  stage: 'Discovery' },
+  { id: 'd15f',firm: 'Sterling Heights Law',     mrr: 5100,  close: '2026-08-02', rep: 'Brandon Steed',  stage: 'Qualified' },
+  { id: 'd15g',firm: 'Anchor Attorneys',         mrr: 7200,  close: '2026-06-10', rep: 'Brandon Steed',  stage: 'Closed Won' },
+  { id: 'd15h',firm: 'Tidewater Law Firm',       mrr: 2900,  close: '2026-05-18', rep: 'Brandon Steed',  stage: 'Closed Lost' },
+
+  // Jacob Man
+  { id: 'd16', firm: 'Whitmore Trial Lawyers',   mrr: 7800,  close: '2026-06-14', rep: 'Jacob Man',      stage: 'Negotiation' },
+  { id: 'd17', firm: 'Ashford Estate Planning',  mrr: 2900,  close: '2026-07-12', rep: 'Jacob Man',      stage: 'Discovery' },
+  { id: 'd18', firm: 'Callahan & Ross',          mrr: 5300,  close: '2026-06-23', rep: 'Jacob Man',      stage: 'Proposal Sent' },
+  { id: 'd18a',firm: 'Horizon Family Law',       mrr: 6200,  close: '2026-07-02', rep: 'Jacob Man',      stage: 'Qualified' },
+  { id: 'd18b',firm: 'Blueridge Litigation',     mrr: 4100,  close: '2026-06-30', rep: 'Jacob Man',      stage: 'Contract Sent' },
+  { id: 'd18c',firm: 'Silverleaf Law',           mrr: 3700,  close: '2026-07-18', rep: 'Jacob Man',      stage: 'Discovery' },
+  { id: 'd18d',firm: 'Granite Defense',          mrr: 8900,  close: '2026-06-20', rep: 'Jacob Man',      stage: 'Negotiation' },
+  { id: 'd18e',firm: 'Cypress Legal Partners',   mrr: 5600,  close: '2026-08-08', rep: 'Jacob Man',      stage: 'Qualified' },
+  { id: 'd18f',firm: 'Evergreen Attorneys',      mrr: 7100,  close: '2026-06-06', rep: 'Jacob Man',      stage: 'Closed Won' },
+  { id: 'd18g',firm: 'Cobalt Law Group',         mrr: 3400,  close: '2026-05-22', rep: 'Jacob Man',      stage: 'Closed Lost' },
+];
+
+// Active pipeline = deals selected by user
+var DEALS = [];
+
+var DEFAULT_TAGS = [
+  { id: 'stalled',     label: 'Stalled' },
+  { id: 'need-help',   label: 'Need Help' },
+  { id: 'sure-thing',  label: 'Sure Thing' },
+  { id: 'competitive', label: 'Competitive' },
+  { id: 'hot',         label: 'Hot' },
+  { id: 'closing',     label: 'Closing Soon' },
+];
+
+var TAGS = [];
+var customTags = [];
+
+// ── State ──
+var boardState = {};
+var dealNotes = {};
+var noteBoxes = [];
+var selectedDealIds = {}; // dealId → true (chosen in picker)
+var canvasOffset = { x: 0, y: 0 };
+var zoom = 1;
+var isPanning = false;
+var panStart = { x: 0, y: 0 };
+var panOffsetStart = { x: 0, y: 0 };
+var activeDealForNote = null;
+
+// ── Init ──
+function init() {
+  loadBoard();
+  TAGS = DEFAULT_TAGS.concat(customTags);
+  DEALS = ALL_DEALS.filter(function(d) { return selectedDealIds[d.id]; });
+
+  // First visit — show picker
+  if (DEALS.length === 0 && Object.keys(boardState).length === 0) {
+    openPicker();
+  }
+
+  renderSidebar();
+  renderCanvas();
+  setupCanvasPan();
+  setupZoom();
+}
+
+// ── Pipeline Picker ──
+function openPicker() {
+  document.getElementById('picker-overlay').classList.remove('hidden');
+  renderPicker();
+}
+
+function renderPicker() {
+  var body = document.getElementById('picker-body');
+  body.innerHTML = '';
+  var reps = Object.keys(REP_COLORS);
+
+  reps.forEach(function(rep) {
+    var repDeals = ALL_DEALS.filter(function(d) { return d.rep === rep; });
+    var div = document.createElement('div');
+    div.className = 'picker-rep';
+
+    var header = document.createElement('div');
+    header.className = 'picker-rep-header';
+    header.innerHTML = '<span class="dot" style="background:' + REP_COLORS[rep] + '"></span>' + rep;
+
+    var selectAll = document.createElement('span');
+    selectAll.className = 'select-all';
+    var allSelected = repDeals.every(function(d) { return selectedDealIds[d.id]; });
+    selectAll.textContent = allSelected ? 'Deselect All' : 'Select All';
+    selectAll.addEventListener('click', function() {
+      var shouldSelect = !repDeals.every(function(d) { return selectedDealIds[d.id]; });
+      repDeals.forEach(function(d) {
+        if (shouldSelect) selectedDealIds[d.id] = true;
+        else delete selectedDealIds[d.id];
+      });
+      renderPicker();
+    });
+    header.appendChild(selectAll);
+    div.appendChild(header);
+
+    // Group by stage
+    var stageOrder = ['Contract Sent', 'Negotiation', 'Proposal Sent', 'Qualified', 'Discovery', 'Closed Won', 'Closed Lost'];
+    stageOrder.forEach(function(stage) {
+      var stageDeals = repDeals.filter(function(d) { return d.stage === stage; });
+      if (stageDeals.length === 0) return;
+
+      var stageDiv = document.createElement('div');
+      stageDiv.className = 'picker-stage';
+
+      var label = document.createElement('div');
+      label.className = 'picker-stage-label';
+      var sc = STAGE_COLORS[stage] || { bg: '#f0f0f0', text: '#555' };
+      label.innerHTML = '<span style="display:inline-block;padding:1px 8px;border-radius:4px;background:' + sc.bg + ';color:' + sc.text + '">' + stage + '</span>';
+      stageDiv.appendChild(label);
+
+      var grid = document.createElement('div');
+      grid.className = 'picker-deals';
+
+      stageDeals.forEach(function(deal) {
+        var card = document.createElement('div');
+        card.className = 'picker-deal' + (selectedDealIds[deal.id] ? ' selected' : '');
+
+        var closeDate = new Date(deal.close + 'T00:00:00');
+        var dateStr = (closeDate.getMonth() + 1) + '/' + closeDate.getDate();
+
+        card.innerHTML =
+          '<div class="check">' + (selectedDealIds[deal.id] ? '&#10003;' : '') + '</div>' +
+          '<div class="deal-info">' +
+            '<div class="deal-firm">' + deal.firm + '</div>' +
+            '<div class="deal-meta"><span class="deal-mrr">$' + deal.mrr.toLocaleString() + '/mo</span><span>' + dateStr + '</span></div>' +
+          '</div>';
+
+        card.addEventListener('click', function() {
+          if (selectedDealIds[deal.id]) delete selectedDealIds[deal.id];
+          else selectedDealIds[deal.id] = true;
+          renderPicker();
+        });
+
+        grid.appendChild(card);
+      });
+
+      stageDiv.appendChild(grid);
+      div.appendChild(stageDiv);
+    });
+
+    body.appendChild(div);
+  });
+
+  updatePickerCount();
+}
+
+function updatePickerCount() {
+  var count = Object.keys(selectedDealIds).length;
+  document.getElementById('picker-count').textContent = count + ' selected';
+}
+
+function confirmPicker() {
+  document.getElementById('picker-overlay').classList.add('hidden');
+  DEALS = ALL_DEALS.filter(function(d) { return selectedDealIds[d.id]; });
+
+  // Remove board state for deals no longer selected
+  Object.keys(boardState).forEach(function(id) {
+    if (id.charAt(0) === 'd' && !selectedDealIds[id]) {
+      delete boardState[id];
+    }
+  });
+
+  renderSidebar();
+  renderCanvas();
+}
+
+// ── Sidebar ──
+function renderSidebar() {
+  TAGS = DEFAULT_TAGS.concat(customTags);
+
+  var tagTray = document.getElementById('tag-tray');
+  tagTray.innerHTML = '';
+  TAGS.forEach(function(tag) {
+    if (boardState[tag.id]) return;
+    var el = document.createElement('div');
+    el.className = 'tag-card';
+    el.setAttribute('data-tag', tag.id);
+    el.setAttribute('data-id', tag.id);
+    el.textContent = tag.label;
+    el.draggable = true;
+    el.addEventListener('dragstart', onDragStart);
+    if (tag.id.indexOf('custom-') === 0) {
+      var del = document.createElement('button');
+      del.className = 'tag-delete custom-tag';
+      del.innerHTML = '&times;';
+      del.addEventListener('click', function(e) { e.stopPropagation(); deleteCustomTag(tag.id); });
+      el.appendChild(del);
+    }
+    tagTray.appendChild(el);
+  });
+
+  var repList = document.getElementById('rep-list');
+  repList.innerHTML = '';
+  var reps = Object.keys(REP_COLORS);
+  reps.forEach(function(rep) {
+    var repDeals = DEALS.filter(function(d) { return d.rep === rep && !boardState[d.id]; });
+    if (repDeals.length === 0) return;
+
+    var group = document.createElement('div');
+    group.className = 'rep-group';
+
+    var header = document.createElement('div');
+    header.className = 'rep-name';
+    header.innerHTML = rep + ' <span class="count">' + repDeals.length + ' deals</span>';
+    header.style.borderLeft = '3px solid ' + REP_COLORS[rep];
+    group.appendChild(header);
+
+    var dealsList = document.createElement('div');
+    dealsList.className = 'rep-deals';
+    repDeals.forEach(function(deal) { dealsList.appendChild(createDealCard(deal, false)); });
+    group.appendChild(dealsList);
+    repList.appendChild(group);
+  });
+}
+
+function createDealCard(deal, onCanvas) {
+  var el = document.createElement('div');
+  el.className = 'deal-card';
+  el.setAttribute('data-id', deal.id);
+  el.draggable = true;
+
+  var closeDate = new Date(deal.close + 'T00:00:00');
+  var dateStr = (closeDate.getMonth() + 1) + '/' + closeDate.getDate();
+  var sc = STAGE_COLORS[deal.stage] || { bg: '#f0f0f0', text: '#555' };
+
+  var noteHtml = '';
+  var noteIcon = '';
+  if (dealNotes[deal.id]) {
+    noteIcon = '<span class="note-indicator" title="Has note">&#9998;</span>';
+    if (onCanvas) {
+      var escaped = dealNotes[deal.id].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      noteHtml = '<div class="deal-note">' + escaped + '</div>';
+    }
+  }
+
+  el.innerHTML =
+    '<div class="rep-dot" style="background:' + REP_COLORS[deal.rep] + '"></div>' +
+    noteIcon +
+    '<div class="firm">' + deal.firm + '</div>' +
+    '<div class="meta">' +
+      '<span class="mrr">$' + deal.mrr.toLocaleString() + '/mo</span>' +
+      '<span>' + dateStr + '</span>' +
+      '<span class="stage-badge" style="background:' + sc.bg + ';color:' + sc.text + '">' + deal.stage + '</span>' +
+      (onCanvas ? '<span style="color:' + REP_COLORS[deal.rep] + '">' + deal.rep.split(' ')[0] + '</span>' : '') +
+    '</div>' +
+    noteHtml;
+
+  el.addEventListener('dragstart', onDragStart);
+  el.addEventListener('contextmenu', function(e) { e.preventDefault(); showNoteModal(deal.id); });
+  return el;
+}
+
+function createTagOnCanvas(tag) {
+  var el = document.createElement('div');
+  el.className = 'tag-card';
+  el.setAttribute('data-tag', tag.id);
+  el.setAttribute('data-id', tag.id);
+  el.textContent = tag.label;
+  el.draggable = true;
+  el.addEventListener('dragstart', onDragStart);
+  if (tag.id.indexOf('custom-') === 0) {
+    var del = document.createElement('button');
+    del.className = 'tag-delete custom-tag';
+    del.innerHTML = '&times;';
+    del.addEventListener('click', function(e) { e.stopPropagation(); deleteCustomTag(tag.id); });
+    el.appendChild(del);
+  }
+  return el;
+}
+
+function createNoteBoxEl(note) {
+  var el = document.createElement('div');
+  el.className = 'note-box';
+  el.setAttribute('data-id', note.id);
+  el.innerHTML =
+    '<div class="note-header"><span>Note</span><button class="note-delete" data-note-id="' + note.id + '">&times;</button></div>' +
+    '<div class="note-text" contenteditable="true">' + (note.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+  el.style.left = note.x + 'px';
+  el.style.top = note.y + 'px';
+  var textEl = el.querySelector('.note-text');
+  textEl.addEventListener('blur', function() {
+    var nb = noteBoxes.find(function(n) { return n.id === note.id; });
+    if (nb) nb.text = textEl.textContent;
+  });
+  textEl.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  el.querySelector('.note-delete').addEventListener('click', function(e) {
+    e.stopPropagation();
+    noteBoxes = noteBoxes.filter(function(n) { return n.id !== note.id; });
+    renderCanvas();
+  });
+  return el;
+}
+
+function renderCanvas() {
+  var canvas = document.getElementById('canvas');
+  canvas.querySelectorAll('.deal-card, .tag-card, .note-box').forEach(function(el) { el.remove(); });
+
+  Object.keys(boardState).forEach(function(id) {
+    var pos = boardState[id];
+    var el;
+    var deal = DEALS.find(function(d) { return d.id === id; });
+    if (deal) {
+      el = createDealCard(deal, true);
+    } else {
+      var tag = TAGS.find(function(t) { return t.id === id; });
+      if (tag) el = createTagOnCanvas(tag);
+    }
+    if (el) {
+      el.style.left = pos.x + 'px';
+      el.style.top = pos.y + 'px';
+      canvas.appendChild(el);
+    }
+  });
+
+  noteBoxes.forEach(function(note) { canvas.appendChild(createNoteBoxEl(note)); });
+  applyTransform();
+}
+
+// ── Custom identifiers ──
+function showAddTagModal() {
+  document.getElementById('modal-add-tag').classList.remove('hidden');
+  var inp = document.getElementById('new-tag-name');
+  inp.value = '';
+  inp.focus();
+}
+
+function addCustomTag() {
+  var name = document.getElementById('new-tag-name').value.trim();
+  if (!name) return;
+  customTags.push({ id: 'custom-' + Date.now(), label: name });
+  closeModal('modal-add-tag');
+  renderSidebar();
+}
+
+function deleteCustomTag(id) {
+  customTags = customTags.filter(function(t) { return t.id !== id; });
+  delete boardState[id];
+  TAGS = DEFAULT_TAGS.concat(customTags);
+  renderSidebar();
+  renderCanvas();
+}
+
+// ── Deal notes ──
+function showNoteModal(dealId) {
+  activeDealForNote = dealId;
+  var deal = ALL_DEALS.find(function(d) { return d.id === dealId; });
+  document.getElementById('note-modal-title').textContent = 'Note — ' + (deal ? deal.firm : '');
+  document.getElementById('deal-note-text').value = dealNotes[dealId] || '';
+  document.getElementById('modal-deal-note').classList.remove('hidden');
+  document.getElementById('deal-note-text').focus();
+}
+
+function saveDealNote() {
+  var text = document.getElementById('deal-note-text').value.trim();
+  if (text) dealNotes[activeDealForNote] = text;
+  else delete dealNotes[activeDealForNote];
+  closeModal('modal-deal-note');
+  renderSidebar();
+  renderCanvas();
+}
+
+function removeDealNote() {
+  delete dealNotes[activeDealForNote];
+  closeModal('modal-deal-note');
+  renderSidebar();
+  renderCanvas();
+}
+
+// ── Note boxes ──
+function addNoteBox() {
+  var id = 'note-' + Date.now();
+  var wrap = document.getElementById('canvas-wrap');
+  var cx = (wrap.clientWidth / 2 - canvasOffset.x) / zoom;
+  var cy = (wrap.clientHeight / 2 - canvasOffset.y) / zoom;
+  noteBoxes.push({ id: id, text: '', x: Math.round(cx), y: Math.round(cy) });
+  renderCanvas();
+  setTimeout(function() {
+    var el = document.querySelector('[data-id="' + id + '"] .note-text');
+    if (el) el.focus();
+  }, 50);
+}
+
+// ── Modals ──
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(function(m) { m.classList.add('hidden'); });
+  }
+  if (e.key === 'Enter' && !document.getElementById('modal-add-tag').classList.contains('hidden')) {
+    addCustomTag();
+  }
+});
+
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.classList.add('hidden'); });
+});
+
+// ── Drag & Drop ──
+var dragId = null;
+
+function onDragStart(e) {
+  dragId = e.target.closest('[data-id]').getAttribute('data-id');
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  var img = document.createElement('div');
+  img.style.opacity = '0';
+  document.body.appendChild(img);
+  e.dataTransfer.setDragImage(img, 0, 0);
+  setTimeout(function() { img.remove(); }, 0);
+}
+
+function setupCanvasPan() {
+  var wrap = document.getElementById('canvas-wrap');
+  var canvas = document.getElementById('canvas');
+
+  wrap.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+
+  wrap.addEventListener('drop', function(e) {
+    e.preventDefault();
+    if (!dragId) return;
+    var rect = canvas.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / zoom - 90;
+    var y = (e.clientY - rect.top) / zoom - 20;
+    boardState[dragId] = { x: Math.round(x), y: Math.round(y) };
+    renderSidebar();
+    renderCanvas();
+    dragId = null;
+  });
+
+  canvas.addEventListener('dblclick', function(e) {
+    var card = e.target.closest('[data-id]');
+    if (!card) return;
+    var id = card.getAttribute('data-id');
+    if (id.indexOf('note-') === 0) return;
+    if (boardState[id]) { delete boardState[id]; renderSidebar(); renderCanvas(); }
+  });
+
+  wrap.addEventListener('mousedown', function(e) {
+    if (e.target.closest('.deal-card, .tag-card, .note-box')) return;
+    if (e.button === 1 || e.button === 0) {
+      isPanning = true;
+      panStart = { x: e.clientX, y: e.clientY };
+      panOffsetStart = { x: canvasOffset.x, y: canvasOffset.y };
+      wrap.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!isPanning) return;
+    canvasOffset.x = panOffsetStart.x + (e.clientX - panStart.x);
+    canvasOffset.y = panOffsetStart.y + (e.clientY - panStart.y);
+    applyTransform();
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (isPanning) { isPanning = false; document.getElementById('canvas-wrap').style.cursor = 'default'; }
+  });
+
+  var activeDrag = null;
+  var dragStartPos = null;
+
+  canvas.addEventListener('mousedown', function(e) {
+    if (e.target.getAttribute('contenteditable') === 'true') return;
+    var card = e.target.closest('[data-id]');
+    if (!card) return;
+    var id = card.getAttribute('data-id');
+    var isOnCanvas = boardState[id] || id.indexOf('note-') === 0;
+    if (!isOnCanvas) return;
+    e.stopPropagation();
+    e.preventDefault();
+    activeDrag = card;
+    var rect = card.getBoundingClientRect();
+    dragStartPos = { offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    card.style.zIndex = 999;
+    card.classList.add('dragging');
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!activeDrag) return;
+    var canvasRect = canvas.getBoundingClientRect();
+    var x = (e.clientX - canvasRect.left) / zoom - dragStartPos.offsetX / zoom;
+    var y = (e.clientY - canvasRect.top) / zoom - dragStartPos.offsetY / zoom;
+    activeDrag.style.left = Math.round(x) + 'px';
+    activeDrag.style.top = Math.round(y) + 'px';
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (!activeDrag) return;
+    var id = activeDrag.getAttribute('data-id');
+    var newX = parseInt(activeDrag.style.left);
+    var newY = parseInt(activeDrag.style.top);
+    if (id.indexOf('note-') === 0) {
+      var nb = noteBoxes.find(function(n) { return n.id === id; });
+      if (nb) { nb.x = newX; nb.y = newY; }
+    } else {
+      boardState[id] = { x: newX, y: newY };
+    }
+    activeDrag.style.zIndex = 10;
+    activeDrag.classList.remove('dragging');
+    activeDrag = null;
+  });
+}
+
+function setupZoom() {
+  var wrap = document.getElementById('canvas-wrap');
+  wrap.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? -0.05 : 0.05;
+    zoom = Math.min(2, Math.max(0.3, zoom + delta));
+    applyTransform();
+    document.getElementById('zoom-indicator').textContent = Math.round(zoom * 100) + '%';
+  }, { passive: false });
+}
+
+function applyTransform() {
+  var canvas = document.getElementById('canvas');
+  canvas.style.transform = 'translate(' + canvasOffset.x + 'px, ' + canvasOffset.y + 'px) scale(' + zoom + ')';
+  canvas.style.transformOrigin = '0 0';
+}
+
+// ── Persistence ──
+function saveBoard() {
+  localStorage.setItem('deal-board-state', JSON.stringify(boardState));
+  localStorage.setItem('deal-board-offset', JSON.stringify(canvasOffset));
+  localStorage.setItem('deal-board-zoom', zoom);
+  localStorage.setItem('deal-board-custom-tags', JSON.stringify(customTags));
+  localStorage.setItem('deal-board-notes', JSON.stringify(dealNotes));
+  localStorage.setItem('deal-board-noteboxes', JSON.stringify(noteBoxes));
+  localStorage.setItem('deal-board-selected', JSON.stringify(selectedDealIds));
+  alert('Board layout saved.');
+}
+
+function loadBoard() {
+  try {
+    var saved = localStorage.getItem('deal-board-state');
+    if (saved) boardState = JSON.parse(saved);
+    var offset = localStorage.getItem('deal-board-offset');
+    if (offset) canvasOffset = JSON.parse(offset);
+    var z = localStorage.getItem('deal-board-zoom');
+    if (z) zoom = parseFloat(z);
+    var ct = localStorage.getItem('deal-board-custom-tags');
+    if (ct) customTags = JSON.parse(ct);
+    var dn = localStorage.getItem('deal-board-notes');
+    if (dn) dealNotes = JSON.parse(dn);
+    var nb = localStorage.getItem('deal-board-noteboxes');
+    if (nb) noteBoxes = JSON.parse(nb);
+    var sel = localStorage.getItem('deal-board-selected');
+    if (sel) selectedDealIds = JSON.parse(sel);
+  } catch (e) { /* ignore */ }
+}
+
+function resetBoard() {
+  if (!confirm('Reset the entire board? All cards return to the sidebar and pipeline selections are cleared.')) return;
+  boardState = {};
+  dealNotes = {};
+  noteBoxes = [];
+  selectedDealIds = {};
+  DEALS = [];
+  canvasOffset = { x: 0, y: 0 };
+  zoom = 1;
+  localStorage.removeItem('deal-board-state');
+  localStorage.removeItem('deal-board-offset');
+  localStorage.removeItem('deal-board-zoom');
+  localStorage.removeItem('deal-board-custom-tags');
+  localStorage.removeItem('deal-board-notes');
+  localStorage.removeItem('deal-board-noteboxes');
+  localStorage.removeItem('deal-board-selected');
+  renderSidebar();
+  renderCanvas();
+  document.getElementById('zoom-indicator').textContent = '100%';
+  openPicker();
+}
+
+// ── Go ──
+init();
+</script>
+</body>
+</html>

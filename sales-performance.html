@@ -155,6 +155,11 @@
             <button class="tab-btn active" data-tab="sales">Sales</button>
             <button class="tab-btn" data-tab="marketing">Marketing</button>
         </div>
+        <div id="view-mode-nav" class="tabs" style="margin-bottom:0;">
+            <button class="tab-btn view-btn active" data-view="monthly">Monthly</button>
+            <button class="tab-btn view-btn" data-view="quarterly">Quarterly</button>
+            <button class="tab-btn view-btn" data-view="yearly">Yearly</button>
+        </div>
         <div id="month-nav" class="tabs" style="margin-bottom:0;"></div>
     </div>
 
@@ -296,28 +301,133 @@
     var allMonthCols = [];
     var selectedMonthIdx = -1;
     var salesTable = null, salesPipelineTable = null, mktTable = null;
+    var viewMode = 'monthly'; // 'monthly' | 'quarterly' | 'yearly'
+    var selectedPeriodIdx = -1; // index into the current period list
+    var currentPeriods = []; // [{label, monthIndices:[]}]
 
-    function selectMonth(idx) {
-        selectedMonthIdx = idx;
-        // Update button styles
+    // Quarter mapping: month label -> Q1-Q4
+    var MONTH_TO_Q = {};
+    ['jan','feb','mar'].forEach(function(m) { MONTH_TO_Q[m] = 'Q1'; });
+    ['apr','may','jun'].forEach(function(m) { MONTH_TO_Q[m] = 'Q2'; });
+    ['jul','aug','sep'].forEach(function(m) { MONTH_TO_Q[m] = 'Q3'; });
+    ['oct','nov','dec'].forEach(function(m) { MONTH_TO_Q[m] = 'Q4'; });
+
+    function getQuarter(monthLabel) {
+        var prefix = monthLabel.toLowerCase().slice(0, 3);
+        return MONTH_TO_Q[prefix] || 'Q1';
+    }
+
+    function buildPeriods() {
+        if (viewMode === 'monthly') {
+            currentPeriods = allMonthCols.map(function(m, i) {
+                return { label: m.label, monthIndices: [i] };
+            });
+        } else if (viewMode === 'quarterly') {
+            var qMap = {};
+            allMonthCols.forEach(function(m, i) {
+                var q = getQuarter(m.label);
+                if (!qMap[q]) qMap[q] = { label: q, monthIndices: [] };
+                qMap[q].monthIndices.push(i);
+            });
+            currentPeriods = ['Q1','Q2','Q3','Q4'].filter(function(q) { return qMap[q]; }).map(function(q) { return qMap[q]; });
+        } else { // yearly
+            currentPeriods = [{ label: 'YTD', monthIndices: allMonthCols.map(function(_, i) { return i; }) }];
+        }
+        // Select latest period with data
+        selectedPeriodIdx = currentPeriods.length - 1;
+    }
+
+    function selectPeriod(idx) {
+        selectedPeriodIdx = idx;
         document.querySelectorAll('.month-btn').forEach(function(b, i) {
             b.classList.toggle('active', i === idx);
         });
+        // For monthly mode, keep selectedMonthIdx in sync
+        if (viewMode === 'monthly') selectedMonthIdx = idx;
         if (salesTable) renderSales(salesTable, salesPipelineTable);
         if (mktTable) renderMarketing(mktTable);
     }
+    window.selectPeriod = selectPeriod;
+
+    function selectMonth(idx) { selectPeriod(idx); }
     window.selectMonth = selectMonth;
 
-    function buildMonthNav() {
+    function setViewMode(mode) {
+        viewMode = mode;
+        document.querySelectorAll('.view-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.view === mode);
+        });
+        buildPeriods();
+        buildPeriodNav();
+        if (salesTable) renderSales(salesTable, salesPipelineTable);
+        if (mktTable) renderMarketing(mktTable);
+    }
+
+    // Wire up view mode buttons
+    document.querySelectorAll('.view-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { setViewMode(btn.dataset.view); });
+    });
+
+    function buildPeriodNav() {
         var nav = document.getElementById('month-nav');
         nav.innerHTML = '';
-        allMonthCols.forEach(function(m, i) {
+        if (viewMode === 'yearly') {
+            nav.style.display = 'none';
+            return;
+        }
+        nav.style.display = '';
+        currentPeriods.forEach(function(p, i) {
             var btn = document.createElement('button');
-            btn.className = 'tab-btn month-btn' + (i === selectedMonthIdx ? ' active' : '');
-            btn.textContent = m.label;
-            btn.onclick = function() { selectMonth(i); };
+            btn.className = 'tab-btn month-btn' + (i === selectedPeriodIdx ? ' active' : '');
+            btn.textContent = p.label;
+            btn.onclick = function() { selectPeriod(i); };
             nav.appendChild(btn);
         });
+    }
+
+    function buildMonthNav() { buildPeriodNav(); }
+
+    // Aggregation helpers: given a row, month columns, and a list of month indices,
+    // return the aggregated value. Mode: 'sum' (default), 'avg', 'latest' (last non-null).
+    function aggregateValue(row, monthCols, monthIndices, mode) {
+        if (!row || !monthIndices || monthIndices.length === 0) return null;
+        mode = mode || 'sum';
+        var vals = [];
+        for (var i = 0; i < monthIndices.length; i++) {
+            var v = gv(row, monthCols[monthIndices[i]].idx);
+            if (v != null) vals.push(v);
+        }
+        if (vals.length === 0) return null;
+        if (mode === 'latest') return vals[vals.length - 1];
+        if (mode === 'avg') return vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+        return vals.reduce(function(a, b) { return a + b; }, 0); // sum
+    }
+
+    // Determine aggregation mode from metric name
+    function aggMode(metricName) {
+        if (!metricName) return 'sum';
+        var lower = metricName.toLowerCase();
+        // Rate/percentage metrics -> average
+        if (lower.indexOf('rate') !== -1 || lower.indexOf('consumption') !== -1 || lower.indexOf('average') !== -1 || lower.indexOf('avg') !== -1) return 'avg';
+        // Point-in-time / cumulative metrics -> latest
+        if (lower.indexOf('followers') !== -1 || lower.indexOf('subscribers') !== -1 || lower.indexOf('total social') !== -1 || lower.indexOf('cumulative') !== -1 || lower.indexOf('pipeline') !== -1 || lower.indexOf('arr') !== -1 && lower.indexOf('closed') === -1) return 'latest';
+        return 'sum';
+    }
+
+    // Get current and previous period indices
+    function curPeriodIndices() {
+        return currentPeriods[selectedPeriodIdx] ? currentPeriods[selectedPeriodIdx].monthIndices : [];
+    }
+    function prevPeriodIndices() {
+        var pi = selectedPeriodIdx - 1;
+        return pi >= 0 && currentPeriods[pi] ? currentPeriods[pi].monthIndices : [];
+    }
+    function curPeriodLabel() {
+        return currentPeriods[selectedPeriodIdx] ? currentPeriods[selectedPeriodIdx].label : '';
+    }
+    function prevPeriodLabel() {
+        var pi = selectedPeriodIdx - 1;
+        return pi >= 0 && currentPeriods[pi] ? currentPeriods[pi].label : '';
     }
 
     Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchSheet(SALES_SUMMARY_GID, 'A20:C40')]).then(function(results) {
@@ -363,30 +473,53 @@
                 if (testRow && gv(testRow, monthCols[mi].idx)) { latestWithData = mi; break; }
             }
             selectedMonthIdx = latestWithData;
-            buildMonthNav();
+            buildPeriods();
+            buildPeriodNav();
         }
 
-        var curIdx = selectedMonthIdx;
-        var lastCol = monthCols[curIdx] ? monthCols[curIdx].idx : 1;
-        var prevCol = curIdx > 0 ? monthCols[curIdx - 1].idx : null;
-        var prevLabel = curIdx > 0 ? monthCols[curIdx - 1].label : '';
+        var curIdx = viewMode === 'monthly' ? selectedMonthIdx : (selectedPeriodIdx >= 0 ? selectedPeriodIdx : 0);
+        // For monthly mode, keep old behavior
+        var lastCol = monthCols[selectedMonthIdx] ? monthCols[selectedMonthIdx].idx : 1;
+        var prevLabel = prevPeriodLabel();
 
         // Update subtitle
-        if (monthLabels.length > 0) {
-            document.getElementById('dash-subtitle').textContent = monthCols[curIdx].label + ' 2026 \u00B7 Rankings.io';
-        }
+        var subtitleLabel = curPeriodLabel();
+        document.getElementById('dash-subtitle').textContent = subtitleLabel + ' 2026 \u00B7 Rankings.io';
 
-        function lastVal(key) { var r = findRow(rows, key); return r ? (gv(r, lastCol) || 0) : 0; }
-        function prevVal(key) { if (!prevCol) return 0; var r = findRow(rows, key); return r ? (gv(r, prevCol) || 0) : 0; }
-        // Raw variants: null = cell not filled in yet (distinct from a real 0)
-        function lastValRaw(key) { var r = findRow(rows, key); return r ? gv(r, lastCol) : null; }
-        function prevValRaw(key) { if (!prevCol) return null; var r = findRow(rows, key); return r ? gv(r, prevCol) : null; }
+        // Aggregated value getters
+        function lastVal(key) {
+            var r = findRow(rows, key);
+            var mode = aggMode(key);
+            var v = aggregateValue(r, monthCols, curPeriodIndices(), mode);
+            return v || 0;
+        }
+        function prevVal(key) {
+            var pi = prevPeriodIndices();
+            if (pi.length === 0) return 0;
+            var r = findRow(rows, key);
+            var mode = aggMode(key);
+            var v = aggregateValue(r, monthCols, pi, mode);
+            return v || 0;
+        }
+        function lastValRaw(key) {
+            var r = findRow(rows, key);
+            return aggregateValue(r, monthCols, curPeriodIndices(), aggMode(key));
+        }
+        function prevValRaw(key) {
+            var pi = prevPeriodIndices();
+            if (pi.length === 0) return null;
+            var r = findRow(rows, key);
+            return aggregateValue(r, monthCols, pi, aggMode(key));
+        }
         function ytdSum(key) {
             var r = findRow(rows, key);
             if (!r) return 0;
-            var sum = 0;
-            for (var i = 0; i <= curIdx; i++) { sum += (gv(r, monthCols[i].idx) || 0); }
-            return sum;
+            var allIdx = allMonthCols.map(function(_, i) { return i; });
+            var lastPeriodEnd = curPeriodIndices();
+            var endIdx = lastPeriodEnd.length ? lastPeriodEnd[lastPeriodEnd.length - 1] : 0;
+            var ytdIdx = [];
+            for (var i = 0; i <= endIdx; i++) ytdIdx.push(i);
+            return aggregateValue(r, monthCols, ytdIdx, 'sum') || 0;
         }
 
         var arrLast = lastVal('Total ARR'), arrPrev = prevVal('Total ARR');
@@ -408,8 +541,8 @@
             ICONS.trending, fmtPctVal(wrPrev));
         html += '</div>';
 
-        // Key Metrics Detail table — selected month only
-        var curMonthLabel = monthCols[curIdx].label;
+        // Key Metrics Detail table
+        var curMonthLabel = curPeriodLabel();
         html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th><th>' + curMonthLabel + '</th>';
         if (prevLabel) html += '<th>' + prevLabel + '</th>';
         html += '<th>Change</th></tr></thead><tbody>';
@@ -422,8 +555,9 @@
         kpiRows.forEach(function(k) {
             var r = findRow(rows, k[0]);
             if (!r) return;
-            var curVal = gv(r, lastCol);
-            var prvVal = prevCol ? gv(r, prevCol) : null;
+            var mode = aggMode(k[0]);
+            var curVal = aggregateValue(r, monthCols, curPeriodIndices(), mode);
+            var prvVal = aggregateValue(r, monthCols, prevPeriodIndices(), mode);
             var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal, !!k[2]) : { text: '\u2014', cls: '' };
             function fmtKpi(v) {
                 if (v == null) return '\u2014';
@@ -452,9 +586,10 @@
         outRows.forEach(function(r) {
             var metric = gv(r, 0);
             if (!metric || !metric.trim()) return;
-            var curVal = gv(r, lastCol);
-            var prvVal = prevCol ? gv(r, prevCol) : null;
-            var isMoney = /(^|[^a-z])arr([^a-z]|$)/i.test(metric); // "ARR" as own word — don't match "Carry Over"
+            var mode = aggMode(metric);
+            var curVal = aggregateValue(r, monthCols, curPeriodIndices(), mode);
+            var prvVal = aggregateValue(r, monthCols, prevPeriodIndices(), mode);
+            var isMoney = /(^|[^a-z])arr([^a-z]|$)/i.test(metric);
             var ch = (curVal != null && prvVal != null) ? pctChange(prvVal, curVal) : { text: '\u2014', cls: '' };
             var fmt = function(v) { return v == null ? '\u2014' : (isMoney ? fmtMoney(v) : fmtNum(v)); };
             html += '<tr><td>' + metric.trim() + '</td><td class="mono">' + fmt(curVal) + '</td>';
@@ -479,7 +614,7 @@
             var repData = [];
             repRows.forEach(function(r) {
                 repNames.push(gv(r, 0) || '');
-                repData.push(gv(r, lastCol) || 0);
+                repData.push(aggregateValue(r, monthCols, curPeriodIndices(), 'sum') || 0);
             });
             var barLabelPlugin = {
                 id: 'barLabels',
@@ -521,7 +656,7 @@
                 if (name.toLowerCase().indexOf('closed won') !== -1) return;
                 if (name.toLowerCase().indexOf('avg daily') !== -1) return;
                 outLabels.push(name);
-                outData.push(gv(r, lastCol) || 0);
+                outData.push(aggregateValue(r, monthCols, curPeriodIndices(), aggMode(name)) || 0);
             });
             new Chart(document.getElementById('chart-outbound'), {
                 type: 'bar',
@@ -688,33 +823,71 @@
             ];
         }
         var mktMonthLabels = mktMonths.map(function(m) { return m.label; });
-        // Use selected month index (mapped to mktMonths)
+        // Map period indices from allMonthCols to mktMonths indices
         var mktCurIdx = Math.min(selectedMonthIdx >= 0 ? selectedMonthIdx : mktMonths.length - 1, mktMonths.length - 1);
         var mktLast = mktMonths[mktCurIdx].idx;
         var mktPrev = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].idx : null;
-        var mktPrevLabel = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].label : '';
-        // Notes column is after months
+        var mktPrevLabel = prevPeriodLabel();
         var notesCol = mktMonths[mktMonths.length - 1].idx + 1;
 
+        // Build mkt period indices (map allMonthCols indices to mktMonths indices)
+        function mapToMktIndices(monthIndices) {
+            var mapped = [];
+            monthIndices.forEach(function(mi) {
+                var idx = Math.min(mi, mktMonths.length - 1);
+                if (mapped.indexOf(idx) === -1) mapped.push(idx);
+            });
+            return mapped;
+        }
+        var mktCurPeriod = mapToMktIndices(curPeriodIndices());
+        var mktPrevPeriod = mapToMktIndices(prevPeriodIndices());
+
         function mktRow(label) { return findRow(rows, label, 1); }
-        function mktLatest(label) { var r = mktRow(label); return r ? (gv(r, mktLast) || 0) : 0; }
-        function mktPrevious(label) { var r = mktRow(label); return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
+
+        function mktAgg(row, periodIndices, mode) {
+            if (!row || !periodIndices || periodIndices.length === 0) return null;
+            mode = mode || 'sum';
+            var vals = [];
+            for (var i = 0; i < periodIndices.length; i++) {
+                var v = gv(row, mktMonths[periodIndices[i]].idx);
+                if (v != null) vals.push(v);
+            }
+            if (vals.length === 0) return null;
+            if (mode === 'latest') return vals[vals.length - 1];
+            if (mode === 'avg') return vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+            return vals.reduce(function(a, b) { return a + b; }, 0);
+        }
+
+        function mktLatest(label) {
+            var r = mktRow(label);
+            return mktAgg(r, mktCurPeriod, aggMode(label)) || 0;
+        }
+        function mktPrevious(label) {
+            var r = mktRow(label);
+            return mktAgg(r, mktPrevPeriod, aggMode(label)) || 0;
+        }
         function mktYtdSum(label) {
             var r = mktRow(label);
             if (!r) return 0;
-            var sum = 0;
-            for (var i = 0; i <= mktCurIdx; i++) { sum += (gv(r, mktMonths[i].idx) || 0); }
-            return sum;
+            var lastIdx = mktCurPeriod.length ? mktCurPeriod[mktCurPeriod.length - 1] : 0;
+            var ytdIdx = [];
+            for (var i = 0; i <= lastIdx; i++) ytdIdx.push(i);
+            return mktAgg(r, ytdIdx, 'sum') || 0;
         }
         function rowYtdSum(r) {
             if (!r) return 0;
-            var sum = 0;
-            for (var i = 0; i <= mktCurIdx; i++) { sum += (gv(r, mktMonths[i].idx) || 0); }
-            return sum;
+            var lastIdx = mktCurPeriod.length ? mktCurPeriod[mktCurPeriod.length - 1] : 0;
+            var ytdIdx = [];
+            for (var i = 0; i <= lastIdx; i++) ytdIdx.push(i);
+            return mktAgg(r, ytdIdx, 'sum') || 0;
         }
         function mktAllMonths(label) {
             var r = mktRow(label);
             return mktMonths.map(function(m) { return r ? (gv(r, m.idx) || 0) : 0; });
+        }
+        function mktSelected(label) {
+            var r = mktRow(label);
+            return mktAgg(r, mktCurPeriod, aggMode(label)) || 0;
         }
 
         // ── Top-level stat cards ──
@@ -733,7 +906,8 @@
         function mktLatestNonNull(label) {
             var r = mktRow(label);
             if (!r) return 0;
-            for (var ci = mktCurIdx; ci >= 0; ci--) {
+            var lastIdx = mktCurPeriod.length ? mktCurPeriod[mktCurPeriod.length - 1] : mktCurIdx;
+            for (var ci = lastIdx; ci >= 0; ci--) {
                 var v = gv(r, mktMonths[ci].idx);
                 if (v != null && v !== 0) return v;
             }
@@ -767,8 +941,15 @@
             if (m === 'Holds') inbHoldsRow = r;
             if (m.indexOf('Closed Won') !== -1) inbArrRow = r;
         });
-        function rowLatest(r) { return r ? (gv(r, mktLast) || 0) : 0; }
-        function rowPrev(r) { return r && mktPrev != null ? (gv(r, mktPrev) || 0) : 0; }
+        function rowLatest(r) {
+            var label = gv(r, 1) || '';
+            return mktAgg(r, mktCurPeriod, aggMode(label)) || 0;
+        }
+        function rowPrev(r) {
+            if (mktPrevPeriod.length === 0) return 0;
+            var label = gv(r, 1) || '';
+            return mktAgg(r, mktPrevPeriod, aggMode(label)) || 0;
+        }
 
         html += '<div class="stat-grid">';
         html += statCard('Inbound Sets', fmtNum(rowLatest(inbSetsRow)), pctChangeFromPrev(rowPrev(inbSetsRow), rowLatest(inbSetsRow), mktPrevLabel), ICONS.inbox, fmtNum(rowPrev(inbSetsRow)), fmtNum(rowYtdSum(inbSetsRow)));
@@ -827,8 +1008,8 @@
             { title: 'Inbound Leads', start: 'Inbound Leads', end: ['__END__'] }
         ];
 
-        var mktCurLabel = mktMonths[mktCurIdx].label;
-        var mktPrevLabelCol = mktCurIdx > 0 ? mktMonths[mktCurIdx - 1].label : '';
+        var mktCurLabel = curPeriodLabel();
+        var mktPrevLabelCol = prevPeriodLabel();
         sections.forEach(function(sec) {
             var secRows = sec.rows || mktSectionRows(rows, sec.start, sec.end);
             if (secRows.length === 0) return;
@@ -837,8 +1018,9 @@
             html += '<th>Change</th><th>Notes</th></tr></thead><tbody>';
             secRows.forEach(function(r) {
                 var metric = gv(r, 1); if (!metric || !metric.trim()) return;
-                var curVal = gv(r, mktLast);
-                var prvVal = mktPrev != null ? gv(r, mktPrev) : null;
+                var mode = aggMode(metric);
+                var curVal = mktAgg(r, mktCurPeriod, mode);
+                var prvVal = mktAgg(r, mktPrevPeriod, mode);
                 var note = gv(r, notesCol) || '';
                 var isPct = (metric.toLowerCase().indexOf('rate') !== -1 || metric.toLowerCase().indexOf('consumption') !== -1);
                 var isMoney = (metric.toLowerCase().indexOf('sold') !== -1 || metric.toLowerCase().indexOf('sponsorship') !== -1 || /(^|[^a-z])arr([^a-z]|$)/i.test(metric));
@@ -871,12 +1053,6 @@
                 { label: 'TikTok', metric: 'Rankings TikTok Followers' },
                 // X / Twitter excluded per request
             ];
-            // Get value for selected month
-            function mktSelected(label) {
-                var r = mktRow(label);
-                if (!r) return 0;
-                return gv(r, mktLast) || 0;
-            }
             var socialLabels = [], socialValues = [];
             socialPlatforms.forEach(function(sp) {
                 var val = mktSelected(sp.metric);
@@ -912,7 +1088,7 @@
             var postLabels = [], postData = [], postColors = [];
             postPlatforms.forEach(function(pp) {
                 var total = 0;
-                pp.metrics.forEach(function(metric) { var r = mktRow(metric); if (r) total += (gv(r, mktLast) || 0); });
+                pp.metrics.forEach(function(metric) { total += mktSelected(metric); });
                 postLabels.push(pp.label); postData.push(total); postColors.push(pp.color);
             });
             new Chart(document.getElementById('chart-social-posts'), {
@@ -935,7 +1111,7 @@
             var pimLabels = [], pimData = [], pimColors = [];
             pimPlatforms.forEach(function(pp) {
                 var r = mktRow(pp.metric);
-                pimLabels.push(pp.label); pimData.push(r ? (gv(r, mktLast) || 0) : 0); pimColors.push(pp.color);
+                pimLabels.push(pp.label); pimData.push(mktSelected(pp.metric)); pimColors.push(pp.color);
             });
             new Chart(document.getElementById('chart-pim-socials'), {
                 type: 'bar',
@@ -957,7 +1133,7 @@
             var chrisLabels = [], chrisData = [], chrisColors = [];
             chrisPlatforms.forEach(function(cp) {
                 var r = mktRow(cp.metric);
-                chrisLabels.push(cp.label); chrisData.push(r ? (gv(r, mktLast) || 0) : 0); chrisColors.push(cp.color);
+                chrisLabels.push(cp.label); chrisData.push(mktSelected(cp.metric)); chrisColors.push(cp.color);
             });
             new Chart(document.getElementById('chart-chris-socials'), {
                 type: 'bar',
@@ -978,7 +1154,7 @@
             var podLabels = [], podData = [], podColors = [];
             podActivityItems.forEach(function(pa) {
                 var r = mktRow(pa.metric);
-                podLabels.push(pa.label); podData.push(r ? (gv(r, mktLast) || 0) : 0); podColors.push(pa.color);
+                podLabels.push(pa.label); podData.push(mktSelected(pa.metric)); podColors.push(pa.color);
             });
             new Chart(document.getElementById('chart-podcast'), {
                 type: 'bar',
@@ -998,7 +1174,7 @@
             var podAudLabels = [], podAudData = [], podAudColors = [];
             podAudienceItems.forEach(function(pa) {
                 var r = mktRow(pa.metric);
-                podAudLabels.push(pa.label); podAudData.push(r ? (gv(r, mktLast) || 0) : 0); podAudColors.push(pa.color);
+                podAudLabels.push(pa.label); podAudData.push(mktSelected(pa.metric)); podAudColors.push(pa.color);
             });
             new Chart(document.getElementById('chart-podcast-audience'), {
                 type: 'bar',
@@ -1014,7 +1190,7 @@
             var consumptionRow = mktRow('Average Consumption');
             var consumptionVal = 0;
             if (consumptionRow) {
-                var v = gv(consumptionRow, mktLast);
+                var v = mktAgg(consumptionRow, mktCurPeriod, 'avg');
                 consumptionVal = v != null ? (v < 1 ? v * 100 : v) : 0;
             }
             new Chart(document.getElementById('chart-podcast-consumption'), {
@@ -1035,10 +1211,10 @@
             // Inbound vs MDR chart — selected month
             var inbMdrLabels = ['Inbound Sets', 'Inbound Holds', 'MDR Sets', 'MDR Holds'];
             var inbMdrData = [
-                inbSetsRow ? (gv(inbSetsRow, mktLast) || 0) : 0,
-                inbHoldsRow ? (gv(inbHoldsRow, mktLast) || 0) : 0,
-                mdrSetsRow ? (gv(mdrSetsRow, mktLast) || 0) : 0,
-                mdrHoldsRow ? (gv(mdrHoldsRow, mktLast) || 0) : 0
+                rowLatest(inbSetsRow),
+                rowLatest(inbHoldsRow),
+                rowLatest(mdrSetsRow),
+                rowLatest(mdrHoldsRow)
             ];
             var inbMdrColors = [COLORS.primary, COLORS.blue, '#eedc82', '#f97316'];
             new Chart(document.getElementById('chart-inbound-mdr'), {
@@ -1071,7 +1247,7 @@
                 if (!r && pimconFallbacks[pm.metric]) {
                     pimconFallbacks[pm.metric].some(function(fb) { r = mktRow(fb); return !!r; });
                 }
-                var val = r ? (gv(r, mktLast) || 0) : 0;
+                var val = r ? (mktAgg(r, mktCurPeriod, aggMode(pm.metric)) || 0) : 0;
                 pcLabels.push(pm.label); pcData.push(pm.divisor ? val / pm.divisor : val); pcColors.push(pm.color);
             });
             new Chart(document.getElementById('chart-pimcon'), {
@@ -1093,7 +1269,7 @@
             var nlLabels = [], nlData = [], nlColors = [];
             nlItems.forEach(function(nl) {
                 var r = mktRow(nl.metric);
-                nlLabels.push(nl.label); nlData.push(r ? (gv(r, mktLast) || 0) : 0); nlColors.push(nl.color);
+                nlLabels.push(nl.label); nlData.push(mktSelected(nl.metric)); nlColors.push(nl.color);
             });
             new Chart(document.getElementById('chart-newsletter'), {
                 type: 'bar',
@@ -1114,7 +1290,7 @@
             var ytLabels = [], ytData = [], ytColors = [];
             ytItems.forEach(function(yt) {
                 var r = mktRow(yt.metric);
-                ytLabels.push(yt.label); ytData.push(r ? (gv(r, mktLast) || 0) : 0); ytColors.push(yt.color);
+                ytLabels.push(yt.label); ytData.push(mktSelected(yt.metric)); ytColors.push(yt.color);
             });
             new Chart(document.getElementById('chart-youtube'), {
                 type: 'bar',
