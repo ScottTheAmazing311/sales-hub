@@ -410,7 +410,7 @@
         // Rate/percentage metrics -> average
         if (lower.indexOf('rate') !== -1 || lower.indexOf('consumption') !== -1 || lower.indexOf('average') !== -1 || lower.indexOf('avg') !== -1) return 'avg';
         // Point-in-time / cumulative metrics -> latest
-        if (lower.indexOf('followers') !== -1 || lower.indexOf('subscribers') !== -1 || lower.indexOf('total social') !== -1 || lower.indexOf('cumulative') !== -1 || lower.indexOf('pipeline') !== -1 || (lower.indexOf('total arr') !== -1) || (lower.indexOf('total mrr') !== -1)) return 'latest';
+        if (lower.indexOf('followers') !== -1 || lower.indexOf('subscribers') !== -1 || lower.indexOf('total social') !== -1 || lower.indexOf('cumulative') !== -1 || lower.indexOf('pipeline') !== -1) return 'latest';
         return 'sum';
     }
 
@@ -533,13 +533,12 @@
 
         // Stat cards
         html += '<div class="stat-grid">';
-        var showPrevYtd = viewMode !== 'yearly';
-        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, showPrevYtd ? fmtMoney(arrPrev) : null, null);
-        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, showPrevYtd ? fmtMoney(mrrPrev) : null, null);
-        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, showPrevYtd ? fmtNum(dealsPrev) : null, showPrevYtd ? fmtNum(ytdSum('Deals Closed')) : null);
+        html += statCard('Total ARR', fmtMoney(arrLast), pctChangeFromPrev(arrPrev, arrLast, prevLabel), ICONS.dollar, fmtMoney(arrPrev), viewMode !== 'yearly' ? fmtMoney(ytdSum('Total ARR')) : null);
+        html += statCard('Total MRR', fmtMoney(mrrLast), pctChangeFromPrev(mrrPrev, mrrLast, prevLabel), ICONS.dollar, fmtMoney(mrrPrev), viewMode !== 'yearly' ? fmtMoney(ytdSum('Total MRR')) : null);
+        html += statCard('Deals Closed', fmtNum(dealsLast), pctChangeFromPrev(dealsPrev, dealsLast, prevLabel), ICONS.target, fmtNum(dealsPrev), viewMode !== 'yearly' ? fmtNum(ytdSum('Deals Closed')) : null);
         html += statCard('Win Rate', fmtPctVal(wrLast),
             (wrLast == null || wrPrev == null) ? { text: '—', cls: '' } : pctChangeFromPrev(wrPrev, wrLast, prevLabel),
-            ICONS.trending, showPrevYtd ? fmtPctVal(wrPrev) : null);
+            ICONS.trending, fmtPctVal(wrPrev));
         html += '</div>';
 
         // Key Metrics Detail table
