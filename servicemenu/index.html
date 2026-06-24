@@ -509,6 +509,18 @@ button { cursor: pointer; font-family: inherit; }
   margin-top: 2px;
   color: var(--yellow);
 }
+.comparison-grid tbody tr.cg-category-row td {
+  background: rgba(7,55,79,0.06);
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding: 0.6rem 0.75rem 0.4rem;
+  border-bottom: 2px solid rgba(7,55,79,0.12);
+  text-align: left;
+}
 .comparison-grid tbody tr {
   border-bottom: 1px solid rgba(20,54,77,0.06);
 }
@@ -599,6 +611,16 @@ button { cursor: pointer; font-family: inherit; }
 .spec-table td { padding: 0.55rem 0; font-size: 0.82rem; vertical-align: middle; }
 .spec-table td:first-child { color: var(--dark); }
 .spec-table td:last-child { text-align: right; min-width: 110px; }
+.spec-category-row td {
+  background: rgba(7,55,79,0.05);
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy) !important;
+  padding: 0.6rem 0 0.4rem !important;
+  border-bottom: 2px solid rgba(7,55,79,0.1) !important;
+}
 .val-check { color: #5a7200; font-weight: 700; font-size: 0.8rem; }
 .val-text  { color: var(--navy); font-weight: 600; font-size: 0.78rem; }
 .val-none  { color: rgba(20,54,77,0.22); font-size: 0.9rem; }
@@ -1423,6 +1445,9 @@ const ALC_HOSTING = `
 
 // ─── TIER/SPRINT BUILDERS ─────────────────────────────────────
 function specRow(name, val) {
+  if (val === '__CATEGORY__') {
+    return `<tr class="spec-category-row"><td colspan="2">${name}</td></tr>`;
+  }
   let td;
   if (val === true)  td = `<td class="val-check">Included</td>`;
   else if (val === false) td = `<td class="val-none">—</td>`;
@@ -1832,27 +1857,33 @@ const offerings = {
   'offeropt-core-5k': {
     entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '5K/Mo — Foundation',
     html: rankTierHTML(0, 'Foundation', [
+      ['AI Search — Generative Engine Optimization (GEO)', '__CATEGORY__'],
       ['AI Citation Optimization', true],
       ['AI Entity Development &amp; Knowledge Graph', true],
       ['Reddit &amp; Community Engagement', false],
       ['AI Citation Magnet', false],
+      ['Local SEO &amp; Google Maps Dominance', '__CATEGORY__'],
       ['Google Business Profile (GBP) Management', '1 GBP'],
       ['Map Pack Ranking Optimization', true],
       ['GBP Posts, Photos &amp; Q&amp;A Management', 'Monthly'],
       ['Local Citation Building &amp; NAP Consistency', true],
       ['Share of Local Voice (SoLV) Rank Tracking', true],
       ['Local Spam Fighting', true],
+      ['Search Engine Optimization (SEO) Foundation', '__CATEGORY__'],
       ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
       ['Google AI Overviews Optimization (AIO)', true],
       ['Content Production', '3 assets/mo'],
       ['Content Refreshing', false],
       ['Link Building — High Authority Links', '5 links min.'],
+      ['Brand Authority', '__CATEGORY__'],
       ['Digital PR', false],
       ['Speaking Opportunity Acquisition', false],
       ['Podcast &amp; Media Appearances', false],
       ['Industry Award Applications / Strategy', false],
+      ['Paid Media', '__CATEGORY__'],
       ['Local Services Ads (LSA)', false],
       ['Google Ads (Pay-Per-Click)', false],
+      ['Insight &amp; Access', '__CATEGORY__'],
       ['Growth Reporting &amp; Attribution', true],
       ['AI Visibility Dashboard', false],
       ['Account Management', 'Standard'],
@@ -1861,27 +1892,33 @@ const offerings = {
   'offeropt-core-10k': {
     entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '10K/Mo — Tier 1',
     html: rankTierHTML(1, 'Tier 1', [
+      ['AI Search — Generative Engine Optimization (GEO)', '__CATEGORY__'],
       ['AI Citation Optimization', true],
       ['AI Entity Development &amp; Knowledge Graph', true],
       ['Reddit &amp; Community Engagement', false],
       ['AI Citation Magnet', false],
+      ['Local SEO &amp; Google Maps Dominance', '__CATEGORY__'],
       ['Google Business Profile (GBP) Management', 'Up to 5 GBPs'],
       ['Map Pack Ranking Optimization', true],
       ['GBP Posts, Photos &amp; Q&amp;A Management', 'Monthly'],
       ['Local Citation Building &amp; NAP Consistency', true],
       ['Share of Local Voice (SoLV) Rank Tracking', true],
       ['Local Spam Fighting', true],
+      ['Search Engine Optimization (SEO) Foundation', '__CATEGORY__'],
       ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
       ['Google AI Overviews Optimization (AIO)', true],
       ['Content Production', '6 assets/mo'],
       ['Content Refreshing', true],
       ['Link Building — High Authority Links', '10 links min.'],
+      ['Brand Authority', '__CATEGORY__'],
       ['Digital PR', 'Brand Mentions'],
       ['Speaking Opportunity Acquisition', false],
       ['Podcast &amp; Media Appearances', false],
       ['Industry Award Applications / Strategy', false],
+      ['Paid Media', '__CATEGORY__'],
       ['Local Services Ads (LSA)', true],
       ['Google Ads (Pay-Per-Click)', true],
+      ['Insight &amp; Access', '__CATEGORY__'],
       ['Growth Reporting &amp; Attribution', true],
       ['AI Visibility Dashboard', false],
       ['Account Management', 'Standard'],
@@ -1890,27 +1927,33 @@ const offerings = {
   'offeropt-core-15k': {
     entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '15K/Mo — Tier 2',
     html: rankTierHTML(2, 'Tier 2', [
+      ['AI Search — Generative Engine Optimization (GEO)', '__CATEGORY__'],
       ['AI Citation Optimization', true],
       ['AI Entity Development &amp; Knowledge Graph', true],
       ['Reddit &amp; Community Engagement', true],
       ['AI Citation Magnet', false],
+      ['Local SEO &amp; Google Maps Dominance', '__CATEGORY__'],
       ['Google Business Profile (GBP) Management', 'Up to 10 GBPs'],
       ['Map Pack Ranking Optimization', true],
       ['GBP Posts, Photos &amp; Q&amp;A Management', 'Weekly'],
       ['Local Citation Building &amp; NAP Consistency', true],
       ['Share of Local Voice (SoLV) Rank Tracking', true],
       ['Local Spam Fighting', true],
+      ['Search Engine Optimization (SEO) Foundation', '__CATEGORY__'],
       ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
       ['Google AI Overviews Optimization (AIO)', true],
       ['Content Production', '9 assets/mo'],
       ['Content Refreshing', true],
       ['Link Building — High Authority Links', '15 links min.'],
+      ['Brand Authority', '__CATEGORY__'],
       ['Digital PR', 'Local &amp; Industry Coverage'],
       ['Speaking Opportunity Acquisition', true],
       ['Podcast &amp; Media Appearances', true],
       ['Industry Award Applications / Strategy', false],
+      ['Paid Media', '__CATEGORY__'],
       ['Local Services Ads (LSA)', true],
       ['Google Ads (Pay-Per-Click)', true],
+      ['Insight &amp; Access', '__CATEGORY__'],
       ['Growth Reporting &amp; Attribution', true],
       ['AI Visibility Dashboard', true],
       ['Account Management', 'Senior Account Manager'],
@@ -1919,27 +1962,33 @@ const offerings = {
   'offeropt-core-25k': {
     entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '25K/Mo — Tier 3',
     html: rankTierHTML(3, 'Tier 3', [
+      ['AI Search — Generative Engine Optimization (GEO)', '__CATEGORY__'],
       ['AI Citation Optimization', true],
       ['AI Entity Development &amp; Knowledge Graph', true],
       ['Reddit &amp; Community Engagement', true],
       ['AI Citation Magnet', true],
+      ['Local SEO &amp; Google Maps Dominance', '__CATEGORY__'],
       ['Google Business Profile (GBP) Management', 'Up to 20 GBPs'],
       ['Map Pack Ranking Optimization', true],
       ['GBP Posts, Photos &amp; Q&amp;A Management', 'Weekly'],
       ['Local Citation Building &amp; NAP Consistency', true],
       ['Share of Local Voice (SoLV) Rank Tracking', true],
       ['Local Spam Fighting', true],
+      ['Search Engine Optimization (SEO) Foundation', '__CATEGORY__'],
       ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
       ['Google AI Overviews Optimization (AIO)', true],
       ['Content Production', '15 assets/mo'],
       ['Content Refreshing', true],
       ['Link Building — High Authority Links', '25 links min.'],
+      ['Brand Authority', '__CATEGORY__'],
       ['Digital PR', 'Editorial Features &amp; Expert Contributions'],
       ['Speaking Opportunity Acquisition', true],
       ['Podcast &amp; Media Appearances', true],
       ['Industry Award Applications / Strategy', true],
+      ['Paid Media', '__CATEGORY__'],
       ['Local Services Ads (LSA)', true],
       ['Google Ads (Pay-Per-Click)', true],
+      ['Insight &amp; Access', '__CATEGORY__'],
       ['Growth Reporting &amp; Attribution', true],
       ['AI Visibility Dashboard', true],
       ['Account Management', 'Key Account Manager'],
@@ -1948,27 +1997,33 @@ const offerings = {
   'offeropt-core-enterprise': {
     entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: 'Enterprise — Custom',
     html: rankTierHTML(4, 'Enterprise', [
+      ['AI Search — Generative Engine Optimization (GEO)', '__CATEGORY__'],
       ['AI Citation Optimization', 'Custom'],
       ['AI Entity Development &amp; Knowledge Graph', 'Custom'],
       ['Reddit &amp; Community Engagement', 'Custom'],
       ['AI Citation Magnet', 'Custom'],
+      ['Local SEO &amp; Google Maps Dominance', '__CATEGORY__'],
       ['Google Business Profile (GBP) Management', 'Custom'],
       ['Map Pack Ranking Optimization', 'Custom'],
       ['GBP Posts, Photos &amp; Q&amp;A Management', 'Custom'],
       ['Local Citation Building &amp; NAP Consistency', 'Custom'],
       ['Share of Local Voice (SoLV) Rank Tracking', 'Custom'],
       ['Local Spam Fighting', 'Custom'],
+      ['Search Engine Optimization (SEO) Foundation', '__CATEGORY__'],
       ['SEO, Practice Area Pages &amp; E-E-A-T Content', 'Custom'],
       ['Google AI Overviews Optimization (AIO)', 'Custom'],
       ['Content Production', 'Custom'],
       ['Content Refreshing', 'Custom'],
       ['Link Building — High Authority Links', 'Custom'],
+      ['Brand Authority', '__CATEGORY__'],
       ['Digital PR', 'Custom'],
       ['Speaking Opportunity Acquisition', 'Custom'],
       ['Podcast &amp; Media Appearances', 'Custom'],
       ['Industry Award Applications / Strategy', 'Custom'],
+      ['Paid Media', '__CATEGORY__'],
       ['Local Services Ads (LSA)', 'Custom'],
       ['Google Ads (Pay-Per-Click)', 'Custom'],
+      ['Insight &amp; Access', '__CATEGORY__'],
       ['Growth Reporting &amp; Attribution', 'Custom'],
       ['AI Visibility Dashboard', 'Custom'],
       ['Account Management', 'Dedicated Team'],
@@ -2738,27 +2793,33 @@ const comparisonData = {
     tilesId: 'offeropt-tiles',
     gridId:  'offeropt-comparison',
     features: [
+      '__CAT__:AI Search — Generative Engine Optimization (GEO)',
       'AI Citation Optimization',
       'AI Entity Development &amp; Knowledge Graph',
       'Reddit &amp; Community Engagement',
       'AI Citation Magnet',
+      '__CAT__:Local SEO &amp; Google Maps Dominance',
       'Google Business Profile (GBP) Management',
       'Map Pack Ranking Optimization',
       'GBP Posts, Photos &amp; Q&amp;A Management',
       'Local Citation Building &amp; NAP Consistency',
       'Share of Local Voice (SoLV) Rank Tracking',
       'Local Spam Fighting',
+      '__CAT__:Search Engine Optimization (SEO) Foundation',
       'SEO, Practice Area Pages &amp; E-E-A-T Content',
       'Google AI Overviews Optimization (AIO)',
       'Content Production',
       'Content Refreshing',
       'Link Building — High Authority Links',
+      '__CAT__:Brand Authority',
       'Digital PR',
       'Speaking Opportunity Acquisition',
       'Podcast &amp; Media Appearances',
       'Industry Award Applications / Strategy',
+      '__CAT__:Paid Media',
       'Local Services Ads (LSA)',
       'Google Ads (Pay-Per-Click)',
+      '__CAT__:Insight &amp; Access',
       'Growth Reporting &amp; Attribution',
       'AI Visibility Dashboard',
       'Account Management',
@@ -2820,13 +2881,20 @@ function buildComparisonGrids() {
     });
     html += '</tr></thead><tbody>';
 
-    data.features.forEach((feature, i) => {
+    let valIdx = 0;
+    data.features.forEach((feature) => {
+      if (typeof feature === 'string' && feature.startsWith('__CAT__:')) {
+        const catName = feature.slice(8);
+        html += `<tr class="cg-category-row"><td colspan="${data.tiers.length + 1}">${catName}</td></tr>`;
+        return;
+      }
       html += '<tr>';
       html += `<td>${feature}</td>`;
       data.tiers.forEach((tier, ci) => {
-        html += `<td data-col="${ci}">${cellHTML(tier.values[i])}</td>`;
+        html += `<td data-col="${ci}">${cellHTML(tier.values[valIdx])}</td>`;
       });
       html += '</tr>';
+      valIdx++;
     });
 
     html += '</tbody><tfoot><tr><td></td>';
