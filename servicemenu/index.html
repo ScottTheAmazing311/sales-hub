@@ -793,7 +793,7 @@ button { cursor: pointer; font-family: inherit; }
       </div>
     </div>
     <div class="header-meta">
-      5 entities &nbsp;·&nbsp; Services menu<br>
+      6 entities &nbsp;·&nbsp; Services menu<br>
       Confidential — internal use only
     </div>
   </header>
@@ -998,6 +998,47 @@ button { cursor: pointer; font-family: inherit; }
           </div>
         
         <div class="add-doc-bar hidden" id="other-add-bar"><input class="add-doc-input" id="other-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('other')" /><button class="add-doc-go" id="other-add-go" onclick="addDocFromBar('other')">Add</button></div>
+      </div>
+      </div>
+
+      <!-- OFFER OPTIMIZATION -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-logo-wrap">
+            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Offer Optimization</span>
+          </div>
+        </div>
+        <div class="card-tabs">
+          <button class="card-tab active" onclick="switchTab(this,'offeropt-core')">Flagship</button>
+        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('offeropt', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="card-body">
+          <div class="card-panel active" id="offeropt-core">
+            <div id="offeropt-tiles">
+              <button class="offering-tile" onclick="expandComparison(0,'offeropt')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Foundation</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(1,'offeropt')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Tier 1</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(2,'offeropt')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Tier 2</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(3,'offeropt')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Tier 3</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+              <button class="offering-tile" onclick="expandComparison(4,'offeropt')">
+                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">Enterprise — Custom</span></div>
+                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </button>
+            </div>
+            <div id="offeropt-comparison" style="display:none"></div>
+          </div>
+
+        <div class="add-doc-bar hidden" id="offeropt-add-bar"><input class="add-doc-input" id="offeropt-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('offeropt')" /><button class="add-doc-go" id="offeropt-add-go" onclick="addDocFromBar('offeropt')">Add</button></div>
       </div>
       </div>
 
@@ -1209,6 +1250,10 @@ const LOGOS = {
   },
   gladiator: {
     text: 'Law Firm',
+    preserve: false
+  },
+  offeropt: {
+    text: 'Offer Optimization',
     preserve: false
   },
   pimcon: {
@@ -1783,6 +1828,153 @@ const offerings = {
     ])
   },
 
+  // ── OFFER OPTIMIZATION CORE ─────────────────────────────────
+  'offeropt-core-5k': {
+    entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '5K/Mo — Foundation',
+    html: rankTierHTML(0, 'Foundation', [
+      ['AI Citation Optimization', true],
+      ['AI Entity Development &amp; Knowledge Graph', true],
+      ['Reddit &amp; Community Engagement', false],
+      ['AI Citation Magnet', false],
+      ['Google Business Profile (GBP) Management', '1 GBP'],
+      ['Map Pack Ranking Optimization', true],
+      ['GBP Posts, Photos &amp; Q&amp;A Management', 'Monthly'],
+      ['Local Citation Building &amp; NAP Consistency', true],
+      ['Share of Local Voice (SoLV) Rank Tracking', true],
+      ['Local Spam Fighting', true],
+      ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
+      ['Google AI Overviews Optimization (AIO)', true],
+      ['Content Production', '3 assets/mo'],
+      ['Content Refreshing', false],
+      ['Link Building — High Authority Links', '5 links min.'],
+      ['Digital PR', false],
+      ['Speaking Opportunity Acquisition', false],
+      ['Podcast &amp; Media Appearances', false],
+      ['Industry Award Applications / Strategy', false],
+      ['Local Services Ads (LSA)', false],
+      ['Google Ads (Pay-Per-Click)', false],
+      ['Growth Reporting &amp; Attribution', true],
+      ['AI Visibility Dashboard', false],
+      ['Account Management', 'Standard'],
+    ], '$5,000 / month')
+  },
+  'offeropt-core-10k': {
+    entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '10K/Mo — Tier 1',
+    html: rankTierHTML(1, 'Tier 1', [
+      ['AI Citation Optimization', true],
+      ['AI Entity Development &amp; Knowledge Graph', true],
+      ['Reddit &amp; Community Engagement', false],
+      ['AI Citation Magnet', false],
+      ['Google Business Profile (GBP) Management', 'Up to 5 GBPs'],
+      ['Map Pack Ranking Optimization', true],
+      ['GBP Posts, Photos &amp; Q&amp;A Management', 'Monthly'],
+      ['Local Citation Building &amp; NAP Consistency', true],
+      ['Share of Local Voice (SoLV) Rank Tracking', true],
+      ['Local Spam Fighting', true],
+      ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
+      ['Google AI Overviews Optimization (AIO)', true],
+      ['Content Production', '6 assets/mo'],
+      ['Content Refreshing', true],
+      ['Link Building — High Authority Links', '10 links min.'],
+      ['Digital PR', 'Brand Mentions'],
+      ['Speaking Opportunity Acquisition', false],
+      ['Podcast &amp; Media Appearances', false],
+      ['Industry Award Applications / Strategy', false],
+      ['Local Services Ads (LSA)', true],
+      ['Google Ads (Pay-Per-Click)', true],
+      ['Growth Reporting &amp; Attribution', true],
+      ['AI Visibility Dashboard', false],
+      ['Account Management', 'Standard'],
+    ], '$10,000 / month')
+  },
+  'offeropt-core-15k': {
+    entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '15K/Mo — Tier 2',
+    html: rankTierHTML(2, 'Tier 2', [
+      ['AI Citation Optimization', true],
+      ['AI Entity Development &amp; Knowledge Graph', true],
+      ['Reddit &amp; Community Engagement', true],
+      ['AI Citation Magnet', false],
+      ['Google Business Profile (GBP) Management', 'Up to 10 GBPs'],
+      ['Map Pack Ranking Optimization', true],
+      ['GBP Posts, Photos &amp; Q&amp;A Management', 'Weekly'],
+      ['Local Citation Building &amp; NAP Consistency', true],
+      ['Share of Local Voice (SoLV) Rank Tracking', true],
+      ['Local Spam Fighting', true],
+      ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
+      ['Google AI Overviews Optimization (AIO)', true],
+      ['Content Production', '9 assets/mo'],
+      ['Content Refreshing', true],
+      ['Link Building — High Authority Links', '15 links min.'],
+      ['Digital PR', 'Local &amp; Industry Coverage'],
+      ['Speaking Opportunity Acquisition', true],
+      ['Podcast &amp; Media Appearances', true],
+      ['Industry Award Applications / Strategy', false],
+      ['Local Services Ads (LSA)', true],
+      ['Google Ads (Pay-Per-Click)', true],
+      ['Growth Reporting &amp; Attribution', true],
+      ['AI Visibility Dashboard', true],
+      ['Account Management', 'Senior Account Manager'],
+    ], '$15,000 / month')
+  },
+  'offeropt-core-25k': {
+    entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: '25K/Mo — Tier 3',
+    html: rankTierHTML(3, 'Tier 3', [
+      ['AI Citation Optimization', true],
+      ['AI Entity Development &amp; Knowledge Graph', true],
+      ['Reddit &amp; Community Engagement', true],
+      ['AI Citation Magnet', true],
+      ['Google Business Profile (GBP) Management', 'Up to 20 GBPs'],
+      ['Map Pack Ranking Optimization', true],
+      ['GBP Posts, Photos &amp; Q&amp;A Management', 'Weekly'],
+      ['Local Citation Building &amp; NAP Consistency', true],
+      ['Share of Local Voice (SoLV) Rank Tracking', true],
+      ['Local Spam Fighting', true],
+      ['SEO, Practice Area Pages &amp; E-E-A-T Content', true],
+      ['Google AI Overviews Optimization (AIO)', true],
+      ['Content Production', '15 assets/mo'],
+      ['Content Refreshing', true],
+      ['Link Building — High Authority Links', '25 links min.'],
+      ['Digital PR', 'Editorial Features &amp; Expert Contributions'],
+      ['Speaking Opportunity Acquisition', true],
+      ['Podcast &amp; Media Appearances', true],
+      ['Industry Award Applications / Strategy', true],
+      ['Local Services Ads (LSA)', true],
+      ['Google Ads (Pay-Per-Click)', true],
+      ['Growth Reporting &amp; Attribution', true],
+      ['AI Visibility Dashboard', true],
+      ['Account Management', 'Key Account Manager'],
+    ], '$25,000 / month')
+  },
+  'offeropt-core-enterprise': {
+    entity: 'Offer Optimization', entityKey: 'offeropt', category: 'Flagship', title: 'Enterprise — Custom',
+    html: rankTierHTML(4, 'Enterprise', [
+      ['AI Citation Optimization', 'Custom'],
+      ['AI Entity Development &amp; Knowledge Graph', 'Custom'],
+      ['Reddit &amp; Community Engagement', 'Custom'],
+      ['AI Citation Magnet', 'Custom'],
+      ['Google Business Profile (GBP) Management', 'Custom'],
+      ['Map Pack Ranking Optimization', 'Custom'],
+      ['GBP Posts, Photos &amp; Q&amp;A Management', 'Custom'],
+      ['Local Citation Building &amp; NAP Consistency', 'Custom'],
+      ['Share of Local Voice (SoLV) Rank Tracking', 'Custom'],
+      ['Local Spam Fighting', 'Custom'],
+      ['SEO, Practice Area Pages &amp; E-E-A-T Content', 'Custom'],
+      ['Google AI Overviews Optimization (AIO)', 'Custom'],
+      ['Content Production', 'Custom'],
+      ['Content Refreshing', 'Custom'],
+      ['Link Building — High Authority Links', 'Custom'],
+      ['Digital PR', 'Custom'],
+      ['Speaking Opportunity Acquisition', 'Custom'],
+      ['Podcast &amp; Media Appearances', 'Custom'],
+      ['Industry Award Applications / Strategy', 'Custom'],
+      ['Local Services Ads (LSA)', 'Custom'],
+      ['Google Ads (Pay-Per-Click)', 'Custom'],
+      ['Growth Reporting &amp; Attribution', 'Custom'],
+      ['AI Visibility Dashboard', 'Custom'],
+      ['Account Management', 'Dedicated Team'],
+    ], 'Custom')
+  },
+
   // ── PIMCON SPONSORSHIPS ─────────────────────────────────────
   'pimcon-title-sponsor': {
     entity: 'PIMCon', entityKey: 'pimcon', category: 'Sponsorship', title: 'Title Sponsor — $250,000',
@@ -2094,6 +2286,7 @@ let currentOfferingId = null;
   const ENTITY_PANELS = {
     rankings:  ['rankings-core','rankings-alacart','rankings-sprints'],
     gladiator: ['gladiator-core','gladiator-alacart','gladiator-sprints'],
+    offeropt:  ['offeropt-core'],
     pimcon:    ['pimcon-services'],
     pimmedia:  ['pimmedia-services'],
     other:     ['other-core','other-alacart'],
@@ -2537,6 +2730,74 @@ const comparisonData = {
         true, true, '15–20 Strategic Assets', '8–10 Strategic Assets', 'Bi-Weekly', true,
         true, true, 'Up to 10 GBPs', '10 Authority Links min.', true, true,
         true, true, true, 'Key Account Management'
+      ]},
+    ],
+  },
+  offeropt: {
+    panelId: 'offeropt-core',
+    tilesId: 'offeropt-tiles',
+    gridId:  'offeropt-comparison',
+    features: [
+      'AI Citation Optimization',
+      'AI Entity Development &amp; Knowledge Graph',
+      'Reddit &amp; Community Engagement',
+      'AI Citation Magnet',
+      'Google Business Profile (GBP) Management',
+      'Map Pack Ranking Optimization',
+      'GBP Posts, Photos &amp; Q&amp;A Management',
+      'Local Citation Building &amp; NAP Consistency',
+      'Share of Local Voice (SoLV) Rank Tracking',
+      'Local Spam Fighting',
+      'SEO, Practice Area Pages &amp; E-E-A-T Content',
+      'Google AI Overviews Optimization (AIO)',
+      'Content Production',
+      'Content Refreshing',
+      'Link Building — High Authority Links',
+      'Digital PR',
+      'Speaking Opportunity Acquisition',
+      'Podcast &amp; Media Appearances',
+      'Industry Award Applications / Strategy',
+      'Local Services Ads (LSA)',
+      'Google Ads (Pay-Per-Click)',
+      'Growth Reporting &amp; Attribution',
+      'AI Visibility Dashboard',
+      'Account Management',
+    ],
+    tiers: [
+      { key: 'offeropt-core-5k', name: 'Foundation', price: '$5,000/mo', values: [
+        true, true, false, false,
+        '1 GBP', true, 'Monthly', true, true, true,
+        true, true, '3 assets/mo', false, '5 links min.',
+        false, false, false, false,
+        false, false, true, false, 'Standard'
+      ]},
+      { key: 'offeropt-core-10k', name: 'Tier 1', price: '$10,000/mo', values: [
+        true, true, false, false,
+        'Up to 5 GBPs', true, 'Monthly', true, true, true,
+        true, true, '6 assets/mo', true, '10 links min.',
+        'Brand Mentions', false, false, false,
+        true, true, true, false, 'Standard'
+      ]},
+      { key: 'offeropt-core-15k', name: 'Tier 2', price: '$15,000/mo', values: [
+        true, true, true, false,
+        'Up to 10 GBPs', true, 'Weekly', true, true, true,
+        true, true, '9 assets/mo', true, '15 links min.',
+        'Local &amp; Industry Coverage', true, true, false,
+        true, true, true, true, 'Senior Account Manager'
+      ]},
+      { key: 'offeropt-core-25k', name: 'Tier 3', price: '$25,000/mo', values: [
+        true, true, true, true,
+        'Up to 20 GBPs', true, 'Weekly', true, true, true,
+        true, true, '15 assets/mo', true, '25 links min.',
+        'Editorial Features &amp; Expert Contributions', true, true, true,
+        true, true, true, true, 'Key Account Manager'
+      ]},
+      { key: 'offeropt-core-enterprise', name: 'Enterprise', price: 'Custom', values: [
+        'Custom', 'Custom', 'Custom', 'Custom',
+        'Custom', 'Custom', 'Custom', 'Custom', 'Custom', 'Custom',
+        'Custom', 'Custom', 'Custom', 'Custom', 'Custom',
+        'Custom', 'Custom', 'Custom', 'Custom',
+        'Custom', 'Custom', 'Custom', 'Custom', 'Dedicated Team'
       ]},
     ],
   },
