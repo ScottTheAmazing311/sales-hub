@@ -901,6 +901,10 @@
                 Year to Date
                 <span class="tab-range" id="ytd-range"></span>
             </button>
+            <button class="period-tab" data-period="quarterly">
+                Quarterly Report
+                <span class="tab-range" id="quarterly-range"></span>
+            </button>
             <button class="period-tab" data-period="closed-won">
                 Closed Won
                 <span class="tab-range" id="closed-won-range"></span>
@@ -969,6 +973,17 @@ function getPrevMonthRange(offset) {
     return { start: s, end: e };
 }
 function getYearStart(d) { return new Date(d.getFullYear(), 0, 1); }
+// Quarter range. offset 0 = current quarter, 1 = last quarter, 2 = two quarters ago, ...
+function getQuarterRange(offset) {
+    offset = offset || 0;
+    let qIndex = Math.floor(NOW.getMonth() / 3) - offset; // 0..3
+    let year = NOW.getFullYear();
+    while (qIndex < 0) { qIndex += 4; year -= 1; }
+    const startMonth = qIndex * 3;
+    const start = new Date(year, startMonth, 1, 0, 0, 0, 0);
+    const end = new Date(year, startMonth + 3, 0, 23, 59, 59, 999);
+    return { start, end, qIndex, year, label: 'Q' + (qIndex + 1) };
+}
 
 function formatShort(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
 function formatFull(d) {
@@ -1044,6 +1059,7 @@ let currentPeriod = 'wtd';
 let prevMonthOffset = 1; // 1 = last month, 2 = two months ago, etc.
 let charts = {};
 let quarterViewMode = 'detailed'; // 'detailed' or 'condensed'
+let quarterOffset = 0; // 0 = current quarter, 1 = last quarter, etc. (Quarterly Report tab)
 
 // ── Categorize a traffic source into goal buckets ──
 function sourceCategory(source) {
@@ -1440,6 +1456,169 @@ function renderQuarterlyBreakdown(leads) {
     return html;
 }
 
+// ── Quarter-over-quarter delta badge (top-level; reused by the Quarterly Report) ──
+function qoqDeltaBadge(current, previous, cssClass) {
+    cssClass = cssClass || 'qoq-badge';
+    if (previous === 0 && current === 0) return `<span class="${cssClass} flat">—</span>`;
+    if (previous === 0) return `<span class="${cssClass} up">NEW</span>`;
+    const change = Math.round((current - previous) / previous * 100);
+    if (change === 0) return `<span class="${cssClass} flat">0%</span>`;
+    const arrow = change > 0 ? '&#9650;' : '&#9660;';
+    const dir = change > 0 ? 'up' : 'down';
+    return `<span class="${cssClass} ${dir}">${arrow} ${Math.abs(change)}%</span>`;
+}
+
+// ── End-of-Quarter Summary Report ──
+function renderQuarterlyReport() {
+    const q = getQuarterRange(quarterOffset);
+    const prev = getQuarterRange(quarterOffset + 1);
+    const isCurrent = quarterOffset === 0;
+    const displayEnd = (isCurrent && NOW < q.end) ? NOW : q.end;
+
+    const qLeads = allLeads.filter(l => l.dateInbound >= q.start && l.dateInbound <= q.end);
+    const prevLeads = allLeads.filter(l => l.dateInbound >= prev.start && l.dateInbound <= prev.end);
+
+    const statusCounts = getStatusCounts(qLeads, q.start, q.end);
+    const prevStatus = getStatusCounts(prevLeads, prev.start, prev.end);
+    const mdr = countMdrSetsInRange(q.start, q.end);
+    const prevMdr = countMdrSetsInRange(prev.start, prev.end);
+    const trafficData = getTrafficData(qLeads);
+    const prevSourceMap = {};
+    getTrafficData(prevLeads).forEach(([s, c]) => { prevSourceMap[s] = c; });
+
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const heldPct = qLeads.length ? Math.round(statusCounts.held / qLeads.length * 100) + '%' : '0%';
+    const noShowPct = qLeads.length ? Math.round(statusCounts.noShow / qLeads.length * 100) + '%' : '0%';
+
+    let html = '';
+
+    // Quarter navigator
+    html += '<div class="month-nav">';
+    html += '<button class="month-nav-btn" id="quarter-back" title="Previous quarter">&#8592;</button>';
+    html += `<span class="month-nav-label">${q.label} ${q.year}${isCurrent ? ' · In Progress' : ''}</span>`;
+    html += `<button class="month-nav-btn" id="quarter-fwd" title="Next quarter"${quarterOffset <= 0 ? ' disabled' : ''}>&#8594;</button>`;
+    html += '</div>';
+
+    // Headline + key metrics with QoQ deltas
+    html += '<div class="section-block">';
+    html += `<div class="section-title">End of Quarter Summary — ${q.label} ${q.year}</div>`;
+    html += `<p style="color:var(--text-muted);font-size:0.9rem;margin:-0.35rem 0 0.9rem;">${formatFull(q.start)} – ${formatFull(displayEnd)}${isCurrent ? ' · quarter still in progress' : ''} &nbsp;·&nbsp; compared to ${prev.label} ${prev.year}</p>`;
+    html += '<div class="stat-grid">';
+    html += statCard('Total Inbound', qLeads.length, qoqDeltaBadge(qLeads.length, prevLeads.length) + ' vs ' + prev.label, true);
+    html += statCard('Held', statusCounts.held, qoqDeltaBadge(statusCounts.held, prevStatus.held) + ' · ' + heldPct);
+    html += statCard('No Show', statusCounts.noShow, qoqDeltaBadge(statusCounts.noShow, prevStatus.noShow) + ' · ' + noShowPct);
+    html += statCard('Pending', statusCounts.pending, 'Awaiting FTA');
+    html += statCard('MDR Sets', mdr, qoqDeltaBadge(mdr, prevMdr) + ' vs ' + prev.label);
+    html += '</div></div>';
+
+    // Status breakdown
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Status Breakdown</div>';
+    const total = statusCounts.total || 1;
+    html += '<div class="status-bar-visual">';
+    html += `<div class="seg" style="width:${(statusCounts.held/total*100)}%;background:var(--success)"></div>`;
+    html += `<div class="seg" style="width:${(statusCounts.noShow/total*100)}%;background:var(--destructive)"></div>`;
+    html += `<div class="seg" style="width:${(statusCounts.pending/total*100)}%;background:var(--warning)"></div>`;
+    html += '</div>';
+    html += '<div class="status-grid">';
+    html += statusCard(statusCounts.total, 'Total Leads');
+    html += statusCard(statusCounts.held, 'Held');
+    html += statusCard(statusCounts.noShow, 'No-Showed');
+    html += statusCard(statusCounts.pending, 'Pending');
+    html += '</div></div>';
+
+    // Monthly pace within the quarter
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Monthly Pace</div>';
+    html += '<div class="stat-grid">';
+    for (let m = 0; m < 3; m++) {
+        const mStart = new Date(q.year, q.qIndex * 3 + m, 1, 0, 0, 0, 0);
+        const mEnd = new Date(q.year, q.qIndex * 3 + m + 1, 0, 23, 59, 59, 999);
+        const mLeads = qLeads.filter(l => l.dateInbound >= mStart && l.dateInbound <= mEnd);
+        const mMdr = countMdrSetsInRange(mStart, mEnd);
+        html += statCard(months[q.qIndex * 3 + m], mLeads.length, mMdr + ' MDR sets');
+    }
+    html += '</div></div>';
+
+    // Traffic source hero + detail table (vs prior quarter)
+    html += '<div class="section-block">';
+    html += '<div class="traffic-hero" id="traffic-hero">';
+    html += '<div class="traffic-hero-title">Traffic Source Breakdown</div>';
+    if (trafficData.length === 0) {
+        html += '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;text-align:center;padding:1rem;">No data for this quarter</div>';
+    } else {
+        const maxCount = trafficData[0][1];
+        html += '<div class="traffic-bars">';
+        trafficData.forEach(([source, count], i) => {
+            const pctVal = qLeads.length ? Math.round(count / qLeads.length * 100) : 0;
+            const barWidth = maxCount ? Math.max(count / maxCount * 100, 8) : 0;
+            const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+            html += '<div class="traffic-row">';
+            html += `<div class="source-name">${escapeHtml(source)}</div>`;
+            html += '<div class="bar-track">';
+            html += `<div class="bar-fill" style="width:${barWidth}%;background:${color}"><span class="bar-count">${count}</span></div>`;
+            html += '</div>';
+            html += `<div class="bar-pct">${pctVal}%</div>`;
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    if (trafficData.length > 0) {
+        html += '<div class="card">';
+        html += `<div class="card-header"><div class="card-title">Source Detail (QoQ vs ${prev.label})</div></div>`;
+        html += '<div class="card-content"><div style="overflow-x:auto;">';
+        html += '<table class="report-table"><thead><tr>';
+        html += '<th>Source</th><th style="text-align:right">Leads</th><th style="text-align:right">% of Total</th><th style="text-align:right">Held</th><th style="text-align:right">No Show</th><th style="text-align:right">QoQ</th>';
+        html += '</tr></thead><tbody>';
+        trafficData.forEach(([source, count]) => {
+            const sourceLeads = qLeads.filter(l => l.source === source);
+            const sHeld = sourceLeads.filter(l => l.status === 'Held').length;
+            const sNoShow = sourceLeads.filter(l => l.status === 'No Show').length;
+            const pctVal = qLeads.length ? Math.round(count / qLeads.length * 100) : 0;
+            html += '<tr>';
+            html += `<td>${escapeHtml(source)}</td>`;
+            html += `<td class="num">${count}</td>`;
+            html += `<td class="num">${pctVal}%</td>`;
+            html += `<td class="num">${sHeld}</td>`;
+            html += `<td class="num">${sNoShow}</td>`;
+            html += `<td class="num">${qoqDeltaBadge(count, prevSourceMap[source] || 0)}</td>`;
+            html += '</tr>';
+        });
+        html += '</tbody></table></div></div></div>';
+    }
+    html += '</div>';
+
+    // Lead detail grouped by month (accordion)
+    html += '<div class="section-block">';
+    html += '<div class="section-title">Lead Detail</div>';
+    if (qLeads.length === 0) {
+        html += '<div class="empty-state">No leads for this quarter</div>';
+    } else {
+        const monthGroups = {};
+        qLeads.forEach(l => {
+            const key = l.dateInbound.getFullYear() + '-' + String(l.dateInbound.getMonth()).padStart(2, '0');
+            if (!monthGroups[key]) monthGroups[key] = { label: formatMonthYear(l.dateInbound), leads: [] };
+            monthGroups[key].leads.push(l);
+        });
+        Object.keys(monthGroups).sort().reverse().forEach(key => {
+            const group = monthGroups[key];
+            html += '<div class="month-group">';
+            html += '<div class="month-header" onclick="toggleMonth(this)">';
+            html += `<span>${escapeHtml(group.label)}</span>`;
+            html += `<span style="display:flex;align-items:center;gap:8px;"><span class="month-count">${group.leads.length} leads</span><span class="chevron">&#9660;</span></span>`;
+            html += '</div>';
+            html += '<div class="month-body">';
+            html += buildLeadTable(group.leads);
+            html += '</div></div>';
+        });
+    }
+    html += '</div>';
+
+    return html;
+}
+
 // ── Render Closed Won ──
 function renderClosedWon() {
     const year = NOW.getFullYear();
@@ -1786,6 +1965,19 @@ function render() {
     document.getElementById('wow-range').textContent = formatShort(wowStart) + ' – ' + formatShort(NOW);
     document.getElementById('closed-won-range').textContent = NOW.getFullYear().toString();
     document.getElementById('events-range').textContent = NOW.getFullYear().toString();
+    const qSel = getQuarterRange(quarterOffset);
+    document.getElementById('quarterly-range').textContent = qSel.label + ' ' + qSel.year;
+
+    if (currentPeriod === 'quarterly') {
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+        dashboard.innerHTML = renderQuarterlyReport();
+        const qb = document.getElementById('quarter-back');
+        const qf = document.getElementById('quarter-fwd');
+        if (qb) qb.addEventListener('click', () => { quarterOffset++; render(); });
+        if (qf) qf.addEventListener('click', () => { if (quarterOffset > 0) { quarterOffset--; render(); } });
+        return;
+    }
 
     if (currentPeriod === 'events') {
         dashboard.innerHTML = renderEventsDashboard();
@@ -2288,7 +2480,8 @@ async function downloadSnapshot() {
         });
 
         const link = document.createElement('a');
-        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'prev-month' ? 'PrevMonth' : currentPeriod === 'wow' ? 'WoW' : currentPeriod === 'closed-won' ? 'ClosedWon' : 'Year';
+        const qr = getQuarterRange(quarterOffset);
+        const periodLabel = currentPeriod === 'wtd' ? 'Week' : currentPeriod === 'mtd' ? 'Month' : currentPeriod === 'prev-month' ? 'PrevMonth' : currentPeriod === 'wow' ? 'WoW' : currentPeriod === 'closed-won' ? 'ClosedWon' : currentPeriod === 'quarterly' ? (qr.label + '-' + qr.year) : 'Year';
         link.download = `Inbound-Leads-${periodLabel}-${formatShort(NOW).replace('/', '-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
@@ -2308,6 +2501,7 @@ document.querySelectorAll('.period-tab').forEach(tab => {
         tab.classList.add('active');
         currentPeriod = tab.dataset.period;
         if (currentPeriod === 'prev-month') prevMonthOffset = 1;
+        if (currentPeriod === 'quarterly') quarterOffset = 0;
         render();
     });
 });
