@@ -608,7 +608,8 @@ async function fetchSheetData() {
 
   // Parse master client list (gid=284342695)
   // Cols: 0=URL, 1=Alt URL, 2=Company Name, 3=Owner, 4=Practice Area,
-  //        5=Total MRR, 6=City, 7=State, 8=Metro/DMA, 9=PI Classification
+  //        5=Total MRR, 6=City, 7=State, 8=Metro/DMA, 9=PI Classification,
+  //        10=Status (Active/Churned — set by the HubSpot sync)
   const firmsByCity = {}; // key "City, ST" -> [{name, classification, mrr, practiceArea}]
   clientTable.rows.forEach(row => {
     const cell = (idx) => {
@@ -618,10 +619,12 @@ async function fetchSheetData() {
     const name = String(cell(2)).trim();
     const city = String(cell(6)).trim();
     const state = String(cell(7)).trim();
+    const status = String(cell(10)).trim().toLowerCase();
     const classification = String(cell(9)).trim(); // PI-MVA, PI-Other, Non-PI
     const practiceArea = String(cell(4)).trim();
     const mrrRaw = cell(5);
     const mrr = typeof mrrRaw === 'number' ? mrrRaw : parseFloat(String(mrrRaw).replace(/[$,]/g, '')) || 0;
+    if (status === 'churned') return; // skip churned clients (row kept for history)
     if (!name || !city) return;
     const key = `${city}, ${state}`;
     if (!firmsByCity[key]) firmsByCity[key] = [];
