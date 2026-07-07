@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Menu Builder — Rankings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+<style>
+  :root{
+    --navy:#07374F;--navy-2:#0e5f87;--cream:#fefaed;--white:#fff;--yellow:#eaff6a;
+    --yellow-warm:#eedc82;--blue:#3c94d1;--dark:#2c2c2c;--muted:#6b6b6b;--line:rgba(7,55,79,.14);
+    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'DM Mono','SF Mono',monospace;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--body);background:var(--cream);color:var(--dark)}
+  button{cursor:pointer;font-family:inherit}
+  /* password gate */
+  #gate{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:100}
+  #gate .box{background:var(--cream);border-radius:14px;padding:2.5rem 2.2rem;width:340px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  #gate h1{font-family:var(--head);color:var(--navy);font-size:1.4rem;margin-bottom:.3rem}
+  #gate p{color:var(--muted);font-size:.85rem;margin-bottom:1.2rem}
+  #gate input{width:100%;padding:.7rem .9rem;border:2px solid var(--line);border-radius:9px;font-size:1rem;font-family:var(--mono);text-align:center;letter-spacing:.3em}
+  #gate button{margin-top:.9rem;width:100%;padding:.7rem;background:var(--navy);color:var(--yellow);border:none;border-radius:9px;font-weight:600}
+  #gate .err{color:#c0392b;font-size:.8rem;min-height:1rem;margin-top:.5rem}
+  /* layout */
+  .top{background:var(--navy);color:var(--white);padding:.8rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:20}
+  .top .t-title{font-family:var(--head);font-size:1.15rem}
+  .top .t-title small{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:var(--yellow);display:block}
+  .top .actions{display:flex;gap:.5rem;flex-wrap:wrap}
+  .top button{border:none;border-radius:999px;padding:.5rem 1rem;font-size:.82rem;font-weight:600}
+  .btn-gen{background:var(--yellow);color:var(--navy)}
+  .btn-full{background:var(--blue);color:var(--white)}
+  .btn-save{background:var(--white);color:var(--navy)}
+  .btn-reset{background:transparent;color:var(--yellow);border:1px solid rgba(255,255,255,.3)!important}
+  .dirty-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--yellow-warm);margin-left:.4rem;vertical-align:middle;opacity:0}
+  .dirty .dirty-dot{opacity:1}
+  .shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 56px)}
+  .side{border-right:1px solid var(--line);background:var(--white);padding:.8rem}
+  .side .grp{font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:1rem .4rem .3rem}
+  .side .grp:first-child{margin-top:.2rem}
+  .side a{display:block;padding:.5rem .6rem;border-radius:8px;font-size:.88rem;color:var(--dark);text-decoration:none;cursor:pointer}
+  .side a:hover{background:rgba(7,55,79,.06)}
+  .side a.active{background:var(--navy);color:var(--white);font-weight:600}
+  .main{padding:1.6rem 1.8rem;max-width:900px}
+  .main h2{font-family:var(--head);color:var(--navy);font-size:1.6rem;margin-bottom:.2rem}
+  .main .hint{color:var(--muted);font-size:.85rem;margin-bottom:1.3rem}
+  .field{margin-bottom:1rem}
+  .field label{display:block;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--navy);margin-bottom:.3rem}
+  .field input,.field textarea{width:100%;padding:.55rem .7rem;border:1px solid var(--line);border-radius:8px;font-family:var(--body);font-size:.9rem;background:var(--white)}
+  .field textarea{min-height:5rem;resize:vertical;line-height:1.5}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--navy)}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+  .card h3{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);margin-bottom:.7rem}
+  table.medit{width:100%;border-collapse:collapse;font-size:.82rem}
+  table.medit th,table.medit td{padding:.25rem;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.medit thead th{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;color:var(--navy);text-align:center}
+  table.medit thead th:first-child{text-align:left}
+  table.medit td input{width:100%;padding:.35rem .4rem;border:1px solid transparent;border-radius:6px;font-size:.82rem;background:rgba(7,55,79,.03)}
+  table.medit td input:focus{outline:none;border-color:var(--navy);background:var(--white)}
+  table.medit td.lbl input{font-weight:500}
+  table.medit tr.grp-row td{background:rgba(7,55,79,.07);font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);font-weight:600;padding:.4rem}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+  .savebar{background:var(--yellow-warm);border-radius:10px;padding:.8rem 1rem;font-size:.82rem;color:var(--navy);margin-bottom:1.2rem}
+  @media(max-width:760px){.shell{grid-template-columns:1fr}.side{border-right:none;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <h1>Service Menu Builder</h1>
+    <p>Enter the builder password to continue.</p>
+    <input id="gate-pw" type="password" inputmode="numeric" placeholder="••••" autofocus>
+    <button onclick="tryGate()">Enter</button>
+    <div class="err" id="gate-err"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="top" id="top">
+    <div class="t-title">Service Menu Builder<small>Rankings · Personal Injury</small></div>
+    <div class="actions">
+      <button class="btn-gen" onclick="generate('page')">Generate this page<span class="dirty-dot"></span></button>
+      <button class="btn-full" onclick="generate('full')">Generate full offer</button>
+      <button class="btn-save" onclick="saveMaster()">Save to master</button>
+      <button class="btn-reset" onclick="resetChanges()">Reset</button>
+    </div>
+  </div>
+  <div class="shell">
+    <nav class="side" id="side"></nav>
+    <main class="main" id="editor"></main>
+  </div>
+</div>
+
+<script>
+const PW='1776';
+const $=(s,p=document)=>p.querySelector(s);
+let master=null, state=null, current='flagship';
+
+function tryGate(){
+  const v=$('#gate-pw').value.trim();
+  if(v===PW){ sessionStorage.setItem('rk_builder','1'); openApp(); }
+  else { $('#gate-err').textContent='Incorrect password'; }
+}
+$('#gate-pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryGate();});
+
+async function openApp(){
+  $('#gate').style.display='none';
+  $('#app').style.display='';
+  master=await (await fetch('offer-rankings.json',{cache:'no-store'})).json();
+  state=clone(master);
+  buildSide();
+  renderEditor();
+}
+if(sessionStorage.getItem('rk_builder')==='1'){ openApp(); }
+
+const clone=o=>JSON.parse(JSON.stringify(o));
+const isDirty=()=>JSON.stringify(state)!==JSON.stringify(master);
+function markDirty(){ $('#top').classList.toggle('dirty',isDirty()); }
+
+// path get/set helpers
+function setPath(obj,path,val){
+  const p=path.split('.'); let o=obj;
+  for(let i=0;i<p.length-1;i++){ o=o[p[i].match(/^\d+$/)?+p[i]:p[i]]; }
+  const last=p[p.length-1]; o[last.match(/^\d+$/)?+last:last]=val;
+}
+
+function buildSide(){
+  const items=[{key:'flagship',name:state.flagship.name,group:'Flagship'},
+    ...state.components.map(c=>({key:c.key,name:c.name,group:c.group}))];
+  const groups={};
+  items.forEach(it=>{(groups[it.group]=groups[it.group]||[]).push(it);});
+  let h='';
+  Object.keys(groups).forEach(g=>{
+    h+=`<div class="grp">${g}</div>`;
+    groups[g].forEach(it=>{h+=`<a data-key="${it.key}" class="${it.key===current?'active':''}" onclick="select('${it.key}')">${it.name}</a>`;});
+  });
+  $('#side').innerHTML=h;
+}
+function select(k){ current=k; document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('active',a.dataset.key===k)); renderEditor(); }
+
+function field(label,path,val,area){
+  const v=(val==null?'':val);
+  if(area) return `<div class="field"><label>${label}</label><textarea data-path="${path}" data-arr="1">${escAttr(Array.isArray(val)?val.join('\n'):v)}</textarea></div>`;
+  return `<div class="field"><label>${label}</label><input data-path="${path}" value="${escAttr(v)}"></div>`;
+}
+const escAttr=s=>String(s==null?'':s).replace(/"/g,'&quot;').replace(/</g,'&lt;');
+
+function renderEditor(){
+  const el=$('#editor');
+  if(current==='flagship'){ el.innerHTML=editFlagship(state.flagship); }
+  else{
+    const idx=state.components.findIndex(c=>c.key===current);
+    el.innerHTML=editComponent(state.components[idx],idx);
+  }
+  wireInputs();
+}
+
+function editFlagship(f){
+  let h=`<h2>${f.name}</h2><p class="hint">Edit tier names, prices, line items, and every cell. Changes are session-only until you Save to master.</p>`;
+  h+=`<div class="savebar">Tip: use <strong>✓</strong> and <strong>❌</strong> for included / not-included cells; free text (e.g. “Up to 5 GBPs”) is fine too.</div>`;
+  h+=field('Blurb','flagship.blurb',f.blurb,true);
+  // tier headers
+  h+='<div class="card"><h3>Tiers &amp; Pricing</h3><div class="row2">';
+  f.tiers.forEach((t,i)=>{
+    h+=`<div><div class="field"><label>Tier ${t.num} name</label><input data-path="flagship.tiers.${i}.name" value="${escAttr(t.name)}"></div>
+    <div class="field"><label>Tier ${t.num} price</label><input data-path="flagship.tiers.${i}.price" value="${escAttr(t.price)}"></div></div>`;
+  });
+  h+='</div></div>';
+  // matrix
+  h+='<div class="card"><h3>Service Matrix</h3><table class="medit"><thead><tr><th>Line item</th>';
+  f.tiers.forEach(t=>h+=`<th>T${t.num}</th>`);
+  h+='</tr></thead><tbody>';
+  f.groups.forEach((g,gi)=>{
+    h+=`<tr class="grp-row"><td>Group</td><td colspan="${f.tiers.length}"><input data-path="flagship.groups.${gi}.name" value="${escAttr(g.name)}" style="font-weight:600"></td></tr>`;
+    g.items.forEach((it,ii)=>{
+      h+=`<tr><td class="lbl"><input data-path="flagship.groups.${gi}.items.${ii}.label" value="${escAttr(it.label)}"></td>`;
+      it.values.forEach((v,vi)=>{h+=`<td><input data-path="flagship.groups.${gi}.items.${ii}.values.${vi}" value="${escAttr(v)}" style="text-align:center"></td>`;});
+      h+='</tr>';
+    });
+  });
+  h+='</tbody></table></div>';
+  h+=field('Footnote','flagship.footnote',f.footnote,true);
+  return h;
+}
+
+function editComponent(c,idx){
+  const base=`components.${idx}`;
+  let h=`<h2>${c.name}</h2><p class="hint">${c.group} · edit fields below. Session-only until you Save to master.</p>`;
+  h+=field('Name',`${base}.name`,c.name);
+  h+=field('Blurb',`${base}.blurb`,c.blurb,true);
+  if(c.kind==='matrix'){
+    h+='<div class="card"><h3>What’s Included (one per line)</h3>'+field('','${b}.included'.replace('${b}',base),c.included,true)+'</div>';
+    h+='<div class="card"><h3>Price Tiers</h3>';
+    (c.priceTiers||[]).forEach((p,i)=>{
+      h+=`<div class="row2"><div class="field"><label>Label</label><input data-path="${base}.priceTiers.${i}.label" value="${escAttr(p.label)}"></div><div class="field"><label>Price</label><input data-path="${base}.priceTiers.${i}.price" value="${escAttr(p.price)}"></div></div>`;
+    });
+    h+='</div>';
+  } else if(c.kind==='tiers'){
+    h+='<div class="card"><h3>Tiers</h3>';
+    (c.tiers||[]).forEach((t,i)=>{
+      h+=`<div class="row3"><div class="field"><label>Name</label><input data-path="${base}.tiers.${i}.name" value="${escAttr(t.name)}"></div><div class="field"><label>Spec</label><input data-path="${base}.tiers.${i}.spec" value="${escAttr(t.spec)}"></div><div class="field"><label>Price</label><input data-path="${base}.tiers.${i}.price" value="${escAttr(t.price)}"></div></div>`;
+    });
+    h+='</div>';
+    h+='<div class="card"><h3>Deliverables (one per line)</h3>'+field('',`${base}.deliverables`,c.deliverables,true)+'</div>';
+  } else {
+    h+=field('Price',`${base}.price`,c.price);
+    if('timeline' in c) h+=field('Timeline',`${base}.timeline`,c.timeline);
+    h+='<div class="card"><h3>Details (one per line)</h3>'+field('',`${base}.details`,c.details,true)+'</div>';
+  }
+  return h;
+}
+
+function wireInputs(){
+  $('#editor').querySelectorAll('[data-path]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      let v=inp.value;
+      if(inp.dataset.arr){ v=v.split('\n').map(s=>s.trim()).filter(x=>x.length); }
+      setPath(state,inp.dataset.path,v);
+      markDirty();
+      if(inp.dataset.path.endsWith('.name')&&(inp.dataset.path.startsWith('components')||inp.dataset.path==='flagship.name')) buildSide();
+    });
+  });
+}
+
+function generate(mode){
+  const c = mode==='full' ? 'full' : current;
+  let url='render.html?c='+encodeURIComponent(c);
+  if(isDirty()){ url+='#d='+LZString.compressToEncodedURIComponent(JSON.stringify(state)); }
+  window.open(url,'_blank');
+}
+
+function resetChanges(){
+  if(isDirty() && !confirm('Discard your session changes and reload the master?')) return;
+  state=clone(master); markDirty(); buildSide(); renderEditor();
+}
+
+function saveMaster(){
+  const pw=prompt('Enter master password to save to the template:');
+  if(pw===null) return;
+  if(pw!==PW){ alert('Incorrect password — not saved.'); return; }
+  // Phase 1: export the new master JSON for commit. (Seamless server-side save is Phase 3.)
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='offer-rankings.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  master=clone(state); markDirty();
+  alert('Downloaded updated offer-rankings.json.\n\nTo publish to the master template, replace builder/offer-rankings.json with this file and redeploy. (Seamless in-app save comes in a later phase.)');
+}
+</script>
+</body>
+</html>
