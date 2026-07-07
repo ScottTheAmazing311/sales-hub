@@ -860,7 +860,7 @@ async function init() {
         tooltip.style('left', (event.pageX + 14) + 'px').style('top', (event.pageY + 14) + 'px');
       })
       .on('mouseleave', () => tooltip.classed('visible', false))
-      .on('click', (event, d) => selectItem(d))
+      .on('click', (event, d) => toggleSelect(d))
       .merge(sel)
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
@@ -927,7 +927,22 @@ async function init() {
         </div>
         <div class="top-count">${paVal(d)}</div>
       `)
-      .on('click', (event, d) => selectItem(d));
+      .on('click', (event, d) => toggleSelect(d));
+  }
+
+  function toggleSelect(d) {
+    if (selected && selected.key === d.key) deselect();
+    else selectItem(d);
+  }
+
+  function deselect() {
+    selected = null;
+    bubbleLayer.selectAll('.city-bubble').classed('selected', false);
+    const det = document.getElementById('detail');
+    det.classList.add('empty');
+    det.innerHTML = '<div class="empty-msg">Click any dot on the map<br>to see client details.</div>';
+    document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === 'top'));
+    showView('top');
   }
 
   function selectItem(d) {
