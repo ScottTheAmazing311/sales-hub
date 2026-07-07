@@ -240,6 +240,15 @@
   .scope-toggle button + button { border-left: 1.5px solid var(--ink); }
   .scope-toggle button.active { background: var(--ink); color: #fff; font-weight: 500; }
 
+  .clear-filter {
+    color: var(--chartreuse);
+    cursor: pointer;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .clear-filter:hover { text-decoration: underline; }
+
   /* Detail panel */
   .detail {
     padding: 24px 28px;
@@ -924,8 +933,10 @@ async function init() {
     const classMap = { 'PI-MVA': 'mva', 'PI-Other': 'other', 'Non-PI': 'nonpi' };
     const sortOrder = { 'PI-MVA': 0, 'PI-Other': 1, 'Non-PI': 2 };
     const sorted = [...d.firms].sort((a, b) => (sortOrder[a.classification] || 9) - (sortOrder[b.classification] || 9));
-    const clientListHtml = sorted.length
-      ? sorted.map(f => {
+    const paClass = { 'pi-mva': 'PI-MVA', 'pi-other': 'PI-Other', 'non-pi': 'Non-PI' }[activePA];
+    const shownFirms = paClass ? sorted.filter(f => f.classification === paClass) : sorted;
+    const clientListHtml = shownFirms.length
+      ? shownFirms.map(f => {
           const cls = classMap[f.classification] || 'nonpi';
           const isSmall = f.mrr > 0 && f.mrr < 10000;
           const mrrStr = f.mrr ? '$' + f.mrr.toLocaleString() : '';
@@ -961,9 +972,19 @@ async function init() {
           ${d.nonPi ? `<div class="pa-bar-item"><div class="pa-bar-dot" style="background:var(--non-pi)"></div>${d.nonPi} Non-PI</div>` : ''}
         </div>
       </div>
-      <div class="clients-header">All Clients (${d.count})</div>
+      <div class="clients-header">${paClass ? `${paClass} Clients (${shownFirms.length}) <span class="clear-filter" id="clearFilter">— show all</span>` : `All Clients (${d.count})`}</div>
       <ul class="client-list">${clientListHtml}</ul>
     `;
+
+    const cf = document.getElementById('clearFilter');
+    if (cf) cf.addEventListener('click', () => {
+      activePA = 'all';
+      document.querySelectorAll('.pa-btn').forEach(b => b.classList.toggle('active', b.dataset.pa === 'all'));
+      applyPA();
+      refreshStatClients();
+      renderTopList();
+      selectItem(d);
+    });
   }
 
   // ---- Controls ----
