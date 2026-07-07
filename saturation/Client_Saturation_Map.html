@@ -970,7 +970,7 @@ async function init() {
       <span class="saturation-pill" style="color:${satColor};border-color:${satColor};background:${satColor}22">${d.saturation}</span>
       ${paClass ? `<div class="filter-banner">Showing <b>${paClass}</b> only<span class="clear-filter" id="clearFilter">✕ clear filter</span></div>` : ''}
       <div class="detail-meta">
-        <div class="meta-item"><div class="meta-num">${d.count}</div><div class="meta-label">Clients</div></div>
+        <div class="meta-item"><div class="meta-num">${paClass ? shownFirms.length : d.count}</div><div class="meta-label">${paClass ? paClass : 'Clients'}</div></div>
         <div class="meta-item"><div class="meta-num">#${rank}</div><div class="meta-label">Rank</div></div>
       </div>
       ${d.mrr ? `<div class="mrr-display"><div class="mrr-num">${d.mrr}</div><div class="mrr-label">PI-MVA MRR</div></div>` : ''}
@@ -1035,6 +1035,8 @@ async function init() {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b === btn));
       showView(btn.dataset.view);
+      // Re-render the selected detail so it always reflects the current filter.
+      if (btn.dataset.view === 'detail' && selected) selectItem(selected);
     });
   });
   function showView(v) {
