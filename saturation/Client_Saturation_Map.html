@@ -218,6 +218,27 @@
     font-weight: 500;
   }
 
+  /* Scope toggle (City / Metro) */
+  .scope-toggle {
+    display: inline-flex;
+    margin: 14px 0 0;
+    border: 1.5px solid var(--ink);
+  }
+  .scope-toggle button {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border: none;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .scope-toggle button + button { border-left: 1.5px solid var(--ink); }
+  .scope-toggle button.active { background: var(--ink); color: #fff; font-weight: 500; }
+
   /* Detail panel */
   .detail {
     padding: 24px 28px;
@@ -500,8 +521,12 @@
     <div class="loading" id="loading">Loading map data...</div>
     <div class="map-header">
       <div class="eyebrow">Rankings.io -- Client Distribution</div>
-      <h1>Saturation by <span class="accent">HQ City</span></h1>
+      <h1>Saturation by <span class="accent" id="scopeAccent">HQ City</span></h1>
       <div class="map-meta" id="metaLine">Loading...</div>
+      <div class="scope-toggle">
+        <button class="active" data-scope="city">By City</button>
+        <button data-scope="dma">By Metro (DMA)</button>
+      </div>
     </div>
     <div class="pa-filter">
       <button class="pa-btn active" data-pa="all">All</button>
@@ -543,13 +568,13 @@
       <div class="sidebar-title">Geographic Saturation</div>
       <div class="sidebar-stats">
         <div class="stat"><div class="stat-num" id="statClients">--</div><div class="stat-label">Clients</div></div>
-        <div class="stat"><div class="stat-num" id="statCities">--</div><div class="stat-label">HQ Cities</div></div>
+        <div class="stat"><div class="stat-num" id="statCities">--</div><div class="stat-label" id="statCitiesLabel">HQ Cities</div></div>
         <div class="stat"><div class="stat-num" id="statStates">--</div><div class="stat-label">States</div></div>
       </div>
     </div>
 
     <div class="view-toggle">
-      <button class="active" data-view="top">Top Cities</button>
+      <button class="active" data-view="top" id="topViewBtn">Top Cities</button>
       <button data-view="detail">Selected</button>
     </div>
 
@@ -610,7 +635,8 @@ async function fetchSheetData() {
   // Cols: 0=URL, 1=Alt URL, 2=Company Name, 3=Owner, 4=Practice Area,
   //        5=Total MRR, 6=City, 7=State, 8=Metro/DMA, 9=PI Classification,
   //        10=Status (Active/Churned — set by the HubSpot sync)
-  const firmsByCity = {}; // key "City, ST" -> [{name, classification, mrr, practiceArea}]
+  const firmsByCity = {}; // key "City, ST" -> [firm]
+  const firmsByDMA = {};  // key DMA/metro name -> [firm]
   clientTable.rows.forEach(row => {
     const cell = (idx) => {
       const c = row.c && row.c[idx];
@@ -619,6 +645,7 @@ async function fetchSheetData() {
     const name = String(cell(2)).trim();
     const city = String(cell(6)).trim();
     const state = String(cell(7)).trim();
+    const dma = String(cell(8)).trim(); // Metro/DMA
     const status = String(cell(10)).trim().toLowerCase();
     const classification = String(cell(9)).trim(); // PI-MVA, PI-Other, Non-PI
     const practiceArea = String(cell(4)).trim();
@@ -627,8 +654,11 @@ async function fetchSheetData() {
     if (status === 'churned') return; // skip churned clients (row kept for history)
     if (!name || !city) return;
     const key = `${city}, ${state}`;
-    if (!firmsByCity[key]) firmsByCity[key] = [];
-    firmsByCity[key].push({ name, classification, practiceArea, mrr });
+    const geo = GEO[key];
+    const firm = { name, classification, practiceArea, mrr, city, state, dma,
+                   lat: geo ? geo[0] : null, lng: geo ? geo[1] : null };
+    (firmsByCity[key] = firmsByCity[key] || []).push(firm);
+    if (dma) (firmsByDMA[dma] = firmsByDMA[dma] || []).push(firm);
   });
 
   // Parse city saturation tab
@@ -670,43 +700,55 @@ async function fetchSheetData() {
       mrr: mrr,
     };
   }).filter(c => c && c.lat !== null && c.count > 0);
-  return cities;
+
+  // Build the DMA (metro) dataset from the same active firms, positioning each
+  // metro bubble at the geographic centroid of its member cities.
+  const dmaLevel = (n) => (n >= 7 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : 1);
+  const dmas = Object.keys(firmsByDMA).map(dma => {
+    const firms = firmsByDMA[dma];
+    const located = firms.filter(f => f.lat != null);
+    if (!located.length) return null; // can't place a bubble with no known cities
+    const lat = located.reduce((s, f) => s + f.lat, 0) / located.length;
+    const lng = located.reduce((s, f) => s + f.lng, 0) / located.length;
+    const byClass = (cl) => firms.filter(f => f.classification === cl).length;
+    const count = firms.length;
+    const mvaMrr = firms.filter(f => f.classification === 'PI-MVA').reduce((s, f) => s + f.mrr, 0);
+    return {
+      city: dma, state: 'Metro / DMA', key: dma,
+      lat, lng, count,
+      piMva: byClass('PI-MVA'), piOther: byClass('PI-Other'), nonPi: byClass('Non-PI'),
+      saturation: SAT_LEVELS[dmaLevel(count)] || 'Low',
+      firms,
+      under10k: new Set(firms.filter(f => f.mrr > 0 && f.mrr < 10000).map(f => f.name.toLowerCase())),
+      mrr: mvaMrr ? '$' + Number(mvaMrr).toLocaleString() : '',
+    };
+  }).filter(Boolean);
+
+  return { cities, dmas };
 }
 
 // Tooltip URL
 const topoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
 
 async function init() {
-  const [cities, us] = await Promise.all([
+  const [data, us] = await Promise.all([
     fetchSheetData(),
     fetch(topoUrl).then(r => r.json())
   ]);
 
-  const CITIES = cities;
+  const DATASETS = { city: data.cities, dma: data.dmas };
+  let scope = 'city';
 
-  // Stats
-  const totalClients = CITIES.reduce((s,c) => s + c.count, 0);
-  const stateSet = new Set(CITIES.map(c => c.state));
-  document.getElementById('metaLine').textContent = `${totalClients} clients -- ${CITIES.length} cities -- ${stateSet.size} states`;
-  document.getElementById('statClients').textContent = totalClients;
-  document.getElementById('statCities').textContent = CITIES.length;
-  document.getElementById('statStates').textContent = stateSet.size;
-
-  // Bubble radius scale
-  const maxCount = d3.max(CITIES, c => c.count);
-  const rScale = d3.scaleSqrt().domain([1, maxCount]).range([3.5, 18]);
-
+  // ---- Base map (drawn once) ----
   const statesGeo = topojson.feature(us, us.objects.states);
   const stateMesh = topojson.mesh(us, us.objects.states, (a,b) => a !== b);
 
   const svg = d3.select('#usmap');
   const node = svg.node();
-  const { width, height } = node.getBoundingClientRect();
-
-  const projection = d3.geoAlbersUsa().fitSize([width, height], statesGeo);
+  const box0 = node.getBoundingClientRect();
+  const projection = d3.geoAlbersUsa().fitSize([box0.width, box0.height], statesGeo);
   const path = d3.geoPath(projection);
 
-  // State abbr -> name
   const stateAbbrToName = {
     'AL':'Alabama','AK':'Alaska','AZ':'Arizona','AR':'Arkansas','CA':'California',
     'CO':'Colorado','CT':'Connecticut','DE':'Delaware','FL':'Florida','GA':'Georgia',
@@ -720,75 +762,123 @@ async function init() {
     'VA':'Virginia','WA':'Washington','WV':'West Virginia','WI':'Wisconsin','WY':'Wyoming',
     'DC':'District of Columbia'
   };
-  const statesWithClients = new Set([...stateSet].map(s => stateAbbrToName[s]));
 
-  // Draw states
-  svg.append('g')
-    .selectAll('path')
+  const statesLayer = svg.append('g');
+  statesLayer.selectAll('path')
     .data(statesGeo.features)
     .join('path')
-    .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''))
+    .attr('class', 'state')
     .attr('d', path);
-
-  svg.append('path')
+  const meshPath = svg.append('path')
     .attr('d', path(stateMesh))
     .attr('fill', 'none')
     .attr('stroke', '#C8C8C0')
     .attr('stroke-width', 0.6)
     .attr('stroke-linejoin', 'round');
 
-  // Project city points
-  const points = CITIES.map(c => {
-    const p = projection([c.lng, c.lat]);
-    return p ? { ...c, x: p[0], y: p[1] } : null;
-  }).filter(Boolean);
-
-  // Draw smallest first
-  const drawn = [...points].sort((a,b) => a.count - b.count);
-
+  const bubbleLayer = svg.append('g');
   const tooltip = d3.select('#tooltip');
-  const bubbles = svg.append('g')
-    .selectAll('circle')
-    .data(drawn, d => d.key)
-    .join('circle')
-    .attr('class', 'city-bubble')
-    .attr('cx', d => d.x)
-    .attr('cy', d => d.y)
-    .attr('r', d => rScale(d.count))
-    .attr('fill', d => SAT_COLOR[d.saturation])
-    .attr('stroke', d => SAT_BORDER[d.saturation])
-    .attr('stroke-width', 1.5)
-    .attr('fill-opacity', 0.85)
-    .on('mouseenter', (event, d) => {
-      const paParts = [];
-      if (d.piMva) paParts.push(d.piMva + ' PI-MVA');
-      if (d.piOther) paParts.push(d.piOther + ' PI-Other');
-      if (d.nonPi) paParts.push(d.nonPi + ' Non-PI');
-      tooltip.classed('visible', true)
-        .html(`<div class="tooltip-city">${d.key}</div>
-               <div class="tooltip-meta">${d.count} client${d.count===1?'':'s'} -- ${d.saturation}</div>
-               <div class="tooltip-meta">${paParts.join(' / ')}</div>`);
-    })
-    .on('mousemove', (event) => {
-      tooltip.style('left', (event.pageX + 14) + 'px')
-             .style('top', (event.pageY + 14) + 'px');
-    })
-    .on('mouseleave', () => tooltip.classed('visible', false))
-    .on('click', (event, d) => selectCity(d));
-
-  // Top cities list
-  const top = [...CITIES].sort((a,b) => b.count - a.count);
   const topList = d3.select('#topList');
+
+  let activePA = 'all';
+  let selected = null;
+  let current = [];     // active dataset
+  let currentTop = [];  // active dataset sorted desc by count
+
+  // ---- Render (re-run whenever scope changes) ----
+  function render() {
+    current = DATASETS[scope];
+
+    // States that have clients in this scope
+    const stateSet = new Set();
+    current.forEach(d => (d.firms || []).forEach(f => f.state && stateSet.add(f.state)));
+    const statesWithClients = new Set([...stateSet].map(s => stateAbbrToName[s]));
+    statesLayer.selectAll('path')
+      .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''));
+
+    // Stats + chrome
+    const totalClients = current.reduce((s, c) => s + c.count, 0);
+    const unit = scope === 'city' ? 'cities' : 'metros';
+    document.getElementById('metaLine').textContent =
+      `${totalClients} clients -- ${current.length} ${unit} -- ${stateSet.size} states`;
+    document.getElementById('statClients').textContent = totalClients;
+    document.getElementById('statCities').textContent = current.length;
+    document.getElementById('statStates').textContent = stateSet.size;
+    document.getElementById('statCitiesLabel').textContent = scope === 'city' ? 'HQ Cities' : 'Metros';
+    document.getElementById('scopeAccent').textContent = scope === 'city' ? 'HQ City' : 'Metro (DMA)';
+    document.getElementById('topViewBtn').textContent = scope === 'city' ? 'Top Cities' : 'Top Metros';
+    updateLegend();
+
+    // Bubbles
+    const maxCount = d3.max(current, c => c.count) || 1;
+    const rScale = d3.scaleSqrt().domain([1, maxCount]).range([3.5, 18]);
+    const points = current.map(c => {
+      const p = projection([c.lng, c.lat]);
+      return p ? Object.assign({}, c, { x: p[0], y: p[1] }) : null;
+    }).filter(Boolean);
+    const drawn = [...points].sort((a, b) => a.count - b.count);
+
+    const sel = bubbleLayer.selectAll('circle').data(drawn, d => d.key);
+    sel.exit().remove();
+    sel.enter().append('circle')
+      .attr('class', 'city-bubble')
+      .on('mouseenter', (event, d) => {
+        const paParts = [];
+        if (d.piMva) paParts.push(d.piMva + ' PI-MVA');
+        if (d.piOther) paParts.push(d.piOther + ' PI-Other');
+        if (d.nonPi) paParts.push(d.nonPi + ' Non-PI');
+        tooltip.classed('visible', true)
+          .html(`<div class="tooltip-city">${d.key}</div>
+                 <div class="tooltip-meta">${d.count} client${d.count===1?'':'s'} -- ${d.saturation}</div>
+                 <div class="tooltip-meta">${paParts.join(' / ')}</div>`);
+      })
+      .on('mousemove', (event) => {
+        tooltip.style('left', (event.pageX + 14) + 'px').style('top', (event.pageY + 14) + 'px');
+      })
+      .on('mouseleave', () => tooltip.classed('visible', false))
+      .on('click', (event, d) => selectItem(d))
+      .merge(sel)
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('r', d => rScale(d.count))
+      .attr('fill', d => SAT_COLOR[d.saturation])
+      .attr('stroke', d => SAT_BORDER[d.saturation])
+      .attr('stroke-width', 1.5)
+      .attr('fill-opacity', 0.85);
+
+    applyPA();
+
+    currentTop = [...current].sort((a, b) => b.count - a.count);
+    renderTopList();
+    bubbleLayer.selectAll('.city-bubble').classed('selected', false);
+  }
+
+  function updateLegend() {
+    const tiers = scope === 'city' ? ['5+', '3-4', '2', '1'] : ['7+', '4-6', '2-3', '1'];
+    document.querySelectorAll('.legend .legend-count').forEach((el, i) => {
+      if (tiers[i] != null) el.textContent = tiers[i];
+    });
+  }
+
+  function applyPA() {
+    bubbleLayer.selectAll('.city-bubble').classed('dimmed', d => {
+      if (activePA === 'all') return false;
+      if (activePA === 'pi-mva') return d.piMva === 0;
+      if (activePA === 'pi-other') return d.piOther === 0;
+      if (activePA === 'non-pi') return d.nonPi === 0;
+      return false;
+    });
+  }
 
   function renderTopList() {
     topList.selectAll('div.top-row').remove();
     topList.selectAll('div.top-row')
-      .data(top)
+      .data(currentTop)
       .join('div')
       .attr('class', 'top-row')
-      .html((d,i) => `
+      .html((d, i) => `
         <div class="top-rank">${String(i+1).padStart(2,'0')}</div>
-        <div><span class="top-city">${d.city}</span><span class="top-state">, ${d.state}</span></div>
+        <div><span class="top-city">${d.city}</span>${d.state && d.state !== 'Metro / DMA' ? `<span class="top-state">, ${d.state}</span>` : ''}</div>
         <div class="top-pa">
           ${d.piMva ? `<div class="top-pa-dot" style="background:var(--pi-mva)" title="${d.piMva} PI-MVA"></div>` : ''}
           ${d.piOther ? `<div class="top-pa-dot" style="background:var(--pi-other)" title="${d.piOther} PI-Other"></div>` : ''}
@@ -796,32 +886,12 @@ async function init() {
         </div>
         <div class="top-count">${d.count}</div>
       `)
-      .on('click', (event, d) => selectCity(d));
+      .on('click', (event, d) => selectItem(d));
   }
-  renderTopList();
 
-  // Practice area filter
-  let activePA = 'all';
-  document.querySelectorAll('.pa-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      activePA = btn.dataset.pa;
-      document.querySelectorAll('.pa-btn').forEach(b => b.classList.toggle('active', b === btn));
-
-      svg.selectAll('.city-bubble').classed('dimmed', d => {
-        if (activePA === 'all') return false;
-        if (activePA === 'pi-mva') return d.piMva === 0;
-        if (activePA === 'pi-other') return d.piOther === 0;
-        if (activePA === 'non-pi') return d.nonPi === 0;
-        return false;
-      });
-    });
-  });
-
-  // Selection
-  let selected = null;
-  function selectCity(d) {
+  function selectItem(d) {
     selected = d;
-    svg.selectAll('.city-bubble').classed('selected', x => x.key === d.key);
+    bubbleLayer.selectAll('.city-bubble').classed('selected', x => x.key === d.key);
     document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === 'detail'));
     showView('detail');
 
@@ -833,31 +903,31 @@ async function init() {
     const otherW = total ? (d.piOther / total * 100) : 0;
     const nonW = total ? (d.nonPi / total * 100) : 0;
 
-    // Build full client list from master sheet, color-coded by classification
     const classMap = { 'PI-MVA': 'mva', 'PI-Other': 'other', 'Non-PI': 'nonpi' };
-    // Sort: PI-MVA first, then PI-Other, then Non-PI
     const sortOrder = { 'PI-MVA': 0, 'PI-Other': 1, 'Non-PI': 2 };
-    const sorted = [...d.firms].sort((a,b) => (sortOrder[a.classification] || 9) - (sortOrder[b.classification] || 9));
-    let clientListHtml = sorted.length
+    const sorted = [...d.firms].sort((a, b) => (sortOrder[a.classification] || 9) - (sortOrder[b.classification] || 9));
+    const clientListHtml = sorted.length
       ? sorted.map(f => {
           const cls = classMap[f.classification] || 'nonpi';
           const isSmall = f.mrr > 0 && f.mrr < 10000;
           const mrrStr = f.mrr ? '$' + f.mrr.toLocaleString() : '';
+          const loc = (scope === 'dma' && f.city) ? `<span style="font-size:10px;color:rgba(245,245,240,0.35);margin-left:6px">${f.city}, ${f.state}</span>` : '';
           return `<li>
-            <span class="client-name-${cls}">${f.name}</span>
+            <span class="client-name-${cls}">${f.name}</span>${loc}
             ${isSmall ? '<span class="small-badge">&lt;10K</span>' : ''}
             ${mrrStr ? `<span style="margin-left:auto;font-size:10px;color:rgba(245,245,240,0.4)">${mrrStr}</span>` : ''}
           </li>`;
         }).join('')
       : '<li style="color:rgba(245,245,240,0.4)">No client data available</li>';
 
+    const rank = currentTop.findIndex(c => c.key === d.key) + 1;
     det.innerHTML = `
       <div class="detail-city">${d.city}</div>
       <div class="detail-state">${d.state}</div>
       <span class="saturation-pill" style="color:${satColor};border-color:${satColor};background:${satColor}22">${d.saturation}</span>
       <div class="detail-meta">
         <div class="meta-item"><div class="meta-num">${d.count}</div><div class="meta-label">Clients</div></div>
-        <div class="meta-item"><div class="meta-num">#${top.findIndex(c=>c.key===d.key)+1}</div><div class="meta-label">Rank</div></div>
+        <div class="meta-item"><div class="meta-num">#${rank}</div><div class="meta-label">Rank</div></div>
       </div>
       ${d.mrr ? `<div class="mrr-display"><div class="mrr-num">${d.mrr}</div><div class="mrr-label">PI-MVA MRR</div></div>` : ''}
       <div class="pa-bar-wrap">
@@ -878,7 +948,30 @@ async function init() {
     `;
   }
 
-  // View toggle
+  // ---- Controls ----
+  document.querySelectorAll('.pa-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activePA = btn.dataset.pa;
+      document.querySelectorAll('.pa-btn').forEach(b => b.classList.toggle('active', b === btn));
+      applyPA();
+    });
+  });
+
+  document.querySelectorAll('.scope-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (scope === btn.dataset.scope) return;
+      scope = btn.dataset.scope;
+      document.querySelectorAll('.scope-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+      selected = null;
+      const det = document.getElementById('detail');
+      det.classList.add('empty');
+      det.innerHTML = '<div class="empty-msg">Click any dot on the map<br>to see client details.</div>';
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === 'top'));
+      showView('top');
+      render();
+    });
+  });
+
   document.querySelectorAll('.view-toggle button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b === btn));
@@ -890,18 +983,18 @@ async function init() {
     document.getElementById('detail').style.display = v === 'detail' ? 'block' : 'none';
   }
 
+  render();
   document.getElementById('loading').classList.add('hidden');
 
   // Resize
   window.addEventListener('resize', () => {
-    const { width, height } = node.getBoundingClientRect();
-    projection.fitSize([width, height], statesGeo);
-    svg.selectAll('path').attr('d', path);
-    points.forEach(p => {
-      const np = projection([p.lng, p.lat]);
-      if (np) { p.x = np[0]; p.y = np[1]; }
-    });
-    svg.selectAll('.city-bubble').attr('cx', d => d.x).attr('cy', d => d.y);
+    const box = node.getBoundingClientRect();
+    projection.fitSize([box.width, box.height], statesGeo);
+    statesLayer.selectAll('path').attr('d', path);
+    meshPath.attr('d', path(stateMesh));
+    bubbleLayer.selectAll('.city-bubble')
+      .attr('cx', d => { const p = projection([d.lng, d.lat]); return p ? p[0] : -9999; })
+      .attr('cy', d => { const p = projection([d.lng, d.lat]); return p ? p[1] : -9999; });
   });
 }
 
