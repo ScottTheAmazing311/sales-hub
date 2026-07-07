@@ -802,7 +802,7 @@ async function init() {
     const unit = scope === 'city' ? 'cities' : 'metros';
     document.getElementById('metaLine').textContent =
       `${totalClients} clients -- ${current.length} ${unit} -- ${stateSet.size} states`;
-    document.getElementById('statClients').textContent = totalClients;
+    refreshStatClients();
     document.getElementById('statCities').textContent = current.length;
     document.getElementById('statStates').textContent = stateSet.size;
     document.getElementById('statCitiesLabel').textContent = scope === 'city' ? 'HQ Cities' : 'Metros';
@@ -871,10 +871,27 @@ async function init() {
     });
   }
 
+  // Count for the active practice-area filter (total when 'all').
+  function paVal(d) {
+    if (activePA === 'pi-mva') return d.piMva;
+    if (activePA === 'pi-other') return d.piOther;
+    if (activePA === 'non-pi') return d.nonPi;
+    return d.count;
+  }
+
+  function refreshStatClients() {
+    document.getElementById('statClients').textContent =
+      current.reduce((s, c) => s + paVal(c), 0);
+  }
+
   function renderTopList() {
+    let list = currentTop;
+    if (activePA !== 'all') {
+      list = currentTop.filter(d => paVal(d) > 0).sort((a, b) => paVal(b) - paVal(a));
+    }
     topList.selectAll('div.top-row').remove();
     topList.selectAll('div.top-row')
-      .data(currentTop)
+      .data(list)
       .join('div')
       .attr('class', 'top-row')
       .html((d, i) => `
@@ -885,7 +902,7 @@ async function init() {
           ${d.piOther ? `<div class="top-pa-dot" style="background:var(--pi-other)" title="${d.piOther} PI-Other"></div>` : ''}
           ${d.nonPi ? `<div class="top-pa-dot" style="background:var(--non-pi)" title="${d.nonPi} Non-PI"></div>` : ''}
         </div>
-        <div class="top-count">${d.count}</div>
+        <div class="top-count">${paVal(d)}</div>
       `)
       .on('click', (event, d) => selectItem(d));
   }
@@ -955,6 +972,8 @@ async function init() {
       activePA = btn.dataset.pa;
       document.querySelectorAll('.pa-btn').forEach(b => b.classList.toggle('active', b === btn));
       applyPA();
+      refreshStatClients();
+      renderTopList();
     });
   });
 
