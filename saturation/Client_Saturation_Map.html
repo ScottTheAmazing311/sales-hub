@@ -1010,6 +1010,9 @@ async function init() {
       applyPA();
       refreshStatClients();
       renderTopList();
+      // If a city/metro detail is open, re-render it for the new filter.
+      const detailOpen = selected && document.getElementById('detail').style.display !== 'none';
+      if (detailOpen) selectItem(selected);
     });
   });
 
