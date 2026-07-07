@@ -240,12 +240,26 @@
   .scope-toggle button + button { border-left: 1.5px solid var(--ink); }
   .scope-toggle button.active { background: var(--ink); color: #fff; font-weight: 500; }
 
+  .filter-banner {
+    margin: 14px 0 4px;
+    padding: 9px 12px;
+    background: rgba(214,255,61,0.12);
+    border: 1px solid var(--chartreuse);
+    font-size: 11px;
+    color: rgba(245,245,240,0.85);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .filter-banner b { color: var(--chartreuse); font-weight: 600; }
   .clear-filter {
     color: var(--chartreuse);
     cursor: pointer;
-    font-weight: 400;
+    font-weight: 500;
     text-transform: none;
     letter-spacing: 0;
+    white-space: nowrap;
   }
   .clear-filter:hover { text-decoration: underline; }
 
@@ -954,6 +968,7 @@ async function init() {
       <div class="detail-city">${d.city}</div>
       <div class="detail-state">${d.state}</div>
       <span class="saturation-pill" style="color:${satColor};border-color:${satColor};background:${satColor}22">${d.saturation}</span>
+      ${paClass ? `<div class="filter-banner">Showing <b>${paClass}</b> only<span class="clear-filter" id="clearFilter">✕ clear filter</span></div>` : ''}
       <div class="detail-meta">
         <div class="meta-item"><div class="meta-num">${d.count}</div><div class="meta-label">Clients</div></div>
         <div class="meta-item"><div class="meta-num">#${rank}</div><div class="meta-label">Rank</div></div>
@@ -972,7 +987,7 @@ async function init() {
           ${d.nonPi ? `<div class="pa-bar-item"><div class="pa-bar-dot" style="background:var(--non-pi)"></div>${d.nonPi} Non-PI</div>` : ''}
         </div>
       </div>
-      <div class="clients-header">${paClass ? `${paClass} Clients (${shownFirms.length}) <span class="clear-filter" id="clearFilter">— show all</span>` : `All Clients (${d.count})`}</div>
+      <div class="clients-header">${paClass ? `${paClass} Clients (${shownFirms.length})` : `All Clients (${d.count})`}</div>
       <ul class="client-list">${clientListHtml}</ul>
     `;
 
