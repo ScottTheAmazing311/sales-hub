@@ -63,6 +63,11 @@
   table.medit tr.grp-row td{background:rgba(7,55,79,.07);font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);font-weight:600;padding:.4rem}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+  .tier-edit{border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem;margin-bottom:.7rem;transition:opacity .15s}
+  .tier-edit.off{opacity:.45;background:rgba(7,55,79,.03)}
+  .tgl{display:flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);font-weight:600;margin-bottom:.6rem;cursor:pointer}
+  .tgl input{width:16px;height:16px;accent-color:var(--navy);cursor:pointer}
+  .tier-edit.off .tgl{color:var(--muted)}
   .savebar{background:var(--yellow-warm);border-radius:10px;padding:.8rem 1rem;font-size:.82rem;color:var(--navy);margin-bottom:1.2rem}
   @media(max-width:760px){.shell{grid-template-columns:1fr}.side{border-right:none;border-bottom:1px solid var(--line)}}
 </style>
@@ -163,10 +168,11 @@ function editFlagship(f){
   let h=`<h2>${f.name}</h2><p class="hint">Edit tier names, prices, line items, and every cell. Changes are session-only until you Save to master.</p>`;
   h+=`<div class="savebar">Tip: use <strong>✓</strong> and <strong>❌</strong> for included / not-included cells; free text (e.g. “Up to 5 GBPs”) is fine too.</div>`;
   h+=field('Blurb','flagship.blurb',f.blurb,true);
-  // tier headers
-  h+='<div class="card"><h3>Tiers &amp; Pricing</h3><div class="row2">';
+  // tier headers + include toggles
+  h+='<div class="card"><h3>Tiers &amp; Pricing</h3><p class="hint" style="margin:-.3rem 0 .8rem">Uncheck a tier to leave it out of the generated offer.</p><div class="row2">';
   f.tiers.forEach((t,i)=>{
-    h+=`<div><div class="field"><label>Tier ${t.num} name</label><input data-path="flagship.tiers.${i}.name" value="${escAttr(t.name)}"></div>
+    h+=`<div class="tier-edit${t.hidden?' off':''}"><label class="tgl"><input type="checkbox" data-toggle="flagship.tiers.${i}.hidden" ${t.hidden?'':'checked'}> Include Tier ${t.num}</label>
+    <div class="field"><label>Tier ${t.num} name</label><input data-path="flagship.tiers.${i}.name" value="${escAttr(t.name)}"></div>
     <div class="field"><label>Tier ${t.num} price</label><input data-path="flagship.tiers.${i}.price" value="${escAttr(t.price)}"></div></div>`;
   });
   h+='</div></div>';
@@ -194,15 +200,15 @@ function editComponent(c,idx){
   h+=field('Blurb',`${base}.blurb`,c.blurb,true);
   if(c.kind==='matrix'){
     h+='<div class="card"><h3>What’s Included (one per line)</h3>'+field('','${b}.included'.replace('${b}',base),c.included,true)+'</div>';
-    h+='<div class="card"><h3>Price Tiers</h3>';
+    h+='<div class="card"><h3>Price Tiers</h3><p class="hint" style="margin:-.3rem 0 .8rem">Uncheck a tier to leave it out of the generated page.</p>';
     (c.priceTiers||[]).forEach((p,i)=>{
-      h+=`<div class="row2"><div class="field"><label>Label</label><input data-path="${base}.priceTiers.${i}.label" value="${escAttr(p.label)}"></div><div class="field"><label>Price</label><input data-path="${base}.priceTiers.${i}.price" value="${escAttr(p.price)}"></div></div>`;
+      h+=`<div class="tier-edit${p.hidden?' off':''}"><label class="tgl"><input type="checkbox" data-toggle="${base}.priceTiers.${i}.hidden" ${p.hidden?'':'checked'}> Include tier</label><div class="row2"><div class="field"><label>Label</label><input data-path="${base}.priceTiers.${i}.label" value="${escAttr(p.label)}"></div><div class="field"><label>Price</label><input data-path="${base}.priceTiers.${i}.price" value="${escAttr(p.price)}"></div></div></div>`;
     });
     h+='</div>';
   } else if(c.kind==='tiers'){
-    h+='<div class="card"><h3>Tiers</h3>';
+    h+='<div class="card"><h3>Tiers</h3><p class="hint" style="margin:-.3rem 0 .8rem">Uncheck a tier to leave it out of the generated page.</p>';
     (c.tiers||[]).forEach((t,i)=>{
-      h+=`<div class="row3"><div class="field"><label>Name</label><input data-path="${base}.tiers.${i}.name" value="${escAttr(t.name)}"></div><div class="field"><label>Spec</label><input data-path="${base}.tiers.${i}.spec" value="${escAttr(t.spec)}"></div><div class="field"><label>Price</label><input data-path="${base}.tiers.${i}.price" value="${escAttr(t.price)}"></div></div>`;
+      h+=`<div class="tier-edit${t.hidden?' off':''}"><label class="tgl"><input type="checkbox" data-toggle="${base}.tiers.${i}.hidden" ${t.hidden?'':'checked'}> Include tier</label><div class="row3"><div class="field"><label>Name</label><input data-path="${base}.tiers.${i}.name" value="${escAttr(t.name)}"></div><div class="field"><label>Spec</label><input data-path="${base}.tiers.${i}.spec" value="${escAttr(t.spec)}"></div><div class="field"><label>Price</label><input data-path="${base}.tiers.${i}.price" value="${escAttr(t.price)}"></div></div></div>`;
     });
     h+='</div>';
     h+='<div class="card"><h3>Deliverables (one per line)</h3>'+field('',`${base}.deliverables`,c.deliverables,true)+'</div>';
@@ -222,6 +228,14 @@ function wireInputs(){
       setPath(state,inp.dataset.path,v);
       markDirty();
       if(inp.dataset.path.endsWith('.name')&&(inp.dataset.path.startsWith('components')||inp.dataset.path==='flagship.name')) buildSide();
+    });
+  });
+  // tier include/exclude toggles → sets `.hidden` (checked = included = hidden:false)
+  $('#editor').querySelectorAll('[data-toggle]').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      setPath(state,cb.dataset.toggle,!cb.checked);
+      const box=cb.closest('.tier-edit'); if(box) box.classList.toggle('off',!cb.checked);
+      markDirty();
     });
   });
 }

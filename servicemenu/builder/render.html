@@ -82,22 +82,25 @@ function valCell(v){
 }
 
 function renderFlagship(f){
-  const tiers=f.tiers||[];
+  // Only include tiers that aren't toggled off (t.hidden). Keep original index to read matching cell values.
+  const active=(f.tiers||[]).map((t,i)=>({t,i})).filter(x=>!x.t.hidden);
   let h=`<h1 class="section-title">${esc(f.name)}</h1>`;
   if(f.blurb) h+=`<p class="blurb">${esc(f.blurb)}</p>`;
+  if(!active.length) return h+'<div class="block">No tiers selected.</div>';
+  const span=active.length+1;
   h+='<div class="block"><table class="matrix"><thead><tr><th>Service Category</th>';
-  tiers.forEach(t=>{h+=`<th class="tier">Tier ${t.num}<span class="tname">${esc(t.name)}</span><span class="tprice">${esc(t.price)}${esc(t.cadence||'')}</span></th>`;});
+  active.forEach(({t})=>{h+=`<th class="tier">Tier ${t.num}<span class="tname">${esc(t.name)}</span><span class="tprice">${esc(t.price)}${esc(t.cadence||'')}</span></th>`;});
   h+='</tr></thead><tbody>';
   (f.groups||[]).forEach(g=>{
-    h+=`<tr class="group"><td colspan="${tiers.length+1}">${esc(g.name)}</td></tr>`;
+    h+=`<tr class="group"><td colspan="${span}">${esc(g.name)}</td></tr>`;
     (g.items||[]).forEach(it=>{
       h+=`<tr><td>${esc(it.label)}</td>`;
-      (it.values||[]).forEach(v=>{h+=`<td class="val">${valCell(v)}</td>`;});
+      active.forEach(({i})=>{h+=`<td class="val">${valCell((it.values||[])[i])}</td>`;});
       h+='</tr>';
     });
   });
   h+=`<tr class="invest"><td>Monthly Investment</td>`;
-  tiers.forEach(t=>{h+=`<td class="val">${esc(t.price)}</td>`;});
+  active.forEach(({t})=>{h+=`<td class="val">${esc(t.price)}</td>`;});
   h+='</tr></tbody></table>';
   if(f.footnote) h+=`<p class="footnote">${esc(f.footnote)}</p>`;
   h+='</div>';
@@ -115,14 +118,15 @@ function renderComponent(c){
       c.included.forEach(i=>h+=`<li>${esc(i)}</li>`);
       h+='</ul>';
     }
-    if(c.priceTiers&&c.priceTiers.length){
+    const pts=(c.priceTiers||[]).filter(p=>!p.hidden);
+    if(pts.length){
       h+='<div class="ptier-grid">';
-      c.priceTiers.forEach(p=>h+=`<div class="ptier"><div class="pt-label">${esc(p.label)}</div><div class="pt-price">${esc(p.price)}</div></div>`);
+      pts.forEach(p=>h+=`<div class="ptier"><div class="pt-label">${esc(p.label)}</div><div class="pt-price">${esc(p.price)}</div></div>`);
       h+='</div>';
     }
   } else if(c.kind==='tiers'){
     h+='<div class="tiers-grid">';
-    (c.tiers||[]).forEach(t=>h+=`<div class="tier-card"><div class="tc-name">${esc(t.name)}</div><div class="tc-spec">${esc(t.spec)}</div><div class="tc-price">${esc(t.price)}</div></div>`);
+    (c.tiers||[]).filter(t=>!t.hidden).forEach(t=>h+=`<div class="tier-card"><div class="tc-name">${esc(t.name)}</div><div class="tc-spec">${esc(t.spec)}</div><div class="tc-price">${esc(t.price)}</div></div>`);
     h+='</div>';
     if(c.deliverables&&c.deliverables.length){h+='<h2 style="font-size:1rem">Deliverables</h2><ul class="plain">';c.deliverables.forEach(d=>h+=`<li>${esc(d)}</li>`);h+='</ul>';}
   } else {
