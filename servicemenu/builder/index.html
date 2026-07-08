@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Service Menu Builder — Rankings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -242,7 +243,8 @@ function wireInputs(){
 
 function generate(mode){
   const c = mode==='full' ? 'full' : current;
-  let url='render.html?c='+encodeURIComponent(c);
+  // cache-bust so the freshly-generated page never loads a stale render.html
+  let url='render.html?c='+encodeURIComponent(c)+'&_='+Date.now();
   if(isDirty()){ url+='#d='+LZString.compressToEncodedURIComponent(JSON.stringify(state)); }
   window.open(url,'_blank');
 }
