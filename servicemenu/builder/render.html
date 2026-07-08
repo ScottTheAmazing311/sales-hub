@@ -9,172 +9,155 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <style>
-  :root{
-    --navy:#07374F; --navy-2:#0e5f87; --cream:#fefaed; --white:#fff;
-    --yellow:#eaff6a; --yellow-warm:#eedc82; --blue:#3c94d1; --dark:#2c2c2c;
-    --muted:#6b6b6b; --line:rgba(7,55,79,.12);
-    --head:'DM Serif Display',Georgia,serif; --body:'DM Sans',-apple-system,sans-serif; --mono:'DM Mono','SF Mono',monospace;
-  }
+  :root{--navy:#07374F;--navy-2:#0e5f87;--cream:#fefaed;--white:#fff;--yellow:#eaff6a;--yellow-warm:#eedc82;--blue:#3c94d1;--dark:#2c2c2c;--muted:#6b6b6b;--line:rgba(7,55,79,.12);
+    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'DM Mono','SF Mono',monospace;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   body{font-family:var(--body);background:var(--cream);color:var(--dark);line-height:1.5}
-  .wrap{max-width:960px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+  .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
   .brandbar{background:var(--navy);color:var(--white);padding:1.4rem 1.5rem;border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.8rem}
-  .brandbar .b-title{font-family:var(--head);font-size:1.5rem;letter-spacing:.2px}
+  .brandbar .b-title{font-family:var(--head);font-size:1.5rem}
   .brandbar .b-sub{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--yellow)}
-  h1.section-title{font-family:var(--head);font-size:2rem;color:var(--navy);margin-bottom:.35rem}
-  .blurb{color:var(--muted);font-size:1rem;max-width:70ch;margin-bottom:1.6rem}
-  .block{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:1.5rem 1.6rem;margin-bottom:1.4rem;box-shadow:0 1px 0 rgba(7,55,79,.03)}
-  .block h2{font-family:var(--head);font-size:1.3rem;color:var(--navy);margin-bottom:.2rem}
-  .block .price-lead{font-family:var(--mono);color:var(--navy-2);font-weight:600;font-size:.95rem;margin-bottom:.8rem}
-  /* flagship matrix */
-  table.matrix{width:100%;border-collapse:collapse;font-size:.86rem}
-  table.matrix th,table.matrix td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
-  table.matrix thead th{background:var(--navy);color:var(--white);font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0}
+  h1.section-title{font-family:var(--head);font-size:2rem;color:var(--navy);margin-bottom:.15rem}
+  .tagline{font-family:var(--head);color:var(--navy-2);font-size:1.1rem;margin-bottom:.5rem}
+  .blurb{color:var(--muted);font-size:.98rem;max-width:75ch;margin-bottom:1.4rem}
+  .block{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin-bottom:1.4rem}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.7rem;background:var(--yellow);color:var(--navy);border-radius:999px;padding:.15rem .6rem;font-weight:600;margin-bottom:.7rem}
+  .pill.retired{background:#e5e0d5;color:var(--muted)}
+  table.matrix{width:100%;border-collapse:collapse;font-size:.85rem}
+  table.matrix th,table.matrix td{text-align:left;padding:.48rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+  table.matrix thead th{background:var(--navy);color:var(--white);font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+  table.matrix thead th.tier{text-align:center}
   table.matrix thead th.tier .tname{display:block;font-family:var(--body);font-size:.82rem;text-transform:none;letter-spacing:0;font-weight:600;margin-top:2px}
-  table.matrix thead th.tier .tprice{display:block;color:var(--yellow);margin-top:2px}
-  table.matrix td.val{text-align:center;font-weight:500;white-space:nowrap}
-  table.matrix tr.group td{background:rgba(7,55,79,.06);font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);font-weight:600}
-  table.matrix tr.invest td{border-top:2px solid var(--navy)}
-  table.matrix tr.invest td.val{font-family:var(--mono);font-weight:600;color:var(--navy);font-size:1rem}
-  table.matrix tr.invest td:first-child{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--navy)}
-  .yes{color:#16a34a;font-weight:700}.no{color:#c0392b}
-  /* included / tiers / simple */
-  ul.checklist{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.35rem .9rem;margin:.4rem 0}
-  ul.checklist li{position:relative;padding-left:1.3rem;font-size:.9rem}
-  ul.checklist li::before{content:'✔';position:absolute;left:0;color:#16a34a;font-weight:700}
-  .ptier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-top:1rem}
-  .ptier{border:1px solid var(--line);border-radius:10px;padding:.85rem;text-align:center}
-  .ptier .pt-label{font-size:.78rem;color:var(--muted)}
-  .ptier .pt-price{font-family:var(--mono);font-weight:600;color:var(--navy);font-size:1.1rem;margin-top:.25rem}
-  .tiers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem;margin:.4rem 0 1rem}
-  .tier-card{border:1px solid var(--line);border-radius:10px;padding:.9rem;text-align:center}
-  .tier-card .tc-name{font-family:var(--head);color:var(--navy);font-size:1.05rem}
-  .tier-card .tc-spec{font-size:.82rem;color:var(--muted);margin:.15rem 0}
-  .tier-card .tc-price{font-family:var(--mono);font-weight:600;color:var(--navy-2)}
-  ul.plain{margin:.4rem 0 0 1.1rem}ul.plain li{font-size:.9rem;margin-bottom:.25rem}
-  .pill{display:inline-block;font-family:var(--mono);font-size:.72rem;background:var(--yellow);color:var(--navy);border-radius:999px;padding:.15rem .6rem;font-weight:600}
-  .footnote{font-size:.78rem;color:var(--muted);font-style:italic;margin-top:.7rem}
-  .full-lead{margin:2.2rem 0 1rem;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);border-top:1px solid var(--line);padding-top:1rem}
-  /* toolbar */
+  table.matrix td.val{text-align:center;font-weight:500}
+  table.matrix tr.group td{background:rgba(7,55,79,.06);font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--navy);font-weight:600}
+  table.matrix tr.price td{border-top:2px solid var(--navy)}
+  table.matrix tr.price td.val{font-family:var(--mono);font-weight:600;color:var(--navy)}
+  table.matrix tr.price.lead td.val{font-size:1rem}
+  table.matrix tr.price td:first-child{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--navy)}
+  .single td.val{text-align:left !important}
+  .yes{color:#16a34a;font-weight:700}.no{color:#c0392b}.dash{color:var(--muted)}
+  .note{border-left:3px solid var(--yellow-warm);padding:.5rem .9rem;margin-top:.8rem;background:rgba(238,220,130,.12);border-radius:0 8px 8px 0}
+  .note h4{font-family:var(--body);font-size:.9rem;color:var(--navy);margin-bottom:.2rem}
+  .note p{font-size:.85rem;color:var(--muted)}
+  .footnote{font-size:.8rem;color:var(--muted);font-style:italic;margin-top:.8rem}
+  .price-lead{font-family:var(--mono);color:var(--navy-2);font-weight:600;font-size:1rem;margin-bottom:.6rem}
+  ul.plain{margin:.3rem 0 0 1.1rem}ul.plain li{font-size:.9rem;margin-bottom:.25rem}
+  .full-lead{margin:2.4rem 0 1rem;font-family:var(--head);font-size:1.5rem;color:var(--navy);border-top:2px solid var(--line);padding-top:1.1rem}
+  .res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem}
+  .res-card{border:1px solid var(--line);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.5rem;background:var(--white)}
+  .res-card .rc-type{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .res-card .rc-name{font-family:var(--head);font-size:1.1rem;color:var(--navy)}
+  .res-card a{margin-top:auto;font-family:var(--body);font-weight:600;font-size:.85rem;color:var(--navy);text-decoration:none;background:var(--yellow);border-radius:999px;padding:.4rem .9rem;text-align:center}
+  table.pimcon{width:100%;border-collapse:collapse;font-size:.9rem}
+  table.pimcon td{padding:.5rem .6rem;border-bottom:1px solid var(--line)}
+  table.pimcon td.price{text-align:right;font-family:var(--mono);font-weight:600;color:var(--navy)}
   .toolbar{position:fixed;bottom:1rem;right:1rem;display:flex;gap:.5rem;z-index:50}
   .toolbar button{font-family:var(--body);font-weight:600;font-size:.85rem;border:none;border-radius:999px;padding:.6rem 1.1rem;cursor:pointer;background:var(--navy);color:var(--yellow);box-shadow:0 4px 14px rgba(7,55,79,.3)}
-  .toolbar button:hover{background:var(--navy-2)}
   .variant-note{background:var(--yellow-warm);color:var(--navy);font-family:var(--mono);font-size:.72rem;text-align:center;padding:.4rem;border-radius:8px;margin-bottom:1rem;letter-spacing:.04em}
-  @media(max-width:640px){ul.checklist{grid-template-columns:1fr}}
-  @media print{
-    body{background:#fff}.wrap{padding:0;max-width:none}.toolbar{display:none}
-    .block,.brandbar{box-shadow:none}
-    table.matrix thead th{position:static}
-    a[href]::after{content:''}
-  }
+  @media print{body{background:#fff}.wrap{padding:0;max-width:none}.toolbar{display:none}.block,.brandbar{box-shadow:none}a[href]::after{content:''}}
 </style>
 </head>
 <body>
 <div class="wrap" id="wrap"><div class="block">Loading…</div></div>
 <div class="toolbar"><button onclick="window.print()">⬇ Download PDF</button></div>
-
 <script>
-const $ = (s,p=document)=>p.querySelector(s);
-const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=(s,p=document)=>p.querySelector(s);
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const driveView=id=>`https://drive.google.com/file/d/${id}/view`;
 function valCell(v){
-  if(v==='✓'||v==='✔') return '<span class="yes">✓</span>';
-  if(v==='❌'||v==='✗'||v==='x') return '<span class="no">✕</span>';
+  if(v==='✓'||v==='✔')return '<span class="yes">✓</span>';
+  if(v==='✕'||v==='✗'||v==='x')return '<span class="no">✕</span>';
+  if(v==='—'||v==='-'||v===''||v==null)return '<span class="dash">—</span>';
   return esc(v);
 }
-
-function renderFlagship(f){
-  // Only include tiers that aren't toggled off (t.hidden). Keep original index to read matching cell values.
-  const active=(f.tiers||[]).map((t,i)=>({t,i})).filter(x=>!x.t.hidden);
-  let h=`<h1 class="section-title">${esc(f.name)}</h1>`;
-  if(f.blurb) h+=`<p class="blurb">${esc(f.blurb)}</p>`;
-  if(!active.length) return h+'<div class="block">No tiers selected.</div>';
-  const span=active.length+1;
-  h+='<div class="block"><table class="matrix"><thead><tr><th>Service Category</th>';
-  active.forEach(({t})=>{h+=`<th class="tier">Tier ${t.num}<span class="tname">${esc(t.name)}</span><span class="tprice">${esc(t.price)}${esc(t.cadence||'')}</span></th>`;});
+function renderMatrix(o){
+  const active=(o.tiers||[]).map((t,i)=>({t,i})).filter(x=>!x.t.hidden);
+  const single=active.length===1;
+  let h='<div class="block"><table class="matrix'+(single?' single':'')+'"><thead><tr><th>Service</th>';
+  active.forEach(({t})=>{h+=`<th class="tier">${single?'':'Tier '+t.num}<span class="tname">${esc(t.name)}</span></th>`;});
   h+='</tr></thead><tbody>';
-  (f.groups||[]).forEach(g=>{
-    h+=`<tr class="group"><td colspan="${span}">${esc(g.name)}</td></tr>`;
+  (o.groups||[]).forEach(g=>{
+    h+=`<tr class="group"><td colspan="${active.length+1}">${esc(g.name)}</td></tr>`;
     (g.items||[]).forEach(it=>{
       h+=`<tr><td>${esc(it.label)}</td>`;
       active.forEach(({i})=>{h+=`<td class="val">${valCell((it.values||[])[i])}</td>`;});
       h+='</tr>';
     });
   });
-  h+=`<tr class="invest"><td>Monthly Investment</td>`;
-  active.forEach(({t})=>{h+=`<td class="val">${esc(t.price)}</td>`;});
-  h+='</tr></tbody></table>';
-  if(f.footnote) h+=`<p class="footnote">${esc(f.footnote)}</p>`;
-  h+='</div>';
-  return h;
-}
-
-function renderComponent(c){
-  let h=`<h1 class="section-title">${esc(c.name)}</h1>`;
-  if(c.group) h+=`<div style="margin-bottom:.8rem"><span class="pill">${esc(c.group)}</span>${c.timeline?` <span class="pill">${esc(c.timeline)}</span>`:''}</div>`;
-  if(c.blurb) h+=`<p class="blurb">${esc(c.blurb)}</p>`;
-  h+='<div class="block">';
-  if(c.kind==='matrix'){
-    if(c.included&&c.included.length){
-      h+='<h2>What\'s Included</h2><ul class="checklist">';
-      c.included.forEach(i=>h+=`<li>${esc(i)}</li>`);
-      h+='</ul>';
-    }
-    const pts=(c.priceTiers||[]).filter(p=>!p.hidden);
-    if(pts.length){
-      h+='<div class="ptier-grid">';
-      pts.forEach(p=>h+=`<div class="ptier"><div class="pt-label">${esc(p.label)}</div><div class="pt-price">${esc(p.price)}</div></div>`);
-      h+='</div>';
-    }
-  } else if(c.kind==='tiers'){
-    h+='<div class="tiers-grid">';
-    (c.tiers||[]).filter(t=>!t.hidden).forEach(t=>h+=`<div class="tier-card"><div class="tc-name">${esc(t.name)}</div><div class="tc-spec">${esc(t.spec)}</div><div class="tc-price">${esc(t.price)}</div></div>`);
-    h+='</div>';
-    if(c.deliverables&&c.deliverables.length){h+='<h2 style="font-size:1rem">Deliverables</h2><ul class="plain">';c.deliverables.forEach(d=>h+=`<li>${esc(d)}</li>`);h+='</ul>';}
-  } else {
-    if(c.price) h+=`<div class="price-lead">${esc(c.price)}</div>`;
-    if(c.details&&c.details.length){h+='<ul class="plain">';c.details.forEach(d=>h+=`<li>${esc(d)}</li>`);h+='</ul>';}
-  }
-  h+='</div>';
-  return h;
-}
-
-function renderFull(o){
-  let h=renderFlagship(o.flagship);
-  const groups={};
-  (o.components||[]).forEach(c=>{(groups[c.group]=groups[c.group]||[]).push(c);});
-  Object.keys(groups).forEach(g=>{
-    h+=`<div class="full-lead">${esc(g)}</div>`;
-    groups[g].forEach(c=>{h+=renderComponent(c);});
+  (o.priceRows||[]).forEach(p=>{
+    h+=`<tr class="price${p.lead?' lead':''}"><td>${esc(p.label)}</td>`;
+    active.forEach(({i})=>{h+=`<td class="val">${esc((p.values||[])[i])}</td>`;});
+    h+='</tr>';
   });
+  h+='</tbody></table>';
+  (o.notes||[]).forEach(n=>{h+=`<div class="note"><h4>${esc(n.title)}</h4><p>${esc(n.body)}</p></div>`;});
+  if(o.footnote)h+=`<p class="footnote">${esc(o.footnote)}</p>`;
+  h+='</div>';
   return h;
 }
-
+function renderOffer(o){
+  let h=`<h1 class="section-title">${esc(o.name)}</h1>`;
+  if(o.retired)h+='<div class="pill retired">Retired</div>';
+  if(o.tagline)h+=`<p class="tagline">${esc(o.tagline)}</p>`;
+  if(o.blurb)h+=`<p class="blurb">${esc(o.blurb)}</p>`;
+  if(o.kind==='matrix'){ h+=renderMatrix(o); }
+  else {
+    h+='<div class="block">';
+    if(o.price)h+=`<div class="price-lead">${esc(o.price)}</div>`;
+    if(o.details&&o.details.length){h+='<ul class="plain">';o.details.forEach(d=>h+=`<li>${esc(d)}</li>`);h+='</ul>';}
+    if(o.footnote)h+=`<p class="footnote">${esc(o.footnote)}</p>`;
+    h+='</div>';
+  }
+  return h;
+}
+function renderResources(list){
+  let h='<h1 class="section-title">Resources</h1><p class="blurb">Live from Drive — always the current version.</p><div class="res-grid">';
+  (list||[]).forEach(r=>{h+=`<div class="res-card"><div class="rc-type">${esc((r.type||'file').toUpperCase())}</div><div class="rc-name">${esc(r.name)}</div><a href="${driveView(r.driveId)}" target="_blank" rel="noopener">Open ↗</a></div>`;});
+  h+='</div>';
+  return h;
+}
+function renderPimcon(list){
+  let h='<h1 class="section-title">PIMCon</h1><p class="blurb">Event sponsorship menu.</p><div class="block"><table class="pimcon"><tbody>';
+  (list||[]).forEach(p=>{h+=`<tr><td>${esc(p.name)}</td><td class="price">${esc(p.price)}</td></tr>`;});
+  h+='</tbody></table></div>';
+  return h;
+}
+function renderSection(data,sec){
+  if(sec.kind==='resources')return renderResources(data.resources);
+  if(sec.kind==='list')return renderPimcon(data[sec.list]);
+  let h='';
+  (sec.offers||[]).forEach((k,idx)=>{const o=data.offers[k];if(!o)return;if(idx>0)h+='<div style="height:1.5rem"></div>';h+=renderOffer(o);});
+  return h;
+}
+function renderFull(data){
+  let h='';
+  data.sections.forEach(sec=>{h+=`<div class="full-lead">${esc(sec.name)}</div>`;h+=renderSection(data,sec);});
+  return h;
+}
 async function boot(){
   const params=new URLSearchParams(location.search);
   const c=params.get('c')||'full';
-  // decode edited override from hash (#d=<lz>)
-  let override=null;
   const hash=new URLSearchParams(location.hash.slice(1));
-  const d=hash.get('d');
+  const dparam=hash.get('d');
   let master;
-  try{ master=await (await fetch('offer-rankings.json',{cache:'no-store'})).json(); }
-  catch(e){ $('#wrap').innerHTML='<div class="block">Could not load offer data.</div>'; return; }
-  if(d){
-    try{ override=JSON.parse(LZString.decompressFromEncodedURIComponent(d)); }catch(e){ override=null; }
-  }
-  const offer=override||master;
-  const meta=offer.meta||master.meta||{};
-  let body='';
-  if(c==='full'){ body=renderFull(offer); }
-  else if(c==='flagship'){ body=renderFlagship(offer.flagship); }
+  try{ master=await (await fetch('menu.json',{cache:'no-store'})).json(); }
+  catch(e){ $('#wrap').innerHTML='<div class="block">Could not load menu data.</div>'; return; }
+  let override=null;
+  if(dparam){ try{ override=JSON.parse(LZString.decompressFromEncodedURIComponent(dparam)); }catch(e){} }
+  const data=override||master;
+  const meta=data.meta||master.meta||{};
+  let body,title;
+  if(c==='full'){ body=renderFull(data); title='Full Service Menu'; }
+  else if(data.offers&&data.offers[c]){ body=renderOffer(data.offers[c]); title=data.offers[c].name; }
   else{
-    const comp=(offer.components||[]).find(x=>x.key===c);
-    body=comp?renderComponent(comp):`<div class="block">Unknown component: ${esc(c)}</div>`;
+    const sec=(data.sections||[]).find(s=>s.key===c);
+    if(sec){ body=renderSection(data,sec); title=sec.name; }
+    else { body=`<div class="block">Unknown page: ${esc(c)}</div>`; title='Not found'; }
   }
-  const head=`<div class="brandbar"><div><div class="b-title">${esc(meta.brand||'Rankings')}</div><div class="b-sub">${esc(meta.entity||'')} · Service Menu</div></div><div class="b-sub">${esc(meta.updated||'')}</div></div>`;
+  const head=`<div class="brandbar"><div><div class="b-title">${esc(meta.brand||'Rankings')}</div><div class="b-sub">${esc(meta.org||'')} · Service Menu</div></div><div class="b-sub">${esc(meta.updated||'')}</div></div>`;
   const vnote=override?'<div class="variant-note">CUSTOM VERSION — not the master template</div>':'';
   $('#wrap').innerHTML=head+vnote+body;
-  document.title=(c==='full'?'Full Offer':(c.charAt(0).toUpperCase()+c.slice(1)))+' — Rankings Service Menu';
+  document.title=title+' — Rankings Service Menu';
 }
 boot();
 </script>
