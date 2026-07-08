@@ -267,6 +267,9 @@ button { cursor: pointer; font-family: inherit; }
   transition: opacity 0.2s, transform 0.2s;
 }
 .tile-arrow svg { width: 14px; height: 14px; }
+.tile-sub { font-family: var(--font-mono, monospace); font-size: 0.72rem; color: var(--text-muted, #6b6b6b); margin-top: 0.15rem; }
+.offering-tile.retired-tile { opacity: 0.6; }
+.offering-tile.retired-tile .tile-category { color: var(--text-muted, #6b6b6b); }
 
 /* Coming soon placeholder */
 .coming-soon {
@@ -823,378 +826,7 @@ button { cursor: pointer; font-family: inherit; }
   </header>
 
   <main class="hub-body">
-    <div class="cards-grid">
-
-      <!-- PERSONAL INJURY -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Personal Injury</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'rankings-core')">Flagship</button>
-          <button class="card-tab" onclick="switchTab(this,'rankings-alacart')">A-La-Cart</button>
-          <button class="card-tab" onclick="switchTab(this,'rankings-sprints')">Module Sprints</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('rankings', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-          <div class="card-panel active" id="rankings-core">
-            <div id="rankings-tiles">
-              <button class="offering-tile" onclick="expandComparison(0,'rankings')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Local Authority</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(1,'rankings')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Regional Contender</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(2,'rankings')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Market Leader</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(3,'rankings')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">40K/Mo — Category Dominance</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-            </div>
-            <div id="rankings-comparison" style="display:none"></div>
-          </div>
-          <div class="card-panel" id="rankings-alacart">
-            <button class="offering-tile" onclick="openOffering('rankings-alacart-ppc')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Paid Media &amp; Ads Management</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-alacart-web-maint')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Web Maintenance</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-alacart-social')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Social Media Management</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-alacart-hosting')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Premium Hosting &amp; Security</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-          </div>
-          <div class="card-panel" id="rankings-sprints">
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-geo')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Technical Architecture &amp; GEO</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-intake')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Intake Optimization Sprint</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-social')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Legal Foundry Social</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-links')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">High DR Link Package</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-web')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Ignite Website Design</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-aic')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">AI Citation Magnet</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('rankings-sprints-media')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">On-Site Media Capture</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-          </div>
-        
-        <div class="add-doc-bar hidden" id="rankings-add-bar"><input class="add-doc-input" id="rankings-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('rankings')" /><button class="add-doc-go" id="rankings-add-go" onclick="addDocFromBar('rankings')">Add</button></div>
-      </div>
-      </div>
-
-      <!-- LAW FIRM -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Law Firm</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'gladiator-core')">Flagship</button>
-          <button class="card-tab" onclick="switchTab(this,'gladiator-alacart')">A-La-Cart</button>
-          <button class="card-tab" onclick="switchTab(this,'gladiator-sprints')">Module Sprints</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('gladiator', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-                    <div class="card-panel active" id="gladiator-core">
-            <div id="gladiator-tiles">
-              <button class="offering-tile" onclick="expandComparison(0,'gladiator')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">3K/Mo — Foundation</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(1,'gladiator')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Local Authority</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(2,'gladiator')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">7.5K/Mo — Regional Contender</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(3,'gladiator')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">12.5K/Mo — Market Leader</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-            </div>
-            <div id="gladiator-comparison" style="display:none"></div>
-          </div>
-
-                    <div class="card-panel" id="gladiator-alacart">
-            <button class="offering-tile" onclick="openOffering('gladiator-alacart-ppc')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Paid Media &amp; Ads Management</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-alacart-web-maint')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Web Maintenance</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-alacart-social')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Social Media Management</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-alacart-hosting')">
-              <div class="tile-info"><span class="tile-category">A-La-Cart</span><span class="tile-name">Premium Hosting &amp; Security</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-          </div>
-
-          <div class="card-panel" id="gladiator-sprints">
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-geo')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Technical Architecture &amp; GEO</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-intake')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Intake Optimization Sprint</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-social')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Legal Foundry Social</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-links')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">High DR Link Package</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-web')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">Ignite Website Design</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-aic')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">AI Citation Magnet</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('gladiator-sprints-media')">
-              <div class="tile-info"><span class="tile-category">Sprints</span><span class="tile-name">On-Site Media Capture</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-          </div>
-
-        
-        <div class="add-doc-bar hidden" id="gladiator-add-bar"><input class="add-doc-input" id="gladiator-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('gladiator')" /><button class="add-doc-go" id="gladiator-add-go" onclick="addDocFromBar('gladiator')">Add</button></div>
-      </div>
-      </div>
-
-      <!-- BRAND -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Brand</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'other-core')">Flagship</button>
-          <button class="card-tab" onclick="switchTab(this,'other-alacart')">A-La-Cart</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('other', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-          <div class="card-panel active" id="other-core">
-            <div class="coming-soon"><div class="coming-soon-dot"></div><p>Flagship offerings coming soon</p></div>
-          </div>
-          <div class="card-panel" id="other-alacart">
-            <div class="coming-soon"><div class="coming-soon-dot"></div><p>A-la-cart offerings coming soon</p></div>
-          </div>
-        
-        <div class="add-doc-bar hidden" id="other-add-bar"><input class="add-doc-input" id="other-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('other')" /><button class="add-doc-go" id="other-add-go" onclick="addDocFromBar('other')">Add</button></div>
-      </div>
-      </div>
-
-      <!-- OFFER OPTIMIZATION -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">Offer Optimization</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'offeropt-core')">Flagship</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('offeropt', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-          <div class="card-panel active" id="offeropt-core">
-            <div id="offeropt-tiles">
-              <button class="offering-tile" onclick="expandComparison(0,'offeropt')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">5K/Mo — Foundation</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(1,'offeropt')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">10K/Mo — Tier 1</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(2,'offeropt')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">15K/Mo — Tier 2</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(3,'offeropt')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">25K/Mo — Tier 3</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-              <button class="offering-tile" onclick="expandComparison(4,'offeropt')">
-                <div class="tile-info"><span class="tile-category">Flagship</span><span class="tile-name">Enterprise — Custom</span></div>
-                <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </button>
-            </div>
-            <div id="offeropt-comparison" style="display:none"></div>
-          </div>
-
-        <div class="add-doc-bar hidden" id="offeropt-add-bar"><input class="add-doc-input" id="offeropt-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('offeropt')" /><button class="add-doc-go" id="offeropt-add-go" onclick="addDocFromBar('offeropt')">Add</button></div>
-      </div>
-      </div>
-
-      <!-- PIM MEDIA -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">PIM Media</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'pimmedia-services')">Sponsorships</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('pimmedia', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-          <div class="card-panel active" id="pimmedia-services">
-            <button class="offering-tile" onclick="openOffering('pimmedia-entry-4k')">
-              <div class="tile-info"><span class="tile-category">Package</span>
-              <span class="tile-name">4K/Mo — Entry</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-            <button class="offering-tile" onclick="openOffering('pimmedia-growth-6k')">
-              <div class="tile-info"><span class="tile-category">Package</span>
-              <span class="tile-name">6K/Mo — Growth</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-            <button class="offering-tile" onclick="openOffering('pimmedia-dominance-12k')">
-              <div class="tile-info"><span class="tile-category">Package</span>
-              <span class="tile-name">12K/Mo — Dominance</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-          </div>
-
-        <div class="add-doc-bar hidden" id="pimmedia-add-bar"><input class="add-doc-input" id="pimmedia-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('pimmedia')" /><button class="add-doc-go" id="pimmedia-add-go" onclick="addDocFromBar('pimmedia')">Add</button></div>
-      </div>
-      </div>
-
-      <!-- PIMCON -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-logo-wrap">
-            <span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">PIMCon</span>
-          </div>
-        </div>
-        <div class="card-tabs">
-          <button class="card-tab active" onclick="switchTab(this,'pimcon-services')">Sponsorships</button>
-        <button class="add-drive-btn" title="Refresh from Drive" onclick="refreshCard('pimcon', this)"><svg viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12,2 12,5.5 8.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-        <div class="card-body">
-          <div class="card-panel active" id="pimcon-services">
-            <button class="offering-tile" onclick="openOffering('pimcon-title-sponsor')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Title Sponsor — $250,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('pimcon-closing-party')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Closing Party Sponsor — $50,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('pimcon-comedy-show')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Comedy Show Sponsor — $50,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('pimcon-vip-dinner')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">VIP Dinner Sponsor — $50,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile" onclick="openOffering('pimcon-welcome-party')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Welcome Party Sponsor — $50,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-lunch')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Lunch Sponsor — $25,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-premium-exhibitor')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Premium Exhibitor — $25,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-vip-tables')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">VIP Tables Sponsor — $20,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-recharge-station')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Work/Recharge Station — $20,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-morning-wellness')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Morning Wellness Sponsor — $17,500</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-event-app')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Event App Sponsor — $15,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-spa')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Spa Sponsor — $15,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-standard-exhibitor')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Standard Exhibitor — $15,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-commercial')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Commercial Sponsorship — $10,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-room-key')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Room Key Sponsor — $10,000</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-badge')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Badge Sponsor — $7,500</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-lanyard')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Lanyard Sponsor — $7,500</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-snack-break')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Snack/Break Sponsor — $7,500</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="offering-tile collapsed-tile" onclick="openOffering('pimcon-wifi')">
-              <div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">Wi-Fi Sponsor — $7,500</span></div>
-              <span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </button>
-            <button class="expand-toggle" onclick="toggleExpand(this)">
-              <span class="expand-label">Show 14 more</span>
-              <svg viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-          </div>
-
-        <div class="add-doc-bar hidden" id="pimcon-add-bar"><input class="add-doc-input" id="pimcon-add-input" type="text" placeholder="Paste Google Doc URL to add offering…" onkeydown="if(event.key==='Enter')addDocFromBar('pimcon')" /><button class="add-doc-go" id="pimcon-add-go" onclick="addDocFromBar('pimcon')">Add</button></div>
-      </div>
-      </div>
-
-    </div>
+    <div class="cards-grid" id="cards-grid"></div>
   </main>
 
   <footer class="site-footer">
@@ -3001,7 +2633,47 @@ function screenshotGrid(entityKey) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => { buildComparisonGrids(); loadCustomTiles(); loadDocOfferings(); });
+// ── Hub cards rendered from the builder's menu.json (single source of truth) ──
+function priceHint(o){
+  if(o.kind==='matrix' && o.priceRows && o.priceRows[0]){
+    const v=(o.priceRows[0].values||[]).filter(Boolean);
+    if(v.length) return v.length>1 ? v[0]+' – '+v[v.length-1] : v[0];
+  }
+  return o.price||'';
+}
+async function renderHubFromMenu(){
+  const grid=document.getElementById('cards-grid');
+  if(!grid) return;
+  let data;
+  try{ data=await (await fetch('builder/menu.json',{cache:'no-store'})).json(); }
+  catch(e){ grid.innerHTML='<div style="color:#fff;padding:2rem;">Could not load menu.</div>'; return; }
+  const arrow='<span class="tile-arrow"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const openPage=c=>`window.open('builder/render.html?c=${c}&_='+Date.now(),'_blank')`;
+  let html='';
+  data.sections.forEach(sec=>{
+    html+='<div class="card"><div class="card-head"><div class="card-logo-wrap"><span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">'+esc(sec.name)+'</span></div></div><div class="card-body"><div class="card-panel active">';
+    if(sec.kind==='offers'){
+      (sec.offers||[]).forEach(k=>{
+        const o=data.offers[k]; if(!o) return;
+        const ph=priceHint(o);
+        html+=`<button class="offering-tile${o.retired?' retired-tile':''}" onclick="${openPage(k)}"><div class="tile-info"><span class="tile-category">${o.retired?'Retired':esc(sec.name)}</span><span class="tile-name">${esc(o.name)}</span>${ph?`<span class="tile-sub">${esc(ph)}</span>`:''}</div>${arrow}</button>`;
+      });
+    } else if(sec.kind==='list'){
+      html+=`<button class="offering-tile" onclick="${openPage(sec.key)}"><div class="tile-info"><span class="tile-category">Sponsorship</span><span class="tile-name">${(data[sec.list]||[]).length} sponsorship tiers</span></div>${arrow}</button>`;
+    } else if(sec.kind==='resources'){
+      (data.resources||[]).forEach(r=>{
+        html+=`<button class="offering-tile" onclick="window.open('https://drive.google.com/file/d/${r.driveId}/view','_blank')"><div class="tile-info"><span class="tile-category">${esc((r.type||'file').toUpperCase())}</span><span class="tile-name">${esc(r.name)}</span></div>${arrow}</button>`;
+      });
+    }
+    html+='</div></div></div>';
+  });
+  grid.innerHTML=html;
+  // if the hub is already unlocked, reveal the freshly-built cards
+  const hub=document.getElementById('hub');
+  if(hub && hub.classList.contains('visible')) grid.querySelectorAll('.card').forEach(c=>c.classList.add('in'));
+}
+document.addEventListener('DOMContentLoaded', renderHubFromMenu);
 </script>
 
 
