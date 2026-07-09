@@ -7,311 +7,1545 @@
     "driveFolderId": "1ftgxgpJhX3eEFTWysJ9dtpFH2T51DP_7"
   },
   "sections": [
-    { "key": "modern-search", "name": "Modern Search", "kind": "offers", "offers": ["modern-search-dominance", "modern-search-foundation"] },
-    { "key": "brand", "name": "Brand", "kind": "offers", "offers": ["ignite-design", "social-video-dominance"] },
-    { "key": "pimcon", "name": "PIMCon", "kind": "list", "list": "pimcon" },
-    { "key": "resources", "name": "Resources", "kind": "resources" },
-    { "key": "retired", "name": "Retired Offers", "kind": "offers", "offers": ["retired-pi-flagship", "retired-paid-media", "retired-web-maintenance", "retired-social", "retired-hosting", "retired-technical-geo-sprint", "retired-intake-optimization", "retired-legal-foundry-social", "retired-high-dr-links", "retired-ignite-website", "retired-ai-citation-magnet", "retired-media-capture"] }
+    {
+      "key": "modern-search",
+      "name": "Modern Search",
+      "kind": "offers",
+      "offers": [
+        "modern-search-dominance",
+        "modern-search-foundation"
+      ]
+    },
+    {
+      "key": "brand",
+      "name": "Brand",
+      "kind": "offers",
+      "offers": [
+        "ignite-design",
+        "social-video-dominance"
+      ]
+    },
+    {
+      "key": "sprints-alacart",
+      "name": "Sprints & A La Carte",
+      "kind": "offers",
+      "offers": [
+        "paid-media",
+        "web-maintenance",
+        "social-media",
+        "technical-geo-sprint",
+        "high-dr-links",
+        "media-capture"
+      ]
+    },
+    {
+      "key": "pimcon",
+      "name": "PIMCon",
+      "kind": "list",
+      "list": "pimcon"
+    },
+    {
+      "key": "resources",
+      "name": "Resources",
+      "kind": "resources"
+    },
+    {
+      "key": "retired",
+      "name": "Retired Offers",
+      "kind": "offers",
+      "offers": [
+        "retired-pi-flagship",
+        "retired-hosting",
+        "retired-intake-optimization",
+        "retired-legal-foundry-social",
+        "retired-ignite-website",
+        "retired-ai-citation-magnet"
+      ]
+    }
   ],
   "offers": {
     "modern-search-dominance": {
-      "key": "modern-search-dominance", "name": "Modern Search Dominance", "section": "modern-search", "kind": "matrix",
-      "source": { "driveId": "1c1riXY6CC3Qm4oB1tM10v31Vy8btriBN", "name": "Modern Search Flagship 10k-Custom SOW.docx", "updated": "2026-07-07" },
+      "key": "modern-search-dominance",
+      "name": "Modern Search Dominance",
+      "section": "modern-search",
+      "kind": "matrix",
+      "source": {
+        "driveId": "1c1riXY6CC3Qm4oB1tM10v31Vy8btriBN",
+        "name": "Modern Search Flagship 10k-Custom SOW.docx",
+        "updated": "2026-07-07"
+      },
       "tagline": "Be the name AI and Google recommend when clients search.",
       "blurb": "Clients no longer just Google a lawyer — they ask AI. Modern Search Dominance makes a firm the most visible, most-cited name across every surface that now decides where cases go: Google, Maps, and the AI engines (ChatGPT, Claude, Perplexity, Gemini). Four tiers scale from single-market growth to total market dominance. Zero ad management fees, ever — you fund LSA, PPC, and paid media spend directly, and we take no commission.",
       "tiers": [
-        { "key": "t1", "num": 1, "name": "Tier 1" },
-        { "key": "t2", "num": 2, "name": "Tier 2" },
-        { "key": "t3", "num": 3, "name": "Tier 3" },
-        { "key": "ent", "num": 4, "name": "Enterprise" }
+        {
+          "key": "t1",
+          "num": 1,
+          "name": "Tier 1"
+        },
+        {
+          "key": "t2",
+          "num": 2,
+          "name": "Tier 2"
+        },
+        {
+          "key": "t3",
+          "num": 3,
+          "name": "Tier 3"
+        },
+        {
+          "key": "ent",
+          "num": 4,
+          "name": "Enterprise"
+        }
       ],
       "groups": [
-        { "name": "AI Search & Google AI Overviews (AIO)", "items": [
-          { "label": "Google AI Overviews Optimization (AIO)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "AI Citation — Google AI surfaces (firm named in Google's AI answers)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Schema & Structured Data Markup", "values": ["✓", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Generative Engine Optimization (GEO)", "items": [
-          { "label": "AI Entity Development & Knowledge Graph", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "AI Citation — External LLMs (ChatGPT, Claude, Perplexity, Gemini)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Reddit & Community Engagement", "values": ["✕", "✓", "✓", "Custom"] },
-          { "label": "AI Citation Magnet (proprietary citable data studies)", "values": ["✕", "✕", "✓", "Custom"] }
-        ]},
-        { "name": "Local SEO & Google Maps Dominance", "items": [
-          { "label": "Google Business Profile Mgmt & Optimization", "values": ["Up to 3", "Up to 5", "Up to 10", "Custom"] },
-          { "label": "Review Playbook", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "GBP Posts, Photos & Q&A Management", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Local Citation Building & NAP Consistency", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Share of Local Voice (SoLV) Tracking", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Local Spam Fighting", "values": ["✓", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Organic Search (SEO)", "items": [
-          { "label": "SEO, Practice Area Pages & E-E-A-T Content", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Content Production", "values": ["6/mo", "9/mo", "15/mo", "Custom"] },
-          { "label": "Content Refreshing", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Link Building — High Authority Links", "values": ["10 min", "15 min", "25 min", "Custom"] }
-        ]},
-        { "name": "Google Ads — $0 Management Fee", "items": [
-          { "label": "Local Services Ads (LSA)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Google Ads (Pay-Per-Click)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Ad Management Fee (you fund spend directly — no commission)", "values": ["$0", "$0", "$0", "$0"] }
-        ]},
-        { "name": "Brand Authority", "items": [
-          { "label": "Press Releases", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Digital PR", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Industry Award Applications / Strategy", "values": ["✕", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Conversion", "items": [
-          { "label": "Conversion Rate Optimization (CRO)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Intake Optimization Playbook", "values": ["✓", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Insight & Access", "items": [
-          { "label": "Growth Reporting & Attribution", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Onsite Strategy Visits", "values": ["✕", "✕", "✓", "Custom"] }
-        ]},
-        { "name": "Engagement", "items": [
-          { "label": "Best For", "values": ["Single-market growth", "Established firms scaling", "Market leaders", "Multi-market / DSA"] },
-          { "label": "Account Management", "values": ["Standard", "Senior AM", "Key AM", "Key AM"] }
-        ]}
+        {
+          "name": "AI Search & Google AI Overviews (AIO)",
+          "items": [
+            {
+              "label": "Google AI Overviews Optimization (AIO)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "AI Citation — Google AI surfaces (firm named in Google's AI answers)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Schema & Structured Data Markup",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Generative Engine Optimization (GEO)",
+          "items": [
+            {
+              "label": "AI Entity Development & Knowledge Graph",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "AI Citation — External LLMs (ChatGPT, Claude, Perplexity, Gemini)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Reddit & Community Engagement",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "AI Citation Magnet (proprietary citable data studies)",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Local SEO & Google Maps Dominance",
+          "items": [
+            {
+              "label": "Google Business Profile Mgmt & Optimization",
+              "values": [
+                "Up to 3",
+                "Up to 5",
+                "Up to 10",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Review Playbook",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "GBP Posts, Photos & Q&A Management",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Local Citation Building & NAP Consistency",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Share of Local Voice (SoLV) Tracking",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Local Spam Fighting",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Organic Search (SEO)",
+          "items": [
+            {
+              "label": "SEO, Practice Area Pages & E-E-A-T Content",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Content Production",
+              "values": [
+                "6/mo",
+                "9/mo",
+                "15/mo",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Content Refreshing",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Link Building — High Authority Links",
+              "values": [
+                "10 min",
+                "15 min",
+                "25 min",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Google Ads — $0 Management Fee",
+          "items": [
+            {
+              "label": "Local Services Ads (LSA)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Google Ads (Pay-Per-Click)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Ad Management Fee (you fund spend directly — no commission)",
+              "values": [
+                "$0",
+                "$0",
+                "$0",
+                "$0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Brand Authority",
+          "items": [
+            {
+              "label": "Press Releases",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Digital PR",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Industry Award Applications / Strategy",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Conversion",
+          "items": [
+            {
+              "label": "Conversion Rate Optimization (CRO)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Intake Optimization Playbook",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Insight & Access",
+          "items": [
+            {
+              "label": "Growth Reporting & Attribution",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Onsite Strategy Visits",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Engagement",
+          "items": [
+            {
+              "label": "Best For",
+              "values": [
+                "Single-market growth",
+                "Established firms scaling",
+                "Market leaders",
+                "Multi-market / DSA"
+              ]
+            },
+            {
+              "label": "Account Management",
+              "values": [
+                "Standard",
+                "Senior AM",
+                "Key AM",
+                "Key AM"
+              ]
+            }
+          ]
+        }
       ],
       "priceRows": [
-        { "label": "Month-to-Month (per month)", "values": ["$10,000", "$15,000", "$25,000", "$30K+"], "lead": true },
-        { "label": "12-Month Total (at monthly rate)", "values": ["$120,000", "$180,000", "$300,000", "Custom"] },
-        { "label": "Prepay 12 Months — Total (10% off)", "values": ["$108,000", "$162,000", "$270,000", "Custom"] }
+        {
+          "label": "Month-to-Month (per month)",
+          "values": [
+            "$10,000",
+            "$15,000",
+            "$25,000",
+            "$30K+"
+          ],
+          "lead": true
+        },
+        {
+          "label": "12-Month Total (at monthly rate)",
+          "values": [
+            "$120,000",
+            "$180,000",
+            "$300,000",
+            "Custom"
+          ]
+        },
+        {
+          "label": "Prepay 12 Months — Total (10% off)",
+          "values": [
+            "$108,000",
+            "$162,000",
+            "$270,000",
+            "Custom"
+          ]
+        }
       ],
       "footnote": "Zero ad management fees, ever. You fund LSA, PPC, and paid media spend directly — every dollar goes to cases, not commission."
     },
     "modern-search-foundation": {
-      "key": "modern-search-foundation", "name": "Modern Search Foundation", "section": "modern-search", "kind": "matrix",
-      "source": { "driveId": "15XMv0nMc5RTYiJ00ZtxGMsdznB036-GA", "name": "Modern Search Foundation 5k SOW.docx", "updated": "2026-07-07" },
+      "key": "modern-search-foundation",
+      "name": "Modern Search Foundation",
+      "section": "modern-search",
+      "kind": "matrix",
+      "source": {
+        "driveId": "15XMv0nMc5RTYiJ00ZtxGMsdznB036-GA",
+        "name": "Modern Search Foundation 5k SOW.docx",
+        "updated": "2026-07-07"
+      },
       "tagline": "Foundational visibility — get found and cited in AI and local search.",
       "blurb": "The entry point into AI and local search. Modern Search Foundation gets a firm found, cited, and on the map across Google, the local pack, and the AI engines. It's the floor that establishes visibility — not a full market-dominance program. Most firms graduate into Modern Search Dominance as they scale.",
-      "tiers": [ { "key": "inc", "num": 1, "name": "Included" } ],
+      "tiers": [
+        {
+          "key": "inc",
+          "num": 1,
+          "name": "Included"
+        }
+      ],
       "groups": [
-        { "name": "AI Search & Citations", "items": [
-          { "label": "Google AI Overviews Optimization (AIO)", "values": ["✓"] },
-          { "label": "AI Citation — Google AI surfaces", "values": ["✓"] },
-          { "label": "AI Entity Development & Knowledge Graph", "values": ["✓"] },
-          { "label": "AI Citation — External LLMs (ChatGPT, Claude, Perplexity, Gemini)", "values": ["✓"] },
-          { "label": "Schema & Structured Data Markup", "values": ["✓"] }
-        ]},
-        { "name": "Local SEO & Maps", "items": [
-          { "label": "Google Business Profile (1) Mgmt & Optimization", "values": ["✓"] },
-          { "label": "Review Playbook", "values": ["✓"] },
-          { "label": "GBP Posts, Photos & Q&A Management", "values": ["✓"] },
-          { "label": "Local Citation Building & NAP Consistency", "values": ["✓"] },
-          { "label": "Share of Local Voice (SoLV) Tracking", "values": ["✓"] }
-        ]},
-        { "name": "Organic & Authority", "items": [
-          { "label": "SEO, Practice Area Pages & E-E-A-T Content", "values": ["✓"] },
-          { "label": "Content Production", "values": ["3 assets/mo"] },
-          { "label": "Press Releases", "values": ["✓"] }
-        ]},
-        { "name": "Conversion & Access", "items": [
-          { "label": "Intake Optimization Playbook", "values": ["✓"] },
-          { "label": "Growth Reporting & Attribution", "values": ["✓"] }
-        ]},
-        { "name": "Not Included at Foundation", "items": [
-          { "label": "Paid Media / Google Ads Management (available in Dominance)", "values": ["✕"] },
-          { "label": "Digital PR, Awards & AI Citation Magnet", "values": ["✕"] },
-          { "label": "Onsite Strategy & Competitor Displacement", "values": ["✕"] }
-        ]}
+        {
+          "name": "AI Search & Citations",
+          "items": [
+            {
+              "label": "Google AI Overviews Optimization (AIO)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Citation — Google AI surfaces",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Entity Development & Knowledge Graph",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Citation — External LLMs (ChatGPT, Claude, Perplexity, Gemini)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Schema & Structured Data Markup",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Local SEO & Maps",
+          "items": [
+            {
+              "label": "Google Business Profile (1) Mgmt & Optimization",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Review Playbook",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "GBP Posts, Photos & Q&A Management",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Local Citation Building & NAP Consistency",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Share of Local Voice (SoLV) Tracking",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Organic & Authority",
+          "items": [
+            {
+              "label": "SEO, Practice Area Pages & E-E-A-T Content",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Content Production",
+              "values": [
+                "3 assets/mo"
+              ]
+            },
+            {
+              "label": "Press Releases",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Conversion & Access",
+          "items": [
+            {
+              "label": "Intake Optimization Playbook",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Growth Reporting & Attribution",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Not Included at Foundation",
+          "items": [
+            {
+              "label": "Paid Media / Google Ads Management (available in Dominance)",
+              "values": [
+                "✕"
+              ]
+            },
+            {
+              "label": "Digital PR, Awards & AI Citation Magnet",
+              "values": [
+                "✕"
+              ]
+            },
+            {
+              "label": "Onsite Strategy & Competitor Displacement",
+              "values": [
+                "✕"
+              ]
+            }
+          ]
+        }
       ],
       "priceRows": [
-        { "label": "Month-to-Month (per month, no commitment)", "values": ["$5,000/mo"], "lead": true },
-        { "label": "12-Month Total (at monthly rate)", "values": ["$60,000"] },
-        { "label": "Prepay 12 Months (10% off, paid upfront)", "values": ["$54,000"] }
+        {
+          "label": "Month-to-Month (per month, no commitment)",
+          "values": [
+            "$5,000/mo"
+          ],
+          "lead": true
+        },
+        {
+          "label": "12-Month Total (at monthly rate)",
+          "values": [
+            "$60,000"
+          ]
+        },
+        {
+          "label": "Prepay 12 Months (10% off, paid upfront)",
+          "values": [
+            "$54,000"
+          ]
+        }
       ],
       "footnote": "Foundational visibility, not a dominance program. Upgrade path: Modern Search Dominance ($10K–$30K+/mo)."
     },
     "ignite-design": {
-      "key": "ignite-design", "name": "Ignite Conversion Design", "section": "brand", "kind": "matrix",
-      "source": { "driveId": "1bsZu0iwuuUXotlbgj832VeIhgRf-dt6W", "name": "Ignite Design SOW.docx", "updated": "2026-07-07" },
+      "key": "ignite-design",
+      "name": "Ignite Conversion Design",
+      "section": "brand",
+      "kind": "matrix",
+      "source": {
+        "driveId": "1bsZu0iwuuUXotlbgj832VeIhgRf-dt6W",
+        "name": "Ignite Design SOW.docx",
+        "updated": "2026-07-07"
+      },
       "tagline": "A high-performance, conversion-built website engineered to turn traffic into signed cases.",
       "blurb": "Ignite Conversion Design is a high-performance website engineered to capture and convert search, local, and AI-driven traffic into signed cases — and built AI-ready so engines like Google AI, ChatGPT, Perplexity, and Gemini can read and cite the firm from day one. A standalone offer that pairs naturally with Modern Search Dominance. Typically delivered within 90 days. No subscription required.",
-      "tiers": [ { "key": "inc", "num": 1, "name": "Included" } ],
+      "tiers": [
+        {
+          "key": "inc",
+          "num": 1,
+          "name": "Included"
+        }
+      ],
       "groups": [
-        { "name": "Design & Build", "items": [
-          { "label": "WordPress Gutenberg Development", "values": ["✓"] },
-          { "label": "Custom Page Design (home, about, contact + core pages)", "values": ["✓"] },
-          { "label": "Practice Area / Service Pages", "values": ["✓"] },
-          { "label": "Attorney Bio Pages (built for trust + E-E-A-T)", "values": ["✓"] },
-          { "label": "Responsive Mobile Design", "values": ["✓"] },
-          { "label": "Premium Plugin Integration", "values": ["✓"] },
-          { "label": "Content Migration", "values": ["✓"] },
-          { "label": "Silo Architecture (topical authority structure)", "values": ["✓"] }
-        ]},
-        { "name": "Conversion & Intake", "items": [
-          { "label": "Conversion-Optimization Design", "values": ["✓"] },
-          { "label": "Landing Page Design", "values": ["✓"] },
-          { "label": "Lead Capture & Intake Optimization", "values": ["✓"] },
-          { "label": "Multi-Step Intake Forms", "values": ["✓"] },
-          { "label": "Click-to-Call & Sticky Mobile CTAs", "values": ["✓"] },
-          { "label": "Case Results / Testimonials Module", "values": ["✓"] },
-          { "label": "Conversion Copywriting (key pages)", "values": ["✓"] },
-          { "label": "CRM & Intake Integration", "values": ["✓"] }
-        ]},
-        { "name": "AI Search Readiness", "items": [
-          { "label": "Schema & Structured Data Foundation (ships AI-ready)", "values": ["✓"] },
-          { "label": "AI / LLM Crawlability & Entity Setup", "values": ["✓"] },
-          { "label": "E-E-A-T Architecture (machine-readable trust signals)", "values": ["✓"] },
-          { "label": "Core Web Vitals Optimization", "values": ["✓"] },
-          { "label": "SEO Technical Foundation", "values": ["✓"] },
-          { "label": "XML Sitemap & Indexing Setup", "values": ["✓"] }
-        ]},
-        { "name": "Tracking & Analytics", "items": [
-          { "label": "GA4 + Conversion Event Tracking", "values": ["✓"] },
-          { "label": "Call Tracking Integration", "values": ["✓"] },
-          { "label": "Heatmap / Behavior Tracking Setup", "values": ["✓"] }
-        ]},
-        { "name": "Security & Performance", "items": [
-          { "label": "SSL & Security Hardening", "values": ["✓"] },
-          { "label": "Page Speed / Performance Tuning", "values": ["✓"] }
-        ]},
-        { "name": "Engagement & Handoff", "items": [
-          { "label": "2 Rounds of Revisions", "values": ["✓"] },
-          { "label": "Post-Launch Support — 30 Days", "values": ["✓"] }
-        ]}
+        {
+          "name": "Design & Build",
+          "items": [
+            {
+              "label": "WordPress Gutenberg Development",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Custom Page Design (home, about, contact + core pages)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Practice Area / Service Pages",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Attorney Bio Pages (built for trust + E-E-A-T)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Responsive Mobile Design",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Premium Plugin Integration",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Content Migration",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Silo Architecture (topical authority structure)",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Conversion & Intake",
+          "items": [
+            {
+              "label": "Conversion-Optimization Design",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Landing Page Design",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Lead Capture & Intake Optimization",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Multi-Step Intake Forms",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Click-to-Call & Sticky Mobile CTAs",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Case Results / Testimonials Module",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Conversion Copywriting (key pages)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "CRM & Intake Integration",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "AI Search Readiness",
+          "items": [
+            {
+              "label": "Schema & Structured Data Foundation (ships AI-ready)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI / LLM Crawlability & Entity Setup",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "E-E-A-T Architecture (machine-readable trust signals)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Core Web Vitals Optimization",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "SEO Technical Foundation",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "XML Sitemap & Indexing Setup",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Tracking & Analytics",
+          "items": [
+            {
+              "label": "GA4 + Conversion Event Tracking",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Call Tracking Integration",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Heatmap / Behavior Tracking Setup",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Security & Performance",
+          "items": [
+            {
+              "label": "SSL & Security Hardening",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Page Speed / Performance Tuning",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Engagement & Handoff",
+          "items": [
+            {
+              "label": "2 Rounds of Revisions",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Post-Launch Support — 30 Days",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        }
       ],
       "priceRows": [
-        { "label": "Investment Level (3-month build)", "values": ["$6,000/mo × 3 (total $18,000)"], "lead": true },
-        { "label": "Premium Hosting & Security (billed separately, ongoing)", "values": ["+ $375/mo"] }
+        {
+          "label": "Investment Level (3-month build)",
+          "values": [
+            "$6,000/mo × 3 (total $18,000)"
+          ],
+          "lead": true
+        },
+        {
+          "label": "Premium Hosting & Security (billed separately, ongoing)",
+          "values": [
+            "+ $375/mo"
+          ]
+        }
       ],
       "notes": [
-        { "title": "Optional Add-On: Brand Foundation (+$4,500)", "body": "Logo / wordmark build or refresh, color system + typography, brand style guide, and social + Google Business Profile visual assets. A great site on a weak brand underperforms." },
-        { "title": "Premium Hosting & Security ($375/mo, included by default)", "body": "Managed enterprise hosting + 99.9% uptime, daily backups + one-click restore, malware monitoring, firewall, SSL & security hardening, performance tuning, and ongoing plugin/core/security updates. Opt-out available with a signed risk acknowledgment." }
+        {
+          "title": "Optional Add-On: Brand Foundation (+$4,500)",
+          "body": "Logo / wordmark build or refresh, color system + typography, brand style guide, and social + Google Business Profile visual assets. A great site on a weak brand underperforms."
+        },
+        {
+          "title": "Premium Hosting & Security ($375/mo, included by default)",
+          "body": "Managed enterprise hosting + 99.9% uptime, daily backups + one-click restore, malware monitoring, firewall, SSL & security hardening, performance tuning, and ongoing plugin/core/security updates. Opt-out available with a signed risk acknowledgment."
+        }
       ],
       "footnote": "Pairs naturally with Modern Search Dominance. Day 31 onward continues under the Modern Search Dominance subscription, if subscribed."
     },
     "social-video-dominance": {
-      "key": "social-video-dominance", "name": "Social Video Dominance", "section": "brand", "kind": "matrix",
-      "source": { "driveId": "1s080WCKLtZFtG_zCph7w75sJzD1S2veS", "name": "Social Video Dominance SOW.docx", "updated": "2026-07-07" },
+      "key": "social-video-dominance",
+      "name": "Social Video Dominance",
+      "section": "brand",
+      "kind": "matrix",
+      "source": {
+        "driveId": "1s080WCKLtZFtG_zCph7w75sJzD1S2veS",
+        "name": "Social Video Dominance SOW.docx",
+        "updated": "2026-07-07"
+      },
       "tagline": "Own the feed in your market.",
       "blurb": "Attention decides cases before intent does. Social Video Dominance makes a firm the name potential clients already know before they ever search — done-for-you video across YouTube, Instagram, Facebook, TikTok, and LinkedIn. The number you buy is total posts per month; every tier is video-first, and statics/motion graphics round out the total when footage runs short. Four tiers scale from owning the feed to total market presence.",
       "tiers": [
-        { "key": "t1", "num": 1, "name": "Tier 1" },
-        { "key": "t2", "num": 2, "name": "Tier 2" },
-        { "key": "t3", "num": 3, "name": "Tier 3" },
-        { "key": "ent", "num": 4, "name": "Enterprise" }
+        {
+          "key": "t1",
+          "num": 1,
+          "name": "Tier 1"
+        },
+        {
+          "key": "t2",
+          "num": 2,
+          "name": "Tier 2"
+        },
+        {
+          "key": "t3",
+          "num": 3,
+          "name": "Tier 3"
+        },
+        {
+          "key": "ent",
+          "num": 4,
+          "name": "Enterprise"
+        }
       ],
       "groups": [
-        { "name": "Production", "items": [
-          { "label": "Monthly Production Days", "values": ["Half-day", "Full-day", "1–2 days", "Custom"] },
-          { "label": "Tier 3 production (onsite or onsite + remote)", "values": ["—", "—", "✓", "Custom"] },
-          { "label": "Total Posts per Month (video-first)", "values": ["30", "45", "60", "Custom"] },
-          { "label": "Statics & Motion Graphics (count toward the total)", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Quarterly Batch Production Option", "values": ["✓", "✕", "✕", "Custom"] },
-          { "label": "Unlimited Video Editing (client-provided footage)", "values": ["✕", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Distribution", "items": [
-          { "label": "YouTube, Instagram, Facebook, TikTok, LinkedIn", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Longform Video Podcast", "values": ["✕", "✕", "✓", "Custom"] }
-        ]},
-        { "name": "Paid Media", "items": [
-          { "label": "Video Ads Created per Month", "values": ["1–2", "3–5", "6+", "Custom"] },
-          { "label": "Paid Social Management", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Programmatic (OTT / display retargeting)", "values": ["✕", "✕", "✓", "Custom"] },
-          { "label": "First-Month Ad Spend Included", "values": ["$1,000", "$1,000", "$1,000", "Custom"] }
-        ]},
-        { "name": "Conversion", "items": [
-          { "label": "DM + Lead Capture", "values": ["✓", "✓", "✓", "Custom"] }
-        ]},
-        { "name": "Brand", "items": [
-          { "label": "Attorney Brand Angles", "values": ["✕", "✓", "✓", "Custom"] },
-          { "label": "Personality Brand Build", "values": ["✕", "✕", "✓", "Custom"] }
-        ]},
-        { "name": "Insight & Access", "items": [
-          { "label": "Monthly Performance Review", "values": ["✓", "✓", "✓", "Custom"] },
-          { "label": "Quarterly Strategy Session", "values": ["✕", "✓", "✓", "Custom"] },
-          { "label": "Executive Strategy + Executive Review", "values": ["✕", "✕", "✓", "Custom"] }
-        ]},
-        { "name": "Engagement", "items": [
-          { "label": "Best For", "values": ["Owning the feed", "Owning the market", "Owning every screen", "Multi-market, built to spec"] }
-        ]}
+        {
+          "name": "Production",
+          "items": [
+            {
+              "label": "Monthly Production Days",
+              "values": [
+                "Half-day",
+                "Full-day",
+                "1–2 days",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Tier 3 production (onsite or onsite + remote)",
+              "values": [
+                "—",
+                "—",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Total Posts per Month (video-first)",
+              "values": [
+                "30",
+                "45",
+                "60",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Statics & Motion Graphics (count toward the total)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Quarterly Batch Production Option",
+              "values": [
+                "✓",
+                "✕",
+                "✕",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Unlimited Video Editing (client-provided footage)",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Distribution",
+          "items": [
+            {
+              "label": "YouTube, Instagram, Facebook, TikTok, LinkedIn",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Longform Video Podcast",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Paid Media",
+          "items": [
+            {
+              "label": "Video Ads Created per Month",
+              "values": [
+                "1–2",
+                "3–5",
+                "6+",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Paid Social Management",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Programmatic (OTT / display retargeting)",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "First-Month Ad Spend Included",
+              "values": [
+                "$1,000",
+                "$1,000",
+                "$1,000",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Conversion",
+          "items": [
+            {
+              "label": "DM + Lead Capture",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Brand",
+          "items": [
+            {
+              "label": "Attorney Brand Angles",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Personality Brand Build",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Insight & Access",
+          "items": [
+            {
+              "label": "Monthly Performance Review",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Quarterly Strategy Session",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "Executive Strategy + Executive Review",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "Custom"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Engagement",
+          "items": [
+            {
+              "label": "Best For",
+              "values": [
+                "Owning the feed",
+                "Owning the market",
+                "Owning every screen",
+                "Multi-market, built to spec"
+              ]
+            }
+          ]
+        }
       ],
       "priceRows": [
-        { "label": "Month-to-Month (per month)", "values": ["$10,000", "$15,000", "$25,000", "$30K+"], "lead": true },
-        { "label": "12-Month Total (at monthly rate)", "values": ["$120,000", "$180,000", "$300,000", "Custom"] },
-        { "label": "Prepay 12 Months (10% off)", "values": ["$108,000", "$162,000", "$270,000", "Custom"] }
+        {
+          "label": "Month-to-Month (per month)",
+          "values": [
+            "$10,000",
+            "$15,000",
+            "$25,000",
+            "$30K+"
+          ],
+          "lead": true
+        },
+        {
+          "label": "12-Month Total (at monthly rate)",
+          "values": [
+            "$120,000",
+            "$180,000",
+            "$300,000",
+            "Custom"
+          ]
+        },
+        {
+          "label": "Prepay 12 Months (10% off)",
+          "values": [
+            "$108,000",
+            "$162,000",
+            "$270,000",
+            "Custom"
+          ]
+        }
       ],
       "footnote": "Pairs with Modern Search: social wins attention; search wins intent. Firms running both own the moment a client sees them and the moment they go looking."
     },
     "retired-pi-flagship": {
-      "key": "retired-pi-flagship", "name": "PI Flagship (retired)", "section": "retired", "kind": "matrix", "retired": true,
+      "key": "retired-pi-flagship",
+      "name": "PI Flagship (retired)",
+      "section": "retired",
+      "kind": "matrix",
+      "retired": true,
       "tagline": "Retired — superseded by Modern Search Dominance.",
       "blurb": "Legacy Personal Injury flagship tiers. Kept for reference; use Modern Search Dominance for new deals.",
       "tiers": [
-        { "key": "t1", "num": 1, "name": "Local Authority" },
-        { "key": "t2", "num": 2, "name": "Regional Contender" },
-        { "key": "t3", "num": 3, "name": "Market Leader" },
-        { "key": "t4", "num": 4, "name": "Category Dominance" }
+        {
+          "key": "t1",
+          "num": 1,
+          "name": "Local Authority"
+        },
+        {
+          "key": "t2",
+          "num": 2,
+          "name": "Regional Contender"
+        },
+        {
+          "key": "t3",
+          "num": 3,
+          "name": "Market Leader"
+        },
+        {
+          "key": "t4",
+          "num": 4,
+          "name": "Category Dominance"
+        }
       ],
       "groups": [
-        { "name": "SEO + AIO + GEO", "items": [
-          { "label": "Search Engine Optimization (SEO)", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Generative Engine Optimization (GEO) & AIO", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Content: Launch (Months 1–4)", "values": ["10–12 Assets", "20–25 Assets", "25–30 Assets", "30–40 Assets"] },
-          { "label": "Content: Growth (Months 5+)", "values": ["4–6 Assets", "6–8 Assets", "8–10 Assets", "10–15 Assets"] },
-          { "label": "Local SEO Optimization", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Google Business Profile (GBP) Management", "values": ["1 to 3 GBPs", "Up to 5 GBPs", "Up to 10 GBPs", "Up to 20 GBPs"] },
-          { "label": "Link Building", "values": ["4 min.", "6 min.", "10 min.", "20 min."] }
-        ]},
-        { "name": "Demand Amplification", "items": [
-          { "label": "Digital PR", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Local Services Ads (LSA)", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Google Ads (PPC)", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Meta Ads (Facebook & Instagram)", "values": ["✕", "✓", "✓", "✓"] },
-          { "label": "YouTube Ads", "values": ["✕", "✕", "✓", "✓"] },
-          { "label": "Omnipresence (OTT & Programmatic Ads)", "values": ["✕", "✕", "✕", "✓"] }
-        ]},
-        { "name": "Insight & Access", "items": [
-          { "label": "Growth Reporting & Attribution", "values": ["✓", "✓", "✓", "✓"] },
-          { "label": "Account Management", "values": ["✓", "✓", "Senior AM", "Key AM"] }
-        ]}
+        {
+          "name": "SEO + AIO + GEO",
+          "items": [
+            {
+              "label": "Search Engine Optimization (SEO)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Generative Engine Optimization (GEO) & AIO",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Content: Launch (Months 1–4)",
+              "values": [
+                "10–12 Assets",
+                "20–25 Assets",
+                "25–30 Assets",
+                "30–40 Assets"
+              ]
+            },
+            {
+              "label": "Content: Growth (Months 5+)",
+              "values": [
+                "4–6 Assets",
+                "6–8 Assets",
+                "8–10 Assets",
+                "10–15 Assets"
+              ]
+            },
+            {
+              "label": "Local SEO Optimization",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Google Business Profile (GBP) Management",
+              "values": [
+                "1 to 3 GBPs",
+                "Up to 5 GBPs",
+                "Up to 10 GBPs",
+                "Up to 20 GBPs"
+              ]
+            },
+            {
+              "label": "Link Building",
+              "values": [
+                "4 min.",
+                "6 min.",
+                "10 min.",
+                "20 min."
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Demand Amplification",
+          "items": [
+            {
+              "label": "Digital PR",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Local Services Ads (LSA)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Google Ads (PPC)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Meta Ads (Facebook & Instagram)",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "YouTube Ads",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Omnipresence (OTT & Programmatic Ads)",
+              "values": [
+                "✕",
+                "✕",
+                "✕",
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Insight & Access",
+          "items": [
+            {
+              "label": "Growth Reporting & Attribution",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Account Management",
+              "values": [
+                "✓",
+                "✓",
+                "Senior AM",
+                "Key AM"
+              ]
+            }
+          ]
+        }
       ],
       "priceRows": [
-        { "label": "Monthly Investment", "values": ["$10,000", "$15,000", "$25,000", "$40,000"], "lead": true }
+        {
+          "label": "Monthly Investment",
+          "values": [
+            "$10,000",
+            "$15,000",
+            "$25,000",
+            "$40,000"
+          ],
+          "lead": true
+        }
       ],
       "footnote": "Retired offer. Reference only."
     },
-    "retired-paid-media": { "key": "retired-paid-media", "name": "Paid Media & Ads Management (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$3,000–$7,500/mo (by ad spend)", "blurb": "Legacy à-la-carte paid media management. Superseded by the $0-management-fee model inside Modern Search Dominance.", "details": [] },
-    "retired-web-maintenance": { "key": "retired-web-maintenance", "name": "Web Maintenance (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$1,250–$3,750/mo", "blurb": "Legacy Web Maintenance tiers (Authority / Ascend / Prestige / Apex).", "details": [] },
-    "retired-social": { "key": "retired-social", "name": "Social Media Management (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$5,000/mo", "blurb": "Legacy social offer. Superseded by Social Video Dominance.", "details": [] },
-    "retired-hosting": { "key": "retired-hosting", "name": "Premium Hosting & Security (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$375/mo", "blurb": "Legacy standalone hosting listing. Now bundled with Ignite Conversion Design.", "details": [] },
-    "retired-technical-geo-sprint": { "key": "retired-technical-geo-sprint", "name": "Technical Architecture & GEO Sprint (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$12,000", "blurb": "Legacy 90-day sprint.", "details": [] },
-    "retired-intake-optimization": { "key": "retired-intake-optimization", "name": "Intake Optimization Sprint (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$9,000", "blurb": "Legacy sprint.", "details": [] },
-    "retired-legal-foundry-social": { "key": "retired-legal-foundry-social", "name": "Legal Foundry Social (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "Custom", "blurb": "Legacy sprint.", "details": [] },
-    "retired-high-dr-links": { "key": "retired-high-dr-links", "name": "High DR Link Package (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "Custom", "blurb": "Legacy sprint.", "details": [] },
-    "retired-ignite-website": { "key": "retired-ignite-website", "name": "Ignite Website Design (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$18,000", "blurb": "Legacy website build. Superseded by Ignite Conversion Design.", "details": [] },
-    "retired-ai-citation-magnet": { "key": "retired-ai-citation-magnet", "name": "AI Citation Magnet (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$9,000 / $15,000", "blurb": "Legacy standalone. Now a line item within Modern Search Dominance.", "details": [] },
-    "retired-media-capture": { "key": "retired-media-capture", "name": "On-Site Media Capture (retired)", "section": "retired", "kind": "simple", "retired": true, "price": "$15,000", "blurb": "Legacy production sprint.", "details": [] }
+    "retired-hosting": {
+      "key": "retired-hosting",
+      "name": "Premium Hosting & Security (retired)",
+      "section": "retired",
+      "kind": "simple",
+      "retired": true,
+      "price": "$375/mo",
+      "blurb": "Legacy standalone hosting listing. Now bundled with Ignite Conversion Design.",
+      "details": []
+    },
+    "retired-intake-optimization": {
+      "key": "retired-intake-optimization",
+      "name": "Intake Optimization Sprint (retired)",
+      "section": "retired",
+      "kind": "simple",
+      "retired": true,
+      "price": "$9,000",
+      "blurb": "Legacy sprint.",
+      "details": []
+    },
+    "retired-legal-foundry-social": {
+      "key": "retired-legal-foundry-social",
+      "name": "Legal Foundry Social (retired)",
+      "section": "retired",
+      "kind": "simple",
+      "retired": true,
+      "price": "Custom",
+      "blurb": "Legacy sprint.",
+      "details": []
+    },
+    "retired-ignite-website": {
+      "key": "retired-ignite-website",
+      "name": "Ignite Website Design (retired)",
+      "section": "retired",
+      "kind": "simple",
+      "retired": true,
+      "price": "$18,000",
+      "blurb": "Legacy website build. Superseded by Ignite Conversion Design.",
+      "details": []
+    },
+    "retired-ai-citation-magnet": {
+      "key": "retired-ai-citation-magnet",
+      "name": "AI Citation Magnet (retired)",
+      "section": "retired",
+      "kind": "simple",
+      "retired": true,
+      "price": "$9,000 / $15,000",
+      "blurb": "Legacy standalone. Now a line item within Modern Search Dominance.",
+      "details": []
+    },
+    "paid-media": {
+      "key": "paid-media",
+      "name": "Paid Media & Ads Management",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "$3,000–$7,500/mo (by ad spend)",
+      "blurb": "Full-service paid media management across Google Ads, LSA, and Meta, run by a dedicated specialist. The management fee scales with monthly ad spend; ad spend is billed separately.",
+      "details": []
+    },
+    "web-maintenance": {
+      "key": "web-maintenance",
+      "name": "Web Maintenance",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "$1,250–$3,750/mo",
+      "blurb": "Ongoing website updates, technical improvements, and development support — tiered monthly pools of development hours (Authority / Ascend / Prestige / Apex).",
+      "details": []
+    },
+    "social-media": {
+      "key": "social-media",
+      "name": "Social Media Management",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "$5,000/mo",
+      "blurb": "Done-for-you organic social management — content calendar, graphics, and short-form video across the firm's primary channels.",
+      "details": []
+    },
+    "technical-geo-sprint": {
+      "key": "technical-geo-sprint",
+      "name": "Technical Architecture & GEO Sprint",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "$12,000",
+      "blurb": "A 90-day intensive that strips technical friction and builds the Knowledge Graph needed to dominate AI-driven search (Gemini, Perplexity, ChatGPT).",
+      "details": [],
+      "timeline": "90 Days"
+    },
+    "high-dr-links": {
+      "key": "high-dr-links",
+      "name": "High DR Link Package",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "Custom",
+      "blurb": "Concentrated acquisition of high-authority backlinks to accelerate rankings and domain authority.",
+      "details": []
+    },
+    "media-capture": {
+      "key": "media-capture",
+      "name": "On-Site Media Capture",
+      "section": "sprints-alacart",
+      "kind": "simple",
+      "price": "$15,000",
+      "blurb": "On-site production day capturing photo and video assets for the firm, delivered within 10 business days. One round of minor revisions included.",
+      "details": []
+    }
   },
   "resources": [
-    { "name": "Modern Search Sellsheet", "driveId": "1uarSNLF4xvZ-p3B8TEXbqodpyR2L1KRH", "type": "pdf" },
-    { "name": "Authority Sprint Sellsheet", "driveId": "1rhqIDeIoIpDsMAhlG5c9xiyz1i_od1Qm", "type": "pdf" },
-    { "name": "Ignite Design Sellsheet", "driveId": "1lBBQ7_30MliRzAMZT6D75JREE0oBRjvD", "type": "pdf" },
-    { "name": "Internal Offer Routing Map", "driveId": "171yo9oRsXFWwkFmE3VVg9O3teG1O6KKm", "type": "pdf" },
-    { "name": "Rankings Capabilities Deck", "driveId": "1XdaemhCDBPSxebIlIcxi-Ro-4Fqco__o", "type": "pptx" }
+    {
+      "name": "Modern Search Sellsheet",
+      "driveId": "1uarSNLF4xvZ-p3B8TEXbqodpyR2L1KRH",
+      "type": "pdf"
+    },
+    {
+      "name": "Authority Sprint Sellsheet",
+      "driveId": "1rhqIDeIoIpDsMAhlG5c9xiyz1i_od1Qm",
+      "type": "pdf"
+    },
+    {
+      "name": "Ignite Design Sellsheet",
+      "driveId": "1lBBQ7_30MliRzAMZT6D75JREE0oBRjvD",
+      "type": "pdf"
+    },
+    {
+      "name": "Internal Offer Routing Map",
+      "driveId": "171yo9oRsXFWwkFmE3VVg9O3teG1O6KKm",
+      "type": "pdf"
+    },
+    {
+      "name": "Rankings Capabilities Deck",
+      "driveId": "1XdaemhCDBPSxebIlIcxi-Ro-4Fqco__o",
+      "type": "pptx"
+    }
   ],
   "pimcon": [
-    { "name": "Title Sponsor", "price": "$250,000" },
-    { "name": "Closing Party Sponsor", "price": "$50,000" },
-    { "name": "Comedy Show Sponsor", "price": "$50,000" },
-    { "name": "VIP Dinner Sponsor", "price": "$50,000" },
-    { "name": "Welcome Party Sponsor", "price": "$50,000" },
-    { "name": "Lunch Sponsor", "price": "$25,000" },
-    { "name": "Premium Exhibitor", "price": "$25,000" },
-    { "name": "VIP Tables Sponsor", "price": "$20,000" },
-    { "name": "Work/Recharge Station Sponsor", "price": "$20,000" },
-    { "name": "Morning Wellness Sponsor", "price": "$17,500" },
-    { "name": "Event App Sponsor", "price": "$15,000" },
-    { "name": "Spa Sponsor", "price": "$15,000" },
-    { "name": "Standard Exhibitor", "price": "$15,000" },
-    { "name": "Commercial Sponsorship", "price": "$10,000" },
-    { "name": "Room Key Sponsor", "price": "$10,000" },
-    { "name": "Badge Sponsor", "price": "$7,500" },
-    { "name": "Lanyard Sponsor", "price": "$7,500" },
-    { "name": "Snack/Break Sponsor", "price": "$7,500" },
-    { "name": "Wi-Fi Sponsor", "price": "$7,500" }
+    {
+      "name": "Title Sponsor",
+      "price": "$250,000"
+    },
+    {
+      "name": "Closing Party Sponsor",
+      "price": "$50,000"
+    },
+    {
+      "name": "Comedy Show Sponsor",
+      "price": "$50,000"
+    },
+    {
+      "name": "VIP Dinner Sponsor",
+      "price": "$50,000"
+    },
+    {
+      "name": "Welcome Party Sponsor",
+      "price": "$50,000"
+    },
+    {
+      "name": "Lunch Sponsor",
+      "price": "$25,000"
+    },
+    {
+      "name": "Premium Exhibitor",
+      "price": "$25,000"
+    },
+    {
+      "name": "VIP Tables Sponsor",
+      "price": "$20,000"
+    },
+    {
+      "name": "Work/Recharge Station Sponsor",
+      "price": "$20,000"
+    },
+    {
+      "name": "Morning Wellness Sponsor",
+      "price": "$17,500"
+    },
+    {
+      "name": "Event App Sponsor",
+      "price": "$15,000"
+    },
+    {
+      "name": "Spa Sponsor",
+      "price": "$15,000"
+    },
+    {
+      "name": "Standard Exhibitor",
+      "price": "$15,000"
+    },
+    {
+      "name": "Commercial Sponsorship",
+      "price": "$10,000"
+    },
+    {
+      "name": "Room Key Sponsor",
+      "price": "$10,000"
+    },
+    {
+      "name": "Badge Sponsor",
+      "price": "$7,500"
+    },
+    {
+      "name": "Lanyard Sponsor",
+      "price": "$7,500"
+    },
+    {
+      "name": "Snack/Break Sponsor",
+      "price": "$7,500"
+    },
+    {
+      "name": "Wi-Fi Sponsor",
+      "price": "$7,500"
+    }
   ]
 }
