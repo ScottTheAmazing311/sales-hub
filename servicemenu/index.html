@@ -819,7 +819,7 @@ button { cursor: pointer; font-family: inherit; }
       </div>
     </div>
     <div class="header-meta">
-      6 entities &nbsp;·&nbsp; Services menu<br>
+      <span id="hub-count">4</span> categories &nbsp;·&nbsp; Services menu<br>
       Confidential — internal use only
       <br>
       <a href="builder/" style="display:inline-block;margin-top:.6rem;font-family:var(--font-mono,monospace);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;background:var(--yellow,#eaff6a);color:var(--navy,#07374F);text-decoration:none;padding:.4rem .8rem;border-radius:999px;font-weight:600">✎ Menu Builder</a>
@@ -2671,6 +2671,8 @@ async function renderHubFromMenu(){
     html+='</div></div></div>';
   });
   grid.innerHTML=html;
+  const cntEl=document.getElementById('hub-count');
+  if(cntEl) cntEl.textContent=data.sections.filter(s=>!s.internal).length;
   // if the hub is already unlocked, reveal the freshly-built cards
   const hub=document.getElementById('hub');
   if(hub && hub.classList.contains('visible')) grid.querySelectorAll('.card').forEach(c=>c.classList.add('in'));
