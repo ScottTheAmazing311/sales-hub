@@ -42,7 +42,8 @@
       "key": "pimcon",
       "name": "PIMCon",
       "kind": "list",
-      "list": "pimcon"
+      "list": "pimcon",
+      "internal": true
     },
     {
       "key": "resources",
