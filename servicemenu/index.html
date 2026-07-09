@@ -798,10 +798,10 @@ button { cursor: pointer; font-family: inherit; }
     <h1 class="pw-title">Attorney Rankings<br>Service Menu</h1>
     <p class="pw-sub">Centralized service offerings for all entities under the Attorney Rankings umbrella.</p>
     <div class="pw-divider"></div>
-    <label class="pw-label" for="pw-input">Access Code</label>
-    <input type="password" id="pw-input" class="pw-input" placeholder="——" maxlength="8" autocomplete="off">
+    <label class="pw-label" for="pw-input">Access Password</label>
+    <input type="password" id="pw-input" class="pw-input" placeholder="Enter password" maxlength="32" autocomplete="off">
     <button class="pw-btn" onclick="checkPassword()">Enter Hub</button>
-    <p class="pw-error" id="pw-error">Incorrect access code. Try again.</p>
+    <p class="pw-error" id="pw-error">Incorrect password. Try again.</p>
   </div>
 </div>
 
@@ -1853,7 +1853,7 @@ const offerings = {
 /* ==============================================
    PASSWORD
    ============================================== */
-const PASS = '1234';
+const PASS = 'Rankings2026';
 
 function checkPassword() {
   const input = document.getElementById('pw-input');
