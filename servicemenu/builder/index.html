@@ -114,7 +114,7 @@ function setPath(obj,path,val){const p=path.split('.');let o=obj;for(let i=0;i<p
 function buildSide(){
   let h='';
   state.sections.forEach(sec=>{
-    h+=`<div class="grp">${sec.name}</div>`;
+    h+=`<div class="grp">${sec.name}${sec.internal?' · <span style="color:var(--yellow-warm)">hidden from hub</span>':''}</div>`;
     if(sec.kind==='offers'){
       sec.offers.forEach(k=>{const o=state.offers[k];if(!o)return;h+=`<a data-key="${k}" class="${k===current?'active':''}${o.retired?' retired':''}" onclick="select('${k}')">${escAttr(o.name)}</a>`;});
     } else {

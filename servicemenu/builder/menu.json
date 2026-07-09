@@ -60,7 +60,8 @@
         "retired-legal-foundry-social",
         "retired-ignite-website",
         "retired-ai-citation-magnet"
-      ]
+      ],
+      "internal": true
     }
   ],
   "offers": {

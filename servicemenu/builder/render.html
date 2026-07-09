@@ -131,7 +131,7 @@ function renderSection(data,sec){
 }
 function renderFull(data){
   let h='';
-  data.sections.forEach(sec=>{h+=`<div class="full-lead">${esc(sec.name)}</div>`;h+=renderSection(data,sec);});
+  data.sections.forEach(sec=>{if(sec.internal)return;h+=`<div class="full-lead">${esc(sec.name)}</div>`;h+=renderSection(data,sec);});
   return h;
 }
 async function boot(){

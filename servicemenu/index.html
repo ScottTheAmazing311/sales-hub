@@ -2652,6 +2652,7 @@ async function renderHubFromMenu(){
   const openPage=c=>`window.open('builder/render.html?c=${c}&_='+Date.now(),'_blank')`;
   let html='';
   data.sections.forEach(sec=>{
+    if(sec.internal) return; // internal-only sections (e.g. Retired) never render on the viewer hub
     html+='<div class="card"><div class="card-head"><div class="card-logo-wrap"><span style="font-family:var(--font-head);font-size:1.5rem;font-weight:400;color:#fcfaec;letter-spacing:0">'+esc(sec.name)+'</span></div></div><div class="card-body"><div class="card-panel active">';
     if(sec.kind==='offers'){
       (sec.offers||[]).forEach(k=>{
