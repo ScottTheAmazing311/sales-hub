@@ -72,10 +72,6 @@
 </style>
 </head>
 <body>
-<div id="gate"><div class="box"><h1>Service Menu Builder</h1><p>Enter the builder password to continue.</p>
-  <input id="gate-pw" type="password" inputmode="numeric" placeholder="••••" autofocus>
-  <button onclick="tryGate()">Enter</button><div class="err" id="gate-err"></div></div></div>
-
 <div id="app" style="display:none">
   <div class="top" id="top">
     <div class="t-title">Service Menu Builder<small>Rankings · Attorney Rankings Org</small></div>
@@ -95,16 +91,14 @@ const $=(s,p=document)=>p.querySelector(s);
 const clone=o=>JSON.parse(JSON.stringify(o));
 let master=null,state=null,current=null;
 
-function tryGate(){ if($('#gate-pw').value.trim()===PW){sessionStorage.setItem('rk_builder','1');openApp();} else {$('#gate-err').textContent='Incorrect password';} }
-$('#gate-pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryGate();});
 async function openApp(){
-  $('#gate').style.display='none';$('#app').style.display='';
+  $('#app').style.display='';
   master=await (await fetch('menu.json',{cache:'no-store'})).json();
   state=clone(master);
   current=state.sections[0].offers[0];
   buildSide();renderEditor();
 }
-if(sessionStorage.getItem('rk_builder')==='1'){ openApp(); }
+openApp();
 
 const isDirty=()=>JSON.stringify(state)!==JSON.stringify(master);
 function markDirty(){ $('#top').classList.toggle('dirty',isDirty()); }
