@@ -464,3 +464,31 @@ function parseDate_(v) {
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d;
 }
+
+// ============================ MAINTENANCE ===================================
+
+/** One-off: highlight active rows missing Classification so they're easy to
+ *  find and fill. Colors the Metro (I) and Classification (J) cells orange. */
+function highlightUnmarked() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(CONFIG.MASTER_TAB);
+  const firstData = CONFIG.MASTER_HEADER_ROW + 1;
+  const lastRow = sh.getLastRow();
+  if (lastRow < firstData) return;
+  const rows = sh.getRange(firstData, 1, lastRow - firstData + 1, COL.lastSynced).getValues();
+  let n = 0;
+  rows.forEach((r, i) => {
+    if (String(r[COL.status - 1]) === 'Active' && !String(r[COL.classification - 1]).trim()) {
+      sh.getRange(firstData + i, COL.metro, 1, 2).setBackground('#F8CBAD'); // cols I:J
+      n++;
+    }
+  });
+  Logger.log('Highlighted %s unmarked active rows.', n);
+}
+
+/** Undo the highlighting from highlightUnmarked() once the cells are filled. */
+function clearHighlights() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(CONFIG.MASTER_TAB);
+  const firstData = CONFIG.MASTER_HEADER_ROW + 1;
+  const lastRow = sh.getLastRow();
+  if (lastRow >= firstData) sh.getRange(firstData, COL.metro, lastRow - firstData + 1, 2).setBackground(null);
+}
