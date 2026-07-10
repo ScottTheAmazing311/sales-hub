@@ -210,11 +210,14 @@
     Chart.defaults.scale.grid.color = 'rgba(0,0,0,0.05)';
     Chart.defaults.scale.ticks.color = '#737373';
 
-    function fetchSheet(gid, range) {
+    function fetchSheet(gid, range, headers) {
         return new Promise(function(resolve, reject) {
             var cb = '__perfData_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
             var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=responseHandler:' + cb + '&gid=' + gid;
             if (range) url += '&range=' + encodeURIComponent(range);
+            // headers=0 keeps the first row as data (no header inference); also lets gviz
+            // type a text-only range (e.g. the pipeline MRR column) as strings, not numbers.
+            if (headers != null) url += '&headers=' + headers;
             window[cb] = function(response) {
                 delete window[cb];
                 if (script.parentNode) script.parentNode.removeChild(script);
@@ -430,7 +433,7 @@
         return pi >= 0 && currentPeriods[pi] ? currentPeriods[pi].label : '';
     }
 
-    Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchSheet(SALES_SUMMARY_GID, 'A20:C40')]).then(function(results) {
+    Promise.all([fetchSheet(SALES_SUMMARY_GID), fetchSheet(SALES_SUMMARY_GID, 'A30:C40', 0)]).then(function(results) {
         salesTable = results[0];
         salesPipelineTable = results[1];
         renderSales(salesTable, salesPipelineTable);
