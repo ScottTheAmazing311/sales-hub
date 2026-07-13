@@ -3,7 +3,7 @@
     "brand": "Rankings",
     "org": "Attorney Rankings Organization",
     "title": "Service Menu",
-    "updated": "2026-07-08",
+    "updated": "2026-07-13",
     "driveFolderId": "1ftgxgpJhX3eEFTWysJ9dtpFH2T51DP_7"
   },
   "sections": [
@@ -275,7 +275,7 @@
           ]
         },
         {
-          "name": "Google Ads — $0 Management Fee",
+          "name": "Paid Ads — $0 Management Fee",
           "items": [
             {
               "label": "Local Services Ads (LSA)",
@@ -288,6 +288,15 @@
             },
             {
               "label": "Google Ads (Pay-Per-Click)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "Custom"
+              ]
+            },
+            {
+              "label": "ChatGPT Ads",
               "values": [
                 "✓",
                 "✓",
@@ -341,15 +350,6 @@
         {
           "name": "Conversion",
           "items": [
-            {
-              "label": "Conversion Rate Optimization (CRO)",
-              "values": [
-                "✓",
-                "✓",
-                "✓",
-                "Custom"
-              ]
-            },
             {
               "label": "Intake Optimization Playbook",
               "values": [
