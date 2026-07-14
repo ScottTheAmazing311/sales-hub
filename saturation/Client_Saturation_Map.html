@@ -617,6 +617,11 @@ const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx
 const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=284342695&tqx=responseHandler:handleClientData`;
 
 // Saturation level mapping
+// Normalize a state to its 2-letter code so "Illinois" and "IL" group together
+// (the City Saturation tab is already normalized; the raw roster is not).
+const STATE_TO_ABBR = {alabama:'AL',alaska:'AK',arizona:'AZ',arkansas:'AR',california:'CA',colorado:'CO',connecticut:'CT',delaware:'DE',florida:'FL',georgia:'GA',hawaii:'HI',idaho:'ID',illinois:'IL',indiana:'IN',iowa:'IA',kansas:'KS',kentucky:'KY',louisiana:'LA',maine:'ME',maryland:'MD',massachusetts:'MA',michigan:'MI',minnesota:'MN',mississippi:'MS',missouri:'MO',montana:'MT',nebraska:'NE',nevada:'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND',ohio:'OH',oklahoma:'OK',oregon:'OR',pennsylvania:'PA','rhode island':'RI','south carolina':'SC','south dakota':'SD',tennessee:'TN',texas:'TX',utah:'UT',vermont:'VT',virginia:'VA',washington:'WA','west virginia':'WV',wisconsin:'WI',wyoming:'WY','district of columbia':'DC'};
+function stAbbr(v){ const s=String(v==null?'':v).trim(); if(s.length===2)return s.toUpperCase(); return STATE_TO_ABBR[s.toLowerCase()]||s; }
+
 const SAT_LEVELS = { 4: 'Very High', 3: 'High', 2: 'Moderate', 1: 'Low' };
 const SAT_COLOR = {
   'Very High': '#FFB3B3',
@@ -668,7 +673,7 @@ async function fetchSheetData() {
     };
     const name = String(cell(2)).trim();
     const city = String(cell(6)).trim();
-    const state = String(cell(7)).trim();
+    const state = stAbbr(cell(7));
     const dma = String(cell(8)).trim(); // Metro/DMA
     const status = String(cell(10)).trim().toLowerCase();
     const classification = String(cell(9)).trim(); // PI-MVA, PI-Other, Non-PI
