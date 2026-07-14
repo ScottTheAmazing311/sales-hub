@@ -70,11 +70,15 @@ const CONFIG = {
     mrr: 'deal_mrr',               // company-level MRR rollup (best available)
     city: 'city',
     state: 'state',
-    classification: '',            // PI-MVA/PI-Other/Non-PI is maintained in the
-                                   // sheet, not HubSpot — never overwrite it.
+    classification: 'pi_or_nonpi', // "PI or Non-PI" — authoritative source of truth
     clientStatus: 'customer_type', // "Customer Type"
     churnDate: '',                 // no churn-date field; we stamp detection date.
   },
+
+  // Map the HubSpot "PI or Non-PI" stored values -> the labels the sheet/map use.
+  // Note: the "PI-MVA" option is stored internally as "PI". Unlisted values pass
+  // through unchanged.
+  CLASSIFICATION_MAP: { 'PI': 'PI-MVA', 'PI-Other': 'PI-Other', 'Non-PI': 'Non-PI' },
 
   // "Customer Type" values that mean CHURNED. In HubSpot the "Previous Client"
   // option is stored with the internal value "Churned"; Active Website / Active
@@ -295,14 +299,17 @@ function reconcileMaster_(companies, owners) {
     row[COL.status - 1] = isChurned ? 'Churned' : 'Active';
     row[COL.churnDate - 1] = isChurned ? (row[COL.churnDate - 1] || now) : '';
     row[COL.lastSynced - 1] = now;
+    // Classification is authoritative from HubSpot: overwrite whenever HubSpot
+    // has a value (leaves the cell alone if HubSpot's is empty).
+    const cls = mapClass_(c[P.classification]);
+    if (cls) row[COL.classification - 1] = cls;
     // Everything else: fill only when the sheet cell is empty — never clobber
-    // manually-maintained data (MRR, geo cleanup, classification, owner).
+    // manually-maintained data (MRR, geo cleanup, owner).
     if (!row[COL.owner - 1] && ownerName) row[COL.owner - 1] = ownerName;
     if (!row[COL.practiceArea - 1] && c[P.practiceArea]) row[COL.practiceArea - 1] = c[P.practiceArea];
     if (!row[COL.mrr - 1] && toNumber_(c[P.mrr]) > 0) row[COL.mrr - 1] = toNumber_(c[P.mrr]);
     if (!row[COL.city - 1] && c[P.city]) row[COL.city - 1] = c[P.city];
     if (!row[COL.state - 1] && c[P.state]) row[COL.state - 1] = c[P.state];
-    if (!row[COL.classification - 1] && c[P.classification]) row[COL.classification - 1] = c[P.classification];
     updated++;
     if (isChurned) churned++;
   });
@@ -322,6 +329,7 @@ function reconcileMaster_(companies, owners) {
     row[COL.mrr - 1] = toNumber_(c[P.mrr]);
     row[COL.city - 1] = c[P.city] || '';
     row[COL.state - 1] = c[P.state] || '';
+    row[COL.classification - 1] = mapClass_(c[P.classification]);
     row[COL.status - 1] = 'Active';
     row[COL.lastSynced - 1] = now;
     appends.push(row);
@@ -432,6 +440,13 @@ const STATE_ABBR = {
   'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
   'district of columbia':'DC',
 };
+
+/** Map a HubSpot "PI or Non-PI" value to the sheet/map label (e.g. PI -> PI-MVA). */
+function mapClass_(v) {
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  return CONFIG.CLASSIFICATION_MAP[s] || s;
+}
 
 /** Normalize a state to its 2-letter code ("New Mexico" -> "NM"). */
 function stateAbbr_(v) {
