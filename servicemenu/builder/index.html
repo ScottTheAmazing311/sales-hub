@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Service Menu Builder — Rankings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <style>
   :root{--navy:#07374F;--navy-2:#0e5f87;--cream:#fefaed;--white:#fff;--yellow:#eaff6a;--yellow-warm:#eedc82;--blue:#3c94d1;--dark:#2c2c2c;--muted:#6b6b6b;--line:rgba(7,55,79,.14);
-    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'DM Mono','SF Mono',monospace;}
+    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'Roboto Mono','SF Mono',monospace;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   body{font-family:var(--body);background:var(--cream);color:var(--dark)}
   button{cursor:pointer;font-family:inherit}
@@ -58,6 +58,12 @@
   table.medit td.lbl input{font-weight:500}
   table.medit tr.grp-row td{background:rgba(7,55,79,.07);font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);font-weight:600;padding:.35rem}
   table.medit tr.price-row td:first-child input{font-family:var(--mono);font-weight:600}
+  .rowtool{width:30px;text-align:center}
+  .del-btn{border:none;background:transparent;color:#c0392b;font-size:.95rem;line-height:1;padding:.2rem .35rem;border-radius:5px;opacity:.5;cursor:pointer}
+  .del-btn:hover{opacity:1;background:rgba(192,57,43,.12)}
+  tr.addrow td{border-bottom:none;padding:.45rem .22rem}
+  .add-btn{border:1px dashed var(--line);background:transparent;color:var(--navy);font-size:.7rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:.35rem .8rem;border-radius:6px;cursor:pointer}
+  .add-btn:hover{background:rgba(7,55,79,.05);border-color:var(--navy)}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   .tier-edit{border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem}
   .tier-edit.off{opacity:.45;background:rgba(7,55,79,.03)}
@@ -151,21 +157,24 @@ function editOffer(o,key){
     // matrix
     h+='<div class="card"><h3>Service Matrix</h3><table class="medit"><tbody>';
     o.groups.forEach((g,gi)=>{
-      h+=`<tr class="grp-row"><td colspan="${o.tiers.length+1}"><input data-path="${b}.groups.${gi}.name" value="${escAttr(g.name)}" style="font-weight:600;background:transparent"></td></tr>`;
+      h+=`<tr class="grp-row"><td colspan="${o.tiers.length+1}"><input data-path="${b}.groups.${gi}.name" value="${escAttr(g.name)}" style="font-weight:600;background:transparent"></td><td class="rowtool"><button class="del-btn" title="Delete this section + its rows" onclick="delGroup('${key}',${gi})">✕</button></td></tr>`;
       g.items.forEach((it,ii)=>{
         h+=`<tr><td class="lbl"><input data-path="${b}.groups.${gi}.items.${ii}.label" value="${escAttr(it.label)}"></td>`;
         it.values.forEach((v,vi)=>{h+=`<td><input data-path="${b}.groups.${gi}.items.${ii}.values.${vi}" value="${escAttr(v)}" style="text-align:center"></td>`;});
-        h+='</tr>';
+        h+=`<td class="rowtool"><button class="del-btn" title="Delete row" onclick="delItem('${key}',${gi},${ii})">✕</button></td></tr>`;
       });
+      h+=`<tr class="addrow"><td colspan="${o.tiers.length+2}"><button class="add-btn" onclick="addItem('${key}',${gi})">+ Add row</button></td></tr>`;
     });
+    h+=`<tr class="addrow"><td colspan="${o.tiers.length+2}"><button class="add-btn" onclick="addGroup('${key}')">+ Add section</button></td></tr>`;
     h+='</tbody></table></div>';
     // price rows
     h+='<div class="card"><h3>Pricing Rows</h3><table class="medit"><tbody>';
     (o.priceRows||[]).forEach((p,pi)=>{
       h+=`<tr class="price-row"><td class="lbl"><input data-path="${b}.priceRows.${pi}.label" value="${escAttr(p.label)}"></td>`;
       p.values.forEach((v,vi)=>{h+=`<td><input data-path="${b}.priceRows.${pi}.values.${vi}" value="${escAttr(v)}" style="text-align:center"></td>`;});
-      h+='</tr>';
+      h+=`<td class="rowtool"><button class="del-btn" title="Delete price row" onclick="delPrice('${key}',${pi})">✕</button></td></tr>`;
     });
+    h+=`<tr class="addrow"><td colspan="${o.tiers.length+2}"><button class="add-btn" onclick="addPrice('${key}')">+ Add price row</button></td></tr>`;
     h+='</tbody></table></div>';
     if(o.notes&&o.notes.length){
       h+='<div class="card"><h3>Notes</h3>';
@@ -189,10 +198,21 @@ function editResources(){
 }
 function editPimcon(listKey){
   let h='<h2>PIMCon</h2><p class="hint">Sponsorship tiers. Edit names and prices; session-only until you Save to master.</p><div class="card"><table class="medit"><tbody>';
-  (state[listKey]||[]).forEach((p,i)=>{h+=`<tr><td class="lbl"><input data-path="${listKey}.${i}.name" value="${escAttr(p.name)}"></td><td><input data-path="${listKey}.${i}.price" value="${escAttr(p.price)}" style="text-align:right"></td></tr>`;});
+  (state[listKey]||[]).forEach((p,i)=>{h+=`<tr><td class="lbl"><input data-path="${listKey}.${i}.name" value="${escAttr(p.name)}"></td><td><input data-path="${listKey}.${i}.price" value="${escAttr(p.price)}" style="text-align:right"></td><td class="rowtool"><button class="del-btn" title="Delete" onclick="delPimcon(${i})">✕</button></td></tr>`;});
+  h+=`<tr class="addrow"><td colspan="3"><button class="add-btn" onclick="addPimcon()">+ Add sponsorship</button></td></tr>`;
   h+='</tbody></table></div>';
   return h;
 }
+
+// ── Structural editing: add/delete rows & sections (session-only until Save) ──
+function delItem(key,gi,ii){ state.offers[key].groups[gi].items.splice(ii,1); markDirty(); renderEditor(); }
+function addItem(key,gi){ var o=state.offers[key]; o.groups[gi].items.push({label:'New line',values:o.tiers.map(function(){return '✓';})}); markDirty(); renderEditor(); }
+function delGroup(key,gi){ if(!confirm('Delete this whole section and all its rows?'))return; state.offers[key].groups.splice(gi,1); markDirty(); renderEditor(); }
+function addGroup(key){ state.offers[key].groups.push({name:'New Section',items:[]}); markDirty(); renderEditor(); }
+function delPrice(key,pi){ state.offers[key].priceRows.splice(pi,1); markDirty(); renderEditor(); }
+function addPrice(key){ var o=state.offers[key]; (o.priceRows=o.priceRows||[]).push({label:'New price row',values:o.tiers.map(function(){return '';})}); markDirty(); renderEditor(); }
+function delPimcon(i){ state.pimcon.splice(i,1); markDirty(); renderEditor(); }
+function addPimcon(){ state.pimcon.push({name:'New Sponsorship',price:'$0'}); markDirty(); renderEditor(); }
 
 function wireInputs(){
   $('#editor').querySelectorAll('[data-path]').forEach(inp=>{

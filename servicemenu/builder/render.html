@@ -6,11 +6,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Rankings — Service Menu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{--navy:#07374F;--navy-2:#0e5f87;--cream:#fefaed;--white:#fff;--yellow:#eaff6a;--yellow-warm:#eedc82;--blue:#3c94d1;--dark:#2c2c2c;--muted:#6b6b6b;--line:rgba(7,55,79,.12);
-    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'DM Mono','SF Mono',monospace;}
+    --head:'DM Serif Display',Georgia,serif;--body:'DM Sans',-apple-system,sans-serif;--mono:'Roboto Mono','SF Mono',monospace;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   body{font-family:var(--body);background:var(--cream);color:var(--dark);line-height:1.5}
   .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
@@ -59,7 +60,7 @@
 </head>
 <body>
 <div class="wrap" id="wrap"><div class="block">Loading…</div></div>
-<div class="toolbar"><button onclick="window.print()">⬇ Download PDF</button></div>
+<div class="toolbar"><button onclick="exportImage('png')">⬇ PNG</button><button onclick="exportImage('jpeg')">⬇ JPG</button><button onclick="window.print()">⬇ PDF</button></div>
 <script>
 const $=(s,p=document)=>p.querySelector(s);
 const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -158,6 +159,18 @@ async function boot(){
   const vnote=override?'<div class="variant-note">CUSTOM VERSION — not the master template</div>':'';
   $('#wrap').innerHTML=head+vnote+body;
   document.title=title+' — Rankings Service Menu';
+}
+function exportImage(fmt){
+  var el=document.getElementById('wrap');
+  var bar=document.querySelector('.toolbar'); if(bar) bar.style.visibility='hidden';
+  html2canvas(el,{backgroundColor:'#fefaed',scale:2,useCORS:true}).then(function(canvas){
+    if(bar) bar.style.visibility='';
+    var name=(new URLSearchParams(location.search).get('c'))||'service-menu';
+    var a=document.createElement('a');
+    a.download='rankings-'+name+'.'+(fmt==='jpeg'?'jpg':'png');
+    a.href=canvas.toDataURL('image/'+fmt, fmt==='jpeg'?0.95:1.0);
+    a.click();
+  }).catch(function(e){ if(bar) bar.style.visibility=''; alert('Image export failed: '+e.message); });
 }
 boot();
 </script>
