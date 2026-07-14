@@ -680,7 +680,7 @@ async function fetchSheetData() {
     const practiceArea = String(cell(4)).trim();
     const mrrRaw = cell(5);
     const mrr = typeof mrrRaw === 'number' ? mrrRaw : parseFloat(String(mrrRaw).replace(/[$,]/g, '')) || 0;
-    if (status === 'churned') return; // skip churned clients (row kept for history)
+    if (status === 'churned' || status === 'duplicate') return; // skip churned + de-duped rows
     if (!name || !city) return;
     const key = `${city}, ${state}`;
     const geo = GEO[key];

@@ -106,8 +106,8 @@ function runSync() {
   Logger.log('Fetched %s client companies from HubSpot.', companies.length);
 
   const result = reconcileMaster_(companies, owners);
-  Logger.log('Master list: %s updated, %s added, %s marked churned, %s flagged for review.',
-    result.updated, result.added, result.churned, result.flagged);
+  Logger.log('Master list: %s updated, %s added, %s churned, %s flagged, %s marked duplicate.',
+    result.updated, result.added, result.churned, result.flagged, result.dups);
 
   const metroFilled = fillMetro_();
   Logger.log('Metro auto-filled on %s blank rows.', metroFilled);
@@ -260,25 +260,41 @@ function reconcileMaster_(companies, owners) {
     });
   });
 
-  let updated = 0, added = 0, churned = 0, flagged = 0;
+  let updated = 0, added = 0, churned = 0, flagged = 0, dups = 0;
 
-  // Pass 1 — reconcile existing sheet rows. A row matches if EITHER its URL or
-  // Alternative URL corresponds to a HubSpot company (covers multi-domain firms).
-  values.forEach(row => {
-    const domains = [normDomain_(row[COL.url - 1]), normDomain_(row[COL.altUrl - 1])]
-      .filter(Boolean);
-    if (!domains.length) return;
-
+  // Pass 1a — resolve each row's matching HubSpot company. A row matches if
+  // EITHER its URL or Alternative URL corresponds to a company (multi-domain
+  // firms). Track match quality: 2 = matched on primary URL, 1 = only on Alt URL.
+  const rowMatch = values.map(row => {
+    const primary = normDomain_(row[COL.url - 1]);
+    const alt = normDomain_(row[COL.altUrl - 1]);
     let ci = -1;
-    domains.forEach(d => {
+    [primary, alt].filter(Boolean).forEach(d => {
       if (!(d in hsIndex)) return;
       const cand = hsIndex[d];
       // Prefer an active match over a churned one when the two domains disagree.
       if (ci === -1 || (companyChurned[ci] && !companyChurned[cand])) ci = cand;
     });
+    if (ci === -1) return { ci: -1, quality: 0 };
+    return { ci, quality: (primary && hsIndex[primary] === ci) ? 2 : 1 };
+  });
 
-    if (ci === -1) {
+  // Pass 1b — pick ONE winner row per HubSpot company (highest match quality,
+  // ties → first). Any other row matching the same company is a duplicate.
+  const winnerRow = {};
+  rowMatch.forEach((m, i) => {
+    if (m.ci === -1) return;
+    const cur = winnerRow[m.ci];
+    if (cur === undefined || m.quality > rowMatch[cur].quality) winnerRow[m.ci] = i;
+  });
+
+  // Pass 1c — apply status and field updates.
+  values.forEach((row, i) => {
+    const m = rowMatch[i];
+
+    if (m.ci === -1) {
       // Not in HubSpot on either domain — flag for review (never auto-churn here).
+      if (!normDomain_(row[COL.url - 1]) && !normDomain_(row[COL.altUrl - 1])) return;
       const cur = String(row[COL.status - 1] || '');
       if (CONFIG.AUTO_CHURN_MISSING) {
         if (cur !== 'Churned') {
@@ -293,9 +309,20 @@ function reconcileMaster_(companies, owners) {
       return;
     }
 
-    companyMatched[ci] = true;
-    const c = companies[ci];
-    const isChurned = companyChurned[ci];
+    if (winnerRow[m.ci] !== i) {
+      // Another sheet row already represents this HubSpot company (e.g. a firm
+      // listed under two domains, one as URL and one as Alt URL). Mark this row
+      // a duplicate so it stops double-counting. Self-heals if the winner is
+      // removed (the survivor becomes the winner next run).
+      if (String(row[COL.status - 1] || '') !== 'Duplicate') dups++;
+      row[COL.status - 1] = 'Duplicate';
+      row[COL.lastSynced - 1] = now;
+      return;
+    }
+
+    companyMatched[m.ci] = true;
+    const c = companies[m.ci];
+    const isChurned = companyChurned[m.ci];
     const ownerName = owners[c[P.ownerId]] || '';
 
     // Status is the ONLY field HubSpot is authoritative over on existing rows.
@@ -344,7 +371,7 @@ function reconcileMaster_(companies, owners) {
   if (appends.length) {
     sh.getRange(sh.getLastRow() + 1, 1, appends.length, width).setValues(appends);
   }
-  return { updated, added, churned, flagged };
+  return { updated, added, churned, flagged, dups };
 }
 
 /** Add K/L/M headers if they aren't there yet. */
@@ -376,7 +403,8 @@ function rebuildCityTab_() {
 
   const byCity = {};
   rows.forEach(r => {
-    if (String(r[COL.status - 1]) === 'Churned') return; // active only
+    const st = String(r[COL.status - 1]);
+    if (st === 'Churned' || st === 'Duplicate') return; // active, de-duplicated only
     const name = String(r[COL.name - 1]).trim();
     const c = String(r[COL.city - 1]).trim();
     const s = stateAbbr_(r[COL.state - 1]); // normalize "New Mexico" -> "NM"
