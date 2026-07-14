@@ -109,6 +109,9 @@ function runSync() {
   Logger.log('Master list: %s updated, %s added, %s marked churned, %s flagged for review.',
     result.updated, result.added, result.churned, result.flagged);
 
+  const metroFilled = fillMetro_();
+  Logger.log('Metro auto-filled on %s blank rows.', metroFilled);
+
   if (CONFIG.REBUILD_CITY_TAB) {
     const n = rebuildCityTab_();
     Logger.log('City Saturation tab rebuilt: %s cities.', n);
@@ -478,6 +481,78 @@ function parseDate_(v) {
   if (!isNaN(n) && String(v).length >= 10) return new Date(n);
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d;
+}
+
+// ============================ METRO / DMA FILL ==============================
+
+// City -> Nielsen DMA fallback for cities not already tagged in the sheet.
+// Keyed by "city_lowercase|ST". Suburbs roll up to their metro's DMA.
+const CITY_METRO = {
+  'lexington|KY': 'Lexington',
+  'cherry hill|NJ': 'Philadelphia',
+  'philadelphia|PA': 'Philadelphia',
+  'lugoff|SC': 'Columbia, SC',
+  'savannah|GA': 'Savannah',
+  'williamsport|PA': 'Wilkes Barre-Scranton',
+  'salt lake city|UT': 'Salt Lake City',
+  'macon|GA': 'Macon',
+  'mill valley|CA': 'San Francisco-Oakland-San Jose',
+  'providence|RI': 'Providence-New Bedford',
+  'winston salem|NC': 'Greensboro-High Point-Winston Salem',
+  'winston salem nc|NC': 'Greensboro-High Point-Winston Salem',
+  'albuquerque|NM': 'Albuquerque-Santa Fe',
+  'peoria|IL': 'Peoria-Bloomington',
+  'east orange|NJ': 'New York',
+  'downey|CA': 'Los Angeles',
+  'oklahoma city|OK': 'Oklahoma City',
+  'palos heights|IL': 'Chicago',
+  'sherman oaks|CA': 'Los Angeles',
+  'new york city|NY': 'New York',
+  'chicago|IL': 'Chicago',
+};
+
+/** Look up a metro by city+state from the fallback table. */
+function metroFor_(city, st) {
+  const key = String(city || '').trim().toLowerCase() + '|' + String(st || '').trim().toUpperCase();
+  return CITY_METRO[key] || '';
+}
+
+/** Fill blank Metro/DMA on active rows: first from city+state pairs already
+ *  tagged elsewhere in the sheet, then from the CITY_METRO fallback. Never
+ *  overwrites an existing metro. Returns the number filled. */
+function fillMetro_() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(CONFIG.MASTER_TAB);
+  const firstData = CONFIG.MASTER_HEADER_ROW + 1;
+  const lastRow = sh.getLastRow();
+  if (lastRow < firstData) return 0;
+  const rng = sh.getRange(firstData, 1, lastRow - firstData + 1, COL.lastSynced);
+  const vals = rng.getValues();
+
+  // Learn "city|ST" -> metro from rows that already have a metro.
+  const learned = {};
+  vals.forEach(r => {
+    const m = String(r[COL.metro - 1] || '').trim();
+    if (!m) return;
+    const key = String(r[COL.city - 1] || '').trim().toLowerCase() + '|' + stateAbbr_(r[COL.state - 1]);
+    if (!(key in learned)) learned[key] = m;
+  });
+
+  let filled = 0;
+  vals.forEach(r => {
+    if (String(r[COL.status - 1]) !== 'Active') return;
+    if (String(r[COL.metro - 1] || '').trim()) return;
+    const city = String(r[COL.city - 1] || '').trim();
+    const st = stateAbbr_(r[COL.state - 1]);
+    const m = learned[city.toLowerCase() + '|' + st] || metroFor_(city, st);
+    if (m) { r[COL.metro - 1] = m; filled++; }
+  });
+  if (filled) rng.setValues(vals);
+  return filled;
+}
+
+/** Manual entry point: fill blank metros and log the result. */
+function fillMetro() {
+  Logger.log('Metro filled on %s blank rows.', fillMetro_());
 }
 
 // ============================ MAINTENANCE ===================================
