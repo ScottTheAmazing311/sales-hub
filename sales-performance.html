@@ -336,8 +336,13 @@
         } else { // yearly
             currentPeriods = [{ label: '2026', monthIndices: allMonthCols.map(function(_, i) { return i; }) }];
         }
-        // Select latest period with data
+        // Select the period containing the latest month with data (falls back to last)
         selectedPeriodIdx = currentPeriods.length - 1;
+        if (selectedMonthIdx >= 0) {
+            for (var pi = 0; pi < currentPeriods.length; pi++) {
+                if (currentPeriods[pi].monthIndices.indexOf(selectedMonthIdx) !== -1) { selectedPeriodIdx = pi; break; }
+            }
+        }
     }
 
     function selectPeriod(idx) {
@@ -544,6 +549,14 @@
             ICONS.trending, fmtPctVal(wrPrev));
         html += '</div>';
 
+        // Month-over-month breakdown — quarterly & yearly views only
+        if (viewMode !== 'monthly' && curPeriodIndices().length > 1) {
+            html += '<div class="chart-grid">';
+            html += '<div class="card"><div class="card-header"><div class="card-title">ARR &amp; MRR by Month</div><div class="card-desc">' + curPeriodLabel() + ' month over month</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-mom-money"></canvas></div></div></div>';
+            html += '<div class="card"><div class="card-header"><div class="card-title">Deals Closed by Month</div><div class="card-desc">' + curPeriodLabel() + ' month over month</div></div><div class="card-content"><div class="chart-wrap"><canvas id="chart-mom-deals"></canvas></div></div></div>';
+            html += '</div>';
+        }
+
         // Key Metrics Detail table
         var curMonthLabel = curPeriodLabel();
         html += '<div class="card chart-full"><div class="card-header"><div class="card-title">Key Metrics Detail</div></div><div class="card-content"><table class="dtable dtable-lg"><thead><tr><th>Metric</th><th>' + curMonthLabel + '</th>';
@@ -670,6 +683,82 @@
                     scales: { x: { beginAtZero: true } }
                 }
             });
+
+            // Month-over-month charts — quarterly & yearly views
+            var momMoneyCanvas = document.getElementById('chart-mom-money');
+            if (momMoneyCanvas) {
+                var momIdx = curPeriodIndices();
+                var momLabels = momIdx.map(function(i) { return monthCols[i].label; });
+                function momVals(key) {
+                    var r = findRow(rows, key);
+                    return momIdx.map(function(i) { return gv(r, monthCols[i].idx) || 0; });
+                }
+                var momArr = momVals('Total ARR');
+                var momMrr = momVals('Total MRR');
+                var momDeals = momVals('Deals Closed');
+                function shortMoney(v) {
+                    if (!v) return '';
+                    if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(2) + 'M';
+                    if (Math.abs(v) >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K';
+                    return '$' + v;
+                }
+                // Draws a value label above every bar in every dataset
+                function makeMomLabelPlugin(fmt) {
+                    return {
+                        id: 'momLabels',
+                        afterDatasetsDraw: function(chart) {
+                            var ctx = chart.ctx;
+                            chart.data.datasets.forEach(function(ds, di) {
+                                var meta = chart.getDatasetMeta(di);
+                                meta.data.forEach(function(bar, i) {
+                                    var val = ds.data[i];
+                                    if (!val) return;
+                                    ctx.save();
+                                    ctx.font = '600 10px Inter, sans-serif';
+                                    ctx.fillStyle = '#07374F';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText(fmt(val), bar.x, bar.y - 5);
+                                    ctx.restore();
+                                });
+                            });
+                        }
+                    };
+                }
+                new Chart(momMoneyCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: momLabels,
+                        datasets: [
+                            { label: 'ARR', data: momArr, backgroundColor: COLORS.primary, borderRadius: 4 },
+                            { label: 'MRR', data: momMrr, backgroundColor: COLORS.blue, borderRadius: 4 }
+                        ]
+                    },
+                    plugins: [makeMomLabelPlugin(shortMoney)],
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { top: 20 } },
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.raw.toLocaleString(); } } }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1e6 ? '$' + (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : '$' + (v / 1000) + 'K'; } } } }
+                    }
+                });
+                new Chart(document.getElementById('chart-mom-deals'), {
+                    type: 'bar',
+                    data: {
+                        labels: momLabels,
+                        datasets: [{ label: 'Deals Closed', data: momDeals, backgroundColor: COLORS.blue, borderRadius: 4 }]
+                    },
+                    plugins: [makeMomLabelPlugin(fmtNum)],
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { top: 20 } },
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
 
             // Pipeline chart — horizontal bar using ARR parsed from MRR/ARR strings
             var pipeCanvas = document.getElementById('chart-pipeline');
