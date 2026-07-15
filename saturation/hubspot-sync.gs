@@ -67,7 +67,8 @@ const CONFIG = {
     name: 'name',
     ownerId: 'hubspot_owner_id',
     practiceArea: 'primary_practice_area',
-    mrr: 'deal_mrr',               // company-level MRR rollup (best available)
+    mrr: 'billed_amount',          // "Billed Amount" — the real money field
+                                   // (goes in the sheet's money column; deal_mrr was empty)
     city: 'city',
     state: 'state',
     classification: 'pi_or_nonpi', // "PI or Non-PI" — authoritative source of truth
@@ -337,7 +338,7 @@ function reconcileMaster_(companies, owners) {
     // manually-maintained data (MRR, geo cleanup, owner).
     if (!row[COL.owner - 1] && ownerName) row[COL.owner - 1] = ownerName;
     if (!row[COL.practiceArea - 1] && c[P.practiceArea]) row[COL.practiceArea - 1] = c[P.practiceArea];
-    if (!row[COL.mrr - 1] && toNumber_(c[P.mrr]) > 0) row[COL.mrr - 1] = toNumber_(c[P.mrr]);
+    if (toNumber_(c[P.mrr]) > 0) row[COL.mrr - 1] = toNumber_(c[P.mrr]); // Billed Amount, authoritative
     if (!row[COL.city - 1] && c[P.city]) row[COL.city - 1] = c[P.city];
     if (!row[COL.state - 1] && c[P.state]) row[COL.state - 1] = c[P.state];
     updated++;
@@ -378,6 +379,7 @@ function reconcileMaster_(companies, owners) {
 function ensureColumnHeaders_(sh) {
   const headerRow = CONFIG.MASTER_HEADER_ROW;
   const need = [
+    [COL.mrr, 'Billed Amount'],
     [COL.status, 'Status'],
     [COL.churnDate, 'Churn Date'],
     [COL.lastSynced, 'Last Synced'],
