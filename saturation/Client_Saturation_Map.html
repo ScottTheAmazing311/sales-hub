@@ -491,6 +491,13 @@
     min-width: 20px;
     text-align: right;
   }
+  .top-billed {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba(245,245,240,0.45);
+    margin-top: 2px;
+  }
 
   .tooltip {
     position: absolute;
@@ -621,6 +628,8 @@ const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?
 // (the City Saturation tab is already normalized; the raw roster is not).
 const STATE_TO_ABBR = {alabama:'AL',alaska:'AK',arizona:'AZ',arkansas:'AR',california:'CA',colorado:'CO',connecticut:'CT',delaware:'DE',florida:'FL',georgia:'GA',hawaii:'HI',idaho:'ID',illinois:'IL',indiana:'IN',iowa:'IA',kansas:'KS',kentucky:'KY',louisiana:'LA',maine:'ME',maryland:'MD',massachusetts:'MA',michigan:'MI',minnesota:'MN',mississippi:'MS',missouri:'MO',montana:'MT',nebraska:'NE',nevada:'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND',ohio:'OH',oklahoma:'OK',oregon:'OR',pennsylvania:'PA','rhode island':'RI','south carolina':'SC','south dakota':'SD',tennessee:'TN',texas:'TX',utah:'UT',vermont:'VT',virginia:'VA',washington:'WA','west virginia':'WV',wisconsin:'WI',wyoming:'WY','district of columbia':'DC'};
 function stAbbr(v){ const s=String(v==null?'':v).trim(); if(s.length===2)return s.toUpperCase(); return STATE_TO_ABBR[s.toLowerCase()]||s; }
+// Compact money: 95375 -> $95K, 1700 -> $1.7K, 375 -> $375.
+function fmtMoney(n){ if(!n) return ''; if(n>=10000) return '$'+Math.round(n/1000)+'K'; if(n>=1000) return '$'+(n/1000).toFixed(1)+'K'; return '$'+Math.round(n); }
 
 const SAT_LEVELS = { 4: 'Very High', 3: 'High', 2: 'Moderate', 1: 'Low' };
 const SAT_COLOR = {
@@ -907,6 +916,12 @@ async function init() {
     return d.count;
   }
 
+  // Sum of Billed Amount for a city/metro, respecting the active PA filter.
+  function billedFor(d) {
+    const paCls = { 'pi-mva': 'PI-MVA', 'pi-other': 'PI-Other', 'non-pi': 'Non-PI' }[activePA];
+    return (d.firms || []).reduce((s, f) => s + ((!paCls || f.classification === paCls) ? (f.mrr || 0) : 0), 0);
+  }
+
   function refreshStatClients() {
     document.getElementById('statClients').textContent =
       current.reduce((s, c) => s + paVal(c), 0);
@@ -930,7 +945,7 @@ async function init() {
           ${d.piOther ? `<div class="top-pa-dot" style="background:var(--pi-other)" title="${d.piOther} PI-Other"></div>` : ''}
           ${d.nonPi ? `<div class="top-pa-dot" style="background:var(--non-pi)" title="${d.nonPi} Non-PI"></div>` : ''}
         </div>
-        <div class="top-count">${paVal(d)}</div>
+        <div class="top-count">${paVal(d)}<div class="top-billed">${fmtMoney(billedFor(d))}</div></div>
       `)
       .on('click', (event, d) => toggleSelect(d));
   }
