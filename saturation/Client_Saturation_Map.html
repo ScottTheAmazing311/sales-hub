@@ -499,16 +499,14 @@
     margin-top: 2px;
   }
   .market { pointer-events: none; }
-  .market-label {
-    font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600;
-    fill: #1e1e28; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
-    paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round;
+  .lbl { pointer-events: none; }
+  .lbl.region-label { pointer-events: auto; cursor: pointer; }
+  .lbl-bg { fill: rgba(0,0,0,0.85); }
+  .lbl-tx {
+    fill: #fff; text-anchor: middle; dominant-baseline: central;
+    font-family: 'DM Mono', monospace; font-weight: 600;
   }
-  .region-label {
-    font-family: 'Fraunces', serif; font-size: 15px; font-weight: 800;
-    fill: #fff; text-anchor: middle; dominant-baseline: middle; cursor: pointer;
-    paint-order: stroke; stroke: rgba(0,0,0,0.55); stroke-width: 3px; stroke-linejoin: round;
-  }
+  .region-label .lbl-tx { font-family: 'Fraunces', serif; font-weight: 800; }
   .market-swatch { width: 14px; height: 14px; border-radius: 3px; }
   .search-wrap { position: relative; margin: 16px 28px 0; }
   .search-input {
@@ -674,7 +672,7 @@ const STATE_REGION = {
   ME:'Northeast',NH:'Northeast',VT:'Northeast',MA:'Northeast',RI:'Northeast',CT:'Northeast',
 };
 const REGION_COLOR = {
-  'Pacific Northwest':'#4E97B7','West Coast':'#5FB98F','Mountain West':'#C79A5B',
+  'Pacific Northwest':'#3E9E6E','West Coast':'#4E97B7','Mountain West':'#C79A5B',
   'Southwest':'#D98C6A','Midwest':'#7C97C9','Southeast':'#C77BA6',
   'Mid-Atlantic':'#8E86C9','Northeast':'#6FB0C2',
 };
@@ -891,6 +889,7 @@ async function init() {
   const marketLayer = svg.append('g') // DMA market regions (behind bubbles)
     .attr('clip-path', 'url(#us-clip)');
   const bubbleLayer = svg.append('g');
+  const labelLayer = svg.append('g'); // market/region labels on top (unclipped)
   const tooltip = d3.select('#tooltip');
   const topList = d3.select('#topList');
 
@@ -913,11 +912,11 @@ async function init() {
       // Region overlay = color the states by their region.
       statesLayer.selectAll('path')
         .attr('class', 'state')
-        .attr('fill', d => { const r = STATE_REGION[STATE_TO_ABBR[String(d.properties.name).toLowerCase()]]; return r ? REGION_COLOR[r] : '#e9e6dc'; })
-        .attr('fill-opacity', 0.55);
+        .style('fill', d => { const r = STATE_REGION[STATE_TO_ABBR[String(d.properties.name).toLowerCase()]]; return r ? REGION_COLOR[r] : '#e9e6dc'; })
+        .style('fill-opacity', 0.6);
     } else {
       statesLayer.selectAll('path')
-        .attr('fill', null).attr('fill-opacity', null)
+        .style('fill', null).style('fill-opacity', null)
         .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''));
     }
 
@@ -1022,16 +1021,12 @@ async function init() {
     // any that would overlap an already-placed label (keeps the map readable).
     const fs = 10, placed = [], labels = [];
     cells.filter(c => !c.dim).sort((a, b) => b.count - a.count).forEach(c => {
-      const w = c.name.length * fs * 0.56, h = fs * 1.25;
+      const w = c.name.length * fs * 0.62 + 12, h = fs + 8;
       const r = { x0: c.x - w / 2, x1: c.x + w / 2, y0: c.y - h / 2, y1: c.y + h / 2 };
       if (placed.some(p => !(r.x1 < p.x0 || r.x0 > p.x1 || r.y1 < p.y0 || r.y0 > p.y1))) return;
       placed.push(r); labels.push(c);
     });
-    const lj = marketLayer.selectAll('text.market-label').data(labels, d => d.key);
-    lj.exit().remove();
-    lj.enter().append('text').attr('class', 'market-label').merge(lj)
-      .attr('x', d => d.x).attr('y', d => d.y)
-      .text(d => d.name);
+    drawLabels(labels, 'market-label', fs, null);
 
     // Region labels (region scope) — clickable to drill into the region.
     const rlabels = [];
@@ -1041,13 +1036,24 @@ async function init() {
         if (p && matchesQuery(d)) rlabels.push({ key: d.key, name: d.city, x: p[0], y: p[1], region: d });
       });
     }
-    const rj = marketLayer.selectAll('text.region-label').data(rlabels, d => d.key);
-    rj.exit().remove();
-    rj.enter().append('text').attr('class', 'region-label')
-      .on('click', (event, d) => selectItem(d.region))
-      .merge(rj)
-      .attr('x', d => d.x).attr('y', d => d.y)
-      .text(d => d.name);
+    drawLabels(rlabels, 'region-label', 15, d => selectItem(d.region));
+  }
+
+  // Draw a set of labels as black-background pills (white text), so they're
+  // always legible over any fill. Lives in the top (unclipped) label layer.
+  function drawLabels(data, cls, fs, onClick) {
+    const g = labelLayer.selectAll('g.' + cls).data(data, d => d.key);
+    g.exit().remove();
+    const en = g.enter().append('g').attr('class', cls + ' lbl');
+    en.append('rect').attr('class', 'lbl-bg');
+    en.append('text').attr('class', 'lbl-tx');
+    const all = en.merge(g).attr('transform', d => `translate(${d.x},${d.y})`);
+    if (onClick) all.on('click', (event, d) => onClick(d));
+    all.select('text.lbl-tx').attr('font-size', fs).text(d => d.name);
+    all.select('rect.lbl-bg')
+      .attr('height', fs + 8).attr('y', -(fs + 8) / 2).attr('rx', 3)
+      .attr('width', d => d.name.length * fs * 0.62 + 12)
+      .attr('x', d => -(d.name.length * fs * 0.62 + 12) / 2);
   }
 
   function updateLegend() {
