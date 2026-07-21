@@ -498,6 +498,11 @@
     color: rgba(245,245,240,0.45);
     margin-top: 2px;
   }
+  .state-label {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.06em;
+    fill: rgba(20,54,77,0.30); text-anchor: middle; dominant-baseline: central;
+    pointer-events: none;
+  }
   .market { pointer-events: none; }
   .lbl { pointer-events: none; }
   .lbl.region-label { pointer-events: auto; cursor: pointer; }
@@ -885,6 +890,8 @@ async function init() {
     .attr('stroke-width', 0.6)
     .attr('stroke-linejoin', 'round');
 
+  const stateLabelLayer = svg.append('g'); // subtle state abbreviations (city view)
+
   svg.append('defs').append('clipPath').attr('id', 'us-clip').append('path');
   const marketLayer = svg.append('g') // DMA market regions (behind bubbles)
     .attr('clip-path', 'url(#us-clip)');
@@ -976,6 +983,7 @@ async function init() {
       .attr('fill-opacity', 0.85);
 
     renderMarkets();
+    renderStateLabels();
     applyPA();
 
     currentTop = [...current].sort((a, b) => b.count - a.count);
@@ -1040,6 +1048,21 @@ async function init() {
       });
     }
     drawLabels(rlabels, 'region-label', 15, d => selectItem(d.region));
+  }
+
+  // Subtle state abbreviations at each state's centroid (city scope only).
+  function renderStateLabels() {
+    const labels = scope === 'city'
+      ? statesGeo.features.map(f => {
+          const c = path.centroid(f);
+          const abbr = STATE_TO_ABBR[String(f.properties.name).toLowerCase()];
+          return (c && isFinite(c[0]) && abbr) ? { key: f.properties.name, abbr, x: c[0], y: c[1] } : null;
+        }).filter(Boolean)
+      : [];
+    const t = stateLabelLayer.selectAll('text.state-label').data(labels, d => d.key);
+    t.exit().remove();
+    t.enter().append('text').attr('class', 'state-label').merge(t)
+      .attr('x', d => d.x).attr('y', d => d.y).text(d => d.abbr);
   }
 
   // Draw a set of labels as black-background pills (white text), so they're
@@ -1316,6 +1339,7 @@ async function init() {
       .attr('cx', d => { const p = projection([d.lng, d.lat]); return p ? p[0] : -9999; })
       .attr('cy', d => { const p = projection([d.lng, d.lat]); return p ? p[1] : -9999; });
     renderMarkets();
+    renderStateLabels();
   });
 }
 
