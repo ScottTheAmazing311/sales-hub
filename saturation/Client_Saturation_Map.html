@@ -498,6 +498,22 @@
     color: rgba(245,245,240,0.45);
     margin-top: 2px;
   }
+  .market { pointer-events: none; }
+  .market-swatch { width: 14px; height: 14px; border-radius: 3px; }
+  .search-wrap { position: relative; margin: 16px 28px 0; }
+  .search-input {
+    width: 100%; box-sizing: border-box; padding: 8px 26px 8px 12px;
+    border: 1px solid var(--tuxedo); background: var(--tuxedo); color: var(--pearl);
+    font-family: 'DM Mono', monospace; font-size: 12px; border-radius: 6px;
+  }
+  .search-input:focus { outline: none; border-color: var(--chartreuse); }
+  .search-input::placeholder { color: rgba(245,245,240,0.4); }
+  .search-clear {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: rgba(245,245,240,0.55);
+    font-size: 17px; line-height: 1; cursor: pointer; display: none; padding: 0 4px;
+  }
+  .search-wrap.has-text .search-clear { display: block; }
 
   .tooltip {
     position: absolute;
@@ -604,12 +620,19 @@
       </div>
     </div>
 
+    <div class="search-wrap">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search city or metro…" autocomplete="off">
+      <button id="searchClear" class="search-clear" title="Clear">&times;</button>
+    </div>
+
     <div class="view-toggle">
       <button class="active" data-view="top" id="topViewBtn">Top Cities</button>
+      <button data-view="markets">Markets</button>
       <button data-view="detail">Selected</button>
     </div>
 
     <div id="topList" class="top-list"></div>
+    <div id="marketList" class="top-list" style="display:none"></div>
     <div id="detail" class="detail empty" style="display:none">
       <div class="empty-msg">Click any city dot on the map<br>to see client details.</div>
     </div>
@@ -761,6 +784,8 @@ async function fetchSheetData() {
       mrr: mvaMrr ? '$' + Number(mvaMrr).toLocaleString() : '',
     };
   }).filter(Boolean);
+  // Distinct color per market (golden-angle hue spread).
+  dmas.forEach((d, i) => { d.color = `hsl(${Math.round((i * 137.508) % 360)}, 62%, 55%)`; });
 
   return { cities, dmas };
 }
@@ -814,12 +839,15 @@ async function init() {
     .attr('stroke-width', 0.6)
     .attr('stroke-linejoin', 'round');
 
+  const marketLayer = svg.append('g'); // DMA market shading (behind bubbles)
   const bubbleLayer = svg.append('g');
   const tooltip = d3.select('#tooltip');
   const topList = d3.select('#topList');
 
   let activePA = 'all';
+  let query = '';
   let selected = null;
+  const matchesQuery = d => !query || String(d.city).toLowerCase().includes(query);
   let current = [];     // active dataset
   let currentTop = [];  // active dataset sorted desc by count
 
@@ -884,11 +912,49 @@ async function init() {
       .attr('stroke-width', 1.5)
       .attr('fill-opacity', 0.85);
 
+    renderMarkets();
     applyPA();
 
     currentTop = [...current].sort((a, b) => b.count - a.count);
     renderTopList();
     bubbleLayer.selectAll('.city-bubble').classed('selected', false);
+  }
+
+  // Shade every DMA market (only in metro scope): a colored hull around its
+  // member cities, or a circle for 1–2 city markets. Behind the bubbles.
+  function renderMarkets() {
+    const polys = [], circs = [];
+    if (scope === 'dma') {
+      current.forEach(d => {
+        const pts = [], seen = {};
+        (d.firms || []).forEach(f => {
+          if (f.lat == null) return;
+          const p = projection([f.lng, f.lat]); if (!p) return;
+          const k = Math.round(p[0]) + ',' + Math.round(p[1]);
+          if (seen[k]) return; seen[k] = 1; pts.push(p);
+        });
+        if (!pts.length) return;
+        const dim = !matchesQuery(d);
+        if (pts.length >= 3) {
+          const hull = d3.polygonHull(pts);
+          if (hull) { polys.push({ key: d.key, color: d.color, dim, d: 'M' + hull.map(p => p.join(',')).join('L') + 'Z' }); return; }
+        }
+        circs.push({ key: d.key, color: d.color, dim, cx: d3.mean(pts, p => p[0]), cy: d3.mean(pts, p => p[1]) });
+      });
+    }
+    const pj = marketLayer.selectAll('path.market').data(polys, d => d.key);
+    pj.exit().remove();
+    pj.enter().append('path').attr('class', 'market').merge(pj)
+      .attr('d', d => d.d).attr('fill', d => d.color)
+      .attr('fill-opacity', d => d.dim ? 0.03 : 0.13)
+      .attr('stroke', d => d.color).attr('stroke-opacity', d => d.dim ? 0.04 : 0.16)
+      .attr('stroke-width', 20).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const cj = marketLayer.selectAll('circle.market').data(circs, d => d.key);
+    cj.exit().remove();
+    cj.enter().append('circle').attr('class', 'market').merge(cj)
+      .attr('cx', d => d.cx).attr('cy', d => d.cy).attr('r', 22)
+      .attr('fill', d => d.color).attr('fill-opacity', d => d.dim ? 0.03 : 0.13)
+      .attr('stroke', d => d.color).attr('stroke-opacity', d => d.dim ? 0.04 : 0.16).attr('stroke-width', 14);
   }
 
   function updateLegend() {
@@ -900,6 +966,7 @@ async function init() {
 
   function applyPA() {
     bubbleLayer.selectAll('.city-bubble').classed('dimmed', d => {
+      if (!matchesQuery(d)) return true;
       if (activePA === 'all') return false;
       if (activePA === 'pi-mva') return d.piMva === 0;
       if (activePA === 'pi-other') return d.piOther === 0;
@@ -928,9 +995,9 @@ async function init() {
   }
 
   function renderTopList() {
-    let list = currentTop;
+    let list = currentTop.filter(matchesQuery);
     if (activePA !== 'all') {
-      list = currentTop.filter(d => paVal(d) > 0).sort((a, b) => paVal(b) - paVal(a));
+      list = list.filter(d => paVal(d) > 0).sort((a, b) => paVal(b) - paVal(a));
     }
     topList.selectAll('div.top-row').remove();
     topList.selectAll('div.top-row')
@@ -1072,12 +1139,67 @@ async function init() {
       showView(btn.dataset.view);
       // Re-render the selected detail so it always reflects the current filter.
       if (btn.dataset.view === 'detail' && selected) selectItem(selected);
+      if (btn.dataset.view === 'markets') {
+        if (scope !== 'dma') {
+          scope = 'dma';
+          document.querySelectorAll('.scope-toggle button').forEach(b => b.classList.toggle('active', b.dataset.scope === 'dma'));
+          render();
+        }
+        renderMarketList();
+      }
     });
   });
+  // Markets tab — a directory of every DMA, drillable into its accounts.
+  function renderMarketList() {
+    const list = [...data.dmas].filter(matchesQuery).sort((a, b) => b.count - a.count);
+    const ml = d3.select('#marketList');
+    ml.selectAll('div.top-row').remove();
+    ml.selectAll('div.top-row').data(list).join('div')
+      .attr('class', 'top-row')
+      .html(d => `
+        <div style="display:flex;justify-content:center"><div class="market-swatch" style="background:${d.color}"></div></div>
+        <div><span class="top-city">${d.city}</span></div>
+        <div class="top-pa">
+          ${d.piMva ? `<div class="top-pa-dot" style="background:var(--pi-mva)" title="${d.piMva} PI-MVA"></div>` : ''}
+          ${d.piOther ? `<div class="top-pa-dot" style="background:var(--pi-other)" title="${d.piOther} PI-Other"></div>` : ''}
+          ${d.nonPi ? `<div class="top-pa-dot" style="background:var(--non-pi)" title="${d.nonPi} Non-PI"></div>` : ''}
+        </div>
+        <div class="top-count">${d.count}<div class="top-billed">${fmtMoney((d.firms||[]).reduce((s,f)=>s+(f.mrr||0),0))}</div></div>
+      `)
+      .on('click', (event, d) => drillMarket(d));
+  }
+
+  // Open a market: ensure metro scope, then show its accounts in the detail.
+  function drillMarket(d) {
+    if (scope !== 'dma') {
+      scope = 'dma';
+      document.querySelectorAll('.scope-toggle button').forEach(b => b.classList.toggle('active', b.dataset.scope === 'dma'));
+      render();
+    }
+    selectItem(d);
+  }
+
   function showView(v) {
     document.getElementById('topList').style.display = v === 'top' ? 'block' : 'none';
+    document.getElementById('marketList').style.display = v === 'markets' ? 'block' : 'none';
     document.getElementById('detail').style.display = v === 'detail' ? 'block' : 'none';
   }
+
+  // Search — filter the list(s) and dim non-matching dots/markets.
+  const searchInput = document.getElementById('searchInput');
+  const searchWrap = searchInput.closest('.search-wrap');
+  function applySearch() {
+    query = searchInput.value.trim().toLowerCase();
+    searchWrap.classList.toggle('has-text', !!query);
+    applyPA();
+    renderMarkets();
+    renderTopList();
+    if (document.getElementById('marketList').style.display !== 'none') renderMarketList();
+  }
+  searchInput.addEventListener('input', applySearch);
+  document.getElementById('searchClear').addEventListener('click', () => {
+    searchInput.value = ''; applySearch(); searchInput.focus();
+  });
 
   render();
   document.getElementById('loading').classList.add('hidden');
@@ -1091,6 +1213,7 @@ async function init() {
     bubbleLayer.selectAll('.city-bubble')
       .attr('cx', d => { const p = projection([d.lng, d.lat]); return p ? p[0] : -9999; })
       .attr('cy', d => { const p = projection([d.lng, d.lat]); return p ? p[1] : -9999; });
+    renderMarkets();
   });
 }
 
