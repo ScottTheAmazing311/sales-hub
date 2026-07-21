@@ -195,6 +195,136 @@
         .stat-value.sky { color: var(--sky); }
 
         /* ═══════════════════════════════════════════ */
+        /* TEAM TO-DO BOARD                            */
+        /* ═══════════════════════════════════════════ */
+        .todo-section {
+            margin: 1.25rem 2rem 0.5rem;
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            padding: 1.25rem;
+        }
+        .todo-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .todo-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+        }
+        .todo-add {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        .todo-add .form-input { flex: 1; min-width: 200px; max-width: 420px; }
+        .todo-add .form-select { width: auto; }
+        .todo-add .form-select.missing { border-color: var(--destructive); }
+        .todo-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .todo-col {
+            background: rgba(0,0,0,0.03);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            min-height: 80px;
+        }
+        .todo-col-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--navy);
+            margin-bottom: 0.6rem;
+        }
+        .todo-col-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .todo-col[data-tstatus="todo"] .todo-col-dot { background: var(--sky); }
+        .todo-col[data-tstatus="done"] .todo-col-dot { background: var(--success); }
+        .todo-col-count {
+            background: rgba(7,55,79,0.08);
+            border-radius: 10px;
+            padding: 0.05rem 0.5rem;
+            font-size: 0.6rem;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 8px;
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .todo-item:last-child { margin-bottom: 0; }
+        .todo-check {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            border: 2px solid var(--navy);
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: white;
+            padding: 0;
+        }
+        .todo-check:hover { border-color: var(--success); }
+        .todo-item.done .todo-check { background: var(--success); border-color: var(--success); }
+        .todo-text { flex: 1; font-size: 0.85rem; line-height: 1.35; }
+        .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-muted); }
+        .todo-who {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(7,55,79,0.08);
+            color: var(--navy);
+            border-radius: 10px;
+            padding: 0.15rem 0.5rem;
+            white-space: nowrap;
+        }
+        .todo-date { font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
+        .todo-del {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0 0.2rem;
+            line-height: 1;
+        }
+        .todo-del:hover { color: var(--destructive); }
+        .todo-empty { font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem 0.2rem; }
+        @media (max-width: 768px) {
+            .todo-section { margin: 1rem; }
+            .todo-cols { grid-template-columns: 1fr; }
+            .todo-add { justify-content: stretch; }
+            .todo-add .form-input { max-width: none; }
+        }
+
+        /* ═══════════════════════════════════════════ */
         /* KANBAN BOARD                                */
         /* ═══════════════════════════════════════════ */
         .kanban {
@@ -831,6 +961,38 @@
 
 <div class="stats-bar" id="statsBar"></div>
 
+<!-- Team To-Do Board -->
+<div class="todo-section">
+    <div class="todo-head">
+        <div class="todo-title">Team To-Dos</div>
+        <div class="todo-add">
+            <input type="text" class="form-input" id="todoInput" placeholder="Add a to-do..." onkeydown="if(event.key==='Enter')addTodo()">
+            <select class="form-select" id="todoWho">
+                <option value="">Submitted by...</option>
+                <option value="Scott">Scott</option>
+                <option value="Jess">Jess</option>
+                <option value="Gui">Gui</option>
+                <option value="Cole">Cole</option>
+                <option value="Carson">Carson</option>
+                <option value="Jacqui">Jacqui</option>
+                <option value="Tyler">Tyler</option>
+                <option value="Zach">Zach</option>
+            </select>
+            <button class="btn btn-primary" onclick="addTodo()">+ Add</button>
+        </div>
+    </div>
+    <div class="todo-cols">
+        <div class="todo-col" data-tstatus="todo">
+            <div class="todo-col-header"><span class="todo-col-dot"></span> To-Do <span class="todo-col-count" id="todoCountOpen">0</span></div>
+            <div id="todoListOpen"></div>
+        </div>
+        <div class="todo-col" data-tstatus="done">
+            <div class="todo-col-header"><span class="todo-col-dot"></span> Done <span class="todo-col-count" id="todoCountDone">0</span></div>
+            <div id="todoListDone"></div>
+        </div>
+    </div>
+</div>
+
 <!-- Team Filter -->
 <div class="tabs-container" style="padding:0 2rem;margin-bottom:0.5rem;">
     <div class="tabs" id="teamTabs">
@@ -1046,6 +1208,76 @@ async function deleteProjectFromDb(id) {
     if (error) console.error('Delete error:', error);
 }
 
+// ── Team To-Dos ──────────────────────────────────────────────
+// To-dos live in the same vibe_projects table, flagged by status 'todo'/'done',
+// and are split out of the projects array at load so the kanban ignores them.
+const TODO_STATUSES = ['todo','done'];
+let todos = [];
+
+function splitLoaded(all) {
+    todos = all.filter(p => TODO_STATUSES.includes(p.status));
+    projects = all.filter(p => !TODO_STATUSES.includes(p.status));
+}
+
+function renderTodos() {
+    const sorted = [...todos].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const open = sorted.filter(t => t.status === 'todo');
+    const done = sorted.filter(t => t.status === 'done');
+    document.getElementById('todoCountOpen').textContent = open.length;
+    document.getElementById('todoCountDone').textContent = done.length;
+
+    function itemHtml(t) {
+        const d = t.createdAt ? new Date(t.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+        return `
+        <div class="todo-item${t.status === 'done' ? ' done' : ''}">
+            <button class="todo-check" onclick="toggleTodo('${t.id}')" title="${t.status === 'done' ? 'Move back to To-Do' : 'Mark done'}">${t.status === 'done' ? '✓' : ''}</button>
+            <span class="todo-text">${escapeHtml(t.name)}</span>
+            ${t.requester ? `<span class="todo-who">${escapeHtml(t.requester)}</span>` : ''}
+            <span class="todo-date">${d}</span>
+            <button class="todo-del" onclick="deleteTodo('${t.id}')" title="Delete">&times;</button>
+        </div>`;
+    }
+    document.getElementById('todoListOpen').innerHTML = open.length ? open.map(itemHtml).join('') : '<div class="todo-empty">Nothing here — add a to-do above.</div>';
+    document.getElementById('todoListDone').innerHTML = done.length ? done.map(itemHtml).join('') : '<div class="todo-empty">Nothing done yet.</div>';
+}
+
+async function addTodo() {
+    const input = document.getElementById('todoInput');
+    const whoSel = document.getElementById('todoWho');
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    if (!whoSel.value) { whoSel.classList.add('missing'); whoSel.focus(); return; }
+    whoSel.classList.remove('missing');
+    const now = new Date().toISOString();
+    const t = {
+        id: generateId(), name: text, description: '', type: 'miscellaneous',
+        priority: 'medium', status: 'todo', requester: whoSel.value, assignee: '',
+        team: 'Leadership', targetDate: '', tasks: [], notes: [],
+        createdAt: now, updatedAt: now,
+    };
+    todos.unshift(t);
+    renderTodos();
+    input.value = '';
+    input.focus();
+    await insertProject(t);
+}
+
+async function toggleTodo(id) {
+    const t = todos.find(x => x.id === id);
+    if (!t) return;
+    t.status = t.status === 'todo' ? 'done' : 'todo';
+    t.updatedAt = new Date().toISOString();
+    renderTodos();
+    await updateProject(t);
+}
+
+async function deleteTodo(id) {
+    if (!confirm('Delete this to-do?')) return;
+    todos = todos.filter(x => x.id !== id);
+    renderTodos();
+    await deleteProjectFromDb(id);
+}
+
 // ── State ────────────────────────────────────────────────────
 let projects = [];
 let currentFilter = 'all';
@@ -1071,7 +1303,8 @@ function getFilteredByTeam(list) {
 function setupRealtime() {
     sb.channel('vibe-realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
-            projects = await loadProjects();
+            splitLoaded(await loadProjects());
+            renderTodos();
             renderCurrentView();
         })
         .subscribe();
@@ -1702,7 +1935,8 @@ async function migrateLocalStorage() {
 async function init() {
     sb = window.rkSupabase;
     await migrateLocalStorage();
-    projects = await loadProjects();
+    splitLoaded(await loadProjects());
+    renderTodos();
     renderCurrentView();
     setupRealtime();
 }
