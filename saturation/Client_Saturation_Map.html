@@ -500,8 +500,8 @@
   }
   .state-label {
     font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.06em;
-    fill: rgba(20,54,77,0.30); text-anchor: middle; dominant-baseline: central;
-    pointer-events: none;
+    fill: rgba(20,54,77,0.5); text-anchor: middle; dominant-baseline: central;
+    pointer-events: none; paint-order: stroke; stroke: rgba(255,255,255,0.55); stroke-width: 1.6px;
   }
   .market { pointer-events: none; }
   .lbl { pointer-events: none; }
@@ -1052,7 +1052,7 @@ async function init() {
 
   // Subtle state abbreviations at each state's centroid (city scope only).
   function renderStateLabels() {
-    const labels = scope === 'city'
+    const labels = (scope === 'city' || scope === 'region')
       ? statesGeo.features.map(f => {
           const c = path.centroid(f);
           const abbr = STATE_TO_ABBR[String(f.properties.name).toLowerCase()];
