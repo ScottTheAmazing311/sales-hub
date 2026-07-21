@@ -499,6 +499,11 @@
     margin-top: 2px;
   }
   .market { pointer-events: none; }
+  .market-label {
+    font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 500;
+    fill: #fff; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
+    paint-order: stroke; stroke: rgba(0,0,0,0.6); stroke-width: 2.2px; stroke-linejoin: round;
+  }
   .market-swatch { width: 14px; height: 14px; border-radius: 3px; }
   .search-wrap { position: relative; margin: 16px 28px 0; }
   .search-input {
@@ -805,6 +810,7 @@ async function init() {
   // ---- Base map (drawn once) ----
   const statesGeo = topojson.feature(us, us.objects.states);
   const stateMesh = topojson.mesh(us, us.objects.states, (a,b) => a !== b);
+  const usLand = topojson.merge(us, us.objects.states.geometries); // outline for clipping
 
   const svg = d3.select('#usmap');
   const node = svg.node();
@@ -839,7 +845,9 @@ async function init() {
     .attr('stroke-width', 0.6)
     .attr('stroke-linejoin', 'round');
 
-  const marketLayer = svg.append('g'); // DMA market shading (behind bubbles)
+  svg.append('defs').append('clipPath').attr('id', 'us-clip').append('path');
+  const marketLayer = svg.append('g') // DMA market regions (behind bubbles)
+    .attr('clip-path', 'url(#us-clip)');
   const bubbleLayer = svg.append('g');
   const tooltip = d3.select('#tooltip');
   const topList = d3.select('#topList');
@@ -920,41 +928,48 @@ async function init() {
     bubbleLayer.selectAll('.city-bubble').classed('selected', false);
   }
 
-  // Shade every DMA market (only in metro scope): a colored hull around its
-  // member cities, or a circle for 1–2 city markets. Behind the bubbles.
+  // Shade DMA markets as full regions (metro scope only): a Voronoi partition of
+  // the market centroids, clipped to the US, so each market gets a colored
+  // territory covering the states around it, with its name labeled on top.
+  // (Approximates Nielsen DMA boundaries by "nearest market".)
   function renderMarkets() {
-    const polys = [], circs = [];
+    const cells = [];
     if (scope === 'dma') {
+      const box = node.getBoundingClientRect();
+      const pts = [], metas = [];
       current.forEach(d => {
-        const pts = [], seen = {};
-        (d.firms || []).forEach(f => {
-          if (f.lat == null) return;
-          const p = projection([f.lng, f.lat]); if (!p) return;
-          const k = Math.round(p[0]) + ',' + Math.round(p[1]);
-          if (seen[k]) return; seen[k] = 1; pts.push(p);
-        });
-        if (!pts.length) return;
-        const dim = !matchesQuery(d);
-        if (pts.length >= 3) {
-          const hull = d3.polygonHull(pts);
-          if (hull) { polys.push({ key: d.key, color: d.color, dim, d: 'M' + hull.map(p => p.join(',')).join('L') + 'Z' }); return; }
-        }
-        circs.push({ key: d.key, color: d.color, dim, cx: d3.mean(pts, p => p[0]), cy: d3.mean(pts, p => p[1]) });
+        const p = projection([d.lng, d.lat]);
+        if (p) { pts.push(p); metas.push(d); }
       });
+      if (pts.length >= 1) {
+        d3.select('#us-clip path').attr('d', path(usLand));
+        const vor = d3.Delaunay.from(pts).voronoi([0, 0, box.width, box.height]);
+        pts.forEach((p, i) => {
+          const poly = vor.cellPolygon(i);
+          if (!poly) return;
+          const d = metas[i];
+          cells.push({
+            key: d.key, name: d.city, color: d.color, dim: !matchesQuery(d),
+            d: 'M' + poly.map(pt => pt.join(',')).join('L') + 'Z',
+            cx: d3.mean(poly, pt => pt[0]), cy: d3.mean(poly, pt => pt[1]),
+            area: Math.abs(d3.polygonArea(poly)),
+          });
+        });
+      }
     }
-    const pj = marketLayer.selectAll('path.market').data(polys, d => d.key);
-    pj.exit().remove();
-    pj.enter().append('path').attr('class', 'market').merge(pj)
-      .attr('d', d => d.d).attr('fill', d => d.color)
-      .attr('fill-opacity', d => d.dim ? 0.03 : 0.13)
-      .attr('stroke', d => d.color).attr('stroke-opacity', d => d.dim ? 0.04 : 0.16)
-      .attr('stroke-width', 20).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
-    const cj = marketLayer.selectAll('circle.market').data(circs, d => d.key);
+    const cj = marketLayer.selectAll('path.market').data(cells, d => d.key);
     cj.exit().remove();
-    cj.enter().append('circle').attr('class', 'market').merge(cj)
-      .attr('cx', d => d.cx).attr('cy', d => d.cy).attr('r', 22)
-      .attr('fill', d => d.color).attr('fill-opacity', d => d.dim ? 0.03 : 0.13)
-      .attr('stroke', d => d.color).attr('stroke-opacity', d => d.dim ? 0.04 : 0.16).attr('stroke-width', 14);
+    cj.enter().append('path').attr('class', 'market').merge(cj)
+      .attr('d', d => d.d).attr('fill', d => d.color)
+      .attr('fill-opacity', d => d.dim ? 0.04 : 0.22)
+      .attr('stroke', '#fff').attr('stroke-opacity', d => d.dim ? 0.12 : 0.5).attr('stroke-width', 0.6);
+    // Label markets whose region is big enough to fit the name.
+    const labels = cells.filter(c => c.area > 2400 && !c.dim);
+    const lj = marketLayer.selectAll('text.market-label').data(labels, d => d.key);
+    lj.exit().remove();
+    lj.enter().append('text').attr('class', 'market-label').merge(lj)
+      .attr('x', d => d.cx).attr('y', d => d.cy)
+      .text(d => d.name);
   }
 
   function updateLegend() {
