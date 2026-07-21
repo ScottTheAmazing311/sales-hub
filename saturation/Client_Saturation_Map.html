@@ -504,6 +504,11 @@
     fill: #fff; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
     paint-order: stroke; stroke: rgba(0,0,0,0.6); stroke-width: 2.2px; stroke-linejoin: round;
   }
+  .region-label {
+    font-family: 'Fraunces', serif; font-size: 15px; font-weight: 800;
+    fill: #fff; text-anchor: middle; dominant-baseline: middle; cursor: pointer;
+    paint-order: stroke; stroke: rgba(0,0,0,0.55); stroke-width: 3px; stroke-linejoin: round;
+  }
   .market-swatch { width: 14px; height: 14px; border-radius: 3px; }
   .search-wrap { position: relative; margin: 16px 28px 0; }
   .search-input {
@@ -578,6 +583,7 @@
       <div class="scope-toggle">
         <button class="active" data-scope="city">By City</button>
         <button data-scope="dma">By Metro (DMA)</button>
+        <button data-scope="region">By Region</button>
       </div>
     </div>
     <div class="pa-filter">
@@ -656,6 +662,22 @@ const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?
 // (the City Saturation tab is already normalized; the raw roster is not).
 const STATE_TO_ABBR = {alabama:'AL',alaska:'AK',arizona:'AZ',arkansas:'AR',california:'CA',colorado:'CO',connecticut:'CT',delaware:'DE',florida:'FL',georgia:'GA',hawaii:'HI',idaho:'ID',illinois:'IL',indiana:'IN',iowa:'IA',kansas:'KS',kentucky:'KY',louisiana:'LA',maine:'ME',maryland:'MD',massachusetts:'MA',michigan:'MI',minnesota:'MN',mississippi:'MS',missouri:'MO',montana:'MT',nebraska:'NE',nevada:'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND',ohio:'OH',oklahoma:'OK',oregon:'OR',pennsylvania:'PA','rhode island':'RI','south carolina':'SC','south dakota':'SD',tennessee:'TN',texas:'TX',utah:'UT',vermont:'VT',virginia:'VA',washington:'WA','west virginia':'WV',wisconsin:'WI',wyoming:'WY','district of columbia':'DC'};
 function stAbbr(v){ const s=String(v==null?'':v).trim(); if(s.length===2)return s.toUpperCase(); return STATE_TO_ABBR[s.toLowerCase()]||s; }
+// US regional grouping (editable). Every state maps to one region.
+const STATE_REGION = {
+  WA:'Pacific Northwest',OR:'Pacific Northwest',AK:'Pacific Northwest',
+  CA:'West Coast',NV:'West Coast',HI:'West Coast',
+  ID:'Mountain West',MT:'Mountain West',WY:'Mountain West',UT:'Mountain West',CO:'Mountain West',
+  AZ:'Southwest',NM:'Southwest',TX:'Southwest',OK:'Southwest',
+  ND:'Midwest',SD:'Midwest',NE:'Midwest',KS:'Midwest',MN:'Midwest',IA:'Midwest',MO:'Midwest',WI:'Midwest',IL:'Midwest',IN:'Midwest',MI:'Midwest',OH:'Midwest',
+  KY:'Southeast',TN:'Southeast',MS:'Southeast',AL:'Southeast',GA:'Southeast',FL:'Southeast',SC:'Southeast',NC:'Southeast',VA:'Southeast',WV:'Southeast',AR:'Southeast',LA:'Southeast',
+  NY:'Mid-Atlantic',NJ:'Mid-Atlantic',PA:'Mid-Atlantic',MD:'Mid-Atlantic',DE:'Mid-Atlantic',DC:'Mid-Atlantic',
+  ME:'Northeast',NH:'Northeast',VT:'Northeast',MA:'Northeast',RI:'Northeast',CT:'Northeast',
+};
+const REGION_COLOR = {
+  'Pacific Northwest':'#4E97B7','West Coast':'#5FB98F','Mountain West':'#C79A5B',
+  'Southwest':'#D98C6A','Midwest':'#7C97C9','Southeast':'#C77BA6',
+  'Mid-Atlantic':'#8E86C9','Northeast':'#6FB0C2',
+};
 // Compact money: 95375 -> $95K, 1700 -> $1.7K, 375 -> $375.
 function fmtMoney(n){ if(!n) return ''; if(n>=10000) return '$'+Math.round(n/1000)+'K'; if(n>=1000) return '$'+(n/1000).toFixed(1)+'K'; return '$'+Math.round(n); }
 
@@ -701,8 +723,9 @@ async function fetchSheetData() {
   // Cols: 0=URL, 1=Alt URL, 2=Company Name, 3=Owner, 4=Practice Area,
   //        5=Total MRR, 6=City, 7=State, 8=Metro/DMA, 9=PI Classification,
   //        10=Status (Active/Churned — set by the HubSpot sync)
-  const firmsByCity = {}; // key "City, ST" -> [firm]
-  const firmsByDMA = {};  // key DMA/metro name -> [firm]
+  const firmsByCity = {};   // key "City, ST" -> [firm]
+  const firmsByDMA = {};    // key DMA/metro name -> [firm]
+  const firmsByRegion = {}; // key region name -> [firm]
   clientTable.rows.forEach(row => {
     const cell = (idx) => {
       const c = row.c && row.c[idx];
@@ -725,6 +748,8 @@ async function fetchSheetData() {
                    lat: geo ? geo[0] : null, lng: geo ? geo[1] : null };
     (firmsByCity[key] = firmsByCity[key] || []).push(firm);
     if (dma) (firmsByDMA[dma] = firmsByDMA[dma] || []).push(firm);
+    const region = STATE_REGION[state];
+    if (region) (firmsByRegion[region] = firmsByRegion[region] || []).push(firm);
   });
 
   // Parse city saturation tab
@@ -792,7 +817,24 @@ async function fetchSheetData() {
   // Distinct color per market (golden-angle hue spread).
   dmas.forEach((d, i) => { d.color = `hsl(${Math.round((i * 137.508) % 360)}, 62%, 55%)`; });
 
-  return { cities, dmas };
+  // Build the Region dataset (states grouped into broad US regions).
+  const regions = Object.keys(firmsByRegion).map(rn => {
+    const firms = firmsByRegion[rn];
+    const located = firms.filter(f => f.lat != null);
+    const lat = located.length ? located.reduce((s, f) => s + f.lat, 0) / located.length : null;
+    const lng = located.length ? located.reduce((s, f) => s + f.lng, 0) / located.length : null;
+    const byClass = (cl) => firms.filter(f => f.classification === cl).length;
+    const mvaMrr = firms.filter(f => f.classification === 'PI-MVA').reduce((s, f) => s + f.mrr, 0);
+    return {
+      city: rn, state: 'Region', key: rn, lat, lng, count: firms.length,
+      piMva: byClass('PI-MVA'), piOther: byClass('PI-Other'), nonPi: byClass('Non-PI'),
+      saturation: 'Very High', firms, under10k: new Set(),
+      mrr: mvaMrr ? '$' + Number(mvaMrr).toLocaleString() : '',
+      color: REGION_COLOR[rn] || '#888',
+    };
+  }).filter(d => d.lat !== null);
+
+  return { cities, dmas, regions };
 }
 
 // Tooltip URL
@@ -804,7 +846,7 @@ async function init() {
     fetch(topoUrl).then(r => r.json())
   ]);
 
-  const DATASETS = { city: data.cities, dma: data.dmas };
+  const DATASETS = { city: data.cities, dma: data.dmas, region: data.regions };
   let scope = 'city';
 
   // ---- Base map (drawn once) ----
@@ -867,20 +909,32 @@ async function init() {
     const stateSet = new Set();
     current.forEach(d => (d.firms || []).forEach(f => f.state && stateSet.add(f.state)));
     const statesWithClients = new Set([...stateSet].map(s => stateAbbrToName[s]));
-    statesLayer.selectAll('path')
-      .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''));
+    if (scope === 'region') {
+      // Region overlay = color the states by their region.
+      statesLayer.selectAll('path')
+        .attr('class', 'state')
+        .attr('fill', d => { const r = STATE_REGION[STATE_TO_ABBR[String(d.properties.name).toLowerCase()]]; return r ? REGION_COLOR[r] : '#e9e6dc'; })
+        .attr('fill-opacity', 0.42);
+    } else {
+      statesLayer.selectAll('path')
+        .attr('fill', null).attr('fill-opacity', null)
+        .attr('class', d => 'state' + (statesWithClients.has(d.properties.name) ? ' has-clients' : ''));
+    }
 
     // Stats + chrome
     const totalClients = current.reduce((s, c) => s + c.count, 0);
-    const unit = scope === 'city' ? 'cities' : 'metros';
+    const UNIT = { city: 'cities', dma: 'metros', region: 'regions' };
+    const LABEL = { city: 'HQ Cities', dma: 'Metros', region: 'Regions' };
+    const ACCENT = { city: 'HQ City', dma: 'Metro (DMA)', region: 'Region' };
+    const TOPBTN = { city: 'Top Cities', dma: 'Top Metros', region: 'Top Regions' };
     document.getElementById('metaLine').textContent =
-      `${totalClients} clients -- ${current.length} ${unit} -- ${stateSet.size} states`;
+      `${totalClients} clients -- ${current.length} ${UNIT[scope]} -- ${stateSet.size} states`;
     refreshStatClients();
     document.getElementById('statCities').textContent = current.length;
     document.getElementById('statStates').textContent = stateSet.size;
-    document.getElementById('statCitiesLabel').textContent = scope === 'city' ? 'HQ Cities' : 'Metros';
-    document.getElementById('scopeAccent').textContent = scope === 'city' ? 'HQ City' : 'Metro (DMA)';
-    document.getElementById('topViewBtn').textContent = scope === 'city' ? 'Top Cities' : 'Top Metros';
+    document.getElementById('statCitiesLabel').textContent = LABEL[scope];
+    document.getElementById('scopeAccent').textContent = ACCENT[scope];
+    document.getElementById('topViewBtn').textContent = TOPBTN[scope];
     updateLegend();
 
     // Bubbles
@@ -890,7 +944,7 @@ async function init() {
       const p = projection([c.lng, c.lat]);
       return p ? Object.assign({}, c, { x: p[0], y: p[1] }) : null;
     }).filter(Boolean);
-    const drawn = [...points].sort((a, b) => a.count - b.count);
+    const drawn = scope === 'region' ? [] : [...points].sort((a, b) => a.count - b.count);
 
     const sel = bubbleLayer.selectAll('circle').data(drawn, d => d.key);
     sel.exit().remove();
@@ -969,6 +1023,22 @@ async function init() {
     lj.exit().remove();
     lj.enter().append('text').attr('class', 'market-label').merge(lj)
       .attr('x', d => d.cx).attr('y', d => d.cy)
+      .text(d => d.name);
+
+    // Region labels (region scope) — clickable to drill into the region.
+    const rlabels = [];
+    if (scope === 'region') {
+      current.forEach(d => {
+        const p = projection([d.lng, d.lat]);
+        if (p && matchesQuery(d)) rlabels.push({ key: d.key, name: d.city, x: p[0], y: p[1], region: d });
+      });
+    }
+    const rj = marketLayer.selectAll('text.region-label').data(rlabels, d => d.key);
+    rj.exit().remove();
+    rj.enter().append('text').attr('class', 'region-label')
+      .on('click', (event, d) => selectItem(d.region))
+      .merge(rj)
+      .attr('x', d => d.x).attr('y', d => d.y)
       .text(d => d.name);
   }
 
