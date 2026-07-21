@@ -914,7 +914,7 @@ async function init() {
       statesLayer.selectAll('path')
         .attr('class', 'state')
         .attr('fill', d => { const r = STATE_REGION[STATE_TO_ABBR[String(d.properties.name).toLowerCase()]]; return r ? REGION_COLOR[r] : '#e9e6dc'; })
-        .attr('fill-opacity', 0.42);
+        .attr('fill-opacity', 0.55);
     } else {
       statesLayer.selectAll('path')
         .attr('fill', null).attr('fill-opacity', null)
@@ -937,14 +937,16 @@ async function init() {
     document.getElementById('topViewBtn').textContent = TOPBTN[scope];
     updateLegend();
 
-    // Bubbles
-    const maxCount = d3.max(current, c => c.count) || 1;
+    // Bubbles — individual client dots. In Region scope we still plot the city
+    // dots (on top of the region-colored states), not one dot per region.
+    const bubbleSrc = scope === 'region' ? data.cities : current;
+    const maxCount = d3.max(bubbleSrc, c => c.count) || 1;
     const rScale = d3.scaleSqrt().domain([1, maxCount]).range([3.5, 18]);
-    const points = current.map(c => {
+    const points = bubbleSrc.map(c => {
       const p = projection([c.lng, c.lat]);
       return p ? Object.assign({}, c, { x: p[0], y: p[1] }) : null;
     }).filter(Boolean);
-    const drawn = scope === 'region' ? [] : [...points].sort((a, b) => a.count - b.count);
+    const drawn = [...points].sort((a, b) => a.count - b.count);
 
     const sel = bubbleLayer.selectAll('circle').data(drawn, d => d.key);
     sel.exit().remove();
