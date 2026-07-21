@@ -162,38 +162,6 @@
         }
         .view-toggle-btn:hover:not(.active) { color: var(--cream); }
 
-        /* Stats bar */
-        .stats-bar {
-            margin: 1.5rem 2rem 0;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 1rem 1.25rem;
-            border: 1px solid rgba(0,0,0,0.06);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-        .stat-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 0.35rem;
-        }
-        .stat-value {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--navy);
-        }
-        .stat-value.success { color: var(--success); }
-        .stat-value.warning { color: var(--warning); }
-        .stat-value.sky { color: var(--sky); }
-
         /* ═══════════════════════════════════════════ */
         /* TEAM TO-DO BOARD                            */
         /* ═══════════════════════════════════════════ */
@@ -959,8 +927,6 @@
     </div>
 </header>
 
-<div class="stats-bar" id="statsBar"></div>
-
 <!-- Team To-Do Board -->
 <div class="todo-section">
     <div class="todo-head">
@@ -1321,24 +1287,9 @@ function setView(view) {
 }
 
 function renderCurrentView() {
-    renderStats();
     updateCounts();
     if (currentView === 'board') renderKanban();
     else renderProjects();
-}
-
-// ── Stats ────────────────────────────────────────────────────
-function renderStats() {
-    const total = projects.length;
-    const active = projects.filter(p => ['planning','building','review'].includes(p.status)).length;
-    const complete = projects.filter(p => p.status === 'complete').length;
-    const requests = projects.filter(p => p.status === 'request').length;
-    document.getElementById('statsBar').innerHTML = `
-        <div class="stat-card"><div class="stat-label">Total Projects</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value sky">${active}</div></div>
-        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value success">${complete}</div></div>
-        <div class="stat-card"><div class="stat-label">Pending Requests</div><div class="stat-value warning">${requests}</div></div>
-    `;
 }
 
 function updateCounts() {
