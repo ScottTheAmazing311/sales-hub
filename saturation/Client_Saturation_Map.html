@@ -500,9 +500,9 @@
   }
   .market { pointer-events: none; }
   .market-label {
-    font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 500;
-    fill: #fff; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
-    paint-order: stroke; stroke: rgba(0,0,0,0.6); stroke-width: 2.2px; stroke-linejoin: round;
+    font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600;
+    fill: #1e1e28; text-anchor: middle; dominant-baseline: middle; pointer-events: none;
+    paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round;
   }
   .region-label {
     font-family: 'Fraunces', serif; font-size: 15px; font-weight: 800;
@@ -1005,8 +1005,7 @@ async function init() {
           cells.push({
             key: d.key, name: d.city, color: d.color, dim: !matchesQuery(d),
             d: 'M' + poly.map(pt => pt.join(',')).join('L') + 'Z',
-            cx: d3.mean(poly, pt => pt[0]), cy: d3.mean(poly, pt => pt[1]),
-            area: Math.abs(d3.polygonArea(poly)),
+            x: p[0], y: p[1], count: d.count, // seed point = market center (always inside its cell)
           });
         });
       }
@@ -1017,12 +1016,19 @@ async function init() {
       .attr('d', d => d.d).attr('fill', d => d.color)
       .attr('fill-opacity', d => d.dim ? 0.04 : 0.22)
       .attr('stroke', '#fff').attr('stroke-opacity', d => d.dim ? 0.12 : 0.5).attr('stroke-width', 0.6);
-    // Label markets whose region is big enough to fit the name.
-    const labels = cells.filter(c => c.area > 2400 && !c.dim);
+    // Metro labels: biggest markets first, at each market's own center, skipping
+    // any that would overlap an already-placed label (keeps the map readable).
+    const fs = 10, placed = [], labels = [];
+    cells.filter(c => !c.dim).sort((a, b) => b.count - a.count).forEach(c => {
+      const w = c.name.length * fs * 0.56, h = fs * 1.25;
+      const r = { x0: c.x - w / 2, x1: c.x + w / 2, y0: c.y - h / 2, y1: c.y + h / 2 };
+      if (placed.some(p => !(r.x1 < p.x0 || r.x0 > p.x1 || r.y1 < p.y0 || r.y0 > p.y1))) return;
+      placed.push(r); labels.push(c);
+    });
     const lj = marketLayer.selectAll('text.market-label').data(labels, d => d.key);
     lj.exit().remove();
     lj.enter().append('text').attr('class', 'market-label').merge(lj)
-      .attr('x', d => d.cx).attr('y', d => d.cy)
+      .attr('x', d => d.x).attr('y', d => d.y)
       .text(d => d.name);
 
     // Region labels (region scope) — clickable to drill into the region.
