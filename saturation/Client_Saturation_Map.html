@@ -888,8 +888,8 @@ async function init() {
   svg.append('defs').append('clipPath').attr('id', 'us-clip').append('path');
   const marketLayer = svg.append('g') // DMA market regions (behind bubbles)
     .attr('clip-path', 'url(#us-clip)');
-  const bubbleLayer = svg.append('g');
-  const labelLayer = svg.append('g'); // market/region labels on top (unclipped)
+  const labelLayer = svg.append('g'); // market/region labels
+  const bubbleLayer = svg.append('g'); // client circles on the very top layer
   const tooltip = d3.select('#tooltip');
   const topList = d3.select('#topList');
 
@@ -1020,11 +1020,14 @@ async function init() {
     // Metro labels: biggest markets first, at each market's own center, skipping
     // any that would overlap an already-placed label (keeps the map readable).
     const fs = 10, placed = [], labels = [];
+    const rmax = d3.max(current, c => c.count) || 1;
+    const rs = d3.scaleSqrt().domain([1, rmax]).range([3.5, 18]);
     cells.filter(c => !c.dim).sort((a, b) => b.count - a.count).forEach(c => {
+      const ly = c.y - (rs(c.count) + 10); // lift the pill just above the market's dot
       const w = c.name.length * fs * 0.62 + 12, h = fs + 8;
-      const r = { x0: c.x - w / 2, x1: c.x + w / 2, y0: c.y - h / 2, y1: c.y + h / 2 };
+      const r = { x0: c.x - w / 2, x1: c.x + w / 2, y0: ly - h / 2, y1: ly + h / 2 };
       if (placed.some(p => !(r.x1 < p.x0 || r.x0 > p.x1 || r.y1 < p.y0 || r.y0 > p.y1))) return;
-      placed.push(r); labels.push(c);
+      placed.push(r); labels.push({ key: c.key, name: c.name, x: c.x, y: ly });
     });
     drawLabels(labels, 'market-label', fs, null);
 
