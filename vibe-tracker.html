@@ -361,6 +361,15 @@
         .kanban-column[data-status="review"] .kanban-column-accent { background: var(--navy-light); }
         .kanban-column[data-status="complete"] .kanban-column-accent { background: var(--success); }
         .kanban-column[data-status="scrapped"] .kanban-column-accent { background: #6b7280; }
+        .kanban-column-header.collapsible { cursor: pointer; user-select: none; }
+        .kanban-collapse-arrow {
+            display: inline-block;
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            margin-right: 0.4rem;
+        }
+        .kanban-column.collapsed { min-height: auto; }
+        .kanban-column.collapsed .kanban-cards { display: none; }
 
         .kanban-cards {
             flex: 1;
@@ -1301,6 +1310,14 @@ function updateCounts() {
 // ═══════════════════════════════════════════════════════════
 // KANBAN BOARD
 // ═══════════════════════════════════════════════════════════
+// Complete & Scrapped columns are collapsible and start collapsed
+let collapsedCols = { complete: true, scrapped: true };
+
+function toggleColumn(status) {
+    collapsedCols[status] = !collapsedCols[status];
+    renderKanban();
+}
+
 function renderKanban() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const board = document.getElementById('kanbanBoard');
@@ -1318,11 +1335,13 @@ function renderKanban() {
         const prioOrder = { high: 0, medium: 1, low: 2 };
         cards.sort((a, b) => prioOrder[a.priority] - prioOrder[b.priority] || new Date(b.createdAt) - new Date(a.createdAt));
 
+        const collapsible = Object.prototype.hasOwnProperty.call(collapsedCols, status);
+        const collapsed = collapsible && collapsedCols[status];
         return `
-        <div class="kanban-column" data-status="${status}"
+        <div class="kanban-column${collapsed ? ' collapsed' : ''}" data-status="${status}"
              ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${status}')">
-            <div class="kanban-column-header">
-                <span class="kanban-column-title">${STATUS_LABELS[status]}</span>
+            <div class="kanban-column-header${collapsible ? ' collapsible' : ''}"${collapsible ? ` onclick="toggleColumn('${status}')" title="${collapsed ? 'Expand' : 'Collapse'}"` : ''}>
+                <span class="kanban-column-title">${collapsible ? `<span class="kanban-collapse-arrow">${collapsed ? '&#9654;' : '&#9660;'}</span>` : ''}${STATUS_LABELS[status]}</span>
                 <span class="kanban-column-count">${cards.length}</span>
             </div>
             <div class="kanban-column-accent"></div>
