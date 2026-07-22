@@ -32,7 +32,8 @@
       "name": "Add-On / À La Carte",
       "kind": "offers",
       "offers": [
-        "search-authority-sprint"
+        "search-authority-sprint",
+        "paid-media"
       ]
     },
     {
@@ -59,7 +60,6 @@
         "retired-legal-foundry-social",
         "retired-ignite-website",
         "retired-ai-citation-magnet",
-        "paid-media",
         "web-maintenance",
         "social-media",
         "technical-geo-sprint",
@@ -1887,13 +1887,124 @@
     },
     "paid-media": {
       "key": "paid-media",
-      "name": "Paid Media & Ads Management",
-      "section": "retired",
-      "kind": "simple",
-      "price": "$3,000–$7,500/mo (by ad spend)",
-      "blurb": "Full-service paid media management across Google Ads, LSA, and Meta, run by a dedicated specialist. The management fee scales with monthly ad spend; ad spend is billed separately.",
-      "details": [],
-      "retired": true
+      "name": "Paid Media & Social",
+      "section": "addon-alacarte",
+      "kind": "matrix",
+      "source": {
+        "driveId": "10EwtufQGVMkuHUZ87GN3oQgmtzxIJpbl",
+        "name": "Paid Media.docx",
+        "updated": "2026-07-22"
+      },
+      "tagline": "Full-service paid media and social ads, run by a dedicated specialist.",
+      "blurb": "Full-service paid media management across Google Ads, LSA, Meta, and social, run by a dedicated Paid Media & Social specialist. The management fee scales with monthly ad spend; ad spend is billed separately and goes entirely to media — no commission.",
+      "tiers": [
+        {
+          "key": "inc",
+          "num": 1,
+          "name": "Included"
+        }
+      ],
+      "groups": [
+        {
+          "name": "Paid Media Management",
+          "items": [
+            {
+              "label": "Ads Setup, Strategy & Optimization",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Dedicated Paid Media & Social Specialist",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Campaign Management",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Creative Production",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Instant Form Configuration",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Compliance & Legal Review",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Keyword Research & Selection",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Landing Page Creation",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Ongoing Keyword Analysis & Revision",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Ad Campaign Copywriting Enhancements",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Comprehensive Bid Strategy & Budget Management",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Reporting, Analytics & Lead Tracking",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        }
+      ],
+      "priceRows": [
+        {
+          "label": "Ad Spend $20,000–$50,000",
+          "values": [
+            "$5,000/mo"
+          ],
+          "lead": true
+        },
+        {
+          "label": "Ad Spend $50,001–$100,000",
+          "values": [
+            "$7,500/mo"
+          ]
+        },
+        {
+          "label": "Ad Spend $100,001+",
+          "values": [
+            "Custom"
+          ]
+        }
+      ],
+      "footnote": "Management fee is tiered by monthly ad spend. Ad spend is billed separately — every dollar goes to media, not commission. Campaign setup takes approximately 7–10 business days before launch."
     },
     "web-maintenance": {
       "key": "web-maintenance",
