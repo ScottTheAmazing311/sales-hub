@@ -181,12 +181,32 @@ function editOffer(o,key){
       o.notes.forEach((n,ni)=>{h+=field('Title',`${b}.notes.${ni}.title`,n.title)+field('Body',`${b}.notes.${ni}.body`,n.body,true);});
       h+='</div>';
     }
+    h+=rampCard(o,key);
     h+=field('Footnote',`${b}.footnote`,o.footnote,true);
   } else {
     h+=field('Price',`${b}.price`,o.price);
     h+='<div class="card"><h3>Details (one per line)</h3>'+field('',`${b}.details`,o.details,true)+'</div>';
+    h+=rampCard(o,key);
     h+=field('Footnote',`${b}.footnote`,o.footnote,true);
   }
+  return h;
+}
+
+function rampCard(o,key){
+  const b=`offers.${key}`;
+  const r=o.ramp||{};
+  let h=`<div class="card"><h3>Ramp Deal</h3><label class="tgl" style="margin-bottom:${r.on?'.5rem':'0'}"><input type="checkbox" onchange="toggleRamp('${key}',this.checked)" ${r.on?'checked':''}> Ramp deal pricing</label>`;
+  if(r.on){
+    h+='<p class="hint" style="margin:0 0 .6rem">Price steps up over the engagement. Shown as a Ramp Pricing block on the generated page.</p>';
+    h+='<table class="medit"><thead><tr><td style="text-align:left">Months</td><td style="text-align:left">Price</td><td></td></tr></thead><tbody>';
+    (r.periods||[]).forEach((p,i)=>{
+      h+=`<tr><td class="lbl"><input data-path="${b}.ramp.periods.${i}.months" value="${escAttr(p.months)}" placeholder="Months 1–3"></td><td><input data-path="${b}.ramp.periods.${i}.price" value="${escAttr(p.price)}" placeholder="$5,000/mo"></td><td class="rowtool"><button class="del-btn" title="Delete period" onclick="delRamp('${key}',${i})">✕</button></td></tr>`;
+    });
+    h+=`<tr class="addrow"><td colspan="3"><button class="add-btn" onclick="addRamp('${key}')">+ Add period</button></td></tr>`;
+    h+='</tbody></table>';
+    h+=field('Note (optional)',`${b}.ramp.note`,r.note||'');
+  }
+  h+='</div>';
   return h;
 }
 
@@ -211,6 +231,9 @@ function delGroup(key,gi){ if(!confirm('Delete this whole section and all its ro
 function addGroup(key){ state.offers[key].groups.push({name:'New Section',items:[]}); markDirty(); renderEditor(); }
 function delPrice(key,pi){ state.offers[key].priceRows.splice(pi,1); markDirty(); renderEditor(); }
 function addPrice(key){ var o=state.offers[key]; (o.priceRows=o.priceRows||[]).push({label:'New price row',values:o.tiers.map(function(){return '';})}); markDirty(); renderEditor(); }
+function toggleRamp(key,on){ var o=state.offers[key]; if(!o.ramp)o.ramp={on:false,periods:[{months:'Months 1–3',price:'$5,000/mo'},{months:'Months 4–6',price:'$10,000/mo'}],note:''}; o.ramp.on=on; markDirty(); renderEditor(); }
+function addRamp(key){ var r=state.offers[key].ramp; (r.periods=r.periods||[]).push({months:'',price:''}); markDirty(); renderEditor(); }
+function delRamp(key,i){ state.offers[key].ramp.periods.splice(i,1); markDirty(); renderEditor(); }
 function delPimcon(i){ state.pimcon.splice(i,1); markDirty(); renderEditor(); }
 function addPimcon(){ state.pimcon.push({name:'New Sponsorship',price:'$0'}); markDirty(); renderEditor(); }
 

@@ -49,6 +49,10 @@
   .res-card .rc-type{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
   .res-card .rc-name{font-family:var(--head);font-size:1.1rem;color:var(--navy)}
   .res-card a{margin-top:auto;font-family:var(--body);font-weight:600;font-size:.85rem;color:var(--navy);text-decoration:none;background:var(--yellow);border-radius:999px;padding:.4rem .9rem;text-align:center}
+  table.rampt{width:100%;border-collapse:collapse;font-size:.9rem}
+  table.rampt td{padding:.5rem .6rem;border-bottom:1px solid var(--line)}
+  table.rampt td.months{font-weight:600;color:var(--navy)}
+  table.rampt td.price{text-align:right;font-family:var(--mono);font-weight:600;color:var(--navy);font-size:1rem}
   table.pimcon{width:100%;border-collapse:collapse;font-size:.9rem}
   table.pimcon td{padding:.5rem .6rem;border-bottom:1px solid var(--line)}
   table.pimcon td.price{text-align:right;font-family:var(--mono);font-weight:600;color:var(--navy)}
@@ -96,18 +100,29 @@ function renderMatrix(o){
   h+='</div>';
   return h;
 }
+function renderRamp(o){
+  const r=o.ramp;
+  if(!r||!r.on||!(r.periods||[]).length)return '';
+  let h='<div class="block"><div class="pill">Ramp Deal</div><table class="rampt"><tbody>';
+  r.periods.forEach(p=>{h+=`<tr><td class="months">${esc(p.months)}</td><td class="price">${esc(p.price)}</td></tr>`;});
+  h+='</tbody></table>';
+  if(r.note)h+=`<p class="footnote">${esc(r.note)}</p>`;
+  h+='</div>';
+  return h;
+}
 function renderOffer(o){
   let h=`<h1 class="section-title">${esc(o.name)}</h1>`;
   if(o.retired)h+='<div class="pill retired">Retired</div>';
   if(o.tagline)h+=`<p class="tagline">${esc(o.tagline)}</p>`;
   if(o.blurb)h+=`<p class="blurb">${esc(o.blurb)}</p>`;
-  if(o.kind==='matrix'){ h+=renderMatrix(o); }
+  if(o.kind==='matrix'){ h+=renderMatrix(o); h+=renderRamp(o); }
   else {
     h+='<div class="block">';
     if(o.price)h+=`<div class="price-lead">${esc(o.price)}</div>`;
     if(o.details&&o.details.length){h+='<ul class="plain">';o.details.forEach(d=>h+=`<li>${esc(d)}</li>`);h+='</ul>';}
     if(o.footnote)h+=`<p class="footnote">${esc(o.footnote)}</p>`;
     h+='</div>';
+    h+=renderRamp(o);
   }
   return h;
 }
