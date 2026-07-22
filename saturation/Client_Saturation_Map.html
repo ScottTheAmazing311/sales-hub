@@ -635,7 +635,7 @@
     </div>
 
     <div class="search-wrap">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search city or metro…" autocomplete="off">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search city, metro, or state…" autocomplete="off">
       <button id="searchClear" class="search-clear" title="Clear">&times;</button>
     </div>
 
@@ -903,7 +903,22 @@ async function init() {
   let activePA = 'all';
   let query = '';
   let selected = null;
-  const matchesQuery = d => !query || String(d.city).toLowerCase().includes(query);
+  // Match by city/metro/region name, OR by state (abbr "TX", full "Texas", or
+  // partial) against the item's own state and any of its clients' states.
+  function matchesQuery(d) {
+    if (!query) return true;
+    if (String(d.city).toLowerCase().includes(query)) return true;
+    const qAbbr = (STATE_TO_ABBR[query] || query).toLowerCase(); // "texas" -> "tx"
+    const states = new Set();
+    if (d.state && d.state.length === 2) states.add(d.state.toLowerCase());
+    (d.firms || []).forEach(f => { if (f.state) states.add(String(f.state).toLowerCase()); });
+    for (const st of states) {
+      if (st === query || st === qAbbr) return true;
+      const full = stateAbbrToName[st.toUpperCase()];
+      if (full && full.toLowerCase().includes(query)) return true;
+    }
+    return false;
+  }
   let current = [];     // active dataset
   let currentTop = [];  // active dataset sorted desc by count
 
