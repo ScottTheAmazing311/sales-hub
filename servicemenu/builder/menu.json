@@ -76,7 +76,7 @@
       "kind": "matrix",
       "source": {
         "driveId": "12r9IKW8wu9TBLhLjcSVA87PhnhEgipZZ",
-        "name": "Modern Search Dominance SOW (1).docx",
+        "name": "Modern Search Flagship SOW (1).docx",
         "updated": "2026-07-07"
       },
       "tagline": "Be the name AI and Google recommend when clients search.",
@@ -178,7 +178,7 @@
           ]
         },
         {
-          "name": "Local SEO & Google Maps Dominance",
+          "name": "Local SEO & Google Maps",
           "items": [
             {
               "label": "Google Business Profile Mgmt & Optimization",
@@ -249,7 +249,7 @@
               ]
             },
             {
-              "label": "Content Production",
+              "label": "Strategic Assets",
               "values": [
                 "6/mo",
                 "9/mo",
@@ -577,7 +577,7 @@
           "name": "Not Included at Foundation",
           "items": [
             {
-              "label": "Paid Media / Google Ads Management (available in Dominance)",
+              "label": "Paid Ads Management — LSA, Google & ChatGPT Ads (available in Dominance)",
               "values": [
                 "✕"
               ]
@@ -723,6 +723,12 @@
           "label": "Billed",
           "values": [
             "$6,000/mo × 2"
+          ]
+        },
+        {
+          "label": "Timeline",
+          "values": [
+            "60 Days"
           ]
         },
         {
@@ -1095,6 +1101,12 @@
           "label": "Billed",
           "values": [
             "$9,000/mo × 2"
+          ]
+        },
+        {
+          "label": "Timeline",
+          "values": [
+            "60 Days"
           ]
         },
         {
