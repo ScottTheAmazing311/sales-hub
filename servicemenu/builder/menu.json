@@ -3,7 +3,7 @@
     "brand": "Rankings",
     "org": "Attorney Rankings Organization",
     "title": "Service Menu",
-    "updated": "2026-07-13",
+    "updated": "2026-07-22",
     "driveFolderId": "1ftgxgpJhX3eEFTWysJ9dtpFH2T51DP_7"
   },
   "sections": [
@@ -12,7 +12,7 @@
       "name": "Modern Search",
       "kind": "offers",
       "offers": [
-        "modern-search-dominance",
+        "modern-search-flagship",
         "modern-search-foundation"
       ]
     },
@@ -21,21 +21,18 @@
       "name": "Brand",
       "kind": "offers",
       "offers": [
-        "ignite-design",
-        "social-video-dominance"
+        "brand-identity-sprint",
+        "ignite-website-design",
+        "video-authority-sprint",
+        "video-flagship"
       ]
     },
     {
-      "key": "sprints-alacart",
-      "name": "Sprints & A La Carte",
+      "key": "addon-alacarte",
+      "name": "Add-On / À La Carte",
       "kind": "offers",
       "offers": [
-        "paid-media",
-        "web-maintenance",
-        "social-media",
-        "technical-geo-sprint",
-        "high-dr-links",
-        "media-capture"
+        "search-authority-sprint"
       ]
     },
     {
@@ -54,30 +51,36 @@
       "key": "retired",
       "name": "Retired Offers",
       "kind": "offers",
+      "internal": true,
       "offers": [
         "retired-pi-flagship",
         "retired-hosting",
         "retired-intake-optimization",
         "retired-legal-foundry-social",
         "retired-ignite-website",
-        "retired-ai-citation-magnet"
-      ],
-      "internal": true
+        "retired-ai-citation-magnet",
+        "paid-media",
+        "web-maintenance",
+        "social-media",
+        "technical-geo-sprint",
+        "high-dr-links",
+        "media-capture"
+      ]
     }
   ],
   "offers": {
-    "modern-search-dominance": {
-      "key": "modern-search-dominance",
-      "name": "Modern Search Dominance",
+    "modern-search-flagship": {
+      "key": "modern-search-flagship",
+      "name": "Modern Search Flagship",
       "section": "modern-search",
       "kind": "matrix",
       "source": {
-        "driveId": "1c1riXY6CC3Qm4oB1tM10v31Vy8btriBN",
-        "name": "Modern Search Flagship 10k-Custom SOW.docx",
+        "driveId": "12r9IKW8wu9TBLhLjcSVA87PhnhEgipZZ",
+        "name": "Modern Search Dominance SOW (1).docx",
         "updated": "2026-07-07"
       },
       "tagline": "Be the name AI and Google recommend when clients search.",
-      "blurb": "Clients no longer just Google a lawyer — they ask AI. Modern Search Dominance makes a firm the most visible, most-cited name across every surface that now decides where cases go: Google, Maps, and the AI engines (ChatGPT, Claude, Perplexity, Gemini). Four tiers scale from single-market growth to total market dominance. Zero ad management fees, ever — you fund LSA, PPC, and paid media spend directly, and we take no commission.",
+      "blurb": "Clients no longer just Google a lawyer — they ask AI. Modern Search Flagship makes a firm the most visible, most-cited name across every surface that now decides where cases go: Google, Maps, and the AI engines (ChatGPT, Claude, Perplexity, Gemini). Four tiers scale from single-market growth to total market dominance. Zero ad management fees, ever — you fund LSA, PPC, and paid media spend directly, and we take no commission.",
       "tiers": [
         {
           "key": "t1",
@@ -446,12 +449,12 @@
       "section": "modern-search",
       "kind": "matrix",
       "source": {
-        "driveId": "15XMv0nMc5RTYiJ00ZtxGMsdznB036-GA",
-        "name": "Modern Search Foundation 5k SOW.docx",
+        "driveId": "1v0uR10Toacs-jEqOZT53e0U4Y9MzdP3T",
+        "name": "Modern Search Foundation SOW (1).docx",
         "updated": "2026-07-07"
       },
       "tagline": "Foundational visibility — get found and cited in AI and local search.",
-      "blurb": "The entry point into AI and local search. Modern Search Foundation gets a firm found, cited, and on the map across Google, the local pack, and the AI engines. It's the floor that establishes visibility — not a full market-dominance program. Most firms graduate into Modern Search Dominance as they scale.",
+      "blurb": "The entry point into AI and local search. Modern Search Foundation gets a firm found, cited, and on the map across Google, the local pack, and the AI engines. It's the floor that establishes visibility — not a full market-dominance program. Most firms graduate into Modern Search Flagship as they scale.",
       "tiers": [
         {
           "key": "inc",
@@ -615,20 +618,134 @@
           ]
         }
       ],
-      "footnote": "Foundational visibility, not a dominance program. Upgrade path: Modern Search Dominance ($10K–$30K+/mo)."
+      "footnote": "Foundational visibility, not a dominance program. Upgrade path: Modern Search Flagship ($10K–$30K+/mo)."
     },
-    "ignite-design": {
-      "key": "ignite-design",
-      "name": "Ignite Conversion Design",
+    "brand-identity-sprint": {
+      "key": "brand-identity-sprint",
+      "name": "Brand Identity Sprint",
       "section": "brand",
       "kind": "matrix",
       "source": {
-        "driveId": "1bsZu0iwuuUXotlbgj832VeIhgRf-dt6W",
-        "name": "Ignite Design SOW.docx",
+        "driveId": "1OSmmyZ6hhOjT3jLbPsaVShfoJQtZtjl3",
+        "name": "Brand Identity Sprint SOW.docx",
+        "updated": "2026-07-07"
+      },
+      "tagline": "60 days. One identity everywhere. A brand your market remembers.",
+      "blurb": "The Brand Identity Sprint builds the complete identity in 60 days — positioning, logo, color, typography, voice, copywriting, and the templates that carry it everywhere — so every search result, video, ad, and page a potential client touches says the same thing: this is the firm. Month one builds the identity; month two puts it to work. Drops into any plan with no retainer change.",
+      "tiers": [
+        {
+          "key": "inc",
+          "num": 1,
+          "name": "Included"
+        }
+      ],
+      "groups": [
+        {
+          "name": "Phase 1 — Identity (Days 1–30)",
+          "items": [
+            {
+              "label": "Brand Discovery & Positioning Workshop",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Logo / Wordmark — build or refresh",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Color System & Typography",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Brand Voice & Messaging Guide (tagline, elevator pitch, key messages)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Conversion Copywriting — Key Pages (homepage, top practice areas, about)",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phase 2 — Activation (Days 31–60)",
+          "items": [
+            {
+              "label": "Brand Style Guide",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Social Profile + Google Business Profile Visual Assets",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Ad & Video Templates (thumbnails, lower thirds, ad frames)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Business Collateral (letterhead, business cards, email signatures)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Website Brand Application Spec (paint-by-numbers handoff for Ignite or your webmaster)",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        }
+      ],
+      "priceRows": [
+        {
+          "label": "60-Day Sprint — Total",
+          "values": [
+            "$12,000"
+          ],
+          "lead": true
+        },
+        {
+          "label": "Billed",
+          "values": [
+            "$6,000/mo × 2"
+          ]
+        },
+        {
+          "label": "Retainer Impact",
+          "values": [
+            "None — drops into any plan"
+          ]
+        }
+      ],
+      "footnote": "Pairs with Ignite Website Design — run the two together and the new site launches wearing the new brand. You keep every file, guide, and template permanently."
+    },
+    "ignite-website-design": {
+      "key": "ignite-website-design",
+      "name": "Ignite Website Design",
+      "section": "brand",
+      "kind": "matrix",
+      "source": {
+        "driveId": "1fd1naXqOzPCyDZ5MGR0V-WWG4TG352rc",
+        "name": "Ignite Website Design SOW.docx",
         "updated": "2026-07-07"
       },
       "tagline": "A high-performance, conversion-built website engineered to turn traffic into signed cases.",
-      "blurb": "Ignite Conversion Design is a high-performance website engineered to capture and convert search, local, and AI-driven traffic into signed cases — and built AI-ready so engines like Google AI, ChatGPT, Perplexity, and Gemini can read and cite the firm from day one. A standalone offer that pairs naturally with Modern Search Dominance. Typically delivered within 90 days. No subscription required.",
+      "blurb": "Ignite Website Design captures and converts search, local, and AI-driven traffic into signed cases — built AI-ready so Google AI, ChatGPT, Perplexity, and Gemini can read and cite the firm from day one. A standalone offer that pairs naturally with Modern Search Flagship. Typically delivered within 90 days; no subscription required.",
       "tiers": [
         {
           "key": "inc",
@@ -694,7 +811,7 @@
           "name": "Conversion & Intake",
           "items": [
             {
-              "label": "Conversion-Optimization Design",
+              "label": "Conversion-Optimized Page Design",
               "values": [
                 "✓"
               ]
@@ -730,12 +847,6 @@
               ]
             },
             {
-              "label": "Conversion Copywriting (key pages)",
-              "values": [
-                "✓"
-              ]
-            },
-            {
               "label": "CRM & Intake Integration",
               "values": [
                 "✓"
@@ -747,7 +858,7 @@
           "name": "AI Search Readiness",
           "items": [
             {
-              "label": "Schema & Structured Data Foundation (ships AI-ready)",
+              "label": "Schema & Structured Data Foundation",
               "values": [
                 "✓"
               ]
@@ -759,7 +870,7 @@
               ]
             },
             {
-              "label": "E-E-A-T Architecture (machine-readable trust signals)",
+              "label": "E-E-A-T Architecture",
               "values": [
                 "✓"
               ]
@@ -859,48 +970,174 @@
       ],
       "notes": [
         {
-          "title": "Optional Add-On: Brand Foundation (+$4,500)",
-          "body": "Logo / wordmark build or refresh, color system + typography, brand style guide, and social + Google Business Profile visual assets. A great site on a weak brand underperforms."
+          "title": "Pairs With: The Brand Identity Sprint ($12,000 · $6,000/mo × 2 · 60 days)",
+          "body": "A great site on a weak brand underperforms. Run the Brand Identity Sprint alongside the build and the new site launches wearing the new brand — one build, one identity, zero rework. Full scope in the Brand Identity Sprint SOW."
         },
         {
           "title": "Premium Hosting & Security ($375/mo, included by default)",
           "body": "Managed enterprise hosting + 99.9% uptime, daily backups + one-click restore, malware monitoring, firewall, SSL & security hardening, performance tuning, and ongoing plugin/core/security updates. Opt-out available with a signed risk acknowledgment."
         }
       ],
-      "footnote": "Pairs naturally with Modern Search Dominance. Day 31 onward continues under the Modern Search Dominance subscription, if subscribed."
+      "footnote": "Pairs naturally with Modern Search Flagship. Day 31 onward continues under the Modern Search Flagship subscription, if subscribed."
     },
-    "social-video-dominance": {
-      "key": "social-video-dominance",
-      "name": "Social Video Dominance",
+    "video-authority-sprint": {
+      "key": "video-authority-sprint",
+      "name": "Video Authority Sprint",
       "section": "brand",
       "kind": "matrix",
       "source": {
-        "driveId": "1s080WCKLtZFtG_zCph7w75sJzD1S2veS",
-        "name": "Social Video Dominance SOW.docx",
+        "driveId": "1EXlbXWh6HxovEU6OApEyNL3xVYNPZ-8h",
+        "name": "Video Authority Sprint SOW.docx",
         "updated": "2026-07-07"
       },
-      "tagline": "Own the feed in your market.",
-      "blurb": "Attention decides cases before intent does. Social Video Dominance makes a firm the name potential clients already know before they ever search — done-for-you video across YouTube, Instagram, Facebook, TikTok, and LinkedIn. The number you buy is total posts per month; every tier is video-first, and statics/motion graphics round out the total when footage runs short. Four tiers scale from owning the feed to total market presence.",
+      "tagline": "60 days. Sixty videos. We’ll make you the authority in your space.",
+      "blurb": "A 60-day video intensive that drops into any plan — no retainer change. Month one: our crew scripts, directs, and captures a full production day, then edits it into 60 finished videos (long-form plus Shorts) with 1–3 ad-ready cuts. Month two: every video optimized, schema-marked, and published across the core channels. Built to the same YouTube and AI-citation standard as Video Flagship, and yours permanently.",
       "tiers": [
         {
-          "key": "t1",
+          "key": "inc",
           "num": 1,
+          "name": "Included"
+        }
+      ],
+      "groups": [
+        {
+          "name": "Phase 1 — Production (Days 1–30)",
+          "items": [
+            {
+              "label": "One Full Production Day (onsite, scripted & directed)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Filming — Done For You (lighting, audio, camera, delivery)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Shot Lists & Scripts Prepared in Advance",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "60 Videos Produced (long-form plus Shorts cutdowns)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Done-For-You Editing & Post-Production",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Thumbnails, Titles & Click-Through Optimization",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "1–3 Ad-Ready Video Cuts",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phase 2 — Distribution (Days 31–60)",
+          "items": [
+            {
+              "label": "Publishing Across Core Channels: YouTube, Facebook, Instagram, TikTok",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Video SEO (titles, descriptions, chapters, transcripts)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Video Schema & Site Embeds",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Citation via Video",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Publishing Schedule & Drip Plan",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        }
+      ],
+      "priceRows": [
+        {
+          "label": "60-Day Sprint — Total",
+          "values": [
+            "$18,000"
+          ],
+          "lead": true
+        },
+        {
+          "label": "Billed",
+          "values": [
+            "$9,000/mo × 2"
+          ]
+        },
+        {
+          "label": "Retainer Impact",
+          "values": [
+            "None — drops into any plan"
+          ]
+        }
+      ],
+      "footnote": "Attaches to any Video Flagship or Modern Search plan. A one-time production intensive, not a retainer change. You keep every asset permanently."
+    },
+    "video-flagship": {
+      "key": "video-flagship",
+      "name": "Video Flagship",
+      "section": "brand",
+      "kind": "matrix",
+      "source": {
+        "driveId": "17fOfT3pyN0JuQNWKONIsZUy_SVWQASav",
+        "name": "Video Dominance SOW (1).docx",
+        "updated": "2026-07-07"
+      },
+      "tagline": "Own the video answers.",
+      "blurb": "Video Flagship builds the E-E-A-T signal no text page can fake: your attorneys, on camera, answering the questions injured people actually ask — produced, optimized, and structured so YouTube, Google, and the AI engines can read, trust, and cite every video. Two ways to run it: Done-With-You ($5K, self-filmed with our coaching) or Done-For-You (Tiers 1–3, our crews direct professional shoots).",
+      "tiers": [
+        {
+          "key": "dwy",
+          "num": 1,
+          "name": "DWY"
+        },
+        {
+          "key": "t1",
+          "num": 2,
           "name": "Tier 1"
         },
         {
           "key": "t2",
-          "num": 2,
+          "num": 3,
           "name": "Tier 2"
         },
         {
           "key": "t3",
-          "num": 3,
-          "name": "Tier 3"
-        },
-        {
-          "key": "ent",
           "num": 4,
-          "name": "Enterprise"
+          "name": "Tier 3"
         }
       ],
       "groups": [
@@ -908,57 +1145,84 @@
           "name": "Production",
           "items": [
             {
-              "label": "Monthly Production Days",
+              "label": "Production Model",
               "values": [
-                "Half-day",
-                "Full-day",
-                "1–2 days",
-                "Custom"
+                "Self-filmed",
+                "Full production",
+                "Full production",
+                "Full production"
               ]
             },
             {
-              "label": "Tier 3 production (onsite or onsite + remote)",
+              "label": "Production Cadence",
               "values": [
-                "—",
-                "—",
-                "✓",
-                "Custom"
+                "Your schedule",
+                "Monthly half-day",
+                "Monthly half-day",
+                "Full-day monthly (or half-day every 3 weeks)"
               ]
             },
             {
-              "label": "Total Posts per Month (video-first)",
+              "label": "On-Camera Talent",
+              "values": [
+                "You",
+                "You",
+                "You",
+                "You + 1 team member"
+              ]
+            },
+            {
+              "label": "Filming (lighting, audio, camera, delivery)",
+              "values": [
+                "Coaching",
+                "Done for you",
+                "Done for you",
+                "Done for you"
+              ]
+            },
+            {
+              "label": "Videos Published per Month",
               "values": [
                 "30",
+                "30",
                 "45",
-                "60",
-                "Custom"
+                "60"
               ]
             },
             {
-              "label": "Statics & Motion Graphics (count toward the total)",
+              "label": "Done-For-You Editing & Post-Production",
               "values": [
                 "✓",
                 "✓",
                 "✓",
-                "Custom"
+                "✓"
               ]
             },
             {
-              "label": "Quarterly Batch Production Option",
+              "label": "Content Continuity",
               "values": [
                 "✓",
-                "✕",
-                "✕",
-                "Custom"
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
-              "label": "Unlimited Video Editing (client-provided footage)",
+              "label": "Annual Batch Option",
               "values": [
                 "✕",
                 "✓",
                 "✓",
-                "Custom"
+                "✓"
+              ]
+            },
+            {
+              "label": "Unlimited Video Editing",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "✓"
               ]
             }
           ]
@@ -967,99 +1231,180 @@
           "name": "Distribution",
           "items": [
             {
-              "label": "YouTube, Instagram, Facebook, TikTok, LinkedIn",
+              "label": "Core Channels: YouTube, Facebook, Instagram, TikTok",
               "values": [
                 "✓",
                 "✓",
                 "✓",
-                "Custom"
+                "✓"
               ]
             },
             {
-              "label": "Longform Video Podcast",
+              "label": "LinkedIn Channel",
               "values": [
                 "✕",
                 "✕",
                 "✓",
-                "Custom"
+                "✓"
+              ]
+            },
+            {
+              "label": "DM + Lead Capture",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "✓"
               ]
             }
           ]
         },
         {
-          "name": "Paid Media",
+          "name": "The YouTube Engine",
           "items": [
             {
-              "label": "Video Ads Created per Month",
+              "label": "YouTube Channel Management & Optimization",
               "values": [
-                "1–2",
-                "3–5",
-                "6+",
-                "Custom"
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "YouTube Shorts Program",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Thumbnails, Titles & Click-Through Optimization",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Playlists & Channel Architecture",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "YouTube Long-Form Program",
+              "values": [
+                "✕",
+                "✕",
+                "✓",
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Video Search & E-E-A-T",
+          "items": [
+            {
+              "label": "Video SEO (titles, descriptions, chapters, transcripts)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Video Schema & Site Embeds",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Citation via Video",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Video Library on Your Website",
+              "values": [
+                "✕",
+                "✕",
+                "✕",
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Paid Video — $0 Management Fee",
+          "items": [
+            {
+              "label": "Competitor Ad Discovery",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
               "label": "Paid Social Management",
               "values": [
+                "✕",
                 "✓",
                 "✓",
-                "✓",
-                "Custom"
+                "✓"
               ]
             },
             {
-              "label": "Programmatic (OTT / display retargeting)",
+              "label": "YouTube Ads Management",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Video Ad Creative",
+              "values": [
+                "✕",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "label": "Programmatic Ad Management (OTT / streaming TV)",
               "values": [
                 "✕",
                 "✕",
-                "✓",
-                "Custom"
+                "✕",
+                "✓"
               ]
             },
             {
               "label": "First-Month Ad Spend Included",
               "values": [
-                "$1,000",
-                "$1,000",
-                "$1,000",
-                "Custom"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Conversion",
-          "items": [
-            {
-              "label": "DM + Lead Capture",
-              "values": [
-                "✓",
-                "✓",
-                "✓",
-                "Custom"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Brand",
-          "items": [
-            {
-              "label": "Attorney Brand Angles",
-              "values": [
-                "✕",
-                "✓",
-                "✓",
-                "Custom"
-              ]
-            },
-            {
-              "label": "Personality Brand Build",
-              "values": [
-                "✕",
-                "✕",
-                "✓",
-                "Custom"
+                "—",
+                "$750",
+                "$1,500",
+                "$3,000"
               ]
             }
           ]
@@ -1068,30 +1413,21 @@
           "name": "Insight & Access",
           "items": [
             {
-              "label": "Monthly Performance Review",
+              "label": "Performance Reviews",
               "values": [
                 "✓",
                 "✓",
                 "✓",
-                "Custom"
+                "✓"
               ]
             },
             {
-              "label": "Quarterly Strategy Session",
-              "values": [
-                "✕",
-                "✓",
-                "✓",
-                "Custom"
-              ]
-            },
-            {
-              "label": "Executive Strategy + Executive Review",
+              "label": "Executive Strategy & Reviews",
               "values": [
                 "✕",
                 "✕",
-                "✓",
-                "Custom"
+                "✕",
+                "✓"
               ]
             }
           ]
@@ -1102,10 +1438,10 @@
             {
               "label": "Best For",
               "values": [
-                "Owning the feed",
-                "Owning the market",
-                "Owning every screen",
-                "Multi-market, built to spec"
+                "Get on camera",
+                "Be recognized",
+                "Be everywhere",
+                "Be famous in your market"
               ]
             }
           ]
@@ -1115,33 +1451,193 @@
         {
           "label": "Month-to-Month (per month)",
           "values": [
+            "$5,000",
             "$10,000",
             "$15,000",
-            "$25,000",
-            "$30K+"
+            "$25,000"
           ],
           "lead": true
         },
         {
           "label": "12-Month Total (at monthly rate)",
           "values": [
+            "$60,000",
             "$120,000",
             "$180,000",
-            "$300,000",
-            "Custom"
+            "$300,000"
           ]
         },
         {
           "label": "Prepay 12 Months (10% off)",
           "values": [
+            "$54,000",
             "$108,000",
             "$162,000",
-            "$270,000",
-            "Custom"
+            "$270,000"
           ]
         }
       ],
-      "footnote": "Pairs with Modern Search: social wins attention; search wins intent. Firms running both own the moment a client sees them and the moment they go looking."
+      "footnote": "Pairs with Modern Search: Modern Search wins the text answers; Video Flagship wins the video answers. DWY is organic-only; paid video begins at DFY (Tier 1+)."
+    },
+    "search-authority-sprint": {
+      "key": "search-authority-sprint",
+      "name": "Search Authority Sprint",
+      "section": "addon-alacarte",
+      "kind": "matrix",
+      "source": {
+        "driveId": "1CQwYrviLORxkPZzORz8WX4vJOu598IF5",
+        "name": "Search Authority Sprint SOW.docx",
+        "updated": "2026-07-07"
+      },
+      "tagline": "A 90-day content and authority intensive. No dev access required.",
+      "blurb": "A 90-day intensive that builds the four assets Google and the AI engines use to decide which firm to recommend: authoritative practice-area content, high-authority editorial links, a fortified citation footprint, and a proprietary citable data study. Every deliverable is built and owned by the firm — no developer access or CMS handover required.",
+      "tiers": [
+        {
+          "key": "inc",
+          "num": 1,
+          "name": "Included"
+        }
+      ],
+      "groups": [
+        {
+          "name": "Phase 1 — The Content Engine (Days 1–30)",
+          "items": [
+            {
+              "label": "10 Practice-Area Pages / Articles (E-E-A-T grade)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Keyword & AI-Answer Targeting per Page",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Attorney Review Cycle & Compliance Pass",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Publish-Ready Delivery",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "On-Page Schema with Every Page",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phase 2 — Citations & AI Citation Magnet (Days 31–60)",
+          "items": [
+            {
+              "label": "200 Local Citations Built, Claimed & Corrected",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "NAP Consistency Cleanup & Aggregator Submissions",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "AI Citation Magnet — 1 Proprietary Citable Data Study",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Study Ideation, Data Design & Publication",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Digital PR Outreach Campaign for the Magnet",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phase 3 — High-Authority Links (Days 61–90)",
+          "items": [
+            {
+              "label": "High-Authority Link Building — 10 Placements (min.)",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Anchor Text & Target Page Strategy",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Magnet-Powered Outreach",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "The Authority Ledger — Proof & Handover",
+          "items": [
+            {
+              "label": "AI Citation Baseline Report",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Post-Sprint Authority Benchmark",
+              "values": [
+                "✓"
+              ]
+            },
+            {
+              "label": "Live Citation, Link & Content Tracker",
+              "values": [
+                "✓"
+              ]
+            }
+          ]
+        }
+      ],
+      "priceRows": [
+        {
+          "label": "90-Day Sprint — Total",
+          "values": [
+            "$18,000"
+          ],
+          "lead": true
+        },
+        {
+          "label": "Billed",
+          "values": [
+            "$6,000/mo × 3"
+          ]
+        },
+        {
+          "label": "Timeline",
+          "values": [
+            "90 Days"
+          ]
+        }
+      ],
+      "footnote": "Standalone: $18,000 over 90 days. Included at no additional cost with an annual Modern Search Flagship agreement — ask your strategist."
     },
     "retired-pi-flagship": {
       "key": "retired-pi-flagship",
@@ -1149,8 +1645,8 @@
       "section": "retired",
       "kind": "matrix",
       "retired": true,
-      "tagline": "Retired — superseded by Modern Search Dominance.",
-      "blurb": "Legacy Personal Injury flagship tiers. Kept for reference; use Modern Search Dominance for new deals.",
+      "tagline": "Retired — superseded by Modern Search Flagship.",
+      "blurb": "Legacy Personal Injury flagship tiers. Kept for reference; use Modern Search Flagship for new deals.",
       "tiers": [
         {
           "key": "t1",
@@ -1386,89 +1882,115 @@
       "kind": "simple",
       "retired": true,
       "price": "$9,000 / $15,000",
-      "blurb": "Legacy standalone. Now a line item within Modern Search Dominance.",
+      "blurb": "Legacy standalone. Now a line item within Modern Search Flagship.",
       "details": []
     },
     "paid-media": {
       "key": "paid-media",
       "name": "Paid Media & Ads Management",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "$3,000–$7,500/mo (by ad spend)",
       "blurb": "Full-service paid media management across Google Ads, LSA, and Meta, run by a dedicated specialist. The management fee scales with monthly ad spend; ad spend is billed separately.",
-      "details": []
+      "details": [],
+      "retired": true
     },
     "web-maintenance": {
       "key": "web-maintenance",
       "name": "Web Maintenance",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "$1,250–$3,750/mo",
       "blurb": "Ongoing website updates, technical improvements, and development support — tiered monthly pools of development hours (Authority / Ascend / Prestige / Apex).",
-      "details": []
+      "details": [],
+      "retired": true
     },
     "social-media": {
       "key": "social-media",
       "name": "Social Media Management",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "$5,000/mo",
       "blurb": "Done-for-you organic social management — content calendar, graphics, and short-form video across the firm's primary channels.",
-      "details": []
+      "details": [],
+      "retired": true
     },
     "technical-geo-sprint": {
       "key": "technical-geo-sprint",
       "name": "Technical Architecture & GEO Sprint",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "$12,000",
       "blurb": "A 90-day intensive that strips technical friction and builds the Knowledge Graph needed to dominate AI-driven search (Gemini, Perplexity, ChatGPT).",
       "details": [],
-      "timeline": "90 Days"
+      "timeline": "90 Days",
+      "retired": true
     },
     "high-dr-links": {
       "key": "high-dr-links",
       "name": "High DR Link Package",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "Custom",
       "blurb": "Concentrated acquisition of high-authority backlinks to accelerate rankings and domain authority.",
-      "details": []
+      "details": [],
+      "retired": true
     },
     "media-capture": {
       "key": "media-capture",
       "name": "On-Site Media Capture",
-      "section": "sprints-alacart",
+      "section": "retired",
       "kind": "simple",
       "price": "$15,000",
       "blurb": "On-site production day capturing photo and video assets for the firm, delivered within 10 business days. One round of minor revisions included.",
-      "details": []
+      "details": [],
+      "retired": true
     }
   },
   "resources": [
     {
       "name": "Modern Search Sellsheet",
-      "driveId": "1uarSNLF4xvZ-p3B8TEXbqodpyR2L1KRH",
+      "driveId": "1gZsxrKQBNJN3ovyeOSp2roks5BmNKDIW",
       "type": "pdf"
     },
     {
-      "name": "Authority Sprint Sellsheet",
-      "driveId": "1rhqIDeIoIpDsMAhlG5c9xiyz1i_od1Qm",
+      "name": "Video Flagship Sellsheet",
+      "driveId": "1jNU4hMCUue0HEhbrhf94uluidajZmBHY",
       "type": "pdf"
     },
     {
-      "name": "Ignite Design Sellsheet",
-      "driveId": "1lBBQ7_30MliRzAMZT6D75JREE0oBRjvD",
+      "name": "Ignite Website Design Sellsheet",
+      "driveId": "1AtXaLaalFE1HpSohrc7UjtYre1CewQEK",
+      "type": "pdf"
+    },
+    {
+      "name": "Brand Identity Sprint Sellsheet",
+      "driveId": "1ws3IEPNZUexoJ5AX-S3pwBCYMpqnZuEl",
+      "type": "pdf"
+    },
+    {
+      "name": "Video Authority Sprint Sellsheet",
+      "driveId": "1FoIBMU-G7snYfq-rrjR1k2eihcrOYQI-",
+      "type": "pdf"
+    },
+    {
+      "name": "Search Authority Sprint Sellsheet",
+      "driveId": "11C0snY_HDgdfKL-Gjb-h63JlKJ0AFPPY",
+      "type": "pdf"
+    },
+    {
+      "name": "Total Search Coverage SPIFF One Sheet",
+      "driveId": "10vleo8gHet6AD2TjmAt4mHFm8xdgyeNC",
       "type": "pdf"
     },
     {
       "name": "Internal Offer Routing Map",
-      "driveId": "171yo9oRsXFWwkFmE3VVg9O3teG1O6KKm",
+      "driveId": "15-ar8pLN2Q2yXML9yeZjSQRmnV_0jqZG",
       "type": "pdf"
     },
     {
       "name": "Rankings Capabilities Deck",
-      "driveId": "1XdaemhCDBPSxebIlIcxi-Ro-4Fqco__o",
+      "driveId": "17NEqMKbg0f5rsTm7gEXEa0AotSGtbjZS",
       "type": "pptx"
     }
   ],

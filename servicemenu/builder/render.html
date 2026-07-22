@@ -75,7 +75,7 @@ function renderMatrix(o){
   const active=(o.tiers||[]).map((t,i)=>({t,i})).filter(x=>!x.t.hidden);
   const single=active.length===1;
   let h='<div class="block"><table class="matrix'+(single?' single':'')+'"><thead><tr><th>Service</th>';
-  active.forEach(({t})=>{h+=`<th class="tier">${single?'':'Tier '+t.num}<span class="tname">${esc(t.name)}</span></th>`;});
+  active.forEach(({t})=>{h+=`<th class="tier"><span class="tname">${esc(t.name)}</span></th>`;});
   h+='</tr></thead><tbody>';
   (o.groups||[]).forEach(g=>{
     h+=`<tr class="group"><td colspan="${active.length+1}">${esc(g.name)}</td></tr>`;
