@@ -80,7 +80,7 @@
         "updated": "2026-07-07"
       },
       "tagline": "Be the name AI and Google recommend when clients search.",
-      "blurb": "Clients no longer just Google a lawyer — they ask AI. Modern Search Flagship makes a firm the most visible, most-cited name across every surface that now decides where cases go: Google, Maps, and the AI engines (ChatGPT, Claude, Perplexity, Gemini). Four tiers scale from single-market growth to total market dominance. Zero ad management fees, ever — you fund LSA, PPC, and paid media spend directly, and we take no commission.",
+      "blurb": "Clients no longer just Google a lawyer — they ask AI. Modern Search Flagship makes a firm the most visible, most-cited name across every surface that now decides where cases go: Google, Maps, and the AI engines (ChatGPT, Claude, Perplexity, Gemini). Four tiers scale from single-market growth to total market ownership. Zero ad management fees, ever — you fund LSA, PPC, and paid media spend directly, and we take no commission.",
       "tiers": [
         {
           "key": "t1",
@@ -117,7 +117,7 @@
               ]
             },
             {
-              "label": "AI Citation — Google AI surfaces (firm named in Google's AI answers)",
+              "label": "AI Brand Mentions (Firm referenced in Google's AI-generated answers)",
               "values": [
                 "✓",
                 "✓",
