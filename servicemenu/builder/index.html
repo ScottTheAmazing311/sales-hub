@@ -93,6 +93,7 @@
 
 <script>
 const PW='1776';
+const SAVE_ENDPOINT='https://servicemenu-save-api.vercel.app/api/save';
 const $=(s,p=document)=>p.querySelector(s);
 const clone=o=>JSON.parse(JSON.stringify(o));
 let master=null,state=null,current=null;
@@ -262,14 +263,25 @@ function generate(mode){
   window.open(url,'_blank');
 }
 function resetChanges(){ if(isDirty()&&!confirm('Discard your session changes?'))return; state=clone(master);markDirty();buildSide();renderEditor(); }
-function saveMaster(){
+async function saveMaster(){
   const pw=prompt('Enter master password to save to the template:');
   if(pw===null)return;
-  if(pw!==PW){alert('Incorrect password — not saved.');return;}
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='menu.json';a.click();URL.revokeObjectURL(a.href);
-  master=clone(state);markDirty();
-  alert('Downloaded updated menu.json.\n\nTo publish: replace builder/menu.json with this file and redeploy. (Seamless in-app save is a later phase.)');
+  try{
+    const r=await fetch(SAVE_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw,menu:state})});
+    if(r.status===403){alert('Incorrect password — not saved.');return;}
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    master=clone(state);markDirty();
+    alert('✓ Saved to master — publishing now. Live in about a minute.');
+    return;
+  }catch(e){
+    // Endpoint unreachable — fall back to a local download so nothing is lost.
+    if(pw!==PW){alert('Incorrect password — not saved.');return;}
+    if(!confirm('Live save unavailable ('+e.message+').\n\nDownload the file to publish manually instead?'))return;
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='menu.json';a.click();URL.revokeObjectURL(a.href);
+    master=clone(state);markDirty();
+    alert('Downloaded menu.json. Replace builder/menu.json and redeploy to publish.');
+  }
 }
 </script>
 </body>
